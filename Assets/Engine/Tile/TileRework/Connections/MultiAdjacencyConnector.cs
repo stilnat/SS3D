@@ -36,6 +36,7 @@ namespace SS3D.Engine.Tiles.Connections
         [SerializeField] private SimpleConnector simpleAdjacency;
         [SerializeField] private AdvancedConnector advancedAdjacency;
         [SerializeField] private OffsetConnector offsetAdjacency;
+        [SerializeField] private WireConnector wireAdjacency;
 
         /// <summary>
         /// Keeps track of adjacenc connections. Do not directly modify! Use the sync functions instead.
@@ -283,6 +284,9 @@ namespace SS3D.Engine.Tiles.Connections
                     break;
                 case AdjacencyType.Offset:
                     info = offsetAdjacency.GetMeshAndDirection(adjacents);
+                    break;
+                case AdjacencyType.Wire:
+                    info = wireAdjacency.GetMeshAndDirection(adjacents);
                     break;
             }
 

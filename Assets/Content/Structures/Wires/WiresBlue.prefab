@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: -1074477776341974781}
   - component: {fileID: -4998431523760016775}
   - component: {fileID: 1342039443250836419}
+  - component: {fileID: 8195091515199569460}
   m_Layer: 0
   m_Name: WiresBlue
   m_TagString: Untagged
@@ -48,7 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneId: 0
   serverOnly: 0
-  m_AssetId: 
+  visible: 0
+  m_AssetId: 2b932aed8c9bdb54da3d5a0274fe9927
   hasSpawned: 0
 --- !u!33 &-1074477776341974781
 MeshFilter:
@@ -112,3 +114,75 @@ MonoBehaviour:
   DisplayName: Wire
   Text: 
   MaxDistance: 0
+--- !u!114 &8195091515199569460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802364579275783218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4c17829cf718f419146d93c0826f22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  selectedAdjacencyType: 3
+  CrossConnectAllowed: 0
+  simpleAdjacency:
+    o: {fileID: 0}
+    u: {fileID: 0}
+    i: {fileID: 0}
+    l: {fileID: 0}
+    t: {fileID: 0}
+    x: {fileID: 0}
+  advancedAdjacency:
+    o: {fileID: 0}
+    u: {fileID: 0}
+    i: {fileID: 0}
+    lNone: {fileID: 0}
+    lSingle: {fileID: 0}
+    tNone: {fileID: 0}
+    tSingleRight: {fileID: 0}
+    tSingleLeft: {fileID: 0}
+    tDouble: {fileID: 0}
+    xNone: {fileID: 0}
+    xSingle: {fileID: 0}
+    xSide: {fileID: 0}
+    xOpposite: {fileID: 0}
+    xTriple: {fileID: 0}
+    xQuad: {fileID: 0}
+    viewObstacles: []
+    opaque: 0
+  offsetAdjacency:
+    o: {fileID: 0}
+    uNorth: {fileID: 0}
+    uSouth: {fileID: 0}
+    i: {fileID: 0}
+    lNE: {fileID: 0}
+    lNW: {fileID: 0}
+    lSE: {fileID: 0}
+    lSW: {fileID: 0}
+    tNEW: {fileID: 0}
+    tNSW: {fileID: 0}
+    tNSE: {fileID: 0}
+    tSWE: {fileID: 0}
+    x: {fileID: 0}
+  wireAdjacency:
+    o: {fileID: -3400695962081112425, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    u1: {fileID: -5222707795264448424, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    u2: {fileID: -2593557019512570454, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    broken1: {fileID: 3670828000116527957, guid: 653d23c68a57e03498cd8519026c3404,
+      type: 3}
+    broken2: {fileID: -6262261672298016732, guid: 653d23c68a57e03498cd8519026c3404,
+      type: 3}
+    v: {fileID: 3091676867663915486, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    i1: {fileID: 5659556953410983108, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    i2: {fileID: 5659556953410983108, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    l1: {fileID: -8166876526216192056, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    l2: {fileID: -3411864467696780249, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    l3: {fileID: 5024322579868472207, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    l4: {fileID: -773248212079153456, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+    l5: {fileID: -4450748068364624294, guid: 653d23c68a57e03498cd8519026c3404, type: 3}
+  EditorblockedConnections: 0

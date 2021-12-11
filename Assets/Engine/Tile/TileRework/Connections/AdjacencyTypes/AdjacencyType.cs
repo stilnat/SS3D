@@ -12,5 +12,6 @@ namespace SS3D.Engine.Tiles.Connections
         Simple,
         Advanced,
         Offset,
+        Wire,
     }
 }
