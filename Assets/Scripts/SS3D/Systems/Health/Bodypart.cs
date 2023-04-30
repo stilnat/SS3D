@@ -53,9 +53,7 @@ public class BodyPart : InteractionTargetNetworkBehaviour
         SetUpChild();
     }
 
-    /// <summary>
-    /// The list of body layers constituting this body part.
-    /// </summary>
+
     public INerveSignalTransmitter NerveSignalTransmitter
     {
         get;

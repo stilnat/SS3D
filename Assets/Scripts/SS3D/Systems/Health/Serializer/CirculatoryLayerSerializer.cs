@@ -1,4 +1,5 @@
 using FishNet.Serializing;
+using SS3D.Substances;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +23,9 @@ public static class CirculatoryLayerSerializer
         var susceptibilities = BodyLayerSerializer.ReadSusceptibilities(reader);
         var resistances = BodyLayerSerializer.ReadResistances(reader);
 
-
-        var isCentralNervousSystem = reader.ReadBoolean();
         var bodyPartGameObject = reader.ReadGameObject();
         var bodyPart = bodyPartGameObject.GetComponent<BodyPart>();
-        layer = new CirculatoryLayer(bodyPart, damages, susceptibilities, resistances);
+        layer = new CirculatoryLayer(bodyPart, bodyPartGameObject.GetComponent<SubstanceContainer>(), damages, susceptibilities, resistances);
         return layer;
     }
 }

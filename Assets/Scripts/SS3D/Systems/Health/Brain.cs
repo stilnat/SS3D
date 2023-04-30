@@ -6,6 +6,7 @@ using UnityEngine;
 using System;
 using UnityEditor;
 using Codice.Client.Common;
+using SS3D.Substances;
 
 /// <summary>
 /// TODO : Make an organ bodylayer since that might be useful as all organs will have the same damage susceptibility.
@@ -23,7 +24,7 @@ public class Brain : BodyPart
 
     private void AddBrainLayer()
     {
-        TryAddBodyLayer(new CirculatoryLayer(this));
+        TryAddBodyLayer(new CirculatoryLayer(this, GetComponent<SubstanceContainer>()));
         TryAddBodyLayer(new NerveLayer(this, true));
         TryAddBodyLayer(new OrganLayer(this));
     }

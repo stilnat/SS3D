@@ -1,4 +1,5 @@
 using Coimbra;
+using SS3D.Substances;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ public class HumanBodypart : BodyPart
     {
         TryAddBodyLayer(new MuscleLayer(this));
         TryAddBodyLayer(new BoneLayer(this));
-        TryAddBodyLayer(new CirculatoryLayer(this));
+        TryAddBodyLayer(new CirculatoryLayer(this, GetComponent<SubstanceContainer>()));
         TryAddBodyLayer(new NerveLayer(this, false));
     }
    
