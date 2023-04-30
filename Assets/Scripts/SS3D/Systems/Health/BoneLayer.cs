@@ -3,13 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoneLayer : BiologicalLayer
+public class BoneLayer : BodyLayer
 {
-
-    public override float OxygenConsumptionRate { get => 0.1f; }
-
-    protected const float BaseBloodProduction = 0.1f;
-
     public override BodyLayerType LayerType
     {
         get { return BodyLayerType.Bone; }

@@ -34,8 +34,8 @@ public class HumanBodypart : BodyPart
     {
         TryAddBodyLayer(new MuscleLayer(this));
         TryAddBodyLayer(new BoneLayer(this));
-        TryAddBodyLayer(new CirculatoryLayer(this, GetComponent<SubstanceContainer>()));
-        TryAddBodyLayer(new NerveLayer(this, false));
+        TryAddBodyLayer(new CirculatoryLayer(this));
+        TryAddBodyLayer(new NerveLayer(this));
     }
    
 }

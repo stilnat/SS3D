@@ -54,12 +54,6 @@ public class BodyPart : InteractionTargetNetworkBehaviour
     }
 
 
-    public INerveSignalTransmitter NerveSignalTransmitter
-    {
-        get;
-        private set;
-    }
-
 
     /// <summary>
     /// The parent bodypart is the body part attached to this body part, closest from the brain. 
@@ -199,28 +193,14 @@ public class BodyPart : InteractionTargetNetworkBehaviour
 
     /// <summary>
     /// Add a body layer if none of the same type are already present on this body part.
-    /// TODO : use generic to check type, actually check if only one of each kind.
+    /// TODO : use generic to check type, actually check if only one body layer of each kind.
     /// </summary>
     /// <returns> The body layer was added.</returns>
     public virtual bool TryAddBodyLayer(BodyLayer layer)
     {
-        // Make sure only one nerve signal layer can exist at a time on a bodypart.
-        if (layer is INerveSignalTransmitter && CanTransmitNerveSignals())
-        {
-            Punpun.Warning(this, "Can't have more than one nerve signal transmitter on a bodypart.");
-            return false;
-        }
-
-        if (layer is INerveSignalTransmitter signalTransmitter)
-        {
-            NerveSignalTransmitter = signalTransmitter;
-        }
-
-
         _bodyLayers.Add(layer);
         layer.BodyPart = this;
         return true;
-
     }
 
     public float TotalDamage => _bodyLayers.Sum(layer => layer.TotalDamage);
@@ -280,26 +260,6 @@ public class BodyPart : InteractionTargetNetworkBehaviour
                 layer.InflictDamage(damageTypeQuantity);
         }
     }
-
-
-    /// <summary>
-    /// Check if a nerveSignalTransmitter is present on this bodypart.
-    /// TODO : check if nerve signal layer is destroyed too.
-    /// </summary>
-    public bool CanTransmitNerveSignals()
-    {
-        foreach (var layer in BodyLayers)
-        {
-            if (layer is INerveSignalTransmitter) return true;
-        }
-        return false;
-    }
-
-    public float ProducePain()
-    {
-        return NerveSignalTransmitter != null ? NerveSignalTransmitter.ProducePain() : 0f;
-    }
-
 
     /// <summary>
     /// Check if this body part contains a given layer type.

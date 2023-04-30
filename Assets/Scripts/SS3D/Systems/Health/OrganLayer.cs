@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OrganLayer : BiologicalLayer
+public class OrganLayer : BodyLayer
 {
     public OrganLayer(BodyPart bodyPart) : base(bodyPart)
     {
@@ -14,8 +14,6 @@ public class OrganLayer : BiologicalLayer
     {
 
     }
-
-    public override float OxygenConsumptionRate { get => 0.2f; }
 
     public override BodyLayerType LayerType { get => BodyLayerType.Organ; }
 

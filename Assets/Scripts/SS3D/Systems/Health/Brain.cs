@@ -24,36 +24,8 @@ public class Brain : BodyPart
 
     private void AddBrainLayer()
     {
-        TryAddBodyLayer(new CirculatoryLayer(this, GetComponent<SubstanceContainer>()));
-        TryAddBodyLayer(new NerveLayer(this, true));
+        TryAddBodyLayer(new CirculatoryLayer(this));
+        TryAddBodyLayer(new NerveLayer(this));
         TryAddBodyLayer(new OrganLayer(this));
-    }
-
-
-    /// <summary>
-    /// This takes all the pain in the body produced by body parts with nerves signal transmitters and sum it.
-    /// </summary>
-    /// <returns> a number between 0 and 1. The number can never be quite 1, since that would mean
-    /// all layers took max damages including nerves (and in that case it would be zero pain).</returns>
-    public float ComputeAveragePain()
-    {
-        int bodyPartCount = 0;
-        float pain = ComputeAveragePain(this, ref bodyPartCount)/bodyPartCount;
-        return pain;
-    }
-
-    private float ComputeAveragePain(BodyPart bodyPart, ref int bodyPartCount)
-    {
-        float currentPain = 0;
-        foreach (var part in bodyPart.ChildBodyParts)
-        {
-            currentPain += ComputeAveragePain(part, ref bodyPartCount);
-        }
-
-        var transmitter = bodyPart.NerveSignalTransmitter;
-        currentPain += transmitter.ProducePain();
-
-        bodyPartCount++;
-        return currentPain;
     }
 }

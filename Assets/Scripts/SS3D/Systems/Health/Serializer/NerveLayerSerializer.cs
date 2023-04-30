@@ -16,8 +16,6 @@ public static class NerveLayerSerializer
         BodyLayerSerializer.WriteResistances(writer, nerve);
 
         writer.WriteNetworkBehaviour(nerve.BodyPart);
-
-        writer.WriteBoolean(nerve.IsCentralNervousSystem);  
     }
 
     public static NerveLayer ReadNerveLayer(this Reader reader)
@@ -31,9 +29,8 @@ public static class NerveLayerSerializer
         var bodyPartGameObject = reader.ReadGameObject();
         var bodyPart = bodyPartGameObject.GetComponent<BodyPart>();
 
-        var isCentralNervousSystem = reader.ReadBoolean();
 
-        nerveLayer = new NerveLayer(bodyPart, isCentralNervousSystem, damages, susceptibilities, resistances);
+        nerveLayer = new NerveLayer(bodyPart, damages, susceptibilities, resistances);
         return nerveLayer;
     }
 }

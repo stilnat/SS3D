@@ -5,45 +5,11 @@ using System;
 using FishNet.Object;
 using System.Linq;
 
-public class NerveLayer : BiologicalLayer, INerveSignalTransmitter
+public class NerveLayer : BodyLayer
 {
-    public float SignalStrenghtShapeParameter { get => 20f; }
-
-    public override float OxygenConsumptionRate { get => 0.2f; }
-
-    public bool IsCentralNervousSystem { get; private set; }
-
-    public NerveSignalTransmitterType TransmitterId
-    {
-        get => NerveSignalTransmitterType.Nerve;
-    }
 
     public NetworkBehaviour GetNetworkBehaviour => BodyPart;
 
-    /// <summary>
-    /// The strenght of the pain signal depends on the health of 
-    /// signal transmitter higher up in the hierarchy.
-    /// The more they're harmed, the weaker the signal will be.
-    /// The power function guarantees that the signal strength will stay between 0 and 1, while 
-    /// increasing very slowly first, and very fast when close to one. This simulate that nerves
-    /// can still transmit nerves signal pretty well, even when badly hurt.
-    /// </summary>
-    public float SignalStrength
-    {
-        get
-        {
-            float localSignalStrength = 1f - Mathf.Pow(TotalDamage / MaxDamage, SignalStrenghtShapeParameter);
-            if (IsCentralNervousSystem) return localSignalStrength;
-
-            var parent = ParentSignalTransmitter();
-            if (parent == null && !IsCentralNervousSystem)
-            {
-                return 0f;
-            }
-
-            return localSignalStrength*parent.SignalStrength;
-        }
-    }
 
     public NetworkObject getNetworkedObject
     {
@@ -69,36 +35,21 @@ public class NerveLayer : BiologicalLayer, INerveSignalTransmitter
         }
     }
 
-    public bool IsConnectedToCentralNervousSystem{
-        get 
-        {
-            if (IsCentralNervousSystem) return true;
-
-            var parent = ParentSignalTransmitter();
-            if (parent == null && !IsCentralNervousSystem)
-            {
-                return false;
-            }
-
-            return parent.CanTransmitSignal() ? parent.IsConnectedToCentralNervousSystem : false;
-        }
-    }
-
     public override BodyLayerType LayerType
     {
         get { return BodyLayerType.Nerve; }
     }
 
-    public NerveLayer(BodyPart bodyPart, bool isCentralNervousSystem) : base(bodyPart)
+    public NerveLayer(BodyPart bodyPart) : base(bodyPart)
     {
-        IsCentralNervousSystem = isCentralNervousSystem;
+
     }
 
-    public NerveLayer(BodyPart bodyPart, bool isCentralNervousSystem,
+    public NerveLayer(BodyPart bodyPart,
         List<DamageTypeQuantity> damages, List<DamageTypeQuantity> susceptibilities, List<DamageTypeQuantity> resistances)
         : base(bodyPart, damages, susceptibilities, resistances)
     {
-        IsCentralNervousSystem = isCentralNervousSystem;
+
     }
 
     protected override void SetSuceptibilities()
@@ -108,57 +59,5 @@ public class NerveLayer : BiologicalLayer, INerveSignalTransmitter
         _damageSuceptibilities.Add(new DamageTypeQuantity(DamageType.Shock, 2f));
         _damageSuceptibilities.Add(new DamageTypeQuantity(DamageType.Rad, 1.5f));
         _damageSuceptibilities.Add(new DamageTypeQuantity(DamageType.Toxic, 1.2f));
-    }
-
-    public INerveSignalTransmitter ParentSignalTransmitter()
-    {
-        if(BodyPart.ParentBodyPart == null) return null;
-        INerveSignalTransmitter transmitter; 
-        if (BodyPart.ParentBodyPart.CanTransmitNerveSignals())
-        {
-            transmitter = (INerveSignalTransmitter)BodyPart.ParentBodyPart.GetBodyLayer<INerveSignalTransmitter>();
-            return transmitter;
-        }
-        else return null;
-    }
-
-    public List<INerveSignalTransmitter> ChildSignalTransmitters()
-    {
-        var res = new List<INerveSignalTransmitter>();
-        foreach (var bodypart in BodyPart.ChildBodyParts)
-        {
-            if (bodypart.CanTransmitNerveSignals())
-            {
-                res.Add((INerveSignalTransmitter) bodypart.GetBodyLayer<INerveSignalTransmitter>());
-            }
-        }
-        return res;
-    }
-
-    /// <summary>
-    /// Produces a given amount of pain depending on other tissues damages.
-    /// It also depends on the state of the nerve layer.
-    /// When nerves are closed to be destroyed, they send less and less pain.
-    /// Should be an average of the state of destruction of each layer on this BodyPart.
-    /// </summary>
-    public float ProducePain()
-    {
-        float pain = 0;
-        foreach(var layer in BodyPart.BodyLayers)
-        {
-            pain += layer.TotalDamage/layer.MaxDamage;
-        }
-        return SignalStrength * pain / BodyPart.BodyLayers.Count;
-    }
-
-    public override void OnDamageInflicted(DamageTypeQuantity damageQuantity)
-    {
-        base.OnDamageInflicted(damageQuantity);
-    }
-
-    public bool CanTransmitSignal()
-    {
-        if(IsDestroyed()) return false;
-        else return true;
     }
 }

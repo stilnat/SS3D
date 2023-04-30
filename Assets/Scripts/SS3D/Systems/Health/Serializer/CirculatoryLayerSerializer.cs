@@ -25,7 +25,7 @@ public static class CirculatoryLayerSerializer
 
         var bodyPartGameObject = reader.ReadGameObject();
         var bodyPart = bodyPartGameObject.GetComponent<BodyPart>();
-        layer = new CirculatoryLayer(bodyPart, bodyPartGameObject.GetComponent<SubstanceContainer>(), damages, susceptibilities, resistances);
+        layer = new CirculatoryLayer(bodyPart, damages, susceptibilities, resistances);
         return layer;
     }
 }

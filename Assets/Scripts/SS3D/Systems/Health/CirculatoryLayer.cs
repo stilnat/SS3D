@@ -3,25 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CirculatoryLayer : BiologicalLayer
+public class CirculatoryLayer : BodyLayer
 {
-    public override float OxygenConsumptionRate { get => 0.5f; }
-
-    public SubstanceContainer _bodyfluids;
 
     public override BodyLayerType LayerType
     {
         get { return BodyLayerType.Circulatory; }
     }
-    public CirculatoryLayer(BodyPart bodyPart, SubstanceContainer bodyfluids) : base(bodyPart)
+    public CirculatoryLayer(BodyPart bodyPart) : base(bodyPart)
     {
-        _bodyfluids = bodyfluids;
+
     }
-    public CirculatoryLayer(BodyPart bodyPart, SubstanceContainer bodyfluids,
+
+    public CirculatoryLayer(BodyPart bodyPart,
     List<DamageTypeQuantity> damages, List<DamageTypeQuantity> susceptibilities, List<DamageTypeQuantity> resistances)
     : base(bodyPart, damages, susceptibilities, resistances)
     {
-        _bodyfluids = bodyfluids;
+
     }
 
     protected override void SetSuceptibilities()
@@ -30,11 +28,4 @@ public class CirculatoryLayer : BiologicalLayer
         _damageSuceptibilities.Add(new DamageTypeQuantity(DamageType.Puncture, 2f));
         _damageSuceptibilities.Add(new DamageTypeQuantity(DamageType.Toxic, 1.5f));
     }
-
-    public void Bleed()
-    {
-
-    }
-
-
 }
