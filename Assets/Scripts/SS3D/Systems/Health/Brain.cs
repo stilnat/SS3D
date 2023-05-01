@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using System;
 using UnityEditor;
-using Codice.Client.Common;
 using SS3D.Substances;
 
 /// <summary>
