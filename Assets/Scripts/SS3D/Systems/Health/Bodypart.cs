@@ -19,12 +19,8 @@ using System.Collections.ObjectModel;
 /// There should always be a network object component everywhere this component is.
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
-public class BodyPart : InteractionTargetNetworkBehaviour
+public abstract class BodyPart : InteractionTargetNetworkBehaviour
 {
-
-
-    [SerializeField] 
-    private bool isHuman;
 
     [SyncVar]
     private BodyPart _parentBodyPart;
@@ -105,7 +101,6 @@ public class BodyPart : InteractionTargetNetworkBehaviour
         ParentBodyPart = parent;
     }
 
-
     public virtual void Init(BodyPart parentBodyPart, List<BodyPart> childBodyParts, List<BodyLayer> bodyLayers, string name = "")
     {
         Name = name;
@@ -126,38 +121,6 @@ public class BodyPart : InteractionTargetNetworkBehaviour
             _parentBodyPart._childBodyParts.Add(this);
         }
     }
-
-    
-    [ServerRpc]
-    public void ServerRpcAddChildBodyPart(NetworkConnection conn, NetworkObject bodyPart)
-    {
-        PermissionSystem permissionSystem = Subsystems.Get<PermissionSystem>();
-        if (!permissionSystem.HasAdminPermission(conn))
-        {
-            return;
-        }
-        ObserverRpcAddChildBodyPart(bodyPart);
-    }
-
-    [ObserversRpc(RunLocally = true)]
-    public void ObserverRpcAddChildBodyPart(NetworkObject bodyPart)
-    {
-        AddChildBodyPart(bodyPart.GetComponent<BodyPart>());
-    }
-
-    [ServerRpc]
-    public void ServerRpcAddNerveLayer(NerveLayer nerveLayer)
-    {
-        ObserversRpcAddNerveLayer(nerveLayer);
-    }
-
-    [ObserversRpc(RunLocally = true)]
-    public void ObserversRpcAddNerveLayer(NerveLayer nerveLayer)
-    {
-       TryAddBodyLayer(nerveLayer);
-    }
-
-
 
     /// <summary>
     /// The body part is not destroyed, it's simply detached from the entity.
@@ -250,7 +213,7 @@ public class BodyPart : InteractionTargetNetworkBehaviour
     }
 
     /// <summary>
-    /// inflict same type damages to all layers present on this body part.
+    /// inflict same type damages to all layers present on this body part except one.
     /// </summary>
     public virtual void InflictDamageToAllLayerButOne<T>(DamageTypeQuantity damageTypeQuantity)
     {
