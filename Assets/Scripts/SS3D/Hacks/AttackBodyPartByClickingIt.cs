@@ -12,7 +12,8 @@ using UnityEngine;
 ///
 /// Mouse over other players (or yourself) and hit F to attack.
 /// </summary>
-public class Attack : NetworkBehaviour
+/// 
+public class AttackBodyPartByClickingIt : NetworkBehaviour
 {
     [SerializeField] private GameObject attackParticleEffect;
     [SerializeField] private DamageType attackType;
@@ -31,7 +32,7 @@ public class Attack : NetworkBehaviour
             return;
         }
 
-        LayerMask layerMask = ~(1 << LayerMask.NameToLayer("Player"));
+        LayerMask layerMask = LayerMask.GetMask("BodyPart");
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (!Physics.Raycast(ray, out hit, 10f, layerMask))
