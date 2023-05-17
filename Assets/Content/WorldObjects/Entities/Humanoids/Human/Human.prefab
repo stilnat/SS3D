@@ -220,7 +220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 14
+  _componentIndexCache: 15
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _automaticContainerSetUp: 0
@@ -329,7 +329,7 @@ GameObject:
   - component: {fileID: 8304794297218136879}
   - component: {fileID: 4618619339577335872}
   - component: {fileID: 8223360868524313975}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Leg Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -467,9 +467,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 9
+  _networkBehaviours:
+  - {fileID: 8223360868524313975}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -492,9 +493,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4618619339577335872}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4618619339577335872}
   _parentBodyPart: {fileID: 2237066583613715696}
   Name: 
 --- !u!1 &472338063523916287
@@ -1405,7 +1406,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6313390061406284947}
   - component: {fileID: 3355837623697654740}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Ear Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1942,7 +1943,7 @@ GameObject:
   - component: {fileID: 8793278027620475813}
   - component: {fileID: 8845815275584085111}
   - component: {fileID: 3366354741339609569}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Foot Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2080,9 +2081,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 11
+  _networkBehaviours:
+  - {fileID: 3366354741339609569}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -2105,9 +2107,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 8845815275584085111}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 8845815275584085111}
   _parentBodyPart: {fileID: 8223360868524313975}
   Name: 
 --- !u!1 &1720895395443369560
@@ -2216,7 +2218,7 @@ GameObject:
   - component: {fileID: 1037560153012890605}
   - component: {fileID: 4394725799957399023}
   - component: {fileID: 7711192453418664904}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Leg Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2354,9 +2356,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 8
+  _networkBehaviours:
+  - {fileID: 7711192453418664904}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -2379,9 +2382,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4394725799957399023}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4394725799957399023}
   _parentBodyPart: {fileID: 2237066583613715696}
   Name: 
 --- !u!1 &1879675768441011179
@@ -2564,7 +2567,7 @@ GameObject:
   - component: {fileID: 949421968142360378}
   - component: {fileID: 7120099545550083789}
   - component: {fileID: 2258477815320491599}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Arm Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2702,9 +2705,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 4
+  _networkBehaviours:
+  - {fileID: 2258477815320491599}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -2727,9 +2731,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 7120099545550083789}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 7120099545550083789}
   _parentBodyPart: {fileID: 2237066583613715696}
   Name: 
 --- !u!1 &2150520291421741415
@@ -3213,7 +3217,7 @@ GameObject:
   - component: {fileID: 6840993320086561213}
   - component: {fileID: 6266904249748560873}
   - component: {fileID: 388532052771075113}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Arm Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3351,9 +3355,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 5
+  _networkBehaviours:
+  - {fileID: 388532052771075113}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -3376,9 +3381,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 6266904249748560873}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6266904249748560873}
   _parentBodyPart: {fileID: 388532052771075113}
   Name: 
 --- !u!1 &2716332713394458792
@@ -4404,7 +4409,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4928814663996923680}
   - component: {fileID: 2147027262095140353}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Ear Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4742,7 +4747,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 12
+  _componentIndexCache: 13
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _automaticContainerSetUp: 1
@@ -5011,7 +5016,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6758726119420805372}
   - component: {fileID: 4512872139536266348}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Ear Gore Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5147,7 +5152,7 @@ GameObject:
   - component: {fileID: 270151793522417329}
   - component: {fileID: 7188540299959043701}
   - component: {fileID: 3073538516465786502}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5286,10 +5291,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
-  <ChildNetworkObjects>k__BackingField: []
+  <ComponentIndex>k__BackingField: 1
+  _networkBehaviours:
+  - {fileID: 3073538516465786502}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
+  <ChildNetworkObjects>k__BackingField:
+  - {fileID: 6318786153190512229}
   _isNetworked: 1
   _isGlobal: 0
   _defaultDespawnType: 0
@@ -5311,9 +5318,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 7188540299959043701}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 7188540299959043701}
   _parentBodyPart: {fileID: 8318491760820189185}
   Name: 
 --- !u!1 &4806492444777318490
@@ -5390,7 +5397,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5069499873217858568}
   - component: {fileID: 1912639710788903869}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Eye Gore Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5660,7 +5667,7 @@ GameObject:
   - component: {fileID: 7063966259298033300}
   - component: {fileID: 8052326237579698321}
   - component: {fileID: 9060991516564050461}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Foot Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5798,9 +5805,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 10
+  _networkBehaviours:
+  - {fileID: 9060991516564050461}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -5823,9 +5831,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 8052326237579698321}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 8052326237579698321}
   _parentBodyPart: {fileID: 7711192453418664904}
   Name: 
 --- !u!1 &5259835642244508253
@@ -6439,7 +6447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1988314526152979523}
   - component: {fileID: 3022107536332115539}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Eye Gore Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6648,6 +6656,7 @@ GameObject:
   - component: {fileID: 3788807725072305327}
   - component: {fileID: 571479044043330787}
   - component: {fileID: 5857269694861021747}
+  - component: {fileID: 7050015805646851322}
   - component: {fileID: 3043704831697070745}
   - component: {fileID: 5429108461815527728}
   - component: {fileID: 5004243816591034345}
@@ -6703,6 +6712,7 @@ MonoBehaviour:
   - {fileID: 3788807725072305327}
   - {fileID: 571479044043330787}
   - {fileID: 5857269694861021747}
+  - {fileID: 7050015805646851322}
   - {fileID: 3043704831697070745}
   - {fileID: 5429108461815527728}
   - {fileID: 5004243816591034345}
@@ -6712,7 +6722,17 @@ MonoBehaviour:
   - {fileID: 4140518851396729342}
   - {fileID: 7144090709710962679}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
-  <ChildNetworkObjects>k__BackingField: []
+  <ChildNetworkObjects>k__BackingField:
+  - {fileID: 7188540299959043701}
+  - {fileID: 2585198595464706776}
+  - {fileID: 7120099545550083789}
+  - {fileID: 6266904249748560873}
+  - {fileID: 6486719224959922776}
+  - {fileID: 6507287416541332276}
+  - {fileID: 4394725799957399023}
+  - {fileID: 4618619339577335872}
+  - {fileID: 8052326237579698321}
+  - {fileID: 8845815275584085111}
   _isNetworked: 1
   _isGlobal: 0
   _defaultDespawnType: 0
@@ -6972,6 +6992,24 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   Ghost: {fileID: 2798955099631966591, guid: 7bbb74a7ffc8cae44baa886de43c586b, type: 3}
+--- !u!114 &7050015805646851322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415765038646171405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81823982a1f0a0a4b8b5b6c5915d1083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 9
+  _addedNetworkObject: {fileID: 2930813178971533500}
+  _networkObjectCache: {fileID: 2930813178971533500}
+  attackParticleEffect: {fileID: 7714517724079113232, guid: 17b0d9163e9cdf14aa557557e7d9d76b, type: 3}
+  attackType: 0
+  damageAmount: 10
 --- !u!114 &3043704831697070745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6984,7 +7022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 9
+  _componentIndexCache: 10
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _openState: 0
@@ -7002,7 +7040,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 10
+  _componentIndexCache: 11
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _openState: 0
@@ -7020,7 +7058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 11
+  _componentIndexCache: 12
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _openState: 0
@@ -7069,7 +7107,8 @@ GameObject:
   - component: {fileID: 4652682359255614497}
   - component: {fileID: 2585198595464706776}
   - component: {fileID: 2237066583613715696}
-  m_Layer: 0
+  - component: {fileID: 7090596395632360000}
+  m_Layer: 12
   m_Name: Human Torso
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7207,9 +7246,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 3
+  _networkBehaviours:
+  - {fileID: 2237066583613715696}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -7232,11 +7272,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 2585198595464706776}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 2585198595464706776}
   _parentBodyPart: {fileID: 3073538516465786502}
   Name: 
+--- !u!64 &7090596395632360000
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6497759491280381115}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2697298597662080333, guid: f553c8289710b5e4dab99c3bcbbb802e, type: 3}
 --- !u!1 &6618192393620894408
 GameObject:
   m_ObjectHideFlags: 0
@@ -7479,7 +7533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 13
+  _componentIndexCache: 14
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _automaticContainerSetUp: 0
@@ -7679,7 +7733,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1520629747557640359}
   - component: {fileID: 3358737676406594101}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7978,7 +8032,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 498654123859477456}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: 01 Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8029,7 +8083,7 @@ GameObject:
   - component: {fileID: 307030994350559859}
   - component: {fileID: 6318786153190512229}
   - component: {fileID: 8318491760820189185}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Brain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8064,9 +8118,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 2
+  _networkBehaviours:
+  - {fileID: 8318491760820189185}
+  <ParentNetworkObject>k__BackingField: {fileID: 7188540299959043701}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -8089,9 +8144,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1046a032bc197247b9aab3d1812b254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 6318786153190512229}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6318786153190512229}
   _parentBodyPart: {fileID: 0}
   Name: Brain
 --- !u!1 &7709650652665280887
@@ -8501,7 +8556,7 @@ GameObject:
   - component: {fileID: 2879367628846680322}
   - component: {fileID: 6507287416541332276}
   - component: {fileID: 4431796012693653657}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Hand Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8639,9 +8694,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 7
+  _networkBehaviours:
+  - {fileID: 4431796012693653657}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -8664,9 +8720,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 6507287416541332276}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6507287416541332276}
   _parentBodyPart: {fileID: 388532052771075113}
   Name: 
 --- !u!1 &8327591943400095719
@@ -8711,7 +8767,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7799443497831185722}
   - component: {fileID: 6459807397474569680}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human COMPLETE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9108,7 +9164,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3696211021867152838}
   - component: {fileID: 1325118169618504031}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Ear Gore Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9411,7 +9467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 15
+  _componentIndexCache: 16
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _automaticContainerSetUp: 0
@@ -9649,7 +9705,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 16
+  _componentIndexCache: 17
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _automaticContainerSetUp: 0
@@ -9750,7 +9806,7 @@ GameObject:
   - component: {fileID: 6217532572249875957}
   - component: {fileID: 6486719224959922776}
   - component: {fileID: 8811230477277706254}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Human Hand Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9888,9 +9944,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
-  _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 6
+  _networkBehaviours:
+  - {fileID: 8811230477277706254}
+  <ParentNetworkObject>k__BackingField: {fileID: 2930813178971533500}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
   _isGlobal: 0
@@ -9913,8 +9970,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25aaf3a871b3d1438c1a27c2c6b57c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 6486719224959922776}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6486719224959922776}
   _parentBodyPart: {fileID: 2258477815320491599}
   Name: 
