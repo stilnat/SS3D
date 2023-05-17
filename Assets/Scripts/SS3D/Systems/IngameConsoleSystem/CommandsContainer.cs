@@ -49,8 +49,8 @@ namespace SS3D.Systems.IngameConsoleSystem
         public static string PlayerList()
         {
             string ret = "";
-            List<Soul> souls = Subsystems.Get<PlayerSystem>().OnlineSouls.ToList();
-            foreach (Soul i in souls)
+            List<Player> souls = Subsystems.Get<PlayerSystem>().OnlinePlayers.ToList();
+            foreach (Player i in souls)
             {
                 ret += i.Ckey + "\t";
             }
@@ -76,8 +76,8 @@ namespace SS3D.Systems.IngameConsoleSystem
         public static string SoulList()
         {
             string ret = "";
-            IEnumerable<Soul> souls = Subsystems.Get<PlayerSystem>().ServerSouls;
-            foreach (Soul i in souls)
+            IEnumerable<Player> souls = Subsystems.Get<PlayerSystem>().ServerPlayers;
+            foreach (Player i in souls)
             {
                 ret += i.Ckey + "\t";
             }
@@ -106,7 +106,7 @@ namespace SS3D.Systems.IngameConsoleSystem
         [LongDescription("inspect body part")]
         public static string LogBodyPart(string ckey, string bodyPartName)
         {
-            Soul player = Subsystems.Get<PlayerSystem>().GetSoul(ckey);
+            Player player = Subsystems.Get<PlayerSystem>().GetPlayer(ckey);
             if (player == null)
                 return "This player doesn't exist";
 
@@ -136,7 +136,7 @@ namespace SS3D.Systems.IngameConsoleSystem
         [LongDescription("inspect body part")]
         public static string AddNerveLayer(string ckey, string bodyPartName, bool isCentralNervousSystem)
         {
-            Soul player = Subsystems.Get<PlayerSystem>().GetSoul(ckey);
+            Player player = Subsystems.Get<PlayerSystem>().GetPlayer(ckey);
             if (player == null)
                 return "This player doesn't exist";
 
@@ -166,7 +166,7 @@ namespace SS3D.Systems.IngameConsoleSystem
         [LongDescription("inspect body part")]
         public static string AddConnectedBodyPart(string ckey, string bodyPartName)
         {
-            Soul player = Subsystems.Get<PlayerSystem>().GetSoul(ckey);
+            Player player = Subsystems.Get<PlayerSystem>().GetPlayer(ckey);
             if (player == null)
                 return "This player doesn't exist";
 
@@ -197,7 +197,7 @@ namespace SS3D.Systems.IngameConsoleSystem
         [LongDescription("Kill player (user ckey)")]
         public static string Kill(string ckey)
         {
-            Soul PlayerToKill = Subsystems.Get<PlayerSystem>().GetSoul(ckey);
+            Player PlayerToKill = Subsystems.Get<PlayerSystem>().GetPlayer(ckey);
             if(PlayerToKill == null)
                 return "This player doesn't exist";
 
