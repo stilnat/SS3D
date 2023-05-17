@@ -198,6 +198,9 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
         var layer = GetBodyLayer<T>();
         if (!BodyLayers.Contains(layer)) return false;
         layer.InflictDamage(damageTypeQuantity);
+
+        if (IsSevered()) HideSeveredBodyPart();
+
         return true;
     }
 
@@ -210,6 +213,8 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
         {
             layer.InflictDamage(damageTypeQuantity);
         }
+
+        if (IsSevered()) HideSeveredBodyPart();
     }
 
     /// <summary>
@@ -222,6 +227,8 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
             if (!(layer is T))
                 layer.InflictDamage(damageTypeQuantity);
         }
+
+        if (IsSevered()) HideSeveredBodyPart();
     }
 
     /// <summary>
@@ -275,6 +282,21 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     public override string ToString()
     {
         return Name;
+    }
+
+    public bool IsSevered()
+    {
+        return GetBodyLayer<BoneLayer>().IsDestroyed();
+    }
+
+    
+    private void HideSeveredBodyPart()
+    {
+        GetComponent<SkinnedMeshRenderer>().enabled = false;
+        foreach(var part in _childBodyParts)
+        {
+            part.GetComponent<SkinnedMeshRenderer>().enabled = false;
+        }
     }
 
 
