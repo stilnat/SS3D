@@ -25,30 +25,22 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     [SyncVar]
     private BodyPart _parentBodyPart;
 
-    [SyncObject]
-    private readonly SyncList<BodyPart> _childBodyParts = new SyncList<BodyPart>();
 
-    [SyncObject]
-    public readonly SyncList<BodyLayer> _bodyLayers = new SyncList<BodyLayer>();
+    private readonly List<BodyPart> _childBodyParts = new List<BodyPart>();
+
+    public readonly List<BodyLayer> _bodyLayers = new List<BodyLayer>();
 
     public string Name;
 
     public ReadOnlyCollection<BodyLayer> BodyLayers
     {
-        get { return ((List<BodyLayer>)_bodyLayers.Collection).AsReadOnly(); }
+        get { return _bodyLayers.AsReadOnly(); }
     }
 
     public ReadOnlyCollection<BodyPart> ChildBodyParts
     {
-        get { return ((List<BodyPart>)_childBodyParts.Collection).AsReadOnly(); }
+        get { return _childBodyParts.AsReadOnly(); }
     }
-
-
-    public void Start()
-    {
-        SetUpChild();
-    }
-
 
 
     /// <summary>
@@ -80,6 +72,8 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
+        ParentBodyPart = _parentBodyPart;
+        AddInitialLayers();
     }
 
     public override void OnStartClient()
@@ -110,15 +104,6 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
         foreach (var bodylayer in BodyLayers)
         {
             bodylayer.BodyPart = this;
-        }
-    }
-
-    [Server]
-    private void SetUpChild()
-    {   
-        if(_parentBodyPart != null)
-        {
-            _parentBodyPart._childBodyParts.Add(this);
         }
     }
 
@@ -161,8 +146,8 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     /// <returns> The body layer was added.</returns>
     public virtual bool TryAddBodyLayer(BodyLayer layer)
     {
-        _bodyLayers.Add(layer);
         layer.BodyPart = this;
+        _bodyLayers.Add(layer);
         return true;
     }
 
@@ -298,6 +283,8 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
             part.GetComponent<SkinnedMeshRenderer>().enabled = false;
         }
     }
+
+    protected abstract void AddInitialLayers();
 
 
 }

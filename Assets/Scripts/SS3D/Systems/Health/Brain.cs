@@ -18,10 +18,9 @@ public class Brain : BodyPart
     public override void Init(string name = "Brain")
     {
         base.Init(name);
-        AddBrainLayer();
     }
 
-    private void AddBrainLayer()
+    protected override void AddInitialLayers()
     {
         TryAddBodyLayer(new CirculatoryLayer(this));
         TryAddBodyLayer(new NerveLayer(this));

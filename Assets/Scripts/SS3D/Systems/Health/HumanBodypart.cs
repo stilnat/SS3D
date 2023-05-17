@@ -19,10 +19,9 @@ public class HumanBodypart : BodyPart
         base.Init(name);
     }
 
-    public override void Init(BodyPart parent,string name = "")
+    public override void Init(BodyPart parent, string name = "")
     {
         base.Init(parent, name);
-        AddHumanBodyLayers();
     }
 
     private void OnNerveDamaged(object sender, DamageEventArgs nerveDamageEventArgs)
@@ -30,12 +29,11 @@ public class HumanBodypart : BodyPart
 
     }
 
-    private void AddHumanBodyLayers()
+    protected override void AddInitialLayers()
     {
         TryAddBodyLayer(new MuscleLayer(this));
         TryAddBodyLayer(new BoneLayer(this));
         TryAddBodyLayer(new CirculatoryLayer(this));
         TryAddBodyLayer(new NerveLayer(this));
     }
-   
 }
