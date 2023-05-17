@@ -14,18 +14,32 @@ public static class BodyLayerSerializer
 {
     public static void WriteBodyLayer(this Writer writer, BodyLayer layer)
     {
+        int layertype = (int)layer.LayerType;
+        writer.WriteInt32(layertype);
         switch (layer.LayerType) 
         {
             case BodyLayerType.Nerve:
                 NerveLayerSerializer.WriteNerveLayer(writer, (NerveLayer)layer);
+                break;
+            case BodyLayerType.Muscle:
+                MuscleLayerSerializer.WriteMuscleLayer(writer, (MuscleLayer) layer);
+                break;
+            case BodyLayerType.Bone:
+                BoneLayerSerializer.WriteBoneLayer(writer, (BoneLayer)layer);
+                break;
+            case BodyLayerType.Circulatory:
+                CirculatoryLayerSerializer.WriteCirculatoryLayer(writer, (CirculatoryLayer)layer);
+                break;
+            case BodyLayerType.Organ:
+                OrganLayerSerializer.WriteOrganLayer(writer, (OrganLayer)layer);
                 break;
         }
     }
 
     public static BodyLayer ReadBodyLayer(this Reader reader)
     {
-
-        var layerType = (BodyLayerType) reader.ReadInt32();
+        int layer = reader.ReadInt32();
+        var layerType = (BodyLayerType) layer;
         switch (layerType)
         {
             case BodyLayerType.Nerve:

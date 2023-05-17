@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class BoneLayerSerializer
 {
-    public static void WriteBoneLayer(this Writer writer, MuscleLayer bone)
+    public static void WriteBoneLayer(this Writer writer, BoneLayer bone)
     {
         BodyLayerSerializer.WriteDamages(writer, bone);
         BodyLayerSerializer.WriteSusceptibilities(writer, bone);
@@ -22,10 +22,12 @@ public static class BoneLayerSerializer
         var susceptibilities = BodyLayerSerializer.ReadSusceptibilities(reader);
         var resistances = BodyLayerSerializer.ReadResistances(reader);
 
-
-        var isCentralNervousSystem = reader.ReadBoolean();
-        var bodyPartGameObject = reader.ReadGameObject();
-        var bodyPart = bodyPartGameObject.GetComponent<BodyPart>();
+        var bodyPartGameObject = reader.ReadNetworkBehaviour();
+        var bodyPart = bodyPartGameObject.gameObject.GetComponent<BodyPart>();
+        if(bodyPart == null)
+        {
+            bodyPart = bodyPartGameObject.GetComponent<HumanBodypart>();
+        }
         boneLayer = new BoneLayer(bodyPart, damages, susceptibilities, resistances);
         return boneLayer;
     }
