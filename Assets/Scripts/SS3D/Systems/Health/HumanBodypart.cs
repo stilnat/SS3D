@@ -24,11 +24,6 @@ public class HumanBodypart : BodyPart
         base.Init(parent, name);
     }
 
-    private void OnNerveDamaged(object sender, DamageEventArgs nerveDamageEventArgs)
-    {
-
-    }
-
     protected override void AddInitialLayers()
     {
         TryAddBodyLayer(new MuscleLayer(this));
