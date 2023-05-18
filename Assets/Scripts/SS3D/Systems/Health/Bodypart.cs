@@ -25,6 +25,9 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     [SyncVar]
     private BodyPart _parentBodyPart;
 
+    [SerializeField]
+    private SkinnedMeshRenderer _skinnedMeshRenderer;
+
 
     private readonly List<BodyPart> _childBodyParts = new List<BodyPart>();
 
@@ -74,11 +77,6 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
         base.OnStartServer();
         ParentBodyPart = _parentBodyPart;
         AddInitialLayers();
-    }
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
     }
 
     /// <summary>
@@ -277,10 +275,10 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
     
     private void HideSeveredBodyPart()
     {
-        GetComponent<SkinnedMeshRenderer>().enabled = false;
+        _skinnedMeshRenderer.enabled = false;
         foreach(var part in _childBodyParts)
         {
-            part.GetComponent<SkinnedMeshRenderer>().enabled = false;
+            part.HideSeveredBodyPart();
         }
     }
 
