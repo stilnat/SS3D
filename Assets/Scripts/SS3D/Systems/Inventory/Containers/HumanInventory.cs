@@ -106,7 +106,12 @@ namespace SS3D.Systems.Inventory.Containers
         private void SyncInventoryContainerChange(SyncListOperation op, int index, AttachedContainer oldContainer, AttachedContainer newContainer, bool asServer)
         {
             if (asServer) return;
-            switch (op)
+			if (newContainer == null && op == SyncListOperation.Add)
+			{
+				Punpun.Warning(this, "container added is null, returning");
+				return;
+			}
+			switch (op)
             {
                 case SyncListOperation.Add:
                     OnInventoryContainerAdded?.Invoke(newContainer);
