@@ -74,7 +74,7 @@ namespace SS3D.Systems.Inventory.Containers
 			base.OnStartServer();
 			foreach(Hand hand in PlayerHands)
 			{
-				hand.handsController = this;
+				hand.HandsController = this;
 				hand.OnHandDisabled += HandleHandRemoved;
 			}
 			// Set the selected hand to be the first available one.
@@ -187,7 +187,7 @@ namespace SS3D.Systems.Inventory.Containers
 		[Server]
 		private void NextHand()
 		{
-			int index = PlayerHands.FindIndex(0, 1, x => x == SelectedHand);
+			int index = PlayerHands.FindIndex(0, x => x == SelectedHand);
 			_selectedHand = PlayerHands[(index + 1) % PlayerHands.Count];
 		}
 

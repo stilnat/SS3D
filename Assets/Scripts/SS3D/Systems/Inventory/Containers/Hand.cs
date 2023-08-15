@@ -1,13 +1,9 @@
-﻿using SS3D.Systems.Inventory.Containers;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using SS3D.Systems.Inventory.Items;
 using System.Linq;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
 using FishNet.Object;
-using static SS3D.Systems.Inventory.Containers.AttachedContainer;
 
 namespace SS3D.Systems.Inventory.Containers
 {
@@ -24,11 +20,11 @@ namespace SS3D.Systems.Inventory.Containers
 		/// <summary>
 		/// Horizontal and vertical max distance to interact with stuff.
 		/// </summary>
-		public RangeLimit range = new(1.5f, 2);
+		[SerializeField] private RangeLimit _range = new(1.5f, 2);
 
 		// pickup icon that this hand uses when there's a pickup interaction
 		// TODO: When AssetData is on, we should update this to not use this
-		public Sprite pickupIcon;
+		[SerializeField] private Sprite _pickupIcon;
 
 		/// <summary>
 		/// The item held in this hand, if it exists
@@ -38,17 +34,17 @@ namespace SS3D.Systems.Inventory.Containers
 		/// <summary>
 		/// Point from where distances for interaction is computed.
 		/// </summary>
-		public Transform interactionOrigin;
+		[SerializeField] private Transform _interactionOrigin;
 
 		/// <summary>
 		/// the hands script controlling this hand.
 		/// </summary>
-		public Hands handsController;
+		public Hands HandsController;
 
-		public Vector3 InteractionOrigin => interactionOrigin.position;
+		public Vector3 InteractionOrigin => _interactionOrigin.position;
 
-		public delegate void HandHandler(Hand hand);
-		public event HandHandler OnHandDisabled;
+		public delegate void HandEventHandler(Hand hand);
+		public event HandEventHandler OnHandDisabled;
 
 		protected override void OnDisabled()
 		{
@@ -67,6 +63,7 @@ namespace SS3D.Systems.Inventory.Containers
 
 		/// <summary>
 		/// Get the interaction source from stuff in hand if there's any.
+		/// Also sets the source of the IInteraction source to be this hand.
 		/// </summary>
 		/// <returns></returns>
 		public IInteractionSource GetActiveTool()
@@ -87,7 +84,7 @@ namespace SS3D.Systems.Inventory.Containers
 
 		public RangeLimit GetInteractionRange()
 		{
-			return range;
+			return _range;
 		}
 
 		[Server]
