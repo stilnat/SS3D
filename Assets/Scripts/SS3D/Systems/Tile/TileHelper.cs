@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using SS3D.Utils;
+using Coimbra;
 
 namespace SS3D.Systems.Tile
 {
@@ -14,8 +15,7 @@ namespace SS3D.Systems.Tile
     public static class TileHelper
     {
         private static TileLayer[] TileLayers;
-
-
+        
         /// <summary>
         /// Get a direction 90 degree clockwise from the one passed in parameter.
         /// </summary>
@@ -35,6 +35,21 @@ namespace SS3D.Systems.Tile
                 case Direction.East: return Direction.South;
                 case Direction.SouthEast: return Direction.SouthWest;
             }
+        }
+
+        public static Direction GetPreviousCardinalDir(Direction dir)
+        {
+            return (Direction) MathUtility.mod((int)dir - 2, 8);
+        }
+
+        public static Direction GetPreviousDir(Direction dir)
+        {
+            return (Direction)MathUtility.mod((int)dir - 1, 8);
+        }
+
+        public static Direction GetNextDir(Direction dir)
+        {
+            return (Direction)MathUtility.mod((int)dir + 1, 8);
         }
 
         /// <summary>
@@ -59,14 +74,43 @@ namespace SS3D.Systems.Tile
         }
 
         /// <summary>
-        /// Get the two adjacent directions from dir passed in parameter.
-        /// e.g if dir is North, return NorthWest and NorthEast.
+        /// Return the closest cardinal directions from a given other direction.
         /// </summary>
-
-        public static Tuple<Direction,Direction> GetAdjacentDirections(Direction dir)
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static List<Direction> ClosestCardinalAdjacentTo(Direction dir)
         {
-            return new Tuple<Direction, Direction>( (Direction) MathUtility.mod((int) dir + 1, 8),
-                (Direction)MathUtility.mod((int)dir - 1, 8) );
+            if(CardinalDirections().Contains(dir)) return new List<Direction> { dir };
+            return GetAdjacentDirections(dir);
+        }
+
+        public static List<Direction> GetAdjacentDirections(Direction dir)
+        {
+            return new List<Direction>{ (Direction)MathUtility.mod((int)dir + 1, 8),
+                (Direction)MathUtility.mod((int)dir - 1, 8) };
+        }
+
+        /// <summary>
+        /// Return the three adjacent directions to Direction dir including itself.
+        /// </summary>
+        public static List<Direction> GetAdjacentAndMiddleDirection(Direction dir)
+        {
+            var list = new List<Direction> { dir };
+            list.AddRange(GetAdjacentDirections(dir));
+            return list;
+        }
+
+        /// <summary>
+        /// Return the 5 adjacent directions to Direction dir including itself.
+        /// </summary>
+        public static List<Direction> GetFiveAdjacents(Direction dir)
+        {
+            return new List<Direction>{ dir,
+                (Direction)MathUtility.mod((int)dir + 1, 8),
+                (Direction)MathUtility.mod((int)dir - 1, 8),
+                (Direction)MathUtility.mod((int)dir - 2, 8),
+                (Direction)MathUtility.mod((int)dir +2, 8),
+            };
         }
 
         /// <summary>
@@ -86,6 +130,29 @@ namespace SS3D.Systems.Tile
         public static Vector3 GetClosestPosition(Vector3 worldPosition)
         {
             return new Vector3(Mathf.Round(worldPosition.x), 0, Mathf.Round(worldPosition.z));
+        }
+        
+        /// <summary>
+        /// Get position on the tile grid, that mouse points to.
+        /// </summary>
+        /// <param name="isTilePosition">If true, position snaps to the center of a tile</param>
+        /// <returns></returns>
+        public static Vector3 GetPointedPosition(bool isTilePosition = false)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (new Plane(Vector3.up, 0).Raycast(ray, out float distance))
+            {
+                Vector3 point = ray.GetPoint(distance);
+                if (isTilePosition)
+                {
+                    return GetClosestPosition(point);
+                }
+                else
+                {
+                    return point;
+                }
+            }
+            return Vector3.zero;
         }
 
         /// <summary>
@@ -141,6 +208,56 @@ namespace SS3D.Systems.Tile
             return givenDiagonals.Contains(Direction.SouthEast) ?
                 givenDiagonals.Contains(Direction.NorthEast) ? Direction.East : Direction.South :
                 givenDiagonals.Contains(Direction.SouthWest) ? Direction.West : Direction.North;
+        }
+
+        /// <summary>
+        /// Shortest distance between two directions, in the sense of the number of 45 degree rotation needed
+        /// to get from one direction to another.
+        /// </summary>
+        public static int DistanceBetweenDir(Direction dir1, Direction dir2) 
+        {
+            int dist1 = MathUtility.mod(dir1 - dir2, 8);
+            int dist2 = MathUtility.mod(dir2 - dir1, 8);
+            return Math.Min(dist1, dist2);
+        }
+
+        /// <summary>
+        /// return the closest diagonal from two other directions.
+        /// There isn't necessarily a single diagonal which works, take the case of two opposite directions,
+        /// then all diagonals work. In case of two adjacent diagonals, it returns the first one.
+        /// </summary>
+        public static Direction ClosestDiagonalFromTwo(Direction dir1, Direction dir2)
+        {
+            if(IsDiagonal(dir1) && IsDiagonal(dir2) && DistanceBetweenDir(dir1, dir2) == 2)
+            {
+                return dir1;
+            }
+
+            Direction res = Direction.NorthEast;
+            int minDistance = int.MaxValue;
+            int distance;
+            foreach(Direction diagonal in DiagonalDirections())
+            { 
+                distance = (int) Math.Pow(DistanceBetweenDir(dir1, diagonal),2) +
+                    (int) Math.Pow(DistanceBetweenDir(dir2, diagonal),2);
+                if(distance < minDistance)
+                {
+                    minDistance = distance;
+                    res = diagonal;
+                }
+            }
+
+            return res;
+        }
+
+        public static bool IsDiagonal(Direction dir)
+        {
+            return DiagonalDirections().Contains(dir);
+        }
+
+        public static bool IsCardinal(Direction dir)
+        {
+            return CardinalDirections().Contains(dir);
         }
 
         /// <summary>
