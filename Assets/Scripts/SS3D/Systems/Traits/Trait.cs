@@ -50,6 +50,7 @@ namespace SS3D.Systems
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
             return Equals((Trait)obj);
         }
 
