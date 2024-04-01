@@ -52,8 +52,11 @@ namespace DummyStuff
             {
                 StopAiming(hands.SelectedHand);
             }
+            
+            
 
-            if (Input.GetKey(KeyCode.E) && hands.SelectedHand.Full && TryGetComponent(out DummyGun gun) && isAiming)
+            if (Input.GetKey(KeyCode.E) && hands.SelectedHand.Full 
+                && isAiming && hands.SelectedHand.item.TryGetComponent(out DummyGun gun))
             {
                 gun.GetComponent<DummyFire>().Fire();
             }
