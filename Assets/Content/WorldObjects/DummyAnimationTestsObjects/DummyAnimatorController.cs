@@ -10,7 +10,7 @@ namespace DummyStuff
     public class DummyAnimatorController : Actor
     {
         [SerializeField]
-        private DummyMovement _movementController;
+        private MovementController _movementController;
 
         [SerializeField]
         private Animator _animator;
@@ -20,22 +20,12 @@ namespace DummyStuff
         protected override void OnStart()
         {
             base.OnStart();
-            SubscribeToEvents();
+            _movementController.OnSpeedChangeEvent += UpdateMovement;
         }
 
         protected override void OnDestroyed()
         {
             base.OnDestroyed();
-            UnsubscribeFromEvents();
-        }
-
-        private void SubscribeToEvents()
-        {
-            _movementController.OnSpeedChangeEvent += UpdateMovement;
-        }
-
-        private void UnsubscribeFromEvents()
-        {
             _movementController.OnSpeedChangeEvent -= UpdateMovement;
         }
 
