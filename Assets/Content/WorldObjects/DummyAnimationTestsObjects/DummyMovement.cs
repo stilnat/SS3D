@@ -12,12 +12,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
-
-public class DummyMovement : Actor
+namespace DummyStuff
+{
+    public class DummyMovement : Actor
     {
 
         [Header("Components")]
-        [SerializeField] private CharacterController _characterController;
+        [SerializeField]
+        private CharacterController _characterController;
 
         /// <summary>
         /// Executes the movement code and updates the IK targets
@@ -46,19 +48,23 @@ public class DummyMovement : Actor
         /// </summary>
         protected void MovePlayer()
         {
-            _characterController.Move(TargetMovement * ( _movementSpeed * Time.deltaTime));
+            _characterController.Move(TargetMovement * (_movementSpeed * Time.deltaTime));
         }
-        
-         public event Action<float> OnSpeedChangeEvent;
-        
+
+        public event Action<float> OnSpeedChangeEvent;
+
 
         [Header("Movement Settings")]
-        [SerializeField] protected float _movementSpeed;
-        [SerializeField] protected float _lerpMultiplier;
-        [SerializeField] protected float _rotationLerpMultiplier;
+        [SerializeField]
+        protected float _movementSpeed;
+        [SerializeField]
+        protected float _lerpMultiplier;
+        [SerializeField]
+        protected float _rotationLerpMultiplier;
 
         [Header("Movement IK Targets")]
-        [SerializeField] private Transform _movementTarget;
+        [SerializeField]
+        private Transform _movementTarget;
 
         [Header("Run/Walk")]
         private bool _isRunning;
@@ -75,7 +81,7 @@ public class DummyMovement : Actor
         private InputSystem _inputSystem;
         private const float _walkAnimatorValue = .3f;
         private const float _runAnimatorValue = 1f;
-        
+
         public virtual float WalkAnimatorValue => _walkAnimatorValue;
         public virtual float RunAnimatorValue => _runAnimatorValue;
         public bool IsRunning => _isRunning;
@@ -105,8 +111,8 @@ public class DummyMovement : Actor
 
         protected override void OnDisabled()
         {
-	        base.OnDisabled();
-	        TargetMovement = Vector3.zero;
+            base.OnDisabled();
+            TargetMovement = Vector3.zero;
         }
 
         protected override void OnDestroyed()
@@ -125,10 +131,11 @@ public class DummyMovement : Actor
 
         private void HandleUpdate(ref EventContext context, in UpdateEvent updateEvent)
         {
-	        if (!enabled)
-	        {
-		        return;
-	        }
+            if (!enabled)
+            {
+                return;
+            }
+
             ProcessCharacterMovement();
         }
 
@@ -136,20 +143,18 @@ public class DummyMovement : Actor
         /// Moves the movement targets with the given input
         /// </summary>
         /// <param name="movementInput"></param>
-         protected void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
-         {
-             //makes the movement align to the camera view
-             Vector3 newTargetMovement =
-                 movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized +
-                 movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
+        protected void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
+        {
+            //makes the movement align to the camera view
+            Vector3 newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
 
-             // smoothly changes the target movement
-             TargetMovement = Vector3.Lerp(TargetMovement, newTargetMovement, Time.deltaTime * (_lerpMultiplier * multiplier));
+            // smoothly changes the target movement
+            TargetMovement = Vector3.Lerp(TargetMovement, newTargetMovement, Time.deltaTime * (_lerpMultiplier * multiplier));
 
-             Vector3 resultingMovement = TargetMovement + Position;
+            Vector3 resultingMovement = TargetMovement + Position;
             AbsoluteMovement = resultingMovement;
-             _movementTarget.position = AbsoluteMovement;
-         }
+            _movementTarget.position = AbsoluteMovement;
+        }
 
         /// <summary>
         /// Rotates the player to the target movement
@@ -160,7 +165,7 @@ public class DummyMovement : Actor
 
             transform.rotation = Quaternion.Slerp(Rotation, lookRotation, Time.deltaTime * _rotationLerpMultiplier);
         }
-        
+
         /// <summary>
         /// Process the player movement input, smoothing it
         /// </summary>
@@ -195,4 +200,5 @@ public class DummyMovement : Actor
         {
             OnSpeedChangeEvent?.Invoke(speed);
         }
+    }
 }

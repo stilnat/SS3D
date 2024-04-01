@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+namespace DummyStuff
+{
 public class DummyHands : MonoBehaviour
 {
 
@@ -37,4 +39,6 @@ public class DummyHands : MonoBehaviour
         
         Debug.Log($"Selected hand is {selectedHand}");
     }
+}
+    
 }

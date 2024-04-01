@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
+namespace DummyStuff
+{
+
 public class DummyHand : MonoBehaviour
 {
     public DummyItem item;
@@ -79,5 +82,7 @@ public class DummyHand : MonoBehaviour
         targetToSet.localPosition = Vector3.zero;
         targetToSet.localRotation = Quaternion.identity;
     }
+    
+}
     
 }

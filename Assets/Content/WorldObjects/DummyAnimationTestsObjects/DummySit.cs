@@ -2,87 +2,85 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DummySit : MonoBehaviour
+namespace DummyStuff
 {
-
-    public DummyAnimatorController animatorController;
-
-    public CharacterController characterController;
-
-    public DummyMovement movement;
-    
-    // Start is called before the first frame update
-    void Start()
+    public class DummySit : MonoBehaviour
     {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (!Input.GetKeyDown(KeyCode.J))
-            return;
+        public DummyAnimatorController animatorController;
 
-        if (GetComponent<DummyPositionController>().Position == PositionType.Standing)
+        public CharacterController characterController;
+
+        public DummyMovement movement;
+
+        // Start is called before the first frame update
+        void Start() { }
+
+        // Update is called once per frame
+        void Update()
         {
-            TrySit();
-        }
-        else if(GetComponent<DummyPositionController>().Position == PositionType.Sitting)
-        {
-            StopSitting();
-        }
-       
-    }
+            if (!Input.GetKeyDown(KeyCode.J))
+                return;
 
-    private void TrySit()
-    {
-        // Cast a ray from the mouse position into the scene
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        // Check if the ray hits any collider
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            // Check if the collider belongs to a GameObject
-            GameObject obj = hit.collider.gameObject;
-
-            if (obj.TryGetComponent(out DummySittable sit) && GoodDistanceFromRootToSit(sit.transform))
+            if (GetComponent<DummyPositionController>().Position == PositionType.Standing)
             {
-                StartCoroutine(Sit(sit.orientation));
+                TrySit();
             }
-            
+            else if (GetComponent<DummyPositionController>().Position == PositionType.Sitting)
+            {
+                StopSitting();
+            }
+
         }
-    }
 
-    private IEnumerator Sit(Transform sitOrientation)
-    {
-        movement.enabled = false;
-        characterController.enabled = false;
-        
-        animatorController.Sit(true);
+        private void TrySit()
+        {
+            // Cast a ray from the mouse position into the scene
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        Vector3 initialRotation = transform.eulerAngles;
-        
-        Vector3 initialPosition = transform.position;
+            // Check if the ray hits any collider
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                // Check if the collider belongs to a GameObject
+                GameObject obj = hit.collider.gameObject;
 
-        StartCoroutine(CoroutineHelper.ModifyVector3OverTime(x => transform.eulerAngles = x,
-            initialRotation, sitOrientation.eulerAngles,0.5f));
-        
-        yield return (CoroutineHelper.ModifyVector3OverTime(x => transform.position = x,
-            initialPosition, sitOrientation.position,0.5f));
-        
-        GetComponent<DummyPositionController>().Position = PositionType.Sitting;
-    }
+                if (obj.TryGetComponent(out DummySittable sit) && GoodDistanceFromRootToSit(sit.transform))
+                {
+                    StartCoroutine(Sit(sit.orientation));
+                }
 
-    private void StopSitting()
-    {
-        movement.enabled = true;
-        characterController.enabled = true;
-        animatorController.Sit(false);
-        GetComponent<DummyPositionController>().Position = PositionType.Standing;
-    }
+            }
+        }
 
-    private bool GoodDistanceFromRootToSit(Transform sit)
-    {
-        return Vector3.Distance(transform.position, sit.position) < 0.8f;
+        private IEnumerator Sit(Transform sitOrientation)
+        {
+            movement.enabled = false;
+            characterController.enabled = false;
+
+            animatorController.Sit(true);
+
+            Vector3 initialRotation = transform.eulerAngles;
+
+            Vector3 initialPosition = transform.position;
+
+            StartCoroutine(CoroutineHelper.ModifyVector3OverTime(x => transform.eulerAngles = x, initialRotation, sitOrientation.eulerAngles, 0.5f));
+
+            yield return (CoroutineHelper.ModifyVector3OverTime(x => transform.position = x, initialPosition, sitOrientation.position, 0.5f));
+
+            GetComponent<DummyPositionController>().Position = PositionType.Sitting;
+        }
+
+        private void StopSitting()
+        {
+            movement.enabled = true;
+            characterController.enabled = true;
+            animatorController.Sit(false);
+            GetComponent<DummyPositionController>().Position = PositionType.Standing;
+        }
+
+        private bool GoodDistanceFromRootToSit(Transform sit)
+        {
+            return Vector3.Distance(transform.position, sit.position) < 0.8f;
+        }
     }
 }
