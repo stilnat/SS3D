@@ -4003,9 +4003,9 @@ GameObject:
   - component: {fileID: 534476557379109011}
   - component: {fileID: 3711543053657384972}
   - component: {fileID: 1045397264392006938}
-  - component: {fileID: 1824327907329005791}
   - component: {fileID: 8635375509376998503}
   - component: {fileID: 7772018303242298867}
+  - component: {fileID: 2500043470628789696}
   m_Layer: 0
   m_Name: DummyHuman
   m_TagString: Untagged
@@ -4168,7 +4168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fd96485356cfc740b6a5e141dec502e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _movementController: {fileID: 1824327907329005791}
+  _movementController: {fileID: 2500043470628789696}
   _animator: {fileID: 7307990926274805850}
   _lerpMultiplier: 2
 --- !u!114 &3473079973903976204
@@ -4396,19 +4396,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bc5569f73db48243adceda97ed5adcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1824327907329005791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4089496606853742746}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f39894eea07f00347a9921a9bfb62f8a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 1.5
 --- !u!54 &8635375509376998503
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4423,7 +4410,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &7772018303242298867
 CapsuleCollider:
@@ -4439,6 +4426,24 @@ CapsuleCollider:
   m_Height: 1.4850018
   m_Direction: 1
   m_Center: {x: -0.008069992, y: 0.86501396, z: 0.034583986}
+--- !u!114 &2500043470628789696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff1cde6195234ca4b97074ecccdda0b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rb: {fileID: 8635375509376998503}
+  _movementSpeed: 200
+  _lerpMultiplier: 5
+  _rotationLerpMultiplier: 5
+  _movementTarget: {fileID: 5029736816765645950}
+  TargetMovement: {x: 0, y: 0, z: 0}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
