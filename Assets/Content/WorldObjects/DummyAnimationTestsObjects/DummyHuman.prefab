@@ -264,7 +264,7 @@ MonoBehaviour:
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 4635930795108269257}
+        transform: {fileID: 0}
         weight: 1
       m_Item1:
         transform: {fileID: 0}
@@ -1879,7 +1879,7 @@ MonoBehaviour:
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 4635930795108269257}
+        transform: {fileID: 0}
         weight: 1
       m_Item1:
         transform: {fileID: 0}
@@ -3399,7 +3399,7 @@ MonoBehaviour:
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 4635930795108269257}
+        transform: {fileID: 0}
         weight: 1
       m_Item1:
         transform: {fileID: 0}
@@ -3915,37 +3915,6 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00097467005, y: 0.63144845, z: -0.02419088}
     m_Extent: {x: 0.07931183, y: 0.082436144, z: 0.092823505}
   m_DirtyAABB: 0
---- !u!1 &4005800667366749732
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4635930795108269257}
-  m_Layer: 0
-  m_Name: AimTarget
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4635930795108269257
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4005800667366749732}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.7184539, y: 1.2113955, z: 1.9202205}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 16
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4038078155594683972
 GameObject:
   m_ObjectHideFlags: 0
@@ -4072,7 +4041,6 @@ Transform:
   - {fileID: 5814723828307042743}
   - {fileID: 4855327836977815790}
   - {fileID: 4647776898251892701}
-  - {fileID: 4635930795108269257}
   - {fileID: 9099685994337818100}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -4408,7 +4376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 766145a5eaeaf4f4fae47ca69fdaff90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aimTarget: {fileID: 4635930795108269257}
+  aimTarget: {fileID: 0}
   hands: {fileID: 4366303252165034965}
   intents: {fileID: 333363580064996929}
   holdController: {fileID: 304844770068834842}
@@ -4463,7 +4431,7 @@ MonoBehaviour:
   intents: {fileID: 333363580064996929}
   animatorController: {fileID: 2643222421258484460}
   timeToTarget: 1
-  aimTarget: {fileID: 4635930795108269257}
+  aimTarget: {fileID: 0}
   rotationSpeed: 5
   holdController: {fileID: 304844770068834842}
   bodyAimRig: {fileID: 4182499762659887119}
@@ -5739,7 +5707,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 17
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6105222684414742159
 GameObject:
@@ -6819,7 +6787,7 @@ MonoBehaviour:
     m_SourceObjects:
       m_Length: 1
       m_Item0:
-        transform: {fileID: 4635930795108269257}
+        transform: {fileID: 0}
         weight: 1
       m_Item1:
         transform: {fileID: 0}
