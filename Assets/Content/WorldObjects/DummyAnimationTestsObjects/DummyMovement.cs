@@ -16,19 +16,14 @@ namespace DummyStuff
 {
     public class DummyMovement : Actor
     {
-
-        [Header("Components")]
         [SerializeField]
-        private CharacterController _characterController;
-
+        private Rigidbody _rb;
         /// <summary>
         /// Executes the movement code and updates the IK targets
         /// </summary>
         protected void ProcessCharacterMovement()
         {
             ProcessPlayerInput();
-
-            _characterController.Move(Physics.gravity);
 
             if (Input.magnitude != 0)
             {
@@ -48,7 +43,7 @@ namespace DummyStuff
         /// </summary>
         protected void MovePlayer()
         {
-            _characterController.Move(TargetMovement * (_movementSpeed * Time.deltaTime));
+            _rb.velocity = TargetMovement * (_movementSpeed * Time.fixedDeltaTime);
         }
 
         public event Action<float> OnSpeedChangeEvent;
@@ -56,11 +51,11 @@ namespace DummyStuff
 
         [Header("Movement Settings")]
         [SerializeField]
-        protected float _movementSpeed;
+        private float _movementSpeed;
         [SerializeField]
-        protected float _lerpMultiplier;
+        private float _lerpMultiplier;
         [SerializeField]
-        protected float _rotationLerpMultiplier;
+        private float _rotationLerpMultiplier;
 
         [Header("Movement IK Targets")]
         [SerializeField]
@@ -79,20 +74,23 @@ namespace DummyStuff
         protected Controls.MovementActions MovementControls;
         protected Controls.HotkeysActions HotkeysControls;
         private InputSystem _inputSystem;
+        
         private const float _walkAnimatorValue = .3f;
         private const float _runAnimatorValue = 1f;
-
-        public virtual float WalkAnimatorValue => _walkAnimatorValue;
-        public virtual float RunAnimatorValue => _runAnimatorValue;
-        public bool IsRunning => _isRunning;
 
         protected override void OnStart()
         {
             base.OnStart();
             Setup();
         }
+        
+        protected override void OnDisabled()
+        {
+            base.OnDisabled();
+            TargetMovement = Vector3.zero;
+        }
 
-        protected void Setup()
+        private void Setup()
         {
             _camera = Subsystems.Get<CameraSystem>().PlayerCamera;
             _inputSystem = Subsystems.Get<InputSystem>();
@@ -106,30 +104,18 @@ namespace DummyStuff
             _inputSystem.ToggleActionMap(MovementControls, true);
             _inputSystem.ToggleActionMap(HotkeysControls, true);
 
-            AddHandle(UpdateEvent.AddListener(HandleUpdate));
-        }
-
-        protected override void OnDisabled()
-        {
-            base.OnDisabled();
-            TargetMovement = Vector3.zero;
+            AddHandle(FixedUpdateEvent.AddListener(HandleFixedUpdate));
         }
 
         protected override void OnDestroyed()
         {
             base.OnDestroyed();
-            UnityEngine.Debug.Log("destroying controller " + gameObject.name);
             MovementControls.ToggleRun.performed -= HandleToggleRun;
             _inputSystem.ToggleActionMap(MovementControls, false);
             _inputSystem.ToggleActionMap(HotkeysControls, false);
         }
 
-        private void HandleControllingPlayerChanged(Mind mind)
-        {
-            OnSpeedChanged(0);
-        }
-
-        private void HandleUpdate(ref EventContext context, in UpdateEvent updateEvent)
+        private void HandleFixedUpdate(ref EventContext context, in FixedUpdateEvent updateEvent)
         {
             if (!enabled)
             {
@@ -185,7 +171,7 @@ namespace DummyStuff
 
         protected virtual float FilterSpeed()
         {
-            return _isRunning ? RunAnimatorValue : WalkAnimatorValue;
+            return _isRunning ? _runAnimatorValue : _walkAnimatorValue;
         }
 
         /// <summary>

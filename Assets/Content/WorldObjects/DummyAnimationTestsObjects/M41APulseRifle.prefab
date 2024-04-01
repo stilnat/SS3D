@@ -302,8 +302,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 8048644634823827442, guid: 6689365f34e3b994295af9f68b26360b, type: 3}
   spawnPoint: {fileID: 2876824034063606500}
-  fireRate: 10
-  bulletSpeed: 10
+  fireRate: 3
+  bulletSpeed: 100
 --- !u!1 &3668275914812991115
 GameObject:
   m_ObjectHideFlags: 0

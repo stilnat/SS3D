@@ -10,7 +10,7 @@ namespace DummyStuff
     public class DummyAnimatorController : Actor
     {
         [SerializeField]
-        private MovementController _movementController;
+        private DummyMovement _movementController;
 
         [SerializeField]
         private Animator _animator;
