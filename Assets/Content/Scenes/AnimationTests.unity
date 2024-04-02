@@ -433,6 +433,8 @@ MonoBehaviour:
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/Lockbox.prefab
   - _gameObject: {fileID: 5956771288712205781}
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/UnboltedGirder.prefab
+  - _gameObject: {fileID: 2205958948406458853}
+    _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/RagdollHuman.prefab
 --- !u!4 &299826985
 Transform:
   m_ObjectHideFlags: 11
@@ -3273,11 +3275,73 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4268885ccf3d48e4b9b845f21690e7d1, type: 3}
+--- !u!1 &2205958948406458853 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4015706199144577803, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+  m_PrefabInstance: {fileID: 2965484542498226926}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2495184866979167448 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3447004931128554605, guid: e7e7ccf70fee9154dbd6bebc1f129efd, type: 3}
   m_PrefabInstance: {fileID: 970127500394285237}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2965484542498226926
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4015706199144577803, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_Name
+      value: RagdollHuman
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_RootOrder
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.104
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.837
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.895
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391422157707076017, guid: b44efd6affb3eb142aa0695994066860, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b44efd6affb3eb142aa0695994066860, type: 3}
 --- !u!1001 &3149558903608460477
 PrefabInstance:
   m_ObjectHideFlags: 0
