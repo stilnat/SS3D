@@ -431,8 +431,6 @@ MonoBehaviour:
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/DummyHuman.prefab
   - _gameObject: {fileID: 9152349780473288372}
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/Lockbox.prefab
-  - _gameObject: {fileID: 2143077959}
-    _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/MaxiDummyHuman.prefab
   - _gameObject: {fileID: 5956771288712205781}
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/UnboltedGirder.prefab
 --- !u!4 &299826985
@@ -2710,68 +2708,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &2143077958
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_RootOrder
-      value: 16
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -2.26
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.76
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 5.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3714097311666575904, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4089496606853742746, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-      propertyPath: m_Name
-      value: MaxiDummyHuman
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
---- !u!1 &2143077959 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4089496606853742746, guid: ed96ff12d2c4ea940a965d67abd45fde, type: 3}
-  m_PrefabInstance: {fileID: 2143077958}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &134745338134360137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3532,7 +3468,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6236848257757615588, guid: 91cc6db2c9e25ce4a83bc3633113536d, type: 3}
       propertyPath: m_RootOrder
-      value: 17
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6236848257757615588, guid: 91cc6db2c9e25ce4a83bc3633113536d, type: 3}
       propertyPath: m_LocalPosition.x
