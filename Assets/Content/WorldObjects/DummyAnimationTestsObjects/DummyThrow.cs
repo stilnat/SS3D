@@ -17,7 +17,8 @@ namespace DummyStuff
 
         public Transform aimTarget;
 
-        private float _maxForce = 10;
+        [SerializeField]
+        private float maxForce = 10;
 
         public float rotationSpeed = 5f;
 
@@ -91,6 +92,11 @@ namespace DummyStuff
             Vector3 initialVelocityInWorldCoordinate = transform.TransformDirection(initialVelocityInRootCoordinate);
 
             hands.SelectedHand.RemoveItem();
+
+            if (initialVelocityInWorldCoordinate.magnitude > maxForce)
+            {
+                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * maxForce;
+            }
 
             item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
 
