@@ -73,6 +73,13 @@ namespace DummyStuff
             hands.SelectedHand.holdIkConstraint.weight = 0f;
             hands.SelectedHand.pickupIkConstraint.weight = 0f;
 
+            if (item.canHoldTwoHand && hands.UnselectedHand.Empty)
+            {
+                hands.UnselectedHand.itemPositionConstraint.weight = 0f;
+                hands.UnselectedHand.holdIkConstraint.weight = 0f;
+                hands.UnselectedHand.pickupIkConstraint.weight = 0f;
+            }
+
             item.transform.parent = hands.SelectedHand.handBone.transform;
 
             animatorController.Throw(hands.SelectedHand.handType);
