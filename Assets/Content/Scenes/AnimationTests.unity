@@ -1798,6 +1798,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0.012
       objectReference: {fileID: 0}
+    - target: {fileID: 2234961184112376321, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
+      propertyPath: lookAtTargetLocker
+      value: 
+      objectReference: {fileID: 903724399}
     - target: {fileID: 2450192892993335570, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
       propertyPath: _componentIndexCache
       value: 1

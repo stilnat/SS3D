@@ -39,6 +39,11 @@ public class DummyHands : MonoBehaviour
         
         Debug.Log($"Selected hand is {selectedHand}");
     }
+
+    public DummyItem GetItem(bool secondary, DummyHand hand)
+    {
+        return secondary ? GetOtherHand(hand.handType).item : hand.item;
+    }
 }
     
 }

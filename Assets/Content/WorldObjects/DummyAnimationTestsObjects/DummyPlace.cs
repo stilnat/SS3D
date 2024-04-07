@@ -129,8 +129,10 @@ namespace DummyStuff
             // Catch two hands holdable item in other hand with main hand, just freed.
             if (secondaryHand.Full && secondaryHand.item.canHoldTwoHand)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, true, itemReachDuration, false);
-                holdController.MovePickupAndHoldTargetLocker(mainHand, true);
+                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                    true, itemReachDuration, false);
+                holdController.MovePickupAndHoldTargetLocker(mainHand, true,
+                    hands.GetItem(true, mainHand));
 
                 yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.holdIkConstraint.weight = x, 0f, 1f, itemReachDuration / 2);
             }

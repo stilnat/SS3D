@@ -79,13 +79,15 @@ namespace DummyStuff
 
         private void SetUpPickup(DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands, DummyItem item)
         {
-            holdController.UpdateItemPositionConstraintAndRotation(mainHand, withTwoHands, 0f, false);
+            holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.item,
+                withTwoHands, 0f, false);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             mainHand.itemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            holdController.MovePickupAndHoldTargetLocker(mainHand, false);
+            holdController.MovePickupAndHoldTargetLocker(mainHand, false,
+                hands.GetItem(false, mainHand));
 
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(mainHand);
@@ -100,7 +102,8 @@ namespace DummyStuff
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                holdController.MovePickupAndHoldTargetLocker(secondaryHand, true);
+                holdController.MovePickupAndHoldTargetLocker(secondaryHand, true, 
+                    hands.GetItem(true,secondaryHand));
                 OrientTargetForHandRotation(secondaryHand);
                 secondaryHand.pickupIkConstraint.data.tipRotationWeight = 1f;
                 secondaryHand.holdIkConstraint.data.targetRotationWeight = 0f;
@@ -154,7 +157,8 @@ namespace DummyStuff
             // if an item held with two hands, change it with a single hand hold
             if (secondaryHand.Full && secondaryHand.item.canHoldTwoHand)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, false, itemMoveDuration, false);
+                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                    false, itemMoveDuration, false);
             }
 
             // Stop looking at item         

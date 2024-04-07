@@ -75,21 +75,24 @@ namespace DummyStuff
             DummyHand secondaryHand = hands.GetOtherHand(hands.SelectedHand.handType);
 
             if (mainHand.Full && secondaryHand.Empty && mainHand.item.canHoldTwoHand)
-                UpdateItemPositionConstraintAndRotation(mainHand, true, 0.5f, false);
+                UpdateItemPositionConstraintAndRotation(mainHand, mainHand.item,
+                    true, 0.5f, false);
             else if (mainHand.Full)
-                UpdateItemPositionConstraintAndRotation(mainHand, false, 0.5f, false);
+                UpdateItemPositionConstraintAndRotation(mainHand,mainHand.item,
+                    false, 0.5f, false);
 
             if (secondaryHand.Full && mainHand.Empty && secondaryHand.item.canHoldTwoHand)
-                UpdateItemPositionConstraintAndRotation(secondaryHand, true, 0.5f, false);
+                UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                    true, 0.5f, false);
             else if (secondaryHand.Full)
-                UpdateItemPositionConstraintAndRotation(secondaryHand, false, 0.5f, false);
+                UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                    false, 0.5f, false);
 
         }
 
-        public void UpdateItemPositionConstraintAndRotation(DummyHand hand, bool withTwoHands, float duration, bool toThrow)
+        public void UpdateItemPositionConstraintAndRotation(DummyHand hand, IHoldProvider item, bool withTwoHands,
+            float duration, bool toThrow)
         {
-            DummyItem item = hand.item;
-
             if (item == null)
                 return;
 
@@ -114,11 +117,9 @@ namespace DummyStuff
         }
 
 
-        public void MovePickupAndHoldTargetLocker(DummyHand hand, bool secondary)
+        public void MovePickupAndHoldTargetLocker(DummyHand hand, bool secondary, IHoldProvider holdProvider)
         {
-            DummyItem item = secondary ? hands.GetOtherHand(hand.handType).item : hand.item;
-
-            Transform parent = item.GetHold(!secondary, hand.handType);
+            Transform parent = holdProvider.GetHold(!secondary, hand.handType);
 
             hand.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
             hand.SetParentTransformTargetLocker(TargetLockerType.Hold, parent);

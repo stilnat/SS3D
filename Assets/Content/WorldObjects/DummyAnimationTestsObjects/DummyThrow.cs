@@ -165,14 +165,16 @@ namespace DummyStuff
         {
             isAiming = true;
             bodyAimRig.weight = 0.3f;
-            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand, false, 0.2f, true);
+            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
+                hands.SelectedHand.item, false, 0.2f, true);
         }
 
         private void StopAiming(DummyHand hand)
         {
             isAiming = false;
             bodyAimRig.weight = 0f;
-            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand, false, 0.2f, false);
+            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
+                hands.SelectedHand.item,false, 0.2f, false);
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)
