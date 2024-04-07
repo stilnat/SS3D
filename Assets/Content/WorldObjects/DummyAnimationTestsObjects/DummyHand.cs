@@ -9,7 +9,7 @@ namespace DummyStuff
 
 public class DummyHand : MonoBehaviour
 {
-    public DummyItem item;
+    private IHoldProvider _item;
 
     public HandType handType;
 
@@ -33,23 +33,25 @@ public class DummyHand : MonoBehaviour
 
     public Transform handBone;
 
-    public bool Full => item != null;
+    public IHoldProvider Item => _item;
 
-    public bool Empty => item == null;
+    public bool Full => _item != null;
+
+    public bool Empty => _item == null;
 
     public void RemoveItem()
     {
-        item.transform.parent = null;
-        item.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-        item.gameObject.GetComponent<Collider>().enabled = true;
-        item = null;
+        _item.GameObject.transform.parent = null;
+        _item.GameObject.GetComponent<Rigidbody>().isKinematic = false;
+        _item.GameObject.GetComponent<Collider>().enabled = true;
+        _item = null;
     }
 
-    public void AddItem(DummyItem itemAdded)
+    public void AddItem(IHoldProvider itemAdded)
     {
-        item = itemAdded;
-        item.GetComponent<Rigidbody>().isKinematic = true;
-        item.GetComponent<Collider>().enabled = false;
+        _item = itemAdded;
+        _item.GameObject.GetComponent<Rigidbody>().isKinematic = true;
+        _item.GameObject.GetComponent<Collider>().enabled = false;
     }
     
     public Transform ChooseTargetLocker(TargetLockerType type)

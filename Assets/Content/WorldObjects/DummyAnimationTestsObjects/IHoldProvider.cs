@@ -11,5 +11,15 @@ namespace DummyStuff
         public HandHoldType GetHoldThrowType(bool withTwoHands);
 
         public HandHoldType GetHoldType(bool withTwoHands, Intent intent);
+
+        public bool CanHoldTwoHand
+        {
+            get;
+        }
+
+        public GameObject GameObject
+        {
+            get;
+        }
     }
 }

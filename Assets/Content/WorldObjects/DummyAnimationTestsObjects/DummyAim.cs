@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.UIElements;
 
 namespace DummyStuff
 {
-    public class DummyAim : MonoBehaviour
+    public sealed class DummyAim : MonoBehaviour
     {
 
         public Transform aimTarget;
@@ -36,7 +33,7 @@ namespace DummyStuff
 
                 if (!isAiming)
                 {
-                    Aim(hands.SelectedHand, hands.SelectedHand.item.GetComponent<DummyGun>());
+                    Aim(hands.SelectedHand, hands.SelectedHand.Item.GameObject.GetComponent<DummyGun>());
                     isAiming = true;
                 }
 
@@ -55,7 +52,7 @@ namespace DummyStuff
             
 
             if (Input.GetKey(KeyCode.E) && hands.SelectedHand.Full 
-                && isAiming && hands.SelectedHand.item.TryGetComponent(out DummyGun gun))
+                && isAiming && hands.SelectedHand.Item.GameObject.TryGetComponent(out DummyGun gun))
             {
                 gun.GetComponent<DummyFire>().Fire();
             }
@@ -80,16 +77,16 @@ namespace DummyStuff
             if (!hand.Full)
                 return;
 
-            hand.item.transform.parent = hand.itemPositionTargetLocker;
-            holdController.UpdateItemPositionConstraintAndRotation(hand, hand.item,
+            hand.Item.GameObject.transform.parent = hand.itemPositionTargetLocker;
+            holdController.UpdateItemPositionConstraintAndRotation(hand, hand.Item,
                 true, 0.5f, false);
-            hand.item.transform.localPosition = Vector3.zero;
-            hand.item.transform.localRotation = Quaternion.identity;
+            hand.Item.GameObject.transform.localPosition = Vector3.zero;
+            hand.Item.GameObject.transform.localRotation = Quaternion.identity;
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)
         {
-            if (intents.intent == Intent.Harm && selectedHand.Full && selectedHand.item.TryGetComponent(out DummyGun gun))
+            if (intents.intent == Intent.Harm && selectedHand.Full && selectedHand.Item.GameObject.TryGetComponent(out DummyGun gun))
             {
                 canAim = true;
             }

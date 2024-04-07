@@ -66,7 +66,7 @@ namespace DummyStuff
 
             DummyHand secondaryHand = hands.GetOtherHand(hands.SelectedHand.handType);
 
-            bool withTwoHands = secondaryHand.Empty && item.canHoldTwoHand;
+            bool withTwoHands = secondaryHand.Empty && item.CanHoldTwoHand;
 
             hands.SelectedHand.AddItem(item);
 
@@ -79,7 +79,7 @@ namespace DummyStuff
 
         private void SetUpPickup(DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands, DummyItem item)
         {
-            holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.item,
+            holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item,
                 withTwoHands, 0f, false);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
@@ -155,9 +155,9 @@ namespace DummyStuff
             StartCoroutine(DummyTransformHelper.LerpTransform(item.transform, hands.SelectedHand.itemPositionTargetLocker, itemMoveDuration));
 
             // if an item held with two hands, change it with a single hand hold
-            if (secondaryHand.Full && secondaryHand.item.canHoldTwoHand)
+            if (secondaryHand.Full && secondaryHand.Item.CanHoldTwoHand)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
                     false, itemMoveDuration, false);
             }
 

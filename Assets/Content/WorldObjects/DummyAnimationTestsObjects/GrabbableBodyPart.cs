@@ -22,5 +22,9 @@ namespace DummyStuff
         {
             return handHold;
         }
+
+        public bool CanHoldTwoHand => true;
+
+        public GameObject GameObject => gameObject;
     }
 }

@@ -48,19 +48,18 @@ namespace DummyStuff
         {
             DummyHand mainHand = hands.SelectedHand;
             DummyHand secondaryHand = hands.GetOtherHand(mainHand.handType);
-            bool withTwoHands = secondaryHand.Empty && hands.SelectedHand.item.canHoldTwoHand;
+            bool withTwoHands = secondaryHand.Empty && hands.SelectedHand.Item.CanHoldTwoHand;
             Transform placeTarget = mainHand.placeTarget;
-            DummyItem item = mainHand.item;
+            GameObject item = mainHand.Item.GameObject;
 
             SetupPlace(placePosition, item, mainHand, secondaryHand, withTwoHands);
 
             yield return PlaceReach(mainHand, placeTarget, item);
 
             yield return PlaceAndPullBack(mainHand, secondaryHand, withTwoHands);
-
         }
 
-        private void SetupPlace(Vector3 placePosition, DummyItem item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
+        private void SetupPlace(Vector3 placePosition, GameObject item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
         {
             // Set up the position the item should be placed on
             hands.SelectedHand.placeTarget.position = placePosition + 0.2f * Vector3.up;
@@ -82,7 +81,7 @@ namespace DummyStuff
             lookAtTargetLocker.position = placePosition;
         }
 
-        private IEnumerator PlaceReach(DummyHand mainHand, Transform placeTarget, DummyItem item)
+        private IEnumerator PlaceReach(DummyHand mainHand, Transform placeTarget, GameObject item)
         {
             // Turn character toward the position to place the item.
             if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
@@ -127,9 +126,9 @@ namespace DummyStuff
             yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.holdIkConstraint.weight = x, 1f, 0f, itemReachDuration);
 
             // Catch two hands holdable item in other hand with main hand, just freed.
-            if (secondaryHand.Full && secondaryHand.item.canHoldTwoHand)
+            if (secondaryHand.Full && secondaryHand.Item.CanHoldTwoHand)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.item,
+                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
                     true, itemReachDuration, false);
                 holdController.MovePickupAndHoldTargetLocker(mainHand, true,
                     hands.GetItem(true, mainHand));

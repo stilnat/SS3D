@@ -30,9 +30,8 @@ namespace DummyStuff
         // need to define rotation too so 
         public Transform interactionPoint;
 
-        public bool canHoldTwoHand;
-
-        public bool canHoldOneHand;
+        [SerializeField]
+        private bool canHoldTwoHand;
 
         public HandHoldType GetHoldType(bool withTwoHands, Intent intent)
         {
@@ -52,6 +51,10 @@ namespace DummyStuff
 
             return singleHandHold;
         }
+
+        public bool CanHoldTwoHand => canHoldTwoHand;
+
+        public GameObject GameObject => gameObject;
 
         public Transform GetHold(bool primary, HandType handType)
         {

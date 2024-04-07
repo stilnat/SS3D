@@ -34,7 +34,8 @@ namespace DummyStuff
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             // Check if the ray hits any collider
-            if (Physics.Raycast(ray, out RaycastHit hit) && hands.SelectedHand.Full && UnderMaxDistanceFromHips(hit.point) && hands.SelectedHand.item.TryGetComponent(out DummyTool tool))
+            if (Physics.Raycast(ray, out RaycastHit hit) && hands.SelectedHand.Full && UnderMaxDistanceFromHips(hit.point) 
+                && hands.SelectedHand.Item.GameObject.TryGetComponent(out DummyTool tool))
             {
 
                 GameObject obj = hit.collider.gameObject;
@@ -46,7 +47,7 @@ namespace DummyStuff
 
         private IEnumerator Interact(Transform interactionTarget, DummyHand mainHand)
         {
-            DummyItem tool = hands.SelectedHand.item;
+            DummyTool tool = hands.SelectedHand.Item.GameObject.GetComponent<DummyTool>();
 
             // disable position constraint the time of the interaction
             mainHand.itemPositionConstraint.weight = 0f;
@@ -71,14 +72,14 @@ namespace DummyStuff
             Vector3 fromShoulderToTarget = (interactionTarget.transform.position - mainHand.upperArm.transform.position).normalized;
 
             // rotate the tool such that its interaction transform Z axis align with the fromShoulderToTarget vector.
-            Quaternion rotation = Quaternion.FromToRotation(tool.interactionPoint.TransformDirection(Vector3.forward), fromShoulderToTarget.normalized);
+            Quaternion rotation = Quaternion.FromToRotation(tool.InteractionPoint.TransformDirection(Vector3.forward), fromShoulderToTarget.normalized);
 
             // Apply the rotation to transform A
             tool.transform.rotation = rotation * tool.transform.rotation;
 
             // Calculate the difference between the tool position and its interaction point.
             // Warning : do it only after applying the rotation.
-            Vector3 difference = tool.interactionPoint.position - tool.transform.position;
+            Vector3 difference = tool.InteractionPoint.position - tool.transform.position;
 
             // Compute the desired position for the tool
             Vector3 endPosition = interactionTarget.position - difference;

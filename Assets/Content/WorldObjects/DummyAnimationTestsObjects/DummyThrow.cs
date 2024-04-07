@@ -68,19 +68,19 @@ namespace DummyStuff
 
         private IEnumerator Throw()
         {
-            DummyItem item = hands.SelectedHand.item;
+            IHoldProvider item = hands.SelectedHand.Item;
             hands.SelectedHand.itemPositionConstraint.weight = 0f;
             hands.SelectedHand.holdIkConstraint.weight = 0f;
             hands.SelectedHand.pickupIkConstraint.weight = 0f;
 
-            if (item.canHoldTwoHand && hands.UnselectedHand.Empty)
+            if (item.CanHoldTwoHand && hands.UnselectedHand.Empty)
             {
                 hands.UnselectedHand.itemPositionConstraint.weight = 0f;
                 hands.UnselectedHand.holdIkConstraint.weight = 0f;
                 hands.UnselectedHand.pickupIkConstraint.weight = 0f;
             }
 
-            item.transform.parent = hands.SelectedHand.handBone.transform;
+            item.GameObject.transform.parent = hands.SelectedHand.handBone.transform;
 
             animatorController.Throw(hands.SelectedHand.handType);
 
@@ -90,7 +90,7 @@ namespace DummyStuff
 
             Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, transform);
 
-            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, transform);
+            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.GameObject.transform.position, transform);
 
             Vector2 initialVelocity = ComputeInitialVelocity(timeToTarget, targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
 
@@ -105,7 +105,7 @@ namespace DummyStuff
                 initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * maxForce;
             }
 
-            item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
+            item.GameObject.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
 
             StopAiming(hands.SelectedHand);
         }
@@ -180,7 +180,7 @@ namespace DummyStuff
             isAiming = true;
             bodyAimRig.weight = 0.3f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
-                hands.SelectedHand.item, false, 0.2f, true);
+                hands.SelectedHand.Item, false, 0.2f, true);
         }
 
         private void StopAiming(DummyHand hand)
@@ -188,7 +188,7 @@ namespace DummyStuff
             isAiming = false;
             bodyAimRig.weight = 0f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
-                hands.SelectedHand.item,false, 0.2f, false);
+                hands.SelectedHand.Item,false, 0.2f, false);
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)
