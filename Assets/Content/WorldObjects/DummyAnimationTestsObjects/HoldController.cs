@@ -73,18 +73,28 @@ namespace DummyStuff
             DummyHand secondaryHand = hands.GetOtherHand(hands.SelectedHand.handType);
 
             if (mainHand.Full && secondaryHand.Empty && mainHand.Item.CanHoldTwoHand)
+            {
                 UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item,
                     true, 0.5f, false);
+            }
             else if (mainHand.Full)
+            {
                 UpdateItemPositionConstraintAndRotation(mainHand,mainHand.Item,
                     false, 0.5f, false);
+            }
+
 
             if (secondaryHand.Full && mainHand.Empty && secondaryHand.Item.CanHoldTwoHand)
+            {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
                     true, 0.5f, false);
+            }
             else if (secondaryHand.Full)
+            {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
                     false, 0.5f, false);
+
+            }
 
         }
 

@@ -22,9 +22,9 @@ namespace DummyStuff
 
         public float rotationSpeed = 5f;
 
-        private bool canAim;
+        private bool _canAim;
 
-        private bool isAiming;
+        private bool _isAiming;
 
         public HoldController holdController;
 
@@ -32,13 +32,13 @@ namespace DummyStuff
 
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             UpdateAimAbility(hands.SelectedHand);
 
-            if (canAim && Input.GetKeyDown(KeyCode.R))
+            if (_canAim && Input.GetKeyDown(KeyCode.R))
             {
-                if (!isAiming)
+                if (!_isAiming)
                 {
                     Aim();
                 }
@@ -48,7 +48,7 @@ namespace DummyStuff
                 }
             }
 
-            if (isAiming)
+            if (_isAiming)
             {
                 UpdateAimTargetPosition();
 
@@ -59,7 +59,7 @@ namespace DummyStuff
             }
 
 
-            if (Input.GetKeyDown(KeyCode.Y) && hands.SelectedHand.Full && isAiming)
+            if (Input.GetKeyDown(KeyCode.Y) && hands.SelectedHand.Full && _isAiming)
             {
                 StartCoroutine(Throw());
             }
@@ -177,7 +177,7 @@ namespace DummyStuff
 
         private void Aim()
         {
-            isAiming = true;
+            _isAiming = true;
             bodyAimRig.weight = 0.3f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
                 hands.SelectedHand.Item, false, 0.2f, true);
@@ -185,7 +185,7 @@ namespace DummyStuff
 
         private void StopAiming(DummyHand hand)
         {
-            isAiming = false;
+            _isAiming = false;
             bodyAimRig.weight = 0f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
                 hands.SelectedHand.Item,false, 0.2f, false);
@@ -195,11 +195,11 @@ namespace DummyStuff
         {
             if (selectedHand.Full)
             {
-                canAim = true;
+                _canAim = true;
             }
             else
             {
-                canAim = false;
+                _canAim = false;
             }
         }
     }

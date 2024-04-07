@@ -1,31 +1,40 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace DummyStuff
 {
     public class DummyItem : MonoBehaviour, IHoldProvider
     {
-        public HandHoldType singleHandHold;
+        [SerializeField]
+        private HandHoldType singleHandHold;
 
-        public HandHoldType twoHandHold;
+        [SerializeField]
+        private HandHoldType twoHandHold;
 
-        public HandHoldType singleHandHoldHarm;
+        [SerializeField]
+        private HandHoldType singleHandHoldHarm;
 
-        public HandHoldType twoHandHoldHarm;
+        [SerializeField]
+        private HandHoldType twoHandHoldHarm;
 
-        public HandHoldType singleHandHoldThrow;
+        [SerializeField]
+        private HandHoldType singleHandHoldThrow;
 
-        public HandHoldType twoHandHoldThrow;
+        [SerializeField]
+        private HandHoldType twoHandHoldThrow;
 
-        public Transform primaryRightHandHold;
+        [SerializeField]
+        private Transform primaryRightHandHold;
 
-        public Transform secondaryRightHandHold;
+        [SerializeField]
+        private Transform secondaryRightHandHold;
 
-        public Transform primaryLeftHandHold;
+        [SerializeField]
+        private Transform primaryLeftHandHold;
 
-        public Transform secondaryLeftHandHold;
+        [SerializeField]
+        private Transform secondaryLeftHandHold;
 
         [SerializeField]
         private bool canHoldTwoHand;
@@ -44,13 +53,12 @@ namespace DummyStuff
                     return singleHandHoldHarm;
             }
 
-            Debug.LogError("case not handled");
-
             return singleHandHold;
         }
 
         public bool CanHoldTwoHand => canHoldTwoHand;
 
+        [NotNull]
         public GameObject GameObject => gameObject;
 
         public Transform GetHold(bool primary, HandType handType)
@@ -72,13 +80,11 @@ namespace DummyStuff
 
         public HandHoldType GetHoldThrowType(bool withTwoHands)
         {
-            switch (withTwoHands)
+            return withTwoHands switch
             {
-                case true:
-                    return twoHandHoldThrow;
-                case false:
-                    return singleHandHoldThrow;
-            }
+                true => twoHandHoldThrow,
+                false => singleHandHoldThrow,
+            };
         }
     }
 }
