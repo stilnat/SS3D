@@ -27,9 +27,6 @@ namespace DummyStuff
 
         public Transform secondaryLeftHandHold;
 
-        // need to define rotation too so 
-        public Transform interactionPoint;
-
         [SerializeField]
         private bool canHoldTwoHand;
 

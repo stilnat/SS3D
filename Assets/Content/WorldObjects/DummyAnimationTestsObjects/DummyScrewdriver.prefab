@@ -167,13 +167,13 @@ MonoBehaviour:
   twoHandHold: 0
   singleHandHoldHarm: 5
   twoHandHoldHarm: 0
+  singleHandHoldThrow: 0
+  twoHandHoldThrow: 0
   primaryRightHandHold: {fileID: 867548239050694870}
   secondaryRightHandHold: {fileID: 0}
   primaryLeftHandHold: {fileID: 4634623118714090102}
   secondaryLeftHandHold: {fileID: 0}
-  interactionPoint: {fileID: 8794388886837492066}
   canHoldTwoHand: 0
-  canHoldOneHand: 0
 --- !u!114 &6401565894626157842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,6 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e2402d4e97e674f8b10465445380ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionPoint: {fileID: 8794388886837492066}
 --- !u!1 &2657778688565007629
 GameObject:
   m_ObjectHideFlags: 0
