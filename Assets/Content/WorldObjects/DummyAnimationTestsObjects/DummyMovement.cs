@@ -18,6 +18,10 @@ namespace DummyStuff
     {
         [SerializeField]
         private Rigidbody _rb;
+
+        [SerializeField]
+        private MovementType movementType;
+        
         /// <summary>
         /// Executes the movement code and updates the IK targets
         /// </summary>
@@ -28,7 +32,8 @@ namespace DummyStuff
             if (Input.magnitude != 0)
             {
                 MoveMovementTarget(Input);
-                RotatePlayerToMovement();
+                if(movementType == MovementType.Normal)
+                    RotatePlayerToMovement();
                 MovePlayer();
             }
             else
@@ -131,9 +136,14 @@ namespace DummyStuff
         /// <param name="movementInput"></param>
         protected void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
         {
-            //makes the movement align to the camera view
-            Vector3 newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
-
+            Vector3 newTargetMovement;
+            // in normal movement makes the movement align to the camera view.
+            // else align on the current player rotation.
+            if(movementType == MovementType.Normal)
+                newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
+            else
+                newTargetMovement = movementInput.y * Vector3.Cross(transform.right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, transform.forward).normalized;
+            
             // smoothly changes the target movement
             TargetMovement = Vector3.Lerp(TargetMovement, newTargetMovement, Time.deltaTime * (_lerpMultiplier * multiplier));
 
