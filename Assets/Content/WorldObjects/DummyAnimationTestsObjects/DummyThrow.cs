@@ -93,6 +93,8 @@ namespace DummyStuff
             hands.SelectedHand.RemoveItem();
 
             item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
+
+            StopAiming(hands.SelectedHand);
         }
 
         private Vector2 ComputeInitialVelocity(float timeToReachTarget, Vector2 targetCoordinates, float initialHeight, float initialHorizontalPosition)
