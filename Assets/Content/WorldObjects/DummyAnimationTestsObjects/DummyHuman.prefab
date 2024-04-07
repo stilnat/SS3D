@@ -4825,7 +4825,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animatorController: {fileID: 2643222421258484460}
   characterController: {fileID: 0}
-  movement: {fileID: 0}
+  movement: {fileID: 2500043470628789696}
 --- !u!114 &3711543053657384972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4843,6 +4843,7 @@ MonoBehaviour:
   animatorController: {fileID: 2643222421258484460}
   timeToTarget: 1
   aimTarget: {fileID: 0}
+  maxForce: 10
   rotationSpeed: 5
   holdController: {fileID: 304844770068834842}
   bodyAimRig: {fileID: 4182499762659887119}
@@ -4901,6 +4902,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rb: {fileID: 8635375509376998503}
+  movementType: 0
   _movementSpeed: 200
   _lerpMultiplier: 5
   _rotationLerpMultiplier: 5

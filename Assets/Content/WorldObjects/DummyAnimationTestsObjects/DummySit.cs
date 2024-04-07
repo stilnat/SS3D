@@ -9,15 +9,9 @@ namespace DummyStuff
 
         public DummyAnimatorController animatorController;
 
-        public CharacterController characterController;
-
         public DummyMovement movement;
 
-        // Start is called before the first frame update
-        void Start() { }
-
-        // Update is called once per frame
-        void Update()
+        private void Update()
         {
             if (!Input.GetKeyDown(KeyCode.J))
                 return;
@@ -55,7 +49,6 @@ namespace DummyStuff
         private IEnumerator Sit(Transform sitOrientation)
         {
             movement.enabled = false;
-            characterController.enabled = false;
 
             animatorController.Sit(true);
 
@@ -73,7 +66,6 @@ namespace DummyStuff
         private void StopSitting()
         {
             movement.enabled = true;
-            characterController.enabled = true;
             animatorController.Sit(false);
             GetComponent<DummyPositionController>().Position = PositionType.Standing;
         }
