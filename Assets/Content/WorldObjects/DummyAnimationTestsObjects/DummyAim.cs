@@ -1,3 +1,4 @@
+using Coimbra;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -86,7 +87,8 @@ namespace DummyStuff
 
         private void UpdateAimAbility(DummyHand selectedHand)
         {
-            if (intents.intent == Intent.Harm && selectedHand.Full && selectedHand.Item.GameObject.TryGetComponent(out DummyGun gun))
+            if (intents.Intent == Intent.Harm && selectedHand.Full
+                && selectedHand.Item.GameObject.HasComponent<DummyGun>())
             {
                 canAim = true;
             }

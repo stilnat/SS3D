@@ -107,7 +107,7 @@ namespace DummyStuff
             HandHoldType itemHoldType;
 
             if (!toThrow)
-                itemHoldType = item.GetHoldType(withTwoHands, intents.intent);
+                itemHoldType = item.GetHoldType(withTwoHands, intents.Intent);
             else
                 itemHoldType = item.GetHoldThrowType(withTwoHands);
 

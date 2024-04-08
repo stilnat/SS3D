@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class IntentController : MonoBehaviour
 {
-    public Intent intent;
+    private Intent _intent;
+
+    public Intent Intent => _intent;
 
     public event EventHandler<Intent> OnIntentChange;
     
@@ -15,10 +17,10 @@ public class IntentController : MonoBehaviour
         if (!Input.GetKeyDown(KeyCode.Space))
             return;
 
-        intent = intent == Intent.Def ? Intent.Harm : Intent.Def; 
+        _intent = _intent == Intent.Def ? Intent.Harm : Intent.Def; 
         
-        OnIntentChange?.Invoke(this, intent);
+        OnIntentChange?.Invoke(this, _intent);
         
-        Debug.Log($"Selected intent is {intent}");
+        Debug.Log($"Selected intent is {_intent}");
     }
 }

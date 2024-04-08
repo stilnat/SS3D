@@ -112,6 +112,11 @@ namespace DummyStuff
                     interactionMoveDuration, false, true));
             }
             
+            if (mainHand.handBone.transform.position.y - interactionTarget.transform.position.y > 0.3)
+            {
+                GetComponent<DummyAnimatorController>().Crouch(true);
+            }
+            
             yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.position = x,
                 startPosition, endPosition, interactionMoveDuration);
         }
@@ -125,10 +130,14 @@ namespace DummyStuff
             StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(x =>
                     tool.transform.localRotation = x, tool.transform.localRotation,
                 Quaternion.identity, 2 * interactionMoveDuration));
+            
+            GetComponent<DummyAnimatorController>().Crouch(false);
 
 
             yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.localPosition = x,
                 tool.transform.localPosition, Vector3.zero, 2 * interactionMoveDuration);
+            
+            
 
             tool.transform.localRotation = Quaternion.identity;
             mainHand.itemPositionConstraint.weight = 1f;
