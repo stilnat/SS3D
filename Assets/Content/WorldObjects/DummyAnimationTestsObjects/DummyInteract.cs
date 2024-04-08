@@ -48,7 +48,7 @@ namespace DummyStuff
 
             yield return new WaitForSeconds(0.6f);
 
-            yield return StopInteracting(interactionTarget, mainHand, tool);
+            yield return StopInteracting(mainHand, tool);
         }
 
         private void SetupInteract(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
@@ -121,7 +121,7 @@ namespace DummyStuff
                 startPosition, endPosition, interactionMoveDuration);
         }
 
-        private IEnumerator StopInteracting(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
+        private IEnumerator StopInteracting(DummyHand mainHand, DummyTool tool)
         {
             // Stop looking at item         
             StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x,
@@ -136,8 +136,6 @@ namespace DummyStuff
 
             yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.localPosition = x,
                 tool.transform.localPosition, Vector3.zero, 2 * interactionMoveDuration);
-            
-            
 
             tool.transform.localRotation = Quaternion.identity;
             mainHand.itemPositionConstraint.weight = 1f;
