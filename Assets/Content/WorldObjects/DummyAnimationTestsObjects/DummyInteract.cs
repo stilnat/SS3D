@@ -56,6 +56,7 @@ namespace DummyStuff
             // disable position constraint the time of the interaction
             mainHand.itemPositionConstraint.weight = 0f;
             mainHand.pickupIkConstraint.weight = 1f;
+            lookAtTargetLocker.position = tool.transform.position;
         }
 
         private void AlignToolWithShoulder(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
