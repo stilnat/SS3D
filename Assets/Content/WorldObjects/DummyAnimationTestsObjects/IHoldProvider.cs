@@ -8,9 +8,7 @@ namespace DummyStuff
     {
         public Transform GetHold(bool primary, HandType handType);
 
-        public HandHoldType GetHoldThrowType(bool withTwoHands);
-
-        public HandHoldType GetHoldType(bool withTwoHands, Intent intent);
+        public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow);
 
         public bool CanHoldTwoHand
         {

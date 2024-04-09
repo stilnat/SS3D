@@ -13,12 +13,7 @@ namespace DummyStuff
             return transform;
         }
 
-        public HandHoldType GetHoldThrowType(bool withTwoHands)
-        {
-            return handHold;
-        }
-
-        public HandHoldType GetHoldType(bool withTwoHands, Intent intent)
+        public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow)
         {
             return handHold;
         }

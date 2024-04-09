@@ -46,6 +46,9 @@ namespace DummyStuff
 
         private readonly List<HoldAndOffset> _holdData = new List<HoldAndOffset>();
 
+        [SerializeField]
+        private DummyThrow throwController;
+
         private void Start()
         {
             Debug.Log("start hold controller");
@@ -75,24 +78,24 @@ namespace DummyStuff
             if (mainHand.Full && secondaryHand.Empty && mainHand.Item.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item,
-                    true, 0.5f, false);
+                    true, 0.5f, throwController.IsAiming);
             }
             else if (mainHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(mainHand,mainHand.Item,
-                    false, 0.5f, false);
+                    false, 0.5f, throwController.IsAiming);
             }
 
 
             if (secondaryHand.Full && mainHand.Empty && secondaryHand.Item.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
-                    true, 0.5f, false);
+                    true, 0.5f, throwController.IsAiming);
             }
             else if (secondaryHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
-                    false, 0.5f, false);
+                    false, 0.5f, throwController.IsAiming);
 
             }
 
@@ -104,12 +107,7 @@ namespace DummyStuff
             if (item == null)
                 return;
 
-            HandHoldType itemHoldType;
-
-            if (!toThrow)
-                itemHoldType = item.GetHoldType(withTwoHands, intents.Intent);
-            else
-                itemHoldType = item.GetHoldThrowType(withTwoHands);
+            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, intents.Intent, toThrow);
 
             Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.handType);
 

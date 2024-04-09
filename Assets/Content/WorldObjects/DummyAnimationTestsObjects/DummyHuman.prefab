@@ -4752,6 +4752,7 @@ MonoBehaviour:
   throwToolboxRight: {fileID: 5020193951115866215}
   smallItemRight: {fileID: 7151404865513586269}
   smallItemLeft: {fileID: 7672624758370820705}
+  throwController: {fileID: 3711543053657384972}
 --- !u!114 &3292637383336994458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4842,6 +4843,7 @@ MonoBehaviour:
   rotationSpeed: 5
   holdController: {fileID: 304844770068834842}
   bodyAimRig: {fileID: 4182499762659887119}
+  intents: {fileID: 333363580064996929}
 --- !u!114 &1045397264392006938
 MonoBehaviour:
   m_ObjectHideFlags: 0

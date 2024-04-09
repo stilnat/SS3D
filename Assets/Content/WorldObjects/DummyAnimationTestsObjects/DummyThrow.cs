@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using Object = System.Object;
 
 namespace DummyStuff
 {
@@ -29,8 +30,14 @@ namespace DummyStuff
         public HoldController holdController;
 
         public Rig bodyAimRig;
+
+        [SerializeField]
+        private IntentController intents;
+
+        public bool IsAiming => _isAiming;
         
-        public event EventHandler<bool> OnAim; 
+        public event EventHandler<bool> OnAim;
+
 
 
         // Update is called once per frame
@@ -59,13 +66,11 @@ namespace DummyStuff
                     RotatePlayerTowardTarget();
                 }
             }
-
-
+            
             if (Input.GetKeyDown(KeyCode.Y) && hands.SelectedHand.Full && _isAiming)
             {
                 StartCoroutine(Throw());
             }
-
         }
 
         private IEnumerator Throw()
@@ -90,24 +95,7 @@ namespace DummyStuff
 
             yield return new WaitForSeconds(0.18f);
 
-            Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, transform);
-
-            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.GameObject.transform.position, transform);
-
-            Vector2 initialVelocity = ComputeInitialVelocity(timeToTarget, targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
-
-            Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
-
-            Vector3 initialVelocityInWorldCoordinate = transform.TransformDirection(initialVelocityInRootCoordinate);
-
-            hands.SelectedHand.RemoveItem();
-
-            if (initialVelocityInWorldCoordinate.magnitude > maxForce)
-            {
-                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * maxForce;
-            }
-
-            item.GameObject.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
+            AddForceToItem(item.GameObject);
 
             StopAiming(hands.SelectedHand);
         }
@@ -181,8 +169,13 @@ namespace DummyStuff
         {
             _isAiming = true;
             bodyAimRig.weight = 0.3f;
-            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
-                hands.SelectedHand.Item, false, 0.2f, true);
+
+            if (intents.Intent == Intent.Harm)
+            {
+                holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
+                    hands.SelectedHand.Item, false, 0.2f, true);
+            }
+            
             OnAim?.Invoke(this, true);
         }
 
@@ -205,6 +198,28 @@ namespace DummyStuff
             {
                 _canAim = false;
             }
+        }
+
+        private void AddForceToItem(GameObject item)
+        {
+            Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, transform);
+
+            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, transform);
+
+            Vector2 initialVelocity = ComputeInitialVelocity(timeToTarget, targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
+
+            Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
+
+            Vector3 initialVelocityInWorldCoordinate = transform.TransformDirection(initialVelocityInRootCoordinate);
+
+            hands.SelectedHand.RemoveItem();
+
+            if (initialVelocityInWorldCoordinate.magnitude > maxForce)
+            {
+                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * maxForce;
+            }
+
+            item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
         }
     }
 }

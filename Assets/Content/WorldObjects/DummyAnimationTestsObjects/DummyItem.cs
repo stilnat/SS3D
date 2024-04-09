@@ -39,7 +39,7 @@ namespace DummyStuff
         [SerializeField]
         private bool canHoldTwoHand;
 
-        public HandHoldType GetHoldType(bool withTwoHands, Intent intent)
+        public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow)
         {
             switch (intent, withTwoHands)
             {
@@ -48,9 +48,9 @@ namespace DummyStuff
                 case (Intent.Def, false):
                     return singleHandHold;
                 case (Intent.Harm, true):
-                    return twoHandHoldHarm;
+                    return toThrow ? twoHandHoldThrow : twoHandHoldHarm;
                 case (Intent.Harm, false):
-                    return singleHandHoldHarm;
+                    return toThrow ? singleHandHoldThrow : singleHandHoldHarm;
             }
 
             return singleHandHold;
@@ -76,15 +76,6 @@ namespace DummyStuff
                 default:
                     throw new ArgumentException();
             }
-        }
-
-        public HandHoldType GetHoldThrowType(bool withTwoHands)
-        {
-            return withTwoHands switch
-            {
-                true => twoHandHoldThrow,
-                false => singleHandHoldThrow,
-            };
         }
     }
 }
