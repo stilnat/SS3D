@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using InputSystem = SS3D.Systems.Inputs.InputSystem;
+using Object = System.Object;
 
 namespace DummyStuff
 {
@@ -32,8 +33,8 @@ namespace DummyStuff
             if (Input.magnitude != 0)
             {
                 MoveMovementTarget(Input);
-                if(movementType == MovementType.Normal)
-                    RotatePlayerToMovement();
+                if(movementType != MovementType.Aiming)
+                    RotatePlayerToMovement(movementType == MovementType.Dragging);
                 MovePlayer();
             }
             else
@@ -48,7 +49,7 @@ namespace DummyStuff
         /// </summary>
         protected void MovePlayer()
         {
-            _rb.velocity = TargetMovement * (_movementSpeed * Time.fixedDeltaTime);
+            _rb.velocity = targetMovement * (movementSpeed * Time.fixedDeltaTime);
         }
 
         public event Action<float> OnSpeedChangeEvent;
@@ -56,15 +57,15 @@ namespace DummyStuff
 
         [Header("Movement Settings")]
         [SerializeField]
-        private float _movementSpeed;
+        private float movementSpeed;
         [SerializeField]
-        private float _lerpMultiplier;
+        private float lerpMultiplier;
         [SerializeField]
-        private float _rotationLerpMultiplier;
+        private float rotationLerpMultiplier;
 
         [Header("Movement IK Targets")]
         [SerializeField]
-        private Transform _movementTarget;
+        private Transform movementTarget;
 
         [Header("Run/Walk")]
         private bool _isRunning;
@@ -73,15 +74,17 @@ namespace DummyStuff
         protected Vector3 AbsoluteMovement;
         protected Vector2 Input;
         protected Vector2 SmoothedInput;
-        public Vector3 TargetMovement;
+        
+        [SerializeField]
+        private Vector3 targetMovement;
 
         private Actor _camera;
         protected Controls.MovementActions MovementControls;
         protected Controls.HotkeysActions HotkeysControls;
         private InputSystem _inputSystem;
         
-        private const float _walkAnimatorValue = .3f;
-        private const float _runAnimatorValue = 1f;
+        private const float WalkAnimatorValue = .3f;
+        private const float RunAnimatorValue = 1f;
 
         protected override void OnStart()
         {
@@ -92,7 +95,7 @@ namespace DummyStuff
         protected override void OnDisabled()
         {
             base.OnDisabled();
-            TargetMovement = Vector3.zero;
+            targetMovement = Vector3.zero;
         }
 
         private void Setup()
@@ -109,7 +112,21 @@ namespace DummyStuff
             _inputSystem.ToggleActionMap(MovementControls, true);
             _inputSystem.ToggleActionMap(HotkeysControls, true);
 
+            GetComponent<DummyThrow>().OnAim += HandleAimChange;
+            GetComponent<DummyAim>().OnAim += HandleAimChange;
+            GetComponent<Grab>().OnGrab += HandleGrabChange;
+
             AddHandle(FixedUpdateEvent.AddListener(HandleFixedUpdate));
+        }
+
+        private void HandleAimChange(Object sender, bool aim)
+        {
+            movementType = aim ? MovementType.Aiming : MovementType.Normal;
+        }
+
+        private void HandleGrabChange(Object sender, bool grab)
+        {
+            movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
         protected override void OnDestroyed()
@@ -139,27 +156,34 @@ namespace DummyStuff
             Vector3 newTargetMovement;
             // in normal movement makes the movement align to the camera view.
             // else align on the current player rotation.
-            if(movementType == MovementType.Normal)
-                newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
+            if (movementType != MovementType.Aiming)
+            {
+                newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized
+                    + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
+            }
             else
-                newTargetMovement = movementInput.y * Vector3.Cross(transform.right, Vector3.up).normalized + movementInput.x * Vector3.Cross(Vector3.up, transform.forward).normalized;
-            
+            {
+                newTargetMovement = movementInput.y * Vector3.Cross(transform.right, Vector3.up).normalized 
+                    + movementInput.x * Vector3.Cross(Vector3.up, transform.forward).normalized;
+            }
+               
             // smoothly changes the target movement
-            TargetMovement = Vector3.Lerp(TargetMovement, newTargetMovement, Time.deltaTime * (_lerpMultiplier * multiplier));
+            targetMovement = Vector3.Lerp(targetMovement, newTargetMovement,
+                Time.deltaTime * (lerpMultiplier * multiplier));
 
-            Vector3 resultingMovement = TargetMovement + Position;
+            Vector3 resultingMovement = targetMovement + Position;
             AbsoluteMovement = resultingMovement;
-            _movementTarget.position = AbsoluteMovement;
+            movementTarget.position = AbsoluteMovement;
         }
 
         /// <summary>
         /// Rotates the player to the target movement
         /// </summary>
-        protected void RotatePlayerToMovement()
+        protected void RotatePlayerToMovement(bool lookOpposite)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(TargetMovement);
-
-            transform.rotation = Quaternion.Slerp(Rotation, lookRotation, Time.deltaTime * _rotationLerpMultiplier);
+            Quaternion lookRotation = Quaternion.LookRotation(lookOpposite ? -targetMovement : targetMovement);
+            transform.rotation = Quaternion.Slerp(Rotation, lookRotation, 
+                Time.deltaTime * rotationLerpMultiplier);
         }
 
         /// <summary>
@@ -174,14 +198,14 @@ namespace DummyStuff
             float inputFilteredSpeed = FilterSpeed();
 
             Input = Vector2.ClampMagnitude(new Vector2(x, y), inputFilteredSpeed);
-            SmoothedInput = Vector2.Lerp(SmoothedInput, Input, Time.deltaTime * (_lerpMultiplier / 10));
+            SmoothedInput = Vector2.Lerp(SmoothedInput, Input, Time.deltaTime * (lerpMultiplier / 10));
 
             OnSpeedChanged(Input.magnitude != 0 ? inputFilteredSpeed : 0);
         }
 
         protected virtual float FilterSpeed()
         {
-            return _isRunning ? _runAnimatorValue : _walkAnimatorValue;
+            return _isRunning ? RunAnimatorValue : WalkAnimatorValue;
         }
 
         /// <summary>

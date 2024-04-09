@@ -1,4 +1,5 @@
 using DummyStuff;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,6 +36,8 @@ public class Grab : MonoBehaviour
     private Transform lookAtTargetLocker;
     
     public MultiAimConstraint lookAtConstraint;
+    
+    public event EventHandler<bool> OnGrab; 
 
     void Update()
     {
@@ -98,6 +101,7 @@ public class Grab : MonoBehaviour
             //grabbedObject.transform.parent = null;
             grabbedObject = null;
             
+            OnGrab?.Invoke(this, false);
         }
     }
 
@@ -149,6 +153,7 @@ public class Grab : MonoBehaviour
             1f, 0f, itemMoveDuration);
     
         Debug.Log("Grabbed object is " + grabbedObject.name);
+        OnGrab?.Invoke(this, true);
         
     }
     

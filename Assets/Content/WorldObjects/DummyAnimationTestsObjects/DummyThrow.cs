@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -10,7 +11,6 @@ namespace DummyStuff
     public class DummyThrow : MonoBehaviour
     {
         public DummyHands hands;
-        public IntentController intents;
         public DummyAnimatorController animatorController;
 
         public float timeToTarget = 1f;
@@ -29,6 +29,8 @@ namespace DummyStuff
         public HoldController holdController;
 
         public Rig bodyAimRig;
+        
+        public event EventHandler<bool> OnAim; 
 
 
         // Update is called once per frame
@@ -181,6 +183,7 @@ namespace DummyStuff
             bodyAimRig.weight = 0.3f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
                 hands.SelectedHand.Item, false, 0.2f, true);
+            OnAim?.Invoke(this, true);
         }
 
         private void StopAiming(DummyHand hand)
@@ -189,6 +192,7 @@ namespace DummyStuff
             bodyAimRig.weight = 0f;
             holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
                 hands.SelectedHand.Item,false, 0.2f, false);
+            OnAim?.Invoke(this, false);
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)

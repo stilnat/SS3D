@@ -4679,7 +4679,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6371626722efc843ba2622b9a6d7d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
   handType: 0
   handHoldTargetLocker: {fileID: 0}
   pickupTargetLocker: {fileID: 0}
@@ -4703,7 +4702,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6371626722efc843ba2622b9a6d7d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
   handType: 1
   handHoldTargetLocker: {fileID: 0}
   pickupTargetLocker: {fileID: 0}
@@ -4727,7 +4725,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6af52064ed47940b6006e55ae72e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  intent: 0
 --- !u!114 &304844770068834842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4838,7 +4835,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hands: {fileID: 4366303252165034965}
-  intents: {fileID: 333363580064996929}
   animatorController: {fileID: 2643222421258484460}
   timeToTarget: 1
   aimTarget: {fileID: 0}
@@ -4902,11 +4898,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rb: {fileID: 8635375509376998503}
   movementType: 0
-  _movementSpeed: 200
-  _lerpMultiplier: 5
-  _rotationLerpMultiplier: 5
-  _movementTarget: {fileID: 5029736816765645950}
-  TargetMovement: {x: 0, y: 0, z: 0}
+  movementSpeed: 150
+  lerpMultiplier: 5
+  rotationLerpMultiplier: 5
+  movementTarget: {fileID: 5029736816765645950}
+  targetMovement: {x: 0, y: 0, z: 0}
 --- !u!114 &6753548122926751948
 MonoBehaviour:
   m_ObjectHideFlags: 0

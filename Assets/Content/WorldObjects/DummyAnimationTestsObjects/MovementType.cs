@@ -8,5 +8,6 @@ namespace DummyStuff
     {
         Normal,
         Aiming,
+        Dragging,
     }
 }

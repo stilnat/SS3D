@@ -1,4 +1,5 @@
 using Coimbra;
+using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -22,6 +23,8 @@ namespace DummyStuff
         public bool canAim;
 
         public bool isAiming;
+        
+        public event EventHandler<bool> OnAim; 
 
 
         private void Update()
@@ -42,8 +45,6 @@ namespace DummyStuff
                 {
                     RotatePlayerTowardTarget();
                 }
-
-
             }
             else if (isAiming && (!canAim || !Input.GetMouseButton(1)))
             {
@@ -68,6 +69,7 @@ namespace DummyStuff
             // position correctly the gun on the shoulder, assuming the rifle butt transform is defined correctly
             gun.transform.localPosition = -gun.rifleButt.localPosition;
             gun.transform.localRotation = Quaternion.identity;
+            OnAim?.Invoke(this, true);
         }
 
         private void StopAiming(DummyHand hand)
@@ -83,6 +85,7 @@ namespace DummyStuff
                 true, 0.5f, false);
             hand.Item.GameObject.transform.localPosition = Vector3.zero;
             hand.Item.GameObject.transform.localRotation = Quaternion.identity;
+            OnAim?.Invoke(this, false);
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)
