@@ -14,14 +14,18 @@ namespace DummyStuff
         public DummyHands hands;
         public DummyAnimatorController animatorController;
 
-        public float timeToTarget = 1f;
-
         public Transform aimTarget;
 
         [SerializeField]
-        private float maxForce = 10;
+        private float maxForce = 20;
 
         public float rotationSpeed = 5f;
+
+        [SerializeField]
+        private float secondPerMeterFactorDef = 0.22f;
+        
+        [SerializeField]
+        private float secondPerMeterFactorHarm = 0.15f;
 
         private bool _canAim;
 
@@ -206,7 +210,8 @@ namespace DummyStuff
 
             Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, transform);
 
-            Vector2 initialVelocity = ComputeInitialVelocity(timeToTarget, targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
+            Vector2 initialVelocity = ComputeInitialVelocity( ComputeTimeToReach(intents.Intent, aimTarget.position),
+                targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
 
             Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
 
@@ -220,6 +225,14 @@ namespace DummyStuff
             }
 
             item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
+        }
+
+        private float ComputeTimeToReach(Intent intent, Vector3 targetPosition)
+        {
+            float distanceToTarget = Vector3.Distance(targetPosition, transform.position);
+
+            return intent == Intent.Def ? 
+                distanceToTarget * secondPerMeterFactorDef : distanceToTarget * secondPerMeterFactorHarm;
         }
     }
 }
