@@ -2,12 +2,9 @@ using Coimbra.Services.Events;
 using Coimbra.Services.PlayerLoopEvents;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Systems.Entities;
 using SS3D.Systems.Inputs;
 using SS3D.Systems.Screens;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using InputSystem = SS3D.Systems.Inputs.InputSystem;
@@ -18,7 +15,10 @@ namespace DummyStuff
     public class DummyMovement : Actor
     {
         [SerializeField]
-        private Rigidbody _rb;
+        private Rigidbody rb;
+        
+        [SerializeField]
+        private Transform aimTarget;
 
         [SerializeField]
         private MovementType movementType;
@@ -49,7 +49,7 @@ namespace DummyStuff
         /// </summary>
         protected void MovePlayer()
         {
-            _rb.velocity = targetMovement * (movementSpeed * Time.fixedDeltaTime);
+            rb.velocity = targetMovement * (movementSpeed * Time.fixedDeltaTime);
         }
 
         public event Action<float> OnSpeedChangeEvent;
@@ -85,6 +85,9 @@ namespace DummyStuff
         
         private const float WalkAnimatorValue = .3f;
         private const float RunAnimatorValue = 1f;
+
+        [SerializeField]
+        private float aimRotationSpeed = 5f;
 
         protected override void OnStart()
         {
@@ -220,5 +223,20 @@ namespace DummyStuff
         {
             OnSpeedChangeEvent?.Invoke(speed);
         }
+        
+        public void RotatePlayerTowardTarget()
+        {
+            // Get the direction to the target
+            Vector3 direction = aimTarget.position - transform.position;
+            direction.y = 0f; // Ignore Y-axis rotation
+
+            // Rotate towards the target
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, aimRotationSpeed * Time.deltaTime);
+            }
+        }
+
     }
 }

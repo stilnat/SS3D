@@ -1810,6 +1810,10 @@ PrefabInstance:
       propertyPath: _networkObjectCache
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2500043470628789696, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
+      propertyPath: aimTarget
+      value: 
+      objectReference: {fileID: 626415437}
     - target: {fileID: 2532537050071209971, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
       propertyPath: m_Data.m_Target
       value: 
@@ -1950,14 +1954,6 @@ PrefabInstance:
       propertyPath: m_Data.m_SourceObjects.m_Item0.transform
       value: 
       objectReference: {fileID: 350909787}
-    - target: {fileID: 3966220969826696441, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3966220969826696441, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
-      propertyPath: m_RigLayers.Array.size
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 3980859623627161711, guid: 808d5d9aee52e894d8343dc57568a2fe, type: 3}
       propertyPath: _componentIndexCache
       value: 4

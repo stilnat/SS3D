@@ -25,6 +25,9 @@ namespace DummyStuff
         public bool isAiming;
         
         public event EventHandler<bool> OnAim; 
+        
+        [SerializeField]
+        private DummyMovement movementController;
 
 
         private void Update()
@@ -43,7 +46,7 @@ namespace DummyStuff
 
                 if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
                 {
-                    RotatePlayerTowardTarget();
+                    movementController.RotatePlayerTowardTarget();
                 }
             }
             else if (isAiming && (!canAim || !Input.GetMouseButton(1)))
@@ -112,21 +115,5 @@ namespace DummyStuff
                 aimTarget.position = hit.point;
             }
         }
-
-        private void RotatePlayerTowardTarget()
-        {
-            // Get the direction to the target
-            Vector3 direction = aimTarget.position - transform.position;
-            direction.y = 0f; // Ignore Y-axis rotation
-
-            // Rotate towards the target
-            if (direction != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-        }
-
-
     }
 }

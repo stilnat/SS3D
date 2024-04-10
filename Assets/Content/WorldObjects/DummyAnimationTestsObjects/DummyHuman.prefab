@@ -4809,6 +4809,7 @@ MonoBehaviour:
   rotationSpeed: 5
   canAim: 0
   isAiming: 0
+  movementController: {fileID: 2500043470628789696}
 --- !u!114 &534476557379109011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4837,9 +4838,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hands: {fileID: 4366303252165034965}
   animatorController: {fileID: 2643222421258484460}
+  movementController: {fileID: 2500043470628789696}
   aimTarget: {fileID: 0}
   maxForce: 20
-  rotationSpeed: 5
   secondPerMeterFactorDef: 0.25
   secondPerMeterFactorHarm: 0.15
   holdController: {fileID: 304844770068834842}
@@ -4899,13 +4900,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff1cde6195234ca4b97074ecccdda0b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rb: {fileID: 8635375509376998503}
+  rb: {fileID: 8635375509376998503}
+  aimTarget: {fileID: 0}
   movementType: 0
   movementSpeed: 150
   lerpMultiplier: 5
   rotationLerpMultiplier: 5
   movementTarget: {fileID: 5029736816765645950}
   targetMovement: {x: 0, y: 0, z: 0}
+  aimRotationSpeed: 5
 --- !u!114 &6753548122926751948
 MonoBehaviour:
   m_ObjectHideFlags: 0

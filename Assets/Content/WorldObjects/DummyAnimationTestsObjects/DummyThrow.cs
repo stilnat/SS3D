@@ -14,12 +14,14 @@ namespace DummyStuff
         public DummyHands hands;
         public DummyAnimatorController animatorController;
 
-        public Transform aimTarget;
+        [SerializeField]
+        private DummyMovement movementController;
+        
+        [SerializeField]
+        private Transform aimTarget;
 
         [SerializeField]
         private float maxForce = 20;
-
-        public float rotationSpeed = 5f;
 
         [SerializeField]
         private float secondPerMeterFactorDef = 0.22f;
@@ -42,6 +44,8 @@ namespace DummyStuff
         
         public event EventHandler<bool> OnAim;
 
+        
+        
 
 
         // Update is called once per frame
@@ -67,7 +71,7 @@ namespace DummyStuff
 
                 if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
                 {
-                    RotatePlayerTowardTarget();
+                    movementController.RotatePlayerTowardTarget();
                 }
             }
             
@@ -154,21 +158,7 @@ namespace DummyStuff
                 aimTarget.position = hit.point;
             }
         }
-
-        private void RotatePlayerTowardTarget()
-        {
-            // Get the direction to the target
-            Vector3 direction = aimTarget.position - transform.position;
-            direction.y = 0f; // Ignore Y-axis rotation
-
-            // Rotate towards the target
-            if (direction != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-        }
-
+        
         private void Aim()
         {
             _isAiming = true;
