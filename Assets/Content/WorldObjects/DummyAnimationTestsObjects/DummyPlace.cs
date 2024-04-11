@@ -36,10 +36,12 @@ namespace DummyStuff
         {
             // Cast a ray from the mouse position into the scene
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
+            
+            Debug.DrawRay(ray.origin, ray.direction, Color.red, 2f);
             // Check if the ray hits any collider
             if (Physics.Raycast(ray, out RaycastHit hit) && UnderMaxDistanceFromHips(hit.point))
             {
+                Debug.Log(hit.point);
                 StartCoroutine(Place(hit.point));
             }
         }
