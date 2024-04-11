@@ -156,19 +156,8 @@ namespace DummyStuff
         /// <param name="movementInput"></param>
         protected void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
         {
-            Vector3 newTargetMovement;
-            // in normal movement makes the movement align to the camera view.
-            // else align on the current player rotation.
-            if (movementType != MovementType.Aiming)
-            {
-                newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized
-                    + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
-            }
-            else
-            {
-                newTargetMovement = movementInput.y * Vector3.Cross(transform.right, Vector3.up).normalized 
-                    + movementInput.x * Vector3.Cross(Vector3.up, transform.forward).normalized;
-            }
+            Vector3 newTargetMovement = movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized
+                + movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized;
                
             // smoothly changes the target movement
             targetMovement = Vector3.Lerp(targetMovement, newTargetMovement,
