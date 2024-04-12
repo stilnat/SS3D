@@ -7,6 +7,8 @@ namespace SS3D.Systems.Entities.Data
         public static class Humanoid
         {
             public static readonly int MovementSpeed = Animator.StringToHash("Speed");
+            public static readonly int StartMoving = Animator.StringToHash("StartMoving");
+            public static readonly int EndMoving = Animator.StringToHash("EndMoving");
         }
 
         public static class Silicon
