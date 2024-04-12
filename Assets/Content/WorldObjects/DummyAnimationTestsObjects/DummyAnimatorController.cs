@@ -17,6 +17,11 @@ namespace DummyStuff
         [SerializeField]
         private float _lerpMultiplier;
 
+        private bool _startMoving = false;
+        private bool _endMoving = false;
+            
+        private bool _wasMovingPreviousUpdate = false;
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -32,11 +37,18 @@ namespace DummyStuff
         private void UpdateMovement(float speed)
         {
             bool isMoving = speed != 0;
+            _startMoving = isMoving && !_wasMovingPreviousUpdate;
+            _endMoving = !isMoving && _wasMovingPreviousUpdate;
+            
             float currentSpeed = _animator.GetFloat(Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
 
             _animator.SetFloat(Animations.Humanoid.MovementSpeed, speed);
+            if(_startMoving) _animator.SetTrigger(Animations.Humanoid.StartMoving);
+            if(_endMoving) _animator.SetTrigger(Animations.Humanoid.EndMoving);
+
+            _wasMovingPreviousUpdate = isMoving;
         }
 
         public void TriggerPickUp()

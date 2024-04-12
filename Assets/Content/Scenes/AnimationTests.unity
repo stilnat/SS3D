@@ -352,6 +352,8 @@ MonoBehaviour:
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/UnboltedGirder.prefab
   - _gameObject: {fileID: 2205958948406458853}
     _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/RagdollHuman.prefab
+  - _gameObject: {fileID: 738746534}
+    _prefab: Assets/Content/WorldObjects/DummyAnimationTestsObjects/Medkit.prefab
 --- !u!4 &299826985
 Transform:
   m_ObjectHideFlags: 11
@@ -654,6 +656,68 @@ Transform:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6226623702120799867, guid: efb33bc648a1e614eb0af7d290a10461, type: 3}
   m_PrefabInstance: {fileID: 508819864}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &738746533
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.821
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.198
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224735173051271293, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1121835539888859953, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+      propertyPath: m_Name
+      value: Medkit
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+--- !u!1 &738746534 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1121835539888859953, guid: dceec64367f0f7749b49faf42b98df04, type: 3}
+  m_PrefabInstance: {fileID: 738746533}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &747552766 stripped
 GameObject:
