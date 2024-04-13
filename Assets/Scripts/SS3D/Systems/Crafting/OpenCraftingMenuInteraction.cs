@@ -9,7 +9,6 @@ using UnityEngine;
 
 public class OpenCraftingMenuInteraction : Interaction
 {
-
     private CraftingInteractionType _craftingInteractionType;
 
     public OpenCraftingMenuInteraction(CraftingInteractionType craftingInteraction)
@@ -17,11 +16,8 @@ public class OpenCraftingMenuInteraction : Interaction
         _craftingInteractionType = craftingInteraction;
     }
 
-    public override string GetGenericName()
-    {
-        return "Open crafting menu";
-    }
-
+    public override string GetGenericName() => "Open crafting menu";
+    
     /// <summary>
     /// Gets the name when interacted with a source
     /// </summary>
@@ -50,9 +46,9 @@ public class OpenCraftingMenuInteraction : Interaction
         if (!Subsystems.TryGet(out CraftingSystem craftingSystem)) return false;
 
         bool recipesAvailable = true;
-
+        
         recipesAvailable &= craftingSystem.AvailableRecipeLinks(_craftingInteractionType, interactionEvent,
-            out List<TaggedEdge<RecipeStep, RecipeStepLink>> availableRecipes);
+            out List<TaggedEdge<RecipeStep, RecipeStepLink>> _);
 
         return recipesAvailable;
     }
@@ -65,13 +61,9 @@ public class OpenCraftingMenuInteraction : Interaction
     /// <returns>If the interaction should continue running</returns>
     public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
     {
-
         Subsystems.TryGet(out CraftingSystem craftingSystem);
-
         List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, _craftingInteractionType);
-
         ViewLocator.Get<CraftingMenu>().First().DisplayMenu(craftingInteractions, interactionEvent, reference, _craftingInteractionType);
-
         return true;
     }
 
@@ -80,8 +72,5 @@ public class OpenCraftingMenuInteraction : Interaction
     /// </summary>
     /// <param name="interactionEvent">The source used in the interaction</param>
     /// <param name="reference"></param>
-    public virtual void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
-    {
-        return;
-    }
+    public virtual void Cancel(InteractionEvent interactionEvent, InteractionReference reference) { }
 }

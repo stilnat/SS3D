@@ -23,8 +23,7 @@ namespace SS3D.Systems.Crafting
         /// The target of the recipe, which is the item on which the player must click to get the crafting interactions.
         /// </summary>
         public WorldObjectAssetReference Target => _target;
-
-
+        
         /// <summary>
         /// A bunch of recipe steps, representing each steps of the recipe.
         /// </summary>
@@ -79,14 +78,13 @@ namespace SS3D.Systems.Crafting
 
                 if (stepFromFound && stepToFound)
                 {
-                    _recipeGraph.AddEdge(new TaggedEdge<RecipeStep, RecipeStepLink>(stepFrom, stepTo, link));
+                    _recipeGraph.AddEdge(new(stepFrom, stepTo, link));
                 }
                 else
                 {
                     Log.Error(this, $"step with name {link.From} or step with name {link.To} not found in recipe {name}");
                 }
             }
-
         }
 
         /// <summary>
@@ -95,7 +93,7 @@ namespace SS3D.Systems.Crafting
         /// <returns></returns>
         public bool TryGetStep(string name, out RecipeStep step)
         {
-            if(_recipeGraph == null)
+            if (_recipeGraph == null)
             {
                 Log.Error(this, "recipe graph should not be null");
                 step = null;
@@ -112,11 +110,10 @@ namespace SS3D.Systems.Crafting
         /// <returns></returns>
         public List<TaggedEdge<RecipeStep, RecipeStepLink>> GetLinksFromStep(string name)
         {
-            if (!TryGetStep(name, out RecipeStep step)) return new List<TaggedEdge<RecipeStep, RecipeStepLink>>();
+            if (!TryGetStep(name, out RecipeStep step)) return new();
             _recipeGraph.TryGetOutEdges(step, out IEnumerable<TaggedEdge<RecipeStep, RecipeStepLink>> results);
             return results.ToList();
         }
     }
-        
 }
 

@@ -29,7 +29,6 @@ namespace SS3D.Systems.Crafting
 
     public sealed class CraftingSystem : NetworkSystem
     {
-
         /// <summary>
         /// First string is the id of the target object of the recipe (as the WorldObjectAssetReference's id).
         /// The value is a list of craftingRecipe, for which the target is the key.
@@ -64,10 +63,9 @@ namespace SS3D.Systems.Crafting
         {
             AssetDatabase recipesDataBase = Assets.GetDatabase(AssetDatabases.CraftingRecipes);
 
-            if (recipesDataBase == null)
+            if (!recipesDataBase)
             {
                 Log.Error(this, "recipeDatabase is null, please fix the crafting recipe database");
-
                 return;
             }
 
@@ -79,8 +77,7 @@ namespace SS3D.Systems.Crafting
 
                     continue;
                 }
-
-
+                
                 _recipeOrganiser.TryAdd(recipe.Target.Id, new List<CraftingRecipe>());
                 _recipeOrganiser[recipe.Target.Id].Add(recipe);
             }
@@ -91,19 +88,18 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         private bool TryGetRecipeLinks(CraftingInteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
         {
-            links = new List<TaggedEdge<RecipeStep, RecipeStepLink>>();
+            links = new();
 
             if (!target.TryGetComponent(out IWorldObjectAsset targetAssetReference)) return false;
-
-            string currentStepName = CurrentStepName(target);
-
+            
             if (!_recipeOrganiser.TryGetValue(targetAssetReference.Asset.Id, out List<CraftingRecipe> recipes))
             {
                 Log.Information(this, $"no recipes with target's name {targetAssetReference.Asset.Id}");
                 return false;
             }
-
-            foreach(CraftingRecipe potentialRecipe in recipes)
+            
+            string currentStepName = CurrentStepName(target);
+            foreach (CraftingRecipe potentialRecipe in recipes)
             {
                 List<TaggedEdge<RecipeStep, RecipeStepLink>> potentialLinks =  potentialRecipe.GetLinksFromStep(currentStepName);
 
@@ -116,7 +112,7 @@ namespace SS3D.Systems.Crafting
                 }
             }
 
-            if(links.Count == 0) 
+            if (links.Count == 0) 
             {
                 Log.Information(this, $"no recipe links matching interaction type {interactionType}, from recipe step {currentStepName} ");
             }
@@ -130,14 +126,10 @@ namespace SS3D.Systems.Crafting
         private List<IRecipeIngredient> GetIngredientsToConsume(InteractionEvent interactionEvent, TaggedEdge<RecipeStep, RecipeStepLink> link)
         {
             List<IRecipeIngredient> closeItemsFromTarget = GetCloseItemsFromTarget(interactionEvent.Target.GetGameObject());
-
             closeItemsFromTarget = link.Tag?.ApplyIngredientConditions(closeItemsFromTarget);
-
             closeItemsFromTarget = BuildListOfItemToConsume(closeItemsFromTarget, link.Tag);
-
             return closeItemsFromTarget;
         }
-
 
         /// <summary>
         /// Using a target item, and a list of item to consume, it despawn everything and 
@@ -147,11 +139,8 @@ namespace SS3D.Systems.Crafting
         public void Craft(CraftingInteraction interaction, InteractionEvent interactionEvent)
         {
             TaggedEdge<RecipeStep, RecipeStepLink> link = interaction.ChosenLink;
-
             if (!CanCraftRecipeLink(interactionEvent, link))  return;
-
             List<IRecipeIngredient> ingredients = GetIngredientsToConsume(interactionEvent, link);
-
             IRecipeIngredient recipeTarget = interactionEvent.Target.GetGameObject().GetComponent<IRecipeIngredient>();
 
             switch (link.Target.IsTerminal)
@@ -169,7 +158,7 @@ namespace SS3D.Systems.Crafting
                     break;
             }
 
-            if(link.Target.TryGetResult(out WorldObjectAssetReference result))
+            if (link.Target.TryGetResult(out WorldObjectAssetReference result))
             {
                 GameObject resultInstance;
 
@@ -178,15 +167,19 @@ namespace SS3D.Systems.Crafting
                     Log.Error(this, $"world object reference {result} has no prefab associated, returning");
                     return;
                 }
-
+                
                 if (link.Target.CustomCraft)
+                {
                     resultInstance = result.Prefab.GetComponent<ICraftable>()?.Craft(interaction, interactionEvent);
+                }
                 else
+                {
                     resultInstance = DefaultCraft(interaction, interactionEvent, result.Prefab, link.Target);
+                }
 
                 if (link.Tag != null && link.Tag.ModifyResult)
                 {
-                    if (resultInstance == null)
+                    if (!resultInstance)
                     {
                         Log.Error(this, "could not craft an instance for the recipe result");
 
@@ -202,7 +195,7 @@ namespace SS3D.Systems.Crafting
                 return;
             }
 
-            foreach(GameObject prefab in link.Tag.SecondaryResults.Select(x => x.Prefab).ToList())
+            foreach (GameObject prefab in link.Tag.SecondaryResults.Select(x => x.Prefab).ToList())
             {
                   DefaultCraft(interaction, interactionEvent, prefab, link.Target);
             }
@@ -285,11 +278,9 @@ namespace SS3D.Systems.Crafting
             }
 
             List<IRecipeIngredient> ingredients = GetIngredientsToConsume(interactionEvent, link);
-
             Dictionary<string, int> potentialRecipeElements = ItemListToDictionnaryOfRecipeElements(ingredients);
-
+            
             if (!CheckEnoughCloseItemsForRecipe(potentialRecipeElements, link.Tag)) return false;
-
             return true;
         }
 
@@ -301,9 +292,8 @@ namespace SS3D.Systems.Crafting
         private List<IRecipeIngredient> BuildListOfItemToConsume([NotNull] List<IRecipeIngredient> closeItemsFromTarget,
             [NotNull] RecipeStepLink recipeStep)
         {
-            List<IRecipeIngredient>  itemsToConsume = new List<IRecipeIngredient>();
-
-            Dictionary<string, int> recipeElements = new Dictionary<string, int>(recipeStep.Elements);
+            List<IRecipeIngredient>  itemsToConsume = new();
+            Dictionary<string, int> recipeElements = new(recipeStep.Elements);
 
             foreach (IRecipeIngredient item in closeItemsFromTarget)
             {
@@ -380,21 +370,17 @@ namespace SS3D.Systems.Crafting
             return potentialRecipeElements;
         }
 
-
         /// <summary>
         /// Move objects toward the crafting target, at constant speed.
         /// </summary>
         [Server]
         public void MoveAllObjectsToCraftPoint(CraftingInteraction interaction,InteractionEvent interactionEvent, InteractionReference reference)
         {
+            List<Coroutine> coroutines = new();
             Vector3 targetPosition = interactionEvent.Target.GetGameObject().transform.position;
-
             List<GameObject> ingredientsToConsume = 
                 GetIngredientsToConsume(interactionEvent, interaction.ChosenLink).Select(x => x.GameObject).ToList();
-
             
-            List<Coroutine> coroutines = new();
-
             foreach (GameObject go in ingredientsToConsume)
             {
                 float distance = Vector3.Distance(go.transform.position, targetPosition);
@@ -403,7 +389,6 @@ namespace SS3D.Systems.Crafting
             }
 
             _coroutinesOrganiser.Add(reference, coroutines);
-
             AddCraftingSmoke(interactionEvent.Target.GetGameObject(), reference.Id);
         }
 
@@ -561,7 +546,7 @@ namespace SS3D.Systems.Crafting
         {
             if (!recipeStep.TryGetResult(out WorldObjectAssetReference recipeResult)) return true;
 
-            if (recipeResult.Prefab != null && recipeResult.Prefab.TryGetComponent(out PlacedTileObject result))
+            if (recipeResult.Prefab && recipeResult.Prefab.TryGetComponent(out PlacedTileObject result))
             {
                 return ResultIsValidPlacedTileObject(result, interactionEvent);
             }
@@ -576,7 +561,6 @@ namespace SS3D.Systems.Crafting
         private bool ResultIsValidPlacedTileObject([NotNull] PlacedTileObject result, [NotNull] InteractionEvent interactionEvent)
         {
             bool replace = false;
-
             bool targetIsPlacedTileObject = interactionEvent.Target.GetGameObject().TryGetComponent(out PlacedTileObject target);
 
             if (targetIsPlacedTileObject && result.Layer == target.Layer)
@@ -594,12 +578,12 @@ namespace SS3D.Systems.Crafting
         private bool ItemTargetIsValid(InteractionEvent interactionEvent, Item target)
         {
             // item target is valid if it is in hand holding the item or out of container.
-            if (target.Container != null && interactionEvent.Source is Hand hand && hand.Container == target.Container)
+            if (target.Container && interactionEvent.Source is Hand hand && hand.Container == target.Container)
             {
                 return true;
             }
 
-            if (target.Container == null)
+            if (!target.Container)
             {
                 return true;
             }
@@ -621,7 +605,7 @@ namespace SS3D.Systems.Crafting
 
             // Adjust the shape to match the object's bounds
             MeshRenderer targetRenderer = target.GetComponentInChildren<MeshRenderer>();
-            if (targetRenderer != null)
+            if (targetRenderer)
             {
                 shapeModule.enabled = true;
                 shapeModule.shapeType = ParticleSystemShapeType.MeshRenderer;
@@ -632,14 +616,14 @@ namespace SS3D.Systems.Crafting
                 Debug.LogWarning("The object to hide does not have a Renderer component.");
             }
 
-            _craftingSmokes.Add(new InteractionReference(referenceId), particles);
+            _craftingSmokes.Add(new(referenceId), particles);
         }
 
         [ObserversRpc]
         private void CancelCraftingSmoke(int referenceId)
         {
-            _craftingSmokes[new InteractionReference(referenceId)]?.Dispose(true);
-            _craftingSmokes.Remove(new InteractionReference(referenceId));
+            _craftingSmokes[new(referenceId)]?.Dispose(true);
+            _craftingSmokes.Remove(new(referenceId));
         }
 
         /// <summary>
@@ -650,19 +634,16 @@ namespace SS3D.Systems.Crafting
         public List<CraftingInteraction> CreateInteractions(InteractionEvent interactionEvent, CraftingInteractionType craftingInteractionType)
         {
             List<CraftingInteraction> craftingInteractions = new();
-
-
-            if (!AvailableRecipeLinks(craftingInteractionType, interactionEvent,
-            out List<TaggedEdge<RecipeStep, RecipeStepLink>> availableRecipes)) return craftingInteractions;
+            if (!AvailableRecipeLinks(craftingInteractionType, interactionEvent, 
+                out List<TaggedEdge<RecipeStep, RecipeStepLink>> availableRecipes)) return craftingInteractions;
 
             foreach (TaggedEdge<RecipeStep, RecipeStepLink> recipeLink in availableRecipes)
             {
-                CraftingInteraction interaction = new CraftingInteraction(recipeLink.Tag.ExecutionTime,
+                CraftingInteraction interaction = new(recipeLink.Tag.ExecutionTime,
                     interactionEvent.Source.GameObject.GetComponentInParent<HumanoidController>().transform, craftingInteractionType, recipeLink);
-
+                
                 craftingInteractions.Add(interaction);
             }
-
 
             return craftingInteractions;
         }

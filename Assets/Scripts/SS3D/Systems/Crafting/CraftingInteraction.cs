@@ -15,8 +15,6 @@ namespace SS3D.Systems.Crafting
     /// </summary>
     public class CraftingInteraction : DelayedInteraction
     {
-
-
         /// <summary>
         /// The recipe link associated to this interaction. Crafting interactions are always associated to a recipe link.
         /// </summary>
@@ -86,15 +84,10 @@ namespace SS3D.Systems.Crafting
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             StartCounter();
-
             _startPosition = _characterTransform.position;
-
             Subsystems.TryGet(out CraftingSystem craftingSystem);
-
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
-
             ViewLocator.Get<CraftingMenu>().First().HideMenu();
-
             return true;
         }
 
@@ -118,7 +111,5 @@ namespace SS3D.Systems.Crafting
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
         }
-
-
     }
 }

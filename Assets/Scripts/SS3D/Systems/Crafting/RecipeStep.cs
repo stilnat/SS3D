@@ -56,7 +56,6 @@ namespace SS3D.Systems.Crafting
             _result = new();
         }
 
-
         /// <summary>
         /// If true, this is a final step of the recipe and the recipe target should be consumed (despawned).
         /// There can be more than one terminal step.
@@ -66,12 +65,12 @@ namespace SS3D.Systems.Crafting
         public bool TryGetResult(out WorldObjectAssetReference result)
         {
             result = _result;
-            return _result != null;
+            return _result;
         } 
 
         public WorldObjectAssetReference GetResultOrTarget()
         {
-            return _result != null ? _result : Recipe.Target;
+            return _result ? _result : Recipe.Target;
         }
 
         /// <summary>

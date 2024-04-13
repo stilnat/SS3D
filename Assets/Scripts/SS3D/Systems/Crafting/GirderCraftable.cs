@@ -11,7 +11,6 @@ namespace SS3D.Systems.Crafting
     /// </summary>
     public class GirderCraftable : MultiStepCraftable
     {
-
         /// <summary>
         /// Mesh renderer for the steel wall sheets.
         /// </summary>
@@ -23,7 +22,6 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [SerializeField]
         private MeshRenderer _windowSheetMesh;
-
 
         /// <summary>
         /// Mesh renderer for the reinforced sheets at the bottom of the girder

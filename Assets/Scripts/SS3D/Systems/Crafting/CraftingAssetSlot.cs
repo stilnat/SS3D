@@ -1,19 +1,7 @@
-﻿using SS3D.Systems.Tile.TileMapCreator;
-using SS3D.Systems.Tile;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using SS3D.Data.AssetDatabases;
-using System;
-using QuikGraph;
-using static SS3D.Systems.Crafting.CraftingRecipe;
-using SS3D.Systems.Crafting;
-using UnityEngine.AddressableAssets;
-using SS3D.Interactions;
 using SS3D.Core;
 using System.Linq;
-using FishNet;
 
 namespace SS3D.Systems.Crafting
 {

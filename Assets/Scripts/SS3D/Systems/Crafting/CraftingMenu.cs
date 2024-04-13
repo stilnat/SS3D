@@ -52,8 +52,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [SerializeField]
         private GameObject _pictureSlotArea;
-
-
+        
         /// <summary>
         /// Selected interaction.
         /// </summary>
@@ -70,16 +69,13 @@ namespace SS3D.Systems.Crafting
         [SerializeField]
         private TextMeshProUGUI _objectTitle;
 
-
-
         /// <summary>
         /// Server only, don't try to access it on client. Hold a list of potential interactions for each client, when
         /// they open the crafting menu.
         /// </summary>
         private readonly Dictionary<NetworkConnection, List<CraftingInteraction>> _interactionsForConnection = new();
-
+        
         private readonly Dictionary<NetworkConnection, InteractionEvent> _eventForConnection = new();
-
 
         public override void OnStartNetwork()
         {
@@ -117,7 +113,6 @@ namespace SS3D.Systems.Crafting
         public void DisplayMenu(List<CraftingInteraction> interactions, InteractionEvent interactionEvent, InteractionReference reference,
             CraftingInteractionType craftingInteractionType)
         {
-
             _interactionsForConnection.Remove(interactionEvent.Source.NetworkObject.Owner);
             _interactionsForConnection.Add(interactionEvent.Source.NetworkObject.Owner, interactions);
 
@@ -226,10 +221,9 @@ namespace SS3D.Systems.Crafting
         [TargetRpc]
         private void TargetSetVisuals(NetworkConnection conn, List<WorldObjectAssetReference> results, string nextRecipeStepName)
         {
-
             ClearPictures();
 
-            foreach(WorldObjectAssetReference result in results)
+            foreach (WorldObjectAssetReference result in results)
             {
                 GenericObjectSo asset = Subsystems.Get<TileSystem>().GetAsset(result.Id);
                 GameObject pictureSlot = Instantiate(_pictureSlotPrefab, _pictureSlotArea.transform, true);
@@ -242,7 +236,7 @@ namespace SS3D.Systems.Crafting
         [ServerRpc(RequireOwnership = false)]
         private void RpcStartSelectedInteraction()
         {
-            if(_interaction == null)
+            if (_interaction == null)
             {
                 Log.Error(this, "can't start selected interaction, it's null");
                 return;
@@ -279,13 +273,9 @@ namespace SS3D.Systems.Crafting
         private void RpcClientInteract(NetworkConnection conn, GameObject target, GameObject sourceObject, int referenceId, int index, CraftingInteractionType type)
         {
             Subsystems.TryGet(out CraftingSystem craftingSystem);
-
             IInteractionSource source = sourceObject.GetComponent<IInteractionSource>();
-            
             InteractionEvent interactionEvent = new(source, new InteractionTargetGameObject(target));
-
             List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, type);
-
             interactionEvent.Source.ClientInteract(interactionEvent, craftingInteractions[index], new InteractionReference(referenceId));
         }
     }
