@@ -34,6 +34,5 @@ namespace SS3D.Systems.Crafting
                 _currentStepName = targetAssetReference.Asset.Prefab.name;
             }
         }
-
     }
 }

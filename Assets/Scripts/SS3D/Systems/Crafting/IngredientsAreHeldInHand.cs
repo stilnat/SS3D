@@ -1,7 +1,5 @@
-﻿using SS3D.Systems.Crafting;
-using SS3D.Systems.Inventory.Containers;
+﻿using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

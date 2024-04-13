@@ -1,6 +1,4 @@
-﻿using SS3D.Data.AssetDatabases;
-using SS3D.Data.Generated;
-using SS3D.Interactions;
+﻿using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using UnityEngine;
 

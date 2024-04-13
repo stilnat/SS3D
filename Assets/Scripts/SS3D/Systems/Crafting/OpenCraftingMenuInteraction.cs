@@ -2,7 +2,6 @@
 using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Systems.Crafting;
-using SS3D.Systems.Entities.Humanoid;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -46,7 +45,6 @@ public class OpenCraftingMenuInteraction : Interaction
         if (!Subsystems.TryGet(out CraftingSystem craftingSystem)) return false;
 
         bool recipesAvailable = true;
-        
         recipesAvailable &= craftingSystem.AvailableRecipeLinks(_craftingInteractionType, interactionEvent,
             out List<TaggedEdge<RecipeStep, RecipeStepLink>> _);
 

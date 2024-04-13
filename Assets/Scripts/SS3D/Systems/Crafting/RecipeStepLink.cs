@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Coimbra;
 using SS3D.Data.AssetDatabases;
 
@@ -13,7 +12,6 @@ namespace SS3D.Systems.Crafting
     [Serializable]
     public class RecipeStepLink
     {
-
         /// <summary>
         /// Elements of the recipe, that will be consumed in the crafting process, and the necessary number of each.
         /// </summary>
@@ -123,7 +121,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         public List<IRecipeIngredient> ApplyIngredientConditions(List<IRecipeIngredient> ingredients)
         {
-            foreach (var condition in _conditions)
+            foreach (IngredientCondition condition in _conditions)
             {
                 ingredients = condition.UsableIngredients(ingredients);
             }

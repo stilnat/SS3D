@@ -88,6 +88,5 @@ namespace SS3D.Systems.Crafting
         /// Name of the recipe step.
         /// </summary>
         public string Name => _name;
-
     }
 }
