@@ -11,8 +11,8 @@ namespace SS3D.Systems.Crafting
     /// </summary>
     public class CraftingAssetSlot : MonoBehaviour
     {
-
         private int _index;
+        
         /// <summary>
         /// Set up the name of the recipe step in a UI slot for the crafting menu. 
         /// </summary>

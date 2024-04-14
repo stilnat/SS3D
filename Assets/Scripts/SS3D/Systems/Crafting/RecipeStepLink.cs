@@ -99,9 +99,8 @@ namespace SS3D.Systems.Crafting
         {
             get
             {
-                Dictionary<string, int> elements = new Dictionary<string, int>();
-
-
+                Dictionary<string, int> elements = new();
+                
                 foreach (KeyValuePair<WorldObjectAssetReference, int> keyValuePair in _elements)
                 {
                     elements.Add(keyValuePair.Key.Id, keyValuePair.Value);

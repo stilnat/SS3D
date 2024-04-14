@@ -22,11 +22,9 @@ using Hand = SS3D.Systems.Inventory.Containers.Hand;
 
 namespace SS3D.Systems.Crafting
 {
-
     /// <summary>
     /// Core of the crafting, store and organize recipes, check what can be crafted, hold the actual craft logic.
     /// </summary>
-
     public sealed class CraftingSystem : NetworkSystem
     {
         /// <summary>
@@ -55,7 +53,7 @@ namespace SS3D.Systems.Crafting
         }
 
         /// <summary>
-        /// organise the recipes in such a way that it'll be easy to sort through the relevant recipes when looking
+        /// Organise the recipes in such a way that it'll be easy to sort through the relevant recipes when looking
         /// up which recipes are available for a given interaction and target.
         /// </summary>
         [ServerOrClient]
@@ -65,7 +63,7 @@ namespace SS3D.Systems.Crafting
 
             if (!recipesDataBase)
             {
-                Log.Error(this, "recipeDatabase is null, please fix the crafting recipe database");
+                Log.Error(this, "recipeDatabase is null");
                 return;
             }
 
@@ -73,18 +71,17 @@ namespace SS3D.Systems.Crafting
             {
                 if (asset is not CraftingRecipe recipe)
                 {
-                    Debug.LogError("Crafting recipe database contains object which are not recipes");
-
+                    Debug.LogError("Crafting recipe database contains object which is not recipe");
                     continue;
                 }
                 
-                _recipeOrganiser.TryAdd(recipe.Target.Id, new List<CraftingRecipe>());
+                _recipeOrganiser.TryAdd(recipe.Target.Id, new());
                 _recipeOrganiser[recipe.Target.Id].Add(recipe);
             }
         }
 
         /// <summary>
-        /// Given an interaction and a specific target, get all potential recipes links.
+        /// Get all potential recipes links.
         /// </summary>
         private bool TryGetRecipeLinks(CraftingInteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
         {
@@ -374,7 +371,7 @@ namespace SS3D.Systems.Crafting
         /// Move objects toward the crafting target, at constant speed.
         /// </summary>
         [Server]
-        public void MoveAllObjectsToCraftPoint(CraftingInteraction interaction,InteractionEvent interactionEvent, InteractionReference reference)
+        public void MoveAllObjectsToCraftPoint(CraftingInteraction interaction, InteractionEvent interactionEvent, InteractionReference reference)
         {
             List<Coroutine> coroutines = new();
             Vector3 targetPosition = interactionEvent.Target.GetGameObject().transform.position;

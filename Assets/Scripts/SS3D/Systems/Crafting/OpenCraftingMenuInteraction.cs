@@ -18,7 +18,7 @@ public class OpenCraftingMenuInteraction : Interaction
     public override string GetGenericName() => "Open crafting menu";
     
     /// <summary>
-    /// Gets the name when interacted with a source
+    /// Get the name of the interaction
     /// </summary>
     /// <param name="interactionEvent">The source used in the interaction</param>
     /// <returns>The display name of the interaction</returns>
@@ -28,7 +28,7 @@ public class OpenCraftingMenuInteraction : Interaction
     }
 
     /// <summary>
-    /// Gets the interaction icon
+    /// Get the icon of the interaction
     /// </summary>
     public override Sprite GetIcon(InteractionEvent interactionEvent)
     {
@@ -36,7 +36,7 @@ public class OpenCraftingMenuInteraction : Interaction
     }
 
     /// <summary>
-    /// Checks if this interaction can be executed
+    /// Check if this interaction can be executed
     /// </summary>
     /// <param name="interactionEvent">The interaction source</param>
     /// <returns>If the interaction can be executed</returns>
@@ -52,7 +52,7 @@ public class OpenCraftingMenuInteraction : Interaction
     }
 
     /// <summary>
-    /// Starts the interaction (server-side)
+    /// Start the interaction (server-side)
     /// </summary>
     /// <param name="interactionEvent">The source used in the interaction</param>
     /// <param name="reference"></param>
@@ -64,11 +64,4 @@ public class OpenCraftingMenuInteraction : Interaction
         ViewLocator.Get<CraftingMenu>().First().DisplayMenu(craftingInteractions, interactionEvent, reference, _craftingInteractionType);
         return true;
     }
-
-    /// <summary>
-    /// Called when the interaction is cancelled (server-side)
-    /// </summary>
-    /// <param name="interactionEvent">The source used in the interaction</param>
-    /// <param name="reference"></param>
-    public virtual void Cancel(InteractionEvent interactionEvent, InteractionReference reference) { }
 }

@@ -95,7 +95,7 @@ namespace SS3D.Systems.Crafting
         {
             if (_recipeGraph == null)
             {
-                Log.Error(this, "recipe graph should not be null");
+                Log.Error(this, "recipeGraph is null");
                 step = null;
                 return false;
             }

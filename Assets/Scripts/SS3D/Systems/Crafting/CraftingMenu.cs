@@ -106,8 +106,7 @@ namespace SS3D.Systems.Crafting
         }
 
         /// <summary>
-        /// Method called when the crafting menu is opened, normally only when multiple options are possible
-        /// for crafting.
+        /// Method called when the crafting menu is opened, normally only when multiple options are possible for crafting.
         /// </summary>
         [Server]
         public void DisplayMenu(List<CraftingInteraction> interactions, InteractionEvent interactionEvent, InteractionReference reference,
@@ -137,7 +136,6 @@ namespace SS3D.Systems.Crafting
         {
             ShowUI(false);
         }
-
 
         /// <summary>
         /// Clear all recipe step's name and result icons in the crafting menu.
@@ -276,7 +274,7 @@ namespace SS3D.Systems.Crafting
             IInteractionSource source = sourceObject.GetComponent<IInteractionSource>();
             InteractionEvent interactionEvent = new(source, new InteractionTargetGameObject(target));
             List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, type);
-            interactionEvent.Source.ClientInteract(interactionEvent, craftingInteractions[index], new InteractionReference(referenceId));
+            interactionEvent.Source.ClientInteract(interactionEvent, craftingInteractions[index], new(referenceId));
         }
     }
 }
