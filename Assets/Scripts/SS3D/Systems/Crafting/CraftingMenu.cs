@@ -264,8 +264,7 @@ namespace SS3D.Systems.Crafting
         /// <param name="target"> Target of the interaction </param>
         /// <param name="sourceObject"> Source of the interaction </param>
         /// <param name="referenceId"> The reference of the interaction, client interaction should be set with the same id as server interaction.</param>
-        /// <param name="index"> Index of the interaction, upon creating available interaction from a given interaction event, and a crafting interaction type,
-        /// this suppose that created interactions will be the same and in the same order on both client and server.</param>
+        /// <param name="index"> Index of the interaction, upon creating available interaction from a given interaction event, and a crafting interaction type. </param>
         /// <param name="type"> Type of the chosen crafting interaction, used to retrieve potential interactions.</param>
         [TargetRpc]
         private void RpcClientInteract(NetworkConnection conn, GameObject target, GameObject sourceObject, int referenceId, int index, CraftingInteractionType type)
