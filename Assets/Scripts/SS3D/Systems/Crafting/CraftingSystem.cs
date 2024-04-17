@@ -1,4 +1,5 @@
 ﻿using Coimbra;
+using Cysharp.Threading.Tasks;
 using FishNet;
 using FishNet.Object;
 using JetBrains.Annotations;
@@ -19,6 +20,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Hand = SS3D.Systems.Inventory.Containers.Hand;
+using DG.Tweening;
+using SS3D.Systems.Inventory.Containers;
 
 namespace SS3D.Systems.Crafting
 {
@@ -122,7 +125,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         private List<IRecipeIngredient> GetIngredientsToConsume(InteractionEvent interactionEvent, TaggedEdge<RecipeStep, RecipeStepLink> link)
         {
-            List<IRecipeIngredient> closeItemsFromTarget = GetCloseItemsFromTarget(interactionEvent.Target.GetGameObject());
+            List<IRecipeIngredient> closeItemsFromTarget = GetCloseItemsFromTarget(interactionEvent);
             closeItemsFromTarget = link.Tag?.ApplyIngredientConditions(closeItemsFromTarget);
             closeItemsFromTarget = BuildListOfItemToConsume(closeItemsFromTarget, link.Tag);
             return closeItemsFromTarget;
@@ -312,15 +315,21 @@ namespace SS3D.Systems.Crafting
         /// Find all potential recipe ingredients in close proximity from the target of the recipe.
         /// TODO : only collider for item ? Should then ensure collider of item is on the
         /// same game object as item script for all items. Would avoid the getInParent.
+        /// TODO : game object with no active colliders are not detected by overlapSphere
         /// </summary>
-        private List<IRecipeIngredient> GetCloseItemsFromTarget(GameObject target)
+        private List<IRecipeIngredient> GetCloseItemsFromTarget(InteractionEvent interactionEvent)
         {
+            GameObject target = interactionEvent.Target.GetGameObject();
+            
+            List<IRecipeIngredient> closeItemsFromTarget = new();
+            
+            AddRecipeIngredientInHand(interactionEvent, closeItemsFromTarget);
+            
             Vector3 center = target.transform.position;
 
             float radius = 3f;
 
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
-            List<IRecipeIngredient> closeItemsFromTarget = new();
 
             foreach (Collider hitCollider in hitColliders)
             {
@@ -456,6 +465,26 @@ namespace SS3D.Systems.Crafting
 
             return instance;
 
+        }
+
+        private void AddRecipeIngredientInHand(InteractionEvent interactionEvent, List<IRecipeIngredient> ingredients)
+        {
+            Hands hands = interactionEvent.Source.GameObject.GetComponentInParent<Hands>();
+            if (hands != null)
+            {
+                List<Item> itemsInHand = new();
+
+                foreach (Hand hand in hands.PlayerHands)
+                {
+                    itemsInHand.AddRange(hand.Container.Items);
+                }
+                
+                foreach (Item item in itemsInHand)
+                {
+                    if(item.GameObject.TryGetComponent(out IRecipeIngredient recipeIngredient))
+                        ingredients.Add(recipeIngredient);
+                }
+            }
         }
 
         /// <summary>
