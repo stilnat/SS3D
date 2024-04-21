@@ -74,7 +74,7 @@ namespace SS3D.Systems.Crafting
             {
                 if (asset is not CraftingRecipe recipe)
                 {
-                    Debug.LogError("Crafting recipe database contains object which is not recipe");
+                    Log.Error(this, "Crafting recipe database contains object which is not recipe");
                     continue;
                 }
                 
