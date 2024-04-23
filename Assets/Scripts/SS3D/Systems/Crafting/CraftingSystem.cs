@@ -143,50 +143,11 @@ namespace SS3D.Systems.Crafting
             List<IRecipeIngredient> ingredients = GetIngredientsToConsume(interactionEvent, link);
             IRecipeIngredient recipeTarget = interactionEvent.Target.GetGameObject().GetComponent<IRecipeIngredient>();
 
-            switch (link.Target.IsTerminal)
-            {
-                // Either apply some crafting on the current target, or do it on new game objects.
-                case false:
-                    interactionEvent.Target.GetGameObject().GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
-
-                    break;
-
-                // Important to do that before spawning, or it'll mess with the spawning of tile objects.
-                case true:
-                    recipeTarget?.Consume();
-
-                    break;
-            }
+            ModifyOrConsumeRecipeTarget(recipeTarget, interaction, interactionEvent, link);
 
             if (link.Target.TryGetResult(out WorldObjectAssetReference result))
             {
-                GameObject resultInstance;
-
-                if (result.Prefab == null)
-                {
-                    Log.Error(this, $"world object reference {result} has no prefab associated, returning");
-                    return;
-                }
-                
-                if (link.Target.CustomCraft)
-                {
-                    resultInstance = result.Prefab.GetComponent<ICraftable>()?.Craft(interaction, interactionEvent);
-                }
-                else
-                {
-                    resultInstance = DefaultCraft(interaction, interactionEvent, result.Prefab, link.Target);
-                }
-
-                if (link.Tag != null && link.Tag.ModifyResult)
-                {
-                    if (!resultInstance)
-                    {
-                        Log.Error(this, "could not craft an instance for the recipe result");
-
-                        return;
-                    }
-                    resultInstance.GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
-                }
+                SpawnOrModifyMainResult(result, interaction, interactionEvent, link);
             }
 
             if (link.Tag == null)
@@ -205,6 +166,55 @@ namespace SS3D.Systems.Crafting
                 item.Consume();
             }
 
+        }
+
+        private void ModifyOrConsumeRecipeTarget(IRecipeIngredient recipeTarget, CraftingInteraction interaction,
+            InteractionEvent interactionEvent, TaggedEdge<RecipeStep, RecipeStepLink> link)
+        {
+            switch (link.Target.IsTerminal)
+            {
+                // Either apply some crafting on the current target, or do it on new game objects.
+                case false:
+                    interactionEvent.Target.GetGameObject().GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
+                    break;
+
+                // Important to do that before spawning, or it'll mess with the spawning of tile objects.
+                case true:
+                    recipeTarget?.Consume();
+                    break;
+            }
+        }
+
+        private void SpawnOrModifyMainResult(WorldObjectAssetReference result, CraftingInteraction interaction,
+            InteractionEvent interactionEvent, TaggedEdge<RecipeStep, RecipeStepLink> link)
+        {
+            GameObject resultInstance;
+
+            if (result.Prefab == null)
+            {
+                Log.Error(this, $"world object reference {result} has no prefab associated, returning");
+                return;
+            }
+                
+            if (link.Target.CustomCraft)
+            {
+                resultInstance = result.Prefab.GetComponent<ICraftable>()?.Craft(interaction, interactionEvent);
+            }
+            else
+            {
+                resultInstance = DefaultCraft(interaction, interactionEvent, result.Prefab, link.Target);
+            }
+
+            if (link.Tag != null && link.Tag.ModifyResult)
+            {
+                if (!resultInstance)
+                {
+                    Log.Error(this, "could not craft an instance for the recipe result");
+
+                    return;
+                }
+                resultInstance.GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
+            }
         }
 
         /// <summary>
