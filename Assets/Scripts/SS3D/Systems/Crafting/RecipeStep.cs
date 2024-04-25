@@ -65,8 +65,10 @@ namespace SS3D.Systems.Crafting
         public bool TryGetResult(out WorldObjectAssetReference result)
         {
             result = _result;
-            return _result;
-        } 
+            return _result is not null;
+        }
+        
+        public WorldObjectAssetReference GetResult => _result;
 
         public WorldObjectAssetReference GetResultOrTarget()
         {
