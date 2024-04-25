@@ -85,7 +85,7 @@ namespace DummyStuff
 
             hand.Item.GameObject.transform.parent = hand.itemPositionTargetLocker;
             holdController.UpdateItemPositionConstraintAndRotation(hand, hand.Item,
-                true, 0.5f, false);
+                true, 0.25f, false);
             hand.Item.GameObject.transform.localPosition = Vector3.zero;
             hand.Item.GameObject.transform.localRotation = Quaternion.identity;
             OnAim?.Invoke(this, false);

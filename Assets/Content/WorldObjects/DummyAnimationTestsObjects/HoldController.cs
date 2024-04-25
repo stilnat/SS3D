@@ -78,24 +78,24 @@ namespace DummyStuff
             if (mainHand.Full && secondaryHand.Empty && mainHand.Item.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item,
-                    true, 0.5f, throwController.IsAiming);
+                    true, 0.25f, throwController.IsAiming);
             }
             else if (mainHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(mainHand,mainHand.Item,
-                    false, 0.5f, throwController.IsAiming);
+                    false, 0.25f, throwController.IsAiming);
             }
 
 
             if (secondaryHand.Full && mainHand.Empty && secondaryHand.Item.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
-                    true, 0.5f, throwController.IsAiming);
+                    true, 0.25f, throwController.IsAiming);
             }
             else if (secondaryHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
-                    false, 0.5f, throwController.IsAiming);
+                    false, 0.25f, throwController.IsAiming);
 
             }
 
