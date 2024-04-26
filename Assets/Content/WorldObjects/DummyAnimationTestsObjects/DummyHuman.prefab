@@ -4645,6 +4645,7 @@ MonoBehaviour:
   itemPositionConstraint: {fileID: 3209808476875596154}
   upperArm: {fileID: 7446386329022654784}
   handBone: {fileID: 8420821262611087137}
+  holdTransform: {fileID: 5569489068996507518}
 --- !u!114 &408292127236538780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4668,6 +4669,7 @@ MonoBehaviour:
   itemPositionConstraint: {fileID: 6263492953658661066}
   upperArm: {fileID: 802911981376609306}
   handBone: {fileID: 6356800398579286298}
+  holdTransform: {fileID: 6456791731408993078}
 --- !u!114 &333363580064996929
 MonoBehaviour:
   m_ObjectHideFlags: 0

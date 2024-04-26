@@ -61,8 +61,11 @@ public class Grab : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, grabbableLayer))
         {
+
+                Debug.DrawRay(ray.origin, ray.direction*5, Color.green, 2f);
                 
                 grabbedObject = hit.transform.gameObject;
+                Debug.Log("grabbed object = " + grabbedObject);
 
                 if (grabbedObject.TryGetComponent(out GrabbableBodyPart bodyPart))
                 {
@@ -149,11 +152,12 @@ public class Grab : MonoBehaviour
 
     private IEnumerator GrabPullBack(GrabbableBodyPart item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
     {
+        // those two lines necessary to smooth pulling back
         mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
         mainHand.pickupTargetLocker.transform.position = item.transform.position;
         
         GetComponent<DummyAnimatorController>().Crouch(false);
-        grabbedObject.transform.position = mainHand.handBone.position;
+        grabbedObject.transform.position = mainHand.holdTransform.position;
         fixedJoint = mainHand.handBone.gameObject.AddComponent<FixedJoint>();
         Rigidbody grabbedRb = grabbedObject.GetComponent<Rigidbody>();
         fixedJoint.connectedBody = grabbedRb;

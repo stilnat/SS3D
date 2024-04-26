@@ -33,6 +33,8 @@ public class DummyHand : MonoBehaviour
 
     public Transform handBone;
 
+    public Transform holdTransform;
+
     public IHoldProvider Item => _item;
 
     public bool Full => _item != null;
