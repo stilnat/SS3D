@@ -107,6 +107,9 @@ public class Grab : MonoBehaviour
 
     private void SetUpGrab(GrabbableBodyPart item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
     {
+        
+        mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, grabbedObject.transform);
+        
         // Needed if this has been changed elsewhere 
         mainHand.pickupIkConstraint.data.tipRotationWeight = 1f;
 
@@ -120,14 +123,22 @@ public class Grab : MonoBehaviour
         lookAtTargetLocker.parent = item.transform;
         lookAtTargetLocker.localPosition = Vector3.zero;
         lookAtTargetLocker.localRotation = Quaternion.identity;
+
+        OrientTargetForHandRotation(mainHand);
     }
 
     private IEnumerator GrabReach(GrabbableBodyPart item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
     {
-        mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, grabbedObject.transform); 
         if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
         {
             StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, item.transform, itemReachDuration, false, true));
+        }
+        
+        if (mainHand.handBone.transform.position.y - item.transform.position.y > 0.3)
+        {
+            GetComponent<DummyAnimatorController>().Crouch(true);
+
+            yield return new WaitForSeconds(0.25f);
         }
         
         StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x, 0f, 1f, itemReachDuration));
@@ -155,6 +166,21 @@ public class Grab : MonoBehaviour
         Debug.Log("Grabbed object is " + grabbedObject.name);
         OnGrab?.Invoke(this, true);
         
+    }
+    
+    /// <summary>
+    /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
+    /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
+    /// </summary>
+    private void OrientTargetForHandRotation(DummyHand hand)
+    {
+        Vector3 armTargetDirection = hand.pickupTargetLocker.position - hand.upperArm.position;
+
+        Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
+
+        targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
+
+        hand.pickupTargetLocker.rotation = targetRotation;
     }
     
  
