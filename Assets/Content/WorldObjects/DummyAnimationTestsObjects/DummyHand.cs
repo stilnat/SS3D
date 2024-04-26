@@ -76,13 +76,16 @@ public class DummyHand : MonoBehaviour
         return targetToSet;
     }
 
-    public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent)
+    public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true,
+        bool resetRotation = true)
     {
         Transform targetToSet = ChooseTargetLocker(type);
         
         targetToSet.parent = parent;
-        targetToSet.localPosition = Vector3.zero;
-        targetToSet.localRotation = Quaternion.identity;
+        if(resetPosition)
+            targetToSet.localPosition = Vector3.zero;
+        if(resetRotation)
+            targetToSet.localRotation = Quaternion.identity;
     }
     
 }

@@ -149,6 +149,9 @@ public class Grab : MonoBehaviour
 
     private IEnumerator GrabPullBack(GrabbableBodyPart item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
     {
+        mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
+        mainHand.pickupTargetLocker.transform.position = item.transform.position;
+        
         GetComponent<DummyAnimatorController>().Crouch(false);
         grabbedObject.transform.position = mainHand.handBone.position;
         fixedJoint = mainHand.handBone.gameObject.AddComponent<FixedJoint>();

@@ -4895,8 +4895,8 @@ MonoBehaviour:
   _jointBreakForce: 15000
   _hands: {fileID: 4366303252165034965}
   holdController: {fileID: 304844770068834842}
-  itemReachDuration: 1
-  itemMoveDuration: 1
+  itemReachDuration: 0.5
+  itemMoveDuration: 0.5
   hands: {fileID: 4366303252165034965}
   lookAtTargetLocker: {fileID: 5358384094254398678}
   lookAtConstraint: {fileID: 2851688491558728783}
