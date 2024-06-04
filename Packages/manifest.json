@@ -7,7 +7,7 @@
     "com.unity.animation.rigging": "1.1.1",
     "com.unity.collab-proxy": "1.17.7",
     "com.unity.ide.rider": "3.0.16",
-    "com.unity.ide.visualstudio": "2.0.22",
+    "com.unity.ide.visualstudio": "2.0.16",
     "com.unity.ide.vscode": "1.2.5",
     "com.unity.inputsystem": "1.4.4",
     "com.unity.postprocessing": "3.2.2",
@@ -56,9 +56,14 @@
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
       "scopes": [
-        "com.johannesmp.unityscenereference",
-        "com.coimbrastudios.core",
-        "com.cysharp.unitask"
+        "com.johannesmp.unityscenereference"
+      ]
+    },
+    {
+      "name": "com.coimbrastudios.core",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.coimbrastudios.core"
       ]
     }
   ]

@@ -386,7 +386,6 @@ namespace SS3D.Systems.Inventory.UI
 			{
 				Slots[i].gameObject.Dispose(true);
 			}
-            Slots.Clear();
 		}
     }
 }

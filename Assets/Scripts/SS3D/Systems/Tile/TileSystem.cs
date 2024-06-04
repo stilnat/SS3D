@@ -136,7 +136,7 @@ namespace SS3D.Systems.Tile
 
             SavedTileMap mapSave = _currentMap.Save();
 												    
-            LocalStorage.SaveObject(SavePath + "/" + mapName, mapSave, overwrite);
+            SaveSystem.SaveObject(SavePath + "/" + mapName, mapSave, overwrite);
         }
 
         [Server]
@@ -144,7 +144,7 @@ namespace SS3D.Systems.Tile
         {
             Log.Information(this, "Loading most recent tilemap");
             
-	        SavedTileMap mapSave = LocalStorage.LoadMostRecentObject<SavedTileMap>(SavePath);
+	        SavedTileMap mapSave = SaveSystem.LoadMostRecentObject<SavedTileMap>(SavePath);
 
             _currentMap.Load(mapSave);
         }
@@ -154,7 +154,7 @@ namespace SS3D.Systems.Tile
         {
             Log.Information(this, "Loading most recent tilemap");
 
-            SavedTileMap mapSave = LocalStorage.LoadObject<SavedTileMap>(mapName);
+            SavedTileMap mapSave = SaveSystem.LoadObject<SavedTileMap>(mapName);
 
             _currentMap.Load(mapSave);
         }
@@ -169,7 +169,7 @@ namespace SS3D.Systems.Tile
 
         public bool MapNameAlreadyExist(string name)
         {
-            return LocalStorage.FolderAlreadyContainsName(savePath, name);
+            return SaveSystem.FolderAlreadyContainsName(savePath, name);
         }
     }
 }

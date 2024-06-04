@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using FishNet.Connection;
 using SS3D.Permissions;
+using UnityEngine.Device;
 
 namespace SS3D.Systems.IngameConsoleSystem.Commands
 {
@@ -16,8 +17,8 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands
         {
             if (!ReceiveCheckResponse(args, out CheckArgsResponse response, out CalculatedValues values)) return response.InvalidArgs;
             
-            Process.Start(UnityEngine.Application.dataPath.Replace("_Data", ".exe"));
-            UnityEngine.Application.Quit();
+            Process.Start(Application.dataPath.Replace("_Data", ".exe"));
+            Application.Quit();
             return "Done";
         }
         protected override CheckArgsResponse CheckArgs(string[] args)

@@ -123,8 +123,6 @@ namespace SS3D.Permissions
         [Server]
         private void LoadPermissions()
         {
-            Log.Information(this, "Loading permission data from file", Logs.ServerOnly);
-            
             if (!HasLoadedPermissions)
             {
                 CreatePermissionsFileIfNotExists();

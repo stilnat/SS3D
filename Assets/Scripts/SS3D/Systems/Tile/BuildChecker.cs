@@ -47,10 +47,6 @@ namespace SS3D.Systems.Tile
                 case TileLayer.WallMountHigh when canBuild:
                 case TileLayer.WallMountLow when canBuild:
                 {
-                    // If a wall mount is large, check to see if there are other large wall mounts
-                    canBuild &= !(tileObjectSo.isLarge && !tileLocations[(int)placedLayer].IsEmpty(TileHelper.GetNextCardinalDir(dir)));
-                    canBuild &= !(tileObjectSo.isLarge && !tileLocations[(int)placedLayer].IsEmpty(TileHelper.GetPreviousCardinalDir(dir)));
-
                     canBuild &= CanBuildWallAttachment((SingleTileLocation) tileLocations[(int)TileLayer.Turf],
                         tileObjectSo, dir, adjacentObjects);
                     break;

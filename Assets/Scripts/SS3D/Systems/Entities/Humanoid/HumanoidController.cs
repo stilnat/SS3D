@@ -114,7 +114,6 @@ namespace SS3D.Systems.Entities.Humanoid
             {
                 return;
             }
-            
             ProcessCharacterMovement();
         }
 

@@ -1,10 +1,7 @@
-﻿using Coimbra;
-using System;
+﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using FishNet.Object;
-using SS3D.Core;
-using SS3D.Engine.Chat;
 using SS3D.Logging;
 using SS3D.Systems.Rounds.Messages;
 
@@ -74,10 +71,6 @@ namespace SS3D.Systems.Rounds
 
             RoundState = RoundState.Ongoing;
             Log.Information(this, "Starting round tick", Logs.ServerOnly);
-            ChatSystem chatSystem = Subsystems.Get<ChatSystem>();
-            ChatChannels chatChannels = ScriptableSettings.GetOrFind<ChatChannels>();
-            // TODO: use captain character name here
-            chatSystem.SendServerMessage(chatChannels.stationAlertsChannel, "Welcome aboard crew, you're under no captain. Enjoy!");
 
             while (IsOngoing)
             {

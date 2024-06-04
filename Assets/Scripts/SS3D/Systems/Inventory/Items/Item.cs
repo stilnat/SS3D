@@ -13,12 +13,11 @@ using SS3D.Logging;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Interactions;
 using SS3D.Systems.Selection;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 #if UNITY_EDITOR
-using AssetDatabase = UnityEditor.AssetDatabase;
 using UnityEditor;
+using AssetDatabase = UnityEditor.AssetDatabase;
 #endif
 
 namespace SS3D.Systems.Inventory.Items
@@ -69,9 +68,6 @@ namespace SS3D.Systems.Inventory.Items
         [SyncObject]
         private readonly SyncList<Trait> _traits = new();
 
-        /// <summary>
-        /// Where the item is stored
-        /// </summary>
         [SyncVar]
         private AttachedContainer _container;
 
@@ -79,39 +75,16 @@ namespace SS3D.Systems.Inventory.Items
 
         public ReadOnlyCollection<Trait> Traits => ((List<Trait>) _traits.Collection).AsReadOnly();
 
-        /// <summary>
-        /// Where the item is stored
-        /// </summary>
         public AttachedContainer Container => _container;
 
         private bool _initialised = false;
-        
-        /// <summary>
-        /// All colliders, related to the item, except of colliders, related to stored items
-        /// </summary>
-        private Collider[] _nativeColliders;
-        /// <summary>
-        /// All colliders, related to the item, except of colliders, related to stored items
-        /// </summary>
-        public Collider[] NativeColliders
-        {
-            get
-            {
-                if (_nativeColliders == null)
-                {
-                    _nativeColliders = GetNativeColliders();
-                }
-                return _nativeColliders;
-            }
-            set => _nativeColliders = value;
-        }
 
         public WorldObjectAssetReference Asset
         {
             get => _asset;
             set
             {
-                if (UnityEngine.Application.isPlaying)
+                if (Application.isPlaying)
                 {
                     Serilog.Log.Warning($"Field {nameof(Asset)} is being modified in runtime. This should not happen in normal conditions.");
                 }
@@ -145,7 +118,7 @@ namespace SS3D.Systems.Inventory.Items
             get => InventorySprite();
             set => _sprite = value;
         }
-        
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -160,23 +133,6 @@ namespace SS3D.Systems.Inventory.Items
             {
                 _rigidbody.isKinematic = true;
             }
-
-            _nativeColliders ??= GetNativeColliders();
-            Debug.Log("Start " + name);
-        }
-
-        /// <summary>
-        /// Get all colliders, related to the item, except of colliders, related to stored items
-        /// </summary>
-        private Collider[] GetNativeColliders()
-        {
-            List<Collider> collidersToExcept = new();
-            AttachedContainer[] containers = GetComponentsInChildren<AttachedContainer>();
-            foreach (Item item in containers.SelectMany(container => container.Items))
-            {
-                collidersToExcept.AddRange(item.GetComponentsInChildren<Collider>());
-            }
-            return GetComponentsInChildren<Collider>().Except(collidersToExcept).ToArray();
         }
 
         public override void OnStartServer()
@@ -220,7 +176,11 @@ namespace SS3D.Systems.Inventory.Items
             {
                 _rigidbody.isKinematic = true;
             }
-            ToggleCollider(false);
+            var itemCollider = GetComponent<Collider>();
+            if (itemCollider != null)
+            {
+                itemCollider.enabled = false;
+            }
         }
 
         /// <summary>
@@ -234,21 +194,13 @@ namespace SS3D.Systems.Inventory.Items
                 if (IsServer)
                     _rigidbody.isKinematic = false;
             }
-            ToggleCollider(true);
-        }
-        
-        /// <summary>
-        /// Enable or disable all colliders related to the item. Does not touch any colliders that would belong to stored items (if there are any).
-        /// TODO : might want to replace GetComponentsInChildren with a manual setup of the container list.
-        /// </summary>
-        [ServerOrClient]
-        protected virtual void ToggleCollider(bool isEnable)
-        {
-            foreach (Collider collider in NativeColliders) 
-            { 
-                collider.enabled = isEnable;
+            var itemCollider = GetComponent<Collider>();
+            if (itemCollider != null)
+            {
+                itemCollider.enabled = true;
             }
         }
+        
         
         /// <param name="visible">Should the item be visible</param>
         [ServerOrClient]
@@ -300,7 +252,7 @@ namespace SS3D.Systems.Inventory.Items
         public string Describe()
         {
             string traits = "";
-            foreach (Trait trait in _traits)
+            foreach (var trait in _traits)
             {
                 traits += trait.Name + " ";
             }
@@ -322,10 +274,12 @@ namespace SS3D.Systems.Inventory.Items
         [Server]
         public void SetContainer(AttachedContainer newContainer)
         {
+            if (_container == newContainer)
+            {
+                return;
+            }
             _container = newContainer;
         }
-
-       
 
         // Generate preview of the same object, but without stored items.
         [ServerOrClient]
