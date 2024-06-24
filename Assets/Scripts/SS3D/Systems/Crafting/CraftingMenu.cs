@@ -142,7 +142,7 @@ namespace SS3D.Systems.Crafting
             
             if (_isPointerOnMenu)
             {
-                //_inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
+                _inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
             }
         }
 
