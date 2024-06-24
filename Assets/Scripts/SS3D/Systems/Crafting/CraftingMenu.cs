@@ -76,6 +76,8 @@ namespace SS3D.Systems.Crafting
         private readonly Dictionary<NetworkConnection, List<CraftingInteraction>> _interactionsForConnection = new();
         
         private readonly Dictionary<NetworkConnection, InteractionEvent> _eventForConnection = new();
+        
+        private bool _isPointerOnMenu = false;
 
         public override void OnStartNetwork()
         {
@@ -90,6 +92,7 @@ namespace SS3D.Systems.Crafting
         public void OnPointerEnter(PointerEventData eventData)
         {
             _inputSystem.ToggleBinding("<Mouse>/scroll/y", false);
+            _isPointerOnMenu = true;
         }
 
         /// <summary>
@@ -98,6 +101,7 @@ namespace SS3D.Systems.Crafting
         public void OnPointerExit(PointerEventData eventData)
         {
             _inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
+            _isPointerOnMenu = false;
         }
 
         private void ShowUI(bool isShow)
@@ -135,6 +139,11 @@ namespace SS3D.Systems.Crafting
         public void HideMenu()
         {
             ShowUI(false);
+            
+            if (_isPointerOnMenu)
+            {
+                //_inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
+            }
         }
 
         /// <summary>
