@@ -184,9 +184,8 @@ namespace SS3D.Systems.Crafting
         {
             _interaction = _interactionsForConnection[conn][index];
             _interactionEvent = _eventForConnection[conn];
-
             List<WorldObjectAssetReference> results = new();
-
+            
             if (_interaction.ChosenLink.Target.IsTerminal && _interaction.ChosenLink.Target.TryGetResult(out WorldObjectAssetReference result))
             {
                 results.Add(result);
@@ -195,9 +194,8 @@ namespace SS3D.Systems.Crafting
             {
                 results.Add(_interaction.ChosenLink.Target.Recipe.Target);
             }
-
-            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults);
-
+            
+            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults.Distinct());
             TargetSetVisuals(conn, results, _interaction.ChosenLink.Target.Name);
         }
 
