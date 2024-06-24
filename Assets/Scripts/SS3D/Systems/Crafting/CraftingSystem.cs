@@ -21,6 +21,8 @@ using System.Linq;
 using UnityEngine;
 using Hand = SS3D.Systems.Inventory.Containers.Hand;
 using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using SS3D.Systems.Inventory.Containers;
 
 namespace SS3D.Systems.Crafting
@@ -37,10 +39,9 @@ namespace SS3D.Systems.Crafting
         private readonly Dictionary<string, List<CraftingRecipe>> _recipeOrganiser = new();
 
         /// <summary>
-        /// Dictionary linking reference to crafting interactions to a list of coroutines, to start and cancel them.
-        /// Should be mostly used to move ingredients on target.
+        /// Dictionary links crafting interactions to a list of tweeners to cancel them.
         /// </summary>
-        private readonly Dictionary<InteractionReference, List<Coroutine>> _coroutinesOrganiser = new();
+        private readonly Dictionary<InteractionReference, List<TweenerCore<Vector3, Vector3, VectorOptions>>> _coroutinesOrganiser = new();
 
         /// <summary>
         /// Dictionary linking crafting interaction references to particles, to start and cancel them.
@@ -330,17 +331,11 @@ namespace SS3D.Systems.Crafting
         private List<IRecipeIngredient> GetCloseItemsFromTarget(InteractionEvent interactionEvent)
         {
             GameObject target = interactionEvent.Target.GetGameObject();
-            
             List<IRecipeIngredient> closeItemsFromTarget = new();
-            
             AddRecipeIngredientInHand(interactionEvent, closeItemsFromTarget);
-            
             Vector3 center = target.transform.position;
-
             float radius = 3f;
-
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
-
             foreach (Collider hitCollider in hitColliders)
             {
                 IRecipeIngredient item = hitCollider.GetComponentInParent<IRecipeIngredient>();
@@ -392,16 +387,14 @@ namespace SS3D.Systems.Crafting
         [Server]
         public void MoveAllObjectsToCraftPoint(CraftingInteraction interaction, InteractionEvent interactionEvent, InteractionReference reference)
         {
-            List<Coroutine> coroutines = new();
+            List<TweenerCore<Vector3, Vector3, VectorOptions>> coroutines = new();
             Vector3 targetPosition = interactionEvent.Target.GetGameObject().transform.position;
             List<GameObject> ingredientsToConsume = 
                 GetIngredientsToConsume(interactionEvent, interaction.ChosenLink).Select(x => x.GameObject).ToList();
             
             foreach (GameObject go in ingredientsToConsume)
             {
-                float distance = Vector3.Distance(go.transform.position, targetPosition);
-                float speed = 5f * distance;
-                coroutines.Add(StartCoroutine(MoveObjectToTarget(go.transform, targetPosition, speed)));
+                coroutines.Add(go.transform.DOMove(targetPosition, 0.75f));
             }
 
             _coroutinesOrganiser.Add(reference, coroutines);
@@ -414,24 +407,9 @@ namespace SS3D.Systems.Crafting
         [Server]
         public void CancelMoveAllObjectsToCraftPoint(InteractionReference reference)
         {
-            _coroutinesOrganiser[reference].Where(x => x!= null).ToList().ForEach(x => StopCoroutine(x) );
+            // TODO: Remove checks for null
+            _coroutinesOrganiser[reference].Where(x => x!= null).ToList().ForEach(x => x.Kill());
             CancelCraftingSmoke(reference.Id);
-        }
-
-        /// <summary>
-        /// Should be called by a coroutine, moves another gameObject to a specific target, at a given speed
-        /// </summary>
-        [Server]
-        private IEnumerator MoveObjectToTarget(Transform objTransform, Vector3 targetPosition, float speed)
-        {
-            while (Vector3.Distance(objTransform.position, targetPosition) > 0.1f)
-            {
-                float step = speed * Time.deltaTime;
-                objTransform.position = Vector3.MoveTowards(objTransform.position, targetPosition, step);
-                yield return null;
-            }
-
-            objTransform.position = targetPosition;
         }
 
         /// <summary>
@@ -480,7 +458,7 @@ namespace SS3D.Systems.Crafting
         private void AddRecipeIngredientInHand(InteractionEvent interactionEvent, List<IRecipeIngredient> ingredients)
         {
             Hands hands = interactionEvent.Source.GameObject.GetComponentInParent<Hands>();
-            if (hands != null)
+            if (hands)
             {
                 List<Item> itemsInHand = new();
 
