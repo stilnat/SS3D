@@ -163,10 +163,13 @@ namespace SS3D.Systems.Crafting
                 Log.Error(this, $"Tag associated to recipe link {link} should not be null");
                 return;
             }
-
-            foreach (GameObject prefab in link.Tag.SecondaryResults.Select(x => x.Prefab).ToList())
+            
+            foreach (RecipeStepLink.SecondaryResult secondaryResult in link.Tag.SecondaryResults)
             {
-                  DefaultCraft(interaction, interactionEvent, prefab, link.Target);
+                for (int i = 0; i < secondaryResult.Amount; i++)
+                {
+                    DefaultCraft(interaction, interactionEvent, secondaryResult.Asset.Prefab, link.Target);
+                }
             }
 
             foreach (IRecipeIngredient item in ingredients)
@@ -433,21 +436,18 @@ namespace SS3D.Systems.Crafting
             {
                 instance = DefaultCraftItemHeldInHand(prefab, hand, recipeStep, interaction);
             }
-
             // If result is a placed tile object, just place it on the tilemap.
-            else if(prefab.TryGetComponent(out PlacedTileObject resultTileObject))
+            else if (prefab.TryGetComponent(out PlacedTileObject resultTileObject))
             {
                 instance = DefaultCraftTileObject(interactionEvent, resultTileObject);
             }
-
-            else if(interactionEvent.Target.GetGameObject().TryGetComponent(out PlacedTileObject _) && prefab.TryGetComponent(out Draggable _))
+            else if (interactionEvent.Target.GetGameObject().TryGetComponent(out PlacedTileObject _) && prefab.TryGetComponent(out Draggable _))
             {
                 instance = Instantiate(prefab);
                 instance.transform.position = interactionEvent.Target.GetGameObject().transform.position;
                 InstanceFinder.ServerManager.Spawn(instance);
                 instance.SetActive(true);
             }
-
             else
             {
                 instance = Instantiate(prefab);
@@ -459,7 +459,6 @@ namespace SS3D.Systems.Crafting
             }
 
             return instance;
-
         }
 
         private void AddRecipeIngredientInHand(InteractionEvent interactionEvent, List<IRecipeIngredient> ingredients)
@@ -468,12 +467,10 @@ namespace SS3D.Systems.Crafting
             if (hands)
             {
                 List<Item> itemsInHand = new();
-
                 foreach (Hand hand in hands.PlayerHands)
                 {
                     itemsInHand.AddRange(hand.Container.Items);
                 }
-                
                 foreach (Item item in itemsInHand)
                 {
                     if(item.GameObject.TryGetComponent(out IRecipeIngredient recipeIngredient))

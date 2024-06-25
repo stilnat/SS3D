@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Coimbra;
 using SS3D.Data.AssetDatabases;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Crafting
 {
@@ -17,7 +18,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [SerializeField]
         private SerializableDictionary<WorldObjectAssetReference, int> _elements = new();
-
+        
         /// <summary>
         /// Bunch of conditions for ingredients to be valid.
         /// </summary>
@@ -58,7 +59,14 @@ namespace SS3D.Systems.Crafting
         ///  Things produced by going through this recipe link, upon reaching next step.
         /// </summary>
         [SerializeField]
-        private List<WorldObjectAssetReference> _secondaryresults;
+        private List<SecondaryResult> _secondaryResults;
+        
+        [Serializable]
+        public struct SecondaryResult
+        {
+            public WorldObjectAssetReference Asset;
+            public uint Amount;
+        }
 
         /// <summary>
         /// Time it takes in second for the crafting to finish.
@@ -113,7 +121,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// The result of the crafting.
         /// </summary>
-        public List<WorldObjectAssetReference> SecondaryResults => _secondaryresults;
+        public List<SecondaryResult> SecondaryResults => _secondaryResults;
 
         /// <summary>
         /// Filter ingredients based on conditions added on this recipe step link.

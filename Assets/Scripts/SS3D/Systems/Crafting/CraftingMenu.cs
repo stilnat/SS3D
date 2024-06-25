@@ -195,7 +195,7 @@ namespace SS3D.Systems.Crafting
                 results.Add(_interaction.ChosenLink.Target.Recipe.Target);
             }
             
-            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults.Distinct());
+            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults.Select(x => x.Asset));
             TargetSetVisuals(conn, results, _interaction.ChosenLink.Target.Name);
         }
 
