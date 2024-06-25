@@ -92,6 +92,13 @@ namespace SS3D.Systems.Crafting
             links = new();
 
             if (!target.TryGetComponent(out IWorldObjectAsset targetAssetReference)) return false;
+
+            if (targetAssetReference.Asset is null)
+            {
+                Log.Warning(this, $"world object asset asset reference is null");
+
+                return false;
+            }
             
             if (!_recipeOrganiser.TryGetValue(targetAssetReference.Asset.Id, out List<CraftingRecipe> recipes))
             {
