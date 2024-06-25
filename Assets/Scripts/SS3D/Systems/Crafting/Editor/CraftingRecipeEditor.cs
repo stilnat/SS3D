@@ -1,22 +1,22 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace SS3D.Systems.Crafting
 {
     [CustomEditor(typeof(CraftingRecipe))]
     public class CraftingRecipeEditor : Editor
     {
-        private SerializedProperty targetProperty;
-        private SerializedProperty stepsProperty;
-        private SerializedProperty stepLinksProperty;
+        private SerializedProperty _targetProperty;
+        private SerializedProperty _stepsProperty;
+        private SerializedProperty _stepLinksProperty;
 
         private void OnEnable()
         {
             // Initialize SerializedProperties
-            targetProperty = serializedObject.FindProperty("_target");
-            stepsProperty = serializedObject.FindProperty("steps");
-            stepLinksProperty = serializedObject.FindProperty("stepLinks");
+            _targetProperty = serializedObject.FindProperty("_target");
+            CraftingRecipe recipe = serializedObject.targetObject as CraftingRecipe;
+            _stepsProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.steps));
+            _stepLinksProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.stepLinks));
         }
 
         public override void OnInspectorGUI()
@@ -25,31 +25,30 @@ namespace SS3D.Systems.Crafting
             serializedObject.Update();
 
             // Draw target property
-            EditorGUILayout.PropertyField(targetProperty);
+            EditorGUILayout.PropertyField(_targetProperty);
 
             // Check if any step has _isInitial set to true
             bool hasInitialStep = HasInitialStep();
 
             // Draw each RecipeStep individually
-            for (int i = 0; i < stepsProperty.arraySize; i++)
+            for (int i = 0; i < _stepsProperty.arraySize; i++)
             {
-                SerializedProperty stepProperty = stepsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty stepProperty = _stepsProperty.GetArrayElementAtIndex(i);
                 DrawRecipeStep(stepProperty, hasInitialStep);
 
                 EditorGUILayout.Space();
             }
-            
 
             // Add a button to add a new step
             if (GUILayout.Button("Add Step"))
             {
                 // Increase the array size by 1 and get the new element
-                stepsProperty.arraySize++;
+                _stepsProperty.arraySize++;
                 serializedObject.ApplyModifiedProperties();
             }
 
             // Draw stepLinks list property
-            EditorGUILayout.PropertyField(stepLinksProperty, true); // 'true' means to draw children
+            EditorGUILayout.PropertyField(_stepLinksProperty, true); // 'true' means to draw children
 
             // Apply changes to SerializedObject
             serializedObject.ApplyModifiedProperties();
@@ -92,9 +91,9 @@ namespace SS3D.Systems.Crafting
 
         private bool HasInitialStep()
         { 
-            for (int i = 0; i < stepsProperty.arraySize; i++)
+            for (int i = 0; i < _stepsProperty.arraySize; i++)
             {
-                SerializedProperty stepProperty = stepsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty stepProperty = _stepsProperty.GetArrayElementAtIndex(i);
                 SerializedProperty isInitialProperty = stepProperty.FindPropertyRelative("_isInitialState");
                 if (isInitialProperty != null && isInitialProperty.boolValue)
                 {

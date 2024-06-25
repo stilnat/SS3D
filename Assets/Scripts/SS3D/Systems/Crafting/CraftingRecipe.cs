@@ -1,8 +1,10 @@
 ﻿using QuikGraph;
 using SS3D.Data.AssetDatabases;
 using SS3D.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
@@ -13,6 +15,7 @@ namespace SS3D.Systems.Crafting
     [CreateAssetMenu(fileName = "Recipe", menuName = "SS3D/Crafting/Recipe")]
     public class CraftingRecipe : ScriptableObject
     {
+        // After renaming make sure that the property is renamed in CraftingRecipeEditor as well
         /// <summary>
         /// The target of the crafting, what needs to be clicked on by the player to start the crafting.
         /// </summary>
@@ -113,6 +116,22 @@ namespace SS3D.Systems.Crafting
             if (!TryGetStep(name, out RecipeStep step)) return new();
             _recipeGraph.TryGetOutEdges(step, out IEnumerable<TaggedEdge<RecipeStep, RecipeStepLink>> results);
             return results.ToList();
+        }
+        
+        // <summary>
+        // Get the name of a static or instance property from a property access lambda.
+        // </summary>
+        // <typeparam name="T">Type of the property</typeparam>
+        // <param name="propertyLambda">lambda expression of the form: '() => Class.Property' or '() => object.Property'</param>
+        // <returns>The name of the property</returns>
+        public static string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
+        {
+            MemberExpression me = propertyLambda.Body as MemberExpression;
+            if (me == null)
+            {
+                throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
+            }
+            return me.Member.Name;
         }
     }
 }
