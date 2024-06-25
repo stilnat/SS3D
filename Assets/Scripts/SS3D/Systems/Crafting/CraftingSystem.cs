@@ -164,7 +164,7 @@ namespace SS3D.Systems.Crafting
                 return;
             }
             
-            foreach (RecipeStepLink.SecondaryResult secondaryResult in link.Tag.SecondaryResults)
+            foreach (SecondaryResult secondaryResult in link.Tag.SecondaryResults)
             {
                 for (int i = 0; i < secondaryResult.Amount; i++)
                 {

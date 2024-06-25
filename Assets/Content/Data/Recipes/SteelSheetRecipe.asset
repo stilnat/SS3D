@@ -44,9 +44,9 @@ MonoBehaviour:
     _to: SteelRods
     _modifyResult: 0
     _executionTime: 2
-    _secondaryresults:
-    - {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
-    - {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
+      Amount: 2
   - _elements:
       _list: []
       _new: {fileID: 0}
@@ -56,7 +56,7 @@ MonoBehaviour:
     _to: SteelGirderUnbolted
     _modifyResult: 0
     _executionTime: 2
-    _secondaryresults: []
+    _secondaryResults: []
   - _elements:
       _list: []
       _new: {fileID: 0}
@@ -66,8 +66,6 @@ MonoBehaviour:
     _to: FloorTiles
     _modifyResult: 0
     _executionTime: 2
-    _secondaryresults:
-    - {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
-    - {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
-    - {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
-    - {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
+      Amount: 4

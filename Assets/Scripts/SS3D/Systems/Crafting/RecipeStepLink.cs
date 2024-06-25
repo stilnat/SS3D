@@ -61,12 +61,6 @@ namespace SS3D.Systems.Crafting
         [SerializeField]
         private List<SecondaryResult> _secondaryResults;
         
-        [Serializable]
-        public struct SecondaryResult
-        {
-            public WorldObjectAssetReference Asset;
-            public uint Amount;
-        }
 
         /// <summary>
         /// Time it takes in second for the crafting to finish.

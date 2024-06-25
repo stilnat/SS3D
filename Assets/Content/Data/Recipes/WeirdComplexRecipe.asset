@@ -34,7 +34,8 @@ MonoBehaviour:
     _to: WeirdStuff
     _modifyResult: 0
     _executionTime: 1
-    _secondaryresults:
-    - {fileID: 11400000, guid: d81d46f903aad014aa4728a8b47ab7ea, type: 2}
-    - {fileID: 11400000, guid: d81d46f903aad014aa4728a8b47ab7ea, type: 2}
-    - {fileID: 11400000, guid: b42f227c43baa2141938339b7dda3f71, type: 2}
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: d81d46f903aad014aa4728a8b47ab7ea, type: 2}
+      Amount: 2
+    - Asset: {fileID: 11400000, guid: b42f227c43baa2141938339b7dda3f71, type: 2}
+      Amount: 1

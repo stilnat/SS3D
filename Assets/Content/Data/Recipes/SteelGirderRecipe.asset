@@ -245,7 +245,9 @@ MonoBehaviour:
     _to: SteelGirder
     _modifyResult: 0
     _executionTime: 1
-    _secondaryResults: []
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 8cfc0ba9b0715224ca017ad6ddfbd66b, type: 2}
+      Amount: 1
   - _elements:
       _list: []
       _new: {fileID: 0}
@@ -255,7 +257,9 @@ MonoBehaviour:
     _to: SteelGirder
     _modifyResult: 0
     _executionTime: 1
-    _secondaryResults: []
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 3c8e8f4d958f81744a729dc344342955, type: 2}
+      Amount: 1
   - _elements:
       _list: []
       _new: {fileID: 0}
@@ -275,7 +279,9 @@ MonoBehaviour:
     _to: ReinforcedSteelGirderWithStruts
     _modifyResult: 0
     _executionTime: 2
-    _secondaryResults: []
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 3c8e8f4d958f81744a729dc344342955, type: 2}
+      Amount: 1
   - _elements:
       _list: []
       _new: {fileID: 0}

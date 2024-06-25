@@ -184,18 +184,18 @@ namespace SS3D.Systems.Crafting
         {
             _interaction = _interactionsForConnection[conn][index];
             _interactionEvent = _eventForConnection[conn];
-            List<WorldObjectAssetReference> results = new();
+            List<SecondaryResult> results = new();
             
             if (_interaction.ChosenLink.Target.IsTerminal && _interaction.ChosenLink.Target.TryGetResult(out WorldObjectAssetReference result))
             {
-                results.Add(result);
+                results.Add(new (result, 1));
             }
             else if (!_interaction.ChosenLink.Target.IsTerminal)
             {
-                results.Add(_interaction.ChosenLink.Target.Recipe.Target);
+                results.Add(new (_interaction.ChosenLink.Target.Recipe.Target, 1));
             }
             
-            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults.Select(x => x.Asset));
+            results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults);
             TargetSetVisuals(conn, results, _interaction.ChosenLink.Target.Name);
         }
 
@@ -224,15 +224,15 @@ namespace SS3D.Systems.Crafting
         }
 
         [TargetRpc]
-        private void TargetSetVisuals(NetworkConnection conn, List<WorldObjectAssetReference> results, string nextRecipeStepName)
+        private void TargetSetVisuals(NetworkConnection conn, List<SecondaryResult> results, string nextRecipeStepName)
         {
             ClearPictures();
 
-            foreach (WorldObjectAssetReference result in results)
+            foreach (SecondaryResult result in results)
             {
-                GenericObjectSo asset = Subsystems.Get<TileSystem>().GetAsset(result.Id);
+                GenericObjectSo asset = Subsystems.Get<TileSystem>().GetAsset(result.Asset.Id);
                 GameObject pictureSlot = Instantiate(_pictureSlotPrefab, _pictureSlotArea.transform, true);
-                pictureSlot.GetComponent<AssetSlot>().Setup(asset);
+                pictureSlot.GetComponent<CraftingSlot>().Setup(asset, result.Amount);
             }
 
             _objectTitle.text = nextRecipeStepName;

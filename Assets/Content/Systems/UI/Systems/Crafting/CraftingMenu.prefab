@@ -1108,7 +1108,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 8932735734697480342}
   _networkObjectCache: {fileID: 8932735734697480342}
   _textSlotPrefab: {fileID: 2526814804305374919, guid: 950de92fa59738547b6c973f1d12cdb9, type: 3}
-  _pictureSlotPrefab: {fileID: 4285405521571209506, guid: 484315627df23dd428819ee4c9e05603, type: 3}
+  _pictureSlotPrefab: {fileID: 4285405521571209506, guid: 5178a7bb33c863f42bad9ef26300473e, type: 3}
   _textSlotArea: {fileID: 3377149541993101921}
   _pictureSlotArea: {fileID: 8090865547143251753}
   _objectTitle: {fileID: 1074193427462014533}
@@ -1140,11 +1140,11 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 69
+  <PrefabId>k__BackingField: 63
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 5320721474294283722
+  <AssetPathHash>k__BackingField: 7104282468500981967
 --- !u!1 &8090865547143251753
 GameObject:
   m_ObjectHideFlags: 0
