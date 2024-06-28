@@ -34,6 +34,4 @@ MonoBehaviour:
     _to: SteelGirderWithMetalSheet
     _modifyResult: 1
     _executionTime: 2
-    _secondaryResults:
-    - Asset: {fileID: 11400000, guid: 8cfc0ba9b0715224ca017ad6ddfbd66b, type: 2}
-      Amount: 1
+    _secondaryResults: []

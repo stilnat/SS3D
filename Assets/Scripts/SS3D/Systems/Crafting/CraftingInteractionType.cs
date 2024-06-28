@@ -5,7 +5,7 @@
     /// </summary>
     public enum CraftingInteractionType
     {
-        Build,
+        Screw,
         Bolt,
         Slice,
         Handcraft,
