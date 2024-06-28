@@ -14,17 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _target: {fileID: 11400000, guid: afd2790edc5c26a48ae1e0f45ecb1f32, type: 2}
   steps:
-  - _result: []
-    _isTerminal: 0
-    _name: SteelWall
+  - _name: SteelWall
     _isInitialState: 1
+    _isTerminal: 0
     _customCraft: 0
-  - _result:
-    - {fileID: 11400000, guid: bbc616cb55d58144eb50ce126cfca103, type: 2}
-    _isTerminal: 1
-    _name: SteelGirderWithMetalSheet
+    _result: {fileID: 0}
+  - _name: SteelGirderWithMetalSheet
     _isInitialState: 0
+    _isTerminal: 1
     _customCraft: 0
+    _result: {fileID: 11400000, guid: bbc616cb55d58144eb50ce126cfca103, type: 2}
   stepLinks:
   - _elements:
       _list: []
@@ -35,4 +34,6 @@ MonoBehaviour:
     _to: SteelGirderWithMetalSheet
     _modifyResult: 1
     _executionTime: 2
-    _secondaryresults: []
+    _secondaryResults:
+    - Asset: {fileID: 11400000, guid: 8cfc0ba9b0715224ca017ad6ddfbd66b, type: 2}
+      Amount: 1
