@@ -13,8 +13,8 @@ namespace SS3D.Systems.Crafting
         private void OnEnable()
         {
             // Initialize SerializedProperties
-            _targetProperty = serializedObject.FindProperty("_target");
             CraftingRecipe recipe = serializedObject.targetObject as CraftingRecipe;
+            _targetProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.Target));
             _stepsProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.steps));
             _stepLinksProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.stepLinks));
         }

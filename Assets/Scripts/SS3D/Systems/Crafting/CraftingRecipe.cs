@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Crafting
 {
@@ -15,17 +16,10 @@ namespace SS3D.Systems.Crafting
     [CreateAssetMenu(fileName = "Recipe", menuName = "SS3D/Crafting/Recipe")]
     public class CraftingRecipe : ScriptableObject
     {
-        // After renaming make sure that the property is renamed in CraftingRecipeEditor as well
         /// <summary>
         /// The target of the crafting, what needs to be clicked on by the player to start the crafting.
         /// </summary>
-        [SerializeField]
-        private WorldObjectAssetReference _target;
-
-        /// <summary>
-        /// The target of the recipe, which is the item on which the player must click to get the crafting interactions.
-        /// </summary>
-        public WorldObjectAssetReference Target => _target;
+        public WorldObjectAssetReference Target;
         
         /// <summary>
         /// A bunch of recipe steps, representing each steps of the recipe.
