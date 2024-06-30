@@ -159,6 +159,8 @@ namespace SS3D.Systems.Crafting
                 case "ReinforcedSteelGirder":
                     AddSupports();
                     break;
+                case "SteelGirder":
+                    break;
                 default:
                     Log.Error(this, "step name passed in parameter is not handled by girderCraftable");
                     break;
