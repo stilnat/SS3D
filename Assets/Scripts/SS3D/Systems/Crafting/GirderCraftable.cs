@@ -55,7 +55,7 @@ namespace SS3D.Systems.Crafting
 
 
         /// <summary>
-        /// Called by the crafting system mostly, to change the current girder prefab model into another one, modifying its mesh.
+        /// Change the current girder prefab model into another one, modifying its mesh.
         /// </summary>
         [Server]
         public override void Modify(IInteraction interaction, InteractionEvent interactionEvent, string step)

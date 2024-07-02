@@ -1,10 +1,8 @@
 ﻿using QuikGraph;
 using SS3D.Data.AssetDatabases;
 using SS3D.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -24,25 +22,25 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// A bunch of recipe steps, representing each steps of the recipe.
         /// </summary>
-        public List<RecipeStep> steps;
+        [FormerlySerializedAs("steps")]
+        public List<RecipeStep> Steps;
 
         /// <summary>
         /// A bunch of recipe links, which link recipe step together.
         /// </summary>
-        public List<RecipeStepLink> stepLinks;
+        [FormerlySerializedAs("stepLinks")]
+        public List<RecipeStepLink> StepLinks;
 
         /// <summary>
         /// First step of the recipe, which should have the same name as the target of the recipe.
         /// </summary>
         public string RootStepName => Target.Prefab.name;
-
+        
         /// <summary>
         /// Graph representing all steps in a recipe and their link between each other.
         /// </summary>
-        private AdjacencyGraph<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>> _recipeGraph;
-
-        public AdjacencyGraph<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>> RecipeGraph => _recipeGraph;
-
+        public AdjacencyGraph<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>> RecipeGraph { get; private set; }
+        
         private void Awake()
         {
             Init();
@@ -59,15 +57,15 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         private void Init()
         {
-            _recipeGraph = new();
+            RecipeGraph = new();
 
-            foreach (RecipeStep step in steps)
+            foreach (RecipeStep step in Steps)
             {
-                _recipeGraph.AddVertex(step);
+                RecipeGraph.AddVertex(step);
                 step.Recipe = this;
             }
 
-            foreach (RecipeStepLink link in stepLinks)
+            foreach (RecipeStepLink link in StepLinks)
             {
                 link.Recipe = this;
                 bool stepFromFound = TryGetStep(link.From, out RecipeStep stepFrom);
@@ -75,7 +73,7 @@ namespace SS3D.Systems.Crafting
 
                 if (stepFromFound && stepToFound)
                 {
-                    _recipeGraph.AddEdge(new(stepFrom, stepTo, link));
+                    RecipeGraph.AddEdge(new(stepFrom, stepTo, link));
                 }
                 else
                 {
@@ -90,13 +88,13 @@ namespace SS3D.Systems.Crafting
         /// <returns></returns>
         public bool TryGetStep(string name, out RecipeStep step)
         {
-            if (_recipeGraph == null)
+            if (RecipeGraph == null)
             {
                 Log.Error(this, "recipeGraph is null");
                 step = null;
                 return false;
             }
-            step = _recipeGraph.Vertices.FirstOrDefault(x => x.Name == name);
+            step = RecipeGraph.Vertices.FirstOrDefault(x => x.Name == name);
             return step != null;
         }
 
@@ -108,24 +106,8 @@ namespace SS3D.Systems.Crafting
         public List<TaggedEdge<RecipeStep, RecipeStepLink>> GetLinksFromStep(string name)
         {
             if (!TryGetStep(name, out RecipeStep step)) return new();
-            _recipeGraph.TryGetOutEdges(step, out IEnumerable<TaggedEdge<RecipeStep, RecipeStepLink>> results);
+            RecipeGraph.TryGetOutEdges(step, out IEnumerable<TaggedEdge<RecipeStep, RecipeStepLink>> results);
             return results.ToList();
-        }
-        
-        // <summary>
-        // Get the name of a static or instance property from a property access lambda.
-        // </summary>
-        // <typeparam name="T">Type of the property</typeparam>
-        // <param name="propertyLambda">lambda expression of the form: '() => Class.Property' or '() => object.Property'</param>
-        // <returns>The name of the property</returns>
-        public static string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
-        {
-            MemberExpression me = propertyLambda.Body as MemberExpression;
-            if (me == null)
-            {
-                throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
-            }
-            return me.Member.Name;
         }
     }
 }

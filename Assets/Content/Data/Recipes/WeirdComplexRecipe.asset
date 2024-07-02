@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c384097cfa3559042be45b4f6328d961, type: 3}
   m_Name: WeirdComplexRecipe
   m_EditorClassIdentifier: 
-  _target: {fileID: 11400000, guid: 3747dddbc41cad94bbbfc43bfed384c3, type: 2}
-  steps:
+  Target: {fileID: 11400000, guid: 3747dddbc41cad94bbbfc43bfed384c3, type: 2}
+  Steps:
   - _name: BikeHorn
     _isInitialState: 1
     _isTerminal: 0
@@ -24,7 +24,7 @@ MonoBehaviour:
     _isTerminal: 1
     _customCraft: 0
     _result: {fileID: 0}
-  stepLinks:
+  StepLinks:
   - _elements:
       _list: []
       _new: {fileID: 0}

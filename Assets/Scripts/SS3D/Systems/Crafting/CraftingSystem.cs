@@ -201,9 +201,9 @@ namespace SS3D.Systems.Crafting
         {
             GameObject resultInstance;
 
-            if (result.Prefab == null)
+            if (!result.Prefab)
             {
-                Log.Error(this, $"world object reference {result} has no prefab associated, returning");
+                Log.Error(this, $"World object reference {result} has no prefab associated");
                 return;
             }
                 

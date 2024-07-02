@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Linq.Expressions;
+using UnityEditor;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
@@ -14,20 +16,15 @@ namespace SS3D.Systems.Crafting
         {
             // Initialize SerializedProperties
             CraftingRecipe recipe = serializedObject.targetObject as CraftingRecipe;
-            _targetProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.Target));
-            _stepsProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.steps));
-            _stepLinksProperty = serializedObject.FindProperty(CraftingRecipe.GetPropertyName(() => recipe.stepLinks));
+            _targetProperty = serializedObject.FindProperty(GetPropertyName(() => recipe.Target));
+            _stepsProperty = serializedObject.FindProperty(GetPropertyName(() => recipe.Steps));
+            _stepLinksProperty = serializedObject.FindProperty(GetPropertyName(() => recipe.StepLinks));
         }
 
         public override void OnInspectorGUI()
         {
-            // Update SerializedObject
             serializedObject.Update();
-
-            // Draw target property
             EditorGUILayout.PropertyField(_targetProperty);
-
-            // Check if any step has _isInitial set to true
             bool hasInitialStep = HasInitialStep();
 
             // Draw each RecipeStep individually
@@ -40,17 +37,13 @@ namespace SS3D.Systems.Crafting
             }
 
             // Add a button to add a new step
-            if (GUILayout.Button("Add Step"))
+            if (GUILayout.Button("Add a step"))
             {
-                // Increase the array size by 1 and get the new element
                 _stepsProperty.arraySize++;
                 serializedObject.ApplyModifiedProperties();
             }
 
-            // Draw stepLinks list property
-            EditorGUILayout.PropertyField(_stepLinksProperty, true); // 'true' means to draw children
-
-            // Apply changes to SerializedObject
+            EditorGUILayout.PropertyField(_stepLinksProperty, true);
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -58,31 +51,31 @@ namespace SS3D.Systems.Crafting
         private void DrawRecipeStep(SerializedProperty stepProperty, bool hasInitialStep)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-
             bool isInitialStep = false;
-
             bool isTerminalStep = false;
 
             // Iterate over properties of RecipeStep
             foreach (SerializedProperty property in stepProperty)
             {
-
-                if (property.name == "_isInitialState" && hasInitialStep && property.boolValue == false)
-                    continue;
-
-                if (property.name == "_isInitialState" && property.boolValue == true) isInitialStep = true;
-
-                if (property.name == "_isTerminal" && property.boolValue == true) isTerminalStep = true;
-
-                if (isInitialStep && property.name == "_isTerminal")
-                    continue;
-
-                if (!isTerminalStep && property.name == "_customCraft")
-                    continue;
-
-                if (!isTerminalStep && property.name == "_result")
-                    continue;
-
+                switch (property.name)
+                {
+                    case "_isInitialState" when hasInitialStep && property.boolValue == false:
+                        continue;
+                    case "_isInitialState" when property.boolValue:
+                        isInitialStep = true;
+                        break;
+                    case "_isTerminal" when property.boolValue:
+                        isTerminalStep = true;
+                        break;
+                }
+                
+                switch (property.name)
+                {
+                    case "_isTerminal" when isInitialStep:
+                    case "_customCraft" when !isTerminalStep:
+                    case "_result" when !isTerminalStep:
+                        continue;
+                }
                 EditorGUILayout.PropertyField(property, true);
             }
 
@@ -102,6 +95,22 @@ namespace SS3D.Systems.Crafting
             }
             
             return false;
+        }
+        
+        /// <summary>
+        /// Get the name of a static or instance property from a property access lambda.
+        /// </summary>
+        /// <typeparam name="T">Type of the property</typeparam>
+        /// <param name="propertyLambda">lambda expression of the form: '() => Class.Property' or '() => object.Property'</param>
+        /// <returns>The name of the property</returns>
+        public static string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
+        {
+            MemberExpression me = propertyLambda.Body as MemberExpression;
+            if (me == null)
+            {
+                throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
+            }
+            return me.Member.Name;
         }
     }
 }

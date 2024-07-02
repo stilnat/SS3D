@@ -23,7 +23,7 @@ namespace SS3D.Systems.Crafting
         private string _name;
 
         /// <summary>
-        /// /// If true, the recipe start here. It should be unique. A step can't be terminal and initial at the same time.
+        /// If true, the recipe starts here. There is only one initial step in a recipe. A step can't be terminal and initial at the same time.
         /// </summary>
         [SerializeField]
         private bool _isInitialState;
@@ -76,7 +76,7 @@ namespace SS3D.Systems.Crafting
         }
 
         /// <summary>
-        /// If true, is the original step of the recipe. Only one original step can exist.
+        /// If true, the recipe starts here. There is only one initial step in a recipe. A step can't be terminal and initial at the same time.
         /// </summary>
         public bool IsInitialState => _isInitialState;
 
