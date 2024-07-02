@@ -90,7 +90,7 @@ namespace SS3D.Systems.Crafting
         private bool TryGetRecipeLinks(CraftingInteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
         {
             links = new();
-
+            
             if (!target.TryGetComponent(out IWorldObjectAsset targetAssetReference)) return false;
 
             if (targetAssetReference.Asset is null)
@@ -107,19 +107,9 @@ namespace SS3D.Systems.Crafting
             }
             
             string currentStepName = CurrentStepName(target);
-            foreach (CraftingRecipe potentialRecipe in recipes)
-            {
-                List<TaggedEdge<RecipeStep, RecipeStepLink>> potentialLinks =  potentialRecipe.GetLinksFromStep(currentStepName);
-
-                foreach(TaggedEdge<RecipeStep, RecipeStepLink> link in potentialLinks)
-                {
-                    if (interactionType == link.Tag?.CraftingInteractionType)
-                    {
-                        links.Add(link);
-                    }
-                }
-            }
-
+            links = (from potentialRecipe in recipes from link in potentialRecipe.GetLinksFromStep(currentStepName) 
+                where interactionType == link.Tag?.CraftingInteractionType select link).ToList();
+            
             if (links.Count == 0) 
             {
                 Log.Information(this, $"no recipe links matching interaction type {interactionType}, from recipe step {currentStepName} ");
@@ -215,17 +205,15 @@ namespace SS3D.Systems.Crafting
             {
                 resultInstance = DefaultCraft(interaction, interactionEvent, result.Prefab, link.Target);
             }
-
-            if (link.Tag != null && link.Tag.ModifyResult)
+            
+            if (link.Tag == null || !link.Tag.ModifyResult) return;
+            
+            if (!resultInstance)
             {
-                if (!resultInstance)
-                {
-                    Log.Error(this, "could not craft an instance for the recipe result");
-
-                    return;
-                }
-                resultInstance.GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
+                Log.Error(this, "could not craft an instance for the recipe result");
+                return;
             }
+            resultInstance.GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
         }
 
         /// <summary>
@@ -301,8 +289,7 @@ namespace SS3D.Systems.Crafting
             List<IRecipeIngredient> ingredients = GetIngredientsToConsume(interactionEvent, link);
             Dictionary<string, int> potentialRecipeElements = ItemListToDictionnaryOfRecipeElements(ingredients);
             
-            if (!CheckEnoughCloseItemsForRecipe(potentialRecipeElements, link.Tag)) return false;
-            return true;
+            return CheckEnoughCloseItemsForRecipe(potentialRecipeElements, link.Tag);
         }
 
         /// <summary>
@@ -368,7 +355,6 @@ namespace SS3D.Systems.Crafting
             foreach (string id in recipeSteplink.Elements.Keys.ToList())
             {
                 int potentialRecipeItemCount = potentialRecipeElements.GetValueOrDefault(id);
-
                 if (potentialRecipeItemCount < recipeSteplink.Elements[id])
                 {
                     return false;

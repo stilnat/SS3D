@@ -32,7 +32,6 @@ namespace SS3D.Systems.Crafting
             {
                 SerializedProperty stepProperty = _stepsProperty.GetArrayElementAtIndex(i);
                 DrawRecipeStep(stepProperty, hasInitialStep);
-
                 EditorGUILayout.Space();
             }
 
