@@ -1,5 +1,7 @@
-﻿using SS3D.Data.AssetDatabases;
+﻿using NaughtyAttributes;
+using SS3D.Data.AssetDatabases;
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
@@ -14,6 +16,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// The recipe this step belongs to.
         /// </summary>
+        [NonSerialized]
         public CraftingRecipe Recipe;
 
         /// <summary>
@@ -25,23 +28,35 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// If true, the recipe starts here. There is only one initial step in a recipe. A step can't be terminal and initial at the same time.
         /// </summary>
+        [HideIf(nameof(ShowInitialState))]
+        [AllowNesting]
         public bool IsInitialState;
+        
+        /// <summary>
+        /// If true, show IsInitialState in the inspector
+        /// </summary>
+        private bool ShowInitialState => Recipe.HasInitial && !IsInitialState; 
 
         /// <summary>
         /// If true, the target is consumed (despawned). A step can't be terminal and initial at the same time.
         /// </summary>
+        [HideIf(nameof(IsInitialState))]
+        [AllowNesting]
         public bool IsTerminal;
 
         /// <summary>
         /// If true, the result of the recipe step should use a custom craft method, instead of the default one.
         /// Should only be true on a terminal step.
         /// </summary>
+        [ShowIf(nameof(IsTerminal))]
+        [AllowNesting]
         public bool CustomCraft;
 
         /// <summary>
-        /// A resulting object that will spawn at the end of the crafting process, optionnal, should be only on
-        /// terminal steps.
+        /// A resulting object that will spawn at the end of the crafting process, optional.
         /// </summary>
+        [ShowIf(nameof(IsTerminal))]
+        [AllowNesting]
         public WorldObjectAssetReference Result;
         
         /// <summary>

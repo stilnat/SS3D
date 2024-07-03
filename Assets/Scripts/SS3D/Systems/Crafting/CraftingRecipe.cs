@@ -33,6 +33,8 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         public string RootStepName => Target.Prefab.name;
         
+        public bool HasInitial => Steps.Any(x => x.IsInitialState);
+        
         /// <summary>
         /// Graph representing all steps in a recipe and their link between each other.
         /// </summary>
