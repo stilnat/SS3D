@@ -14,81 +14,56 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// The recipe this step belongs to.
         /// </summary>
-        public CraftingRecipe Recipe { get; set; }
+        public CraftingRecipe Recipe;
 
         /// <summary>
         /// The name of the step. Choose it carefully as it is currently how one can refer to it.
         /// </summary>
         [SerializeField]
         private string _name;
-
+        
         /// <summary>
         /// If true, the recipe starts here. There is only one initial step in a recipe. A step can't be terminal and initial at the same time.
         /// </summary>
-        [SerializeField]
-        private bool _isInitialState;
+        public bool IsInitialState;
 
         /// <summary>
         /// If true, the target is consumed (despawned). A step can't be terminal and initial at the same time.
         /// </summary>
-        [SerializeField]
-        private bool _isTerminal;
-
-        /// <summary>
-        /// If a default crafting method should be called, or if a custom one should.
-        /// </summary>
-        [SerializeField]
-        private bool _customCraft;
-
-        /// <summary>
-        /// A resulting object that will spawn at the end of the crafting process, optionnal, should be only on
-        /// terminal steps.
-        /// </summary>
-        [SerializeField]
-        private WorldObjectAssetReference _result;
-
-        public RecipeStep(CraftingRecipe recipe, string name)
-        {
-            Recipe = recipe;
-            _isTerminal = false;
-            _name = name;
-            _customCraft = false;
-            _result = new();
-        }
-
-        /// <summary>
-        /// If true, this is a final step of the recipe and the recipe target should be consumed (despawned).
-        /// There can be more than one terminal step.
-        /// </summary>
-        public bool IsTerminal => _isTerminal;
-
-        public bool TryGetResult(out WorldObjectAssetReference result)
-        {
-            result = _result;
-            return _result is not null;
-        }
-        
-        public WorldObjectAssetReference GetResult => _result;
-
-        public WorldObjectAssetReference GetResultOrTarget()
-        {
-            return _result ? _result : Recipe.Target;
-        }
-
-        /// <summary>
-        /// If true, the recipe starts here. There is only one initial step in a recipe. A step can't be terminal and initial at the same time.
-        /// </summary>
-        public bool IsInitialState => _isInitialState;
+        public bool IsTerminal;
 
         /// <summary>
         /// If true, the result of the recipe step should use a custom craft method, instead of the default one.
         /// Should only be true on a terminal step.
         /// </summary>
-        public bool CustomCraft => _customCraft;
+        public bool CustomCraft;
 
+        /// <summary>
+        /// A resulting object that will spawn at the end of the crafting process, optionnal, should be only on
+        /// terminal steps.
+        /// </summary>
+        public WorldObjectAssetReference Result;
+        
         /// <summary>
         /// Name of the recipe step.
         /// </summary>
         public string Name => _name;
+
+        public RecipeStep(CraftingRecipe recipe, string name)
+        {
+            Recipe = recipe;
+            IsTerminal = false;
+            _name = name;
+            CustomCraft = false;
+            Result = new();
+        }
+        
+        public bool TryGetResult(out WorldObjectAssetReference result)
+        {
+            result = Result;
+            return Result is not null;
+        }
+
+        public WorldObjectAssetReference GetResultOrTarget() => Result ? Result : Recipe.Target;
     }
 }

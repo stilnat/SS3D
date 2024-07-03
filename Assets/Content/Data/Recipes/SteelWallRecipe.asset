@@ -15,15 +15,15 @@ MonoBehaviour:
   Target: {fileID: 11400000, guid: afd2790edc5c26a48ae1e0f45ecb1f32, type: 2}
   Steps:
   - _name: SteelWall
-    _isInitialState: 1
-    _isTerminal: 0
-    _customCraft: 0
-    _result: {fileID: 0}
+    IsInitialState: 1
+    IsTerminal: 0
+    CustomCraft: 0
+    Result: {fileID: 0}
   - _name: SteelGirderWithMetalSheet
-    _isInitialState: 0
-    _isTerminal: 1
-    _customCraft: 0
-    _result: {fileID: 11400000, guid: bbc616cb55d58144eb50ce126cfca103, type: 2}
+    IsInitialState: 0
+    IsTerminal: 1
+    CustomCraft: 0
+    Result: {fileID: 11400000, guid: bbc616cb55d58144eb50ce126cfca103, type: 2}
   StepLinks:
   - _elements:
       _list: []

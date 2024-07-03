@@ -15,25 +15,25 @@ MonoBehaviour:
   Target: {fileID: 11400000, guid: 8cfc0ba9b0715224ca017ad6ddfbd66b, type: 2}
   Steps:
   - _name: SteelSheet
-    _isInitialState: 1
-    _isTerminal: 0
-    _customCraft: 0
-    _result: {fileID: 0}
+    IsInitialState: 1
+    IsTerminal: 0
+    CustomCraft: 0
+    Result: {fileID: 0}
   - _name: SteelGirderUnbolted
-    _isInitialState: 0
-    _isTerminal: 1
-    _customCraft: 0
-    _result: {fileID: 11400000, guid: 6fbb4f54f5632024680a17fba3fdf53d, type: 2}
+    IsInitialState: 0
+    IsTerminal: 1
+    CustomCraft: 0
+    Result: {fileID: 11400000, guid: 6fbb4f54f5632024680a17fba3fdf53d, type: 2}
   - _name: SteelRod
-    _isInitialState: 0
-    _isTerminal: 1
-    _customCraft: 0
-    _result: {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
+    IsInitialState: 0
+    IsTerminal: 1
+    CustomCraft: 0
+    Result: {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
   - _name: FloorTile
-    _isInitialState: 0
-    _isTerminal: 1
-    _customCraft: 0
-    _result: {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
+    IsInitialState: 0
+    IsTerminal: 1
+    CustomCraft: 0
+    Result: {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
   StepLinks:
   - _elements:
       _list: []

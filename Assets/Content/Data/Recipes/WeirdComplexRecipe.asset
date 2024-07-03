@@ -15,15 +15,15 @@ MonoBehaviour:
   Target: {fileID: 11400000, guid: 3747dddbc41cad94bbbfc43bfed384c3, type: 2}
   Steps:
   - _name: BikeHorn
-    _isInitialState: 1
-    _isTerminal: 0
-    _customCraft: 0
-    _result: {fileID: 0}
+    IsInitialState: 1
+    IsTerminal: 0
+    CustomCraft: 0
+    Result: {fileID: 0}
   - _name: WeirdStuff
-    _isInitialState: 0
-    _isTerminal: 1
-    _customCraft: 0
-    _result: {fileID: 0}
+    IsInitialState: 0
+    IsTerminal: 1
+    CustomCraft: 0
+    Result: {fileID: 0}
   StepLinks:
   - _elements:
       _list: []

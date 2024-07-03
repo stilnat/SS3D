@@ -4,7 +4,6 @@ using SS3D.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Crafting
 {
@@ -22,13 +21,11 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// A bunch of recipe steps, representing each steps of the recipe.
         /// </summary>
-        [FormerlySerializedAs("steps")]
         public List<RecipeStep> Steps;
 
         /// <summary>
         /// A bunch of recipe links, which link recipe step together.
         /// </summary>
-        [FormerlySerializedAs("stepLinks")]
         public List<RecipeStepLink> StepLinks;
 
         /// <summary>
