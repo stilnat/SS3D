@@ -1,18 +1,15 @@
 ﻿using QuikGraph;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace SS3D.Utils
 {
-
     public class VerticeWithPosition<TVertex>
     {
-        public TVertex vertice;
-        public Vector2 position;
+        public TVertex Vertice;
+        public Vector2 Position;
     }
 
     /// <summary>
@@ -26,23 +23,23 @@ namespace SS3D.Utils
         /// How much vertices are repulsive to each other.
         /// </summary>
         private static float RepulsiveConstant = 1;
-
+        
         /// <summary>
         /// How much vertices linked by an an edge attract each other.
         /// </summary>
         private static float AttractiveConstant = 1;
-
+        
         /// <summary>
         /// Ideal lenght between vertices.
         /// </summary>
         private static float IdealLenght = 80;
-
+        
         /// <summary>
         /// Delta acts like a "speed" factor for the algorithm, the higher it is, the faster it converges
         /// toward the solution, but values too high can lead to divergence.
         /// </summary>
         private static float Delta = 1f;
-
+        
         /// <summary>
         /// Another criteria to stop the algorithm is what's the max force exerted on any vertices is at a given iteration.
         /// When lower than a given amount we consider it won't move much still, and we stop.
@@ -72,14 +69,12 @@ namespace SS3D.Utils
             // make a new graph giving positions to vertices.
             foreach (TaggedEdge<TVertex, TTag> edge in originalGraph.Edges)
             {
-                VerticeWithPosition<TVertex> source = graphWithPosition.Vertices.FirstOrDefault(x => x.vertice.Equals(edge.Source));
-                VerticeWithPosition<TVertex> target = graphWithPosition.Vertices.FirstOrDefault(x => x.vertice.Equals(edge.Target));
+                VerticeWithPosition<TVertex> source = graphWithPosition.Vertices.FirstOrDefault(x => x.Vertice.Equals(edge.Source));
+                VerticeWithPosition<TVertex> target = graphWithPosition.Vertices.FirstOrDefault(x => x.Vertice.Equals(edge.Target));
 
-
-
-                TaggedEdge<VerticeWithPosition<TVertex>, TTag> edgeWithPosition = new TaggedEdge<VerticeWithPosition<TVertex>, TTag>(
-                    source != null ? source : new VerticeWithPosition<TVertex>() { vertice = edge.Source, position = GetRandomCirclePosition() },
-                    target != null ? target : new VerticeWithPosition<TVertex>() { vertice = edge.Target, position = GetRandomCirclePosition() },
+                TaggedEdge<VerticeWithPosition<TVertex>, TTag> edgeWithPosition = new(
+                    source != null ? source : new() { Vertice = edge.Source, Position = GetRandomCirclePosition() },
+                    target != null ? target : new() { Vertice = edge.Target, Position = GetRandomCirclePosition() },
                     edge.Tag
                     );
                 graphWithPosition.AddVerticesAndEdge(edgeWithPosition);
@@ -93,27 +88,25 @@ namespace SS3D.Utils
         /// </summary>
         private static Vector2 GetRandomCirclePosition()
         {
-            return UnityEngine.Random.insideUnitCircle * 300 + new Vector2(400, 400);
+            return UnityEngine.Random.insideUnitCircle * 200 + new Vector2(300, 200);
         }
 
         /// <summary>
         /// Compute a sing step of the algorithm, return true if conditions are met to stop it.
         /// </summary>
-        public static bool ComputeOneStep(
-            AdjacencyGraph<VerticeWithPosition<TVertex>, TaggedEdge<VerticeWithPosition<TVertex>, TTag>> graphWithPosition)
+        public static bool ComputeOneStep(AdjacencyGraph<VerticeWithPosition<TVertex>, TaggedEdge<VerticeWithPosition<TVertex>, TTag>> graphWithPosition)
         {
-
             Tuple<VerticeWithPosition<TVertex>, Vector2>[] forcesOnVertices = ComputeForceAllVertices(graphWithPosition);
 
-            Vector2 maxForce = forcesOnVertices.Select(x => x.Item2).Aggregate(Vector2.zero,
-                (current, next) => current.magnitude > next.magnitude ? current : next,
-                result => result);
+            Vector2 maxForce = forcesOnVertices.Select(x => x.Item2)
+                .Aggregate(Vector2.zero, (current, next) => 
+                    current.magnitude > next.magnitude ? current : next, result => result);
 
-            if (maxForce.magnitude < ForceToStop) { return true; }
+            if (maxForce.magnitude < ForceToStop) return true;
 
-            for (int j = 0; j < forcesOnVertices.Length; j++)
+            foreach (Tuple<VerticeWithPosition<TVertex>, Vector2> t in forcesOnVertices)
             {
-                forcesOnVertices[j].Item1.position += Delta * forcesOnVertices[j].Item2;
+                t.Item1.Position += Delta * t.Item2;
             }
 
             return false;
@@ -129,7 +122,7 @@ namespace SS3D.Utils
             int i = 0;
             foreach (VerticeWithPosition<TVertex> vertice in graph.Vertices)
             {
-                forcesOnVertice[i] = new Tuple<VerticeWithPosition<TVertex>, Vector2>(vertice, ComputeForceSingleVertice(vertice, graph));
+                forcesOnVertice[i] = new(vertice, ComputeForceSingleVertice(vertice, graph));
                 i++;
             }
 
@@ -142,7 +135,7 @@ namespace SS3D.Utils
         private static Vector2 ComputeForceSingleVertice(VerticeWithPosition<TVertex> vertice,
             AdjacencyGraph<VerticeWithPosition<TVertex>, TaggedEdge<VerticeWithPosition<TVertex>, TTag>> graph)
         {
-            List<VerticeWithPosition<TVertex>> conVertices = new List<VerticeWithPosition<TVertex>>();
+            List<VerticeWithPosition<TVertex>> conVertices = new();
 
             // Inefficient way of getting neighbour edges, but I could not find a better one.
             foreach (Edge<VerticeWithPosition<TVertex>> edge in graph.Edges)
@@ -157,7 +150,7 @@ namespace SS3D.Utils
                 }
             }
 
-            List<VerticeWithPosition<TVertex>> currentVertice = new List<VerticeWithPosition<TVertex>>() { vertice };
+            List<VerticeWithPosition<TVertex>> currentVertice = new() { vertice };
 
             IEnumerable<VerticeWithPosition<TVertex>> unconnectedVertices = graph.Vertices.Except(currentVertice);
 
@@ -176,7 +169,7 @@ namespace SS3D.Utils
 
             foreach (VerticeWithPosition<TVertex> target in vertices)
             {
-                result += AttractiveForce(vertice.position, target.position);
+                result += AttractiveForce(vertice.Position, target.Position);
             }
 
             return result;
@@ -190,7 +183,7 @@ namespace SS3D.Utils
             Vector2 result = Vector2.zero;
             foreach (VerticeWithPosition<TVertex> target in vertices)
             {
-                result += RepulsiveForce(vertice.position, target.position);
+                result += RepulsiveForce(vertice.Position, target.Position);
             }
 
             return result;
@@ -211,7 +204,5 @@ namespace SS3D.Utils
         {
             return (AttractiveConstant * Mathf.Log(Vector2.Distance(v1, v2)) / IdealLenght) * (v2 - v1).normalized;
         }
-
-
     }
 }

@@ -40,8 +40,8 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// If true, the target is consumed (despawned). A step can't be terminal and initial at the same time.
         /// </summary>
-        [HideIf(nameof(IsInitialState))]
         [AllowNesting]
+        [HideIf(nameof(IsInitialState))]
         public bool IsTerminal;
 
         /// <summary>

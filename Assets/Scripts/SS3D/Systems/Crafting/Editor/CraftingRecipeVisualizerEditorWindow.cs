@@ -3,51 +3,49 @@ using UnityEngine;
 using QuikGraph;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
-using System;
 using SS3D.Utils;
+using UnityEngine.AddressableAssets;
 
 namespace SS3D.Systems.Crafting
 {
     /// <summary>
-    /// Custom window to display the recipe graph of a recipe opened in inspector. The 
-    /// recipe graph is shown as a visual graph, and it's node positions are chosen using a force constrained algorithm.
+    /// Custom window to display recipe graph. It's node positions are chosen using a force constrained algorithm.
     /// This window should show the graph position being dynamically chosen, like an animation.
-    /// It need a craftin recipe open in inspector to show the graph.
     /// </summary>
     public class CraftingRecipeVisualizerEditorWindow : EditorWindow
     {
         /// <summary>
         /// How much vertices are repulsive to each other.
         /// </summary>
-        private float _repulsiveConstant = 1;
-
+        private const float RepulsiveConstant = 100;
+        
         /// <summary>
-        /// How much vertices linked by an an edge attract each other.
+        /// How much vertices linked by an edge attract each other.
         /// </summary>
-        private float _attractiveConstant = 1;
-
+        private const float AttractiveConstant = 3;
+        
         /// <summary>
         /// Ideal lenght between vertices.
         /// </summary>
-        private float _idealLenght = 80;
-
+        private const float IdealLenght = 80;
+        
         /// <summary>
-        /// How much iteration will the force algorithm make before stopping.
+        /// Maximum of interation the force algorithm will make.
         /// </summary>
-        private int _maxIteration = 300;
-
+        private const int MaxIteration = 500;
+        
         /// <summary>
-        /// Delta acts like a "speed" factor for the algorithm, the higher it is, the faster it converges
+        /// "Speed" factor for the algorithm, the higher it is, the faster it converges
         /// toward the solution, but values too high can lead to divergence.
         /// </summary>
-        private float _delta = 1f;
-
+        private const float Delta = 10f;
+        
         /// <summary>
         /// Another criteria to stop the algorithm is what's the max force exerted on any vertices is at a given iteration.
-        /// When lower than a given amount we consider it won't move much still, and we stop.
+        /// When lower than a given amount we consider it won't move much, and we stop.
         /// </summary>
-        private float _forceToStop = 0.1f;
-
+        private const float ForceToStop = 0.1f;
+        
         /// <summary>
         /// Enhanced recipe Graph with position for vertices. 
         /// </summary>
@@ -66,7 +64,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Area in which the zooming will occur.
         /// </summary>
-        private readonly Rect _zoomArea = new Rect(200.0f, 200.0f, 1200.0f, 600.0f);
+        private readonly Rect _zoomArea = new(0.0f, 100.0f, 1200.0f, 600.0f);
 
         /// <summary>
         /// The current value of the zoom.
@@ -74,6 +72,9 @@ namespace SS3D.Systems.Crafting
         private float _zoom = 1.0f;
 
         private Vector2 _zoomCoordsOrigin = Vector2.zero;
+        
+        [SerializeField]
+        private AssetReferenceT<CraftingRecipe> _recipe;
 
         /// <summary>
         /// Size of vertices drawn in the window.
@@ -96,13 +97,14 @@ namespace SS3D.Systems.Crafting
             // Within the zoom area all coordinates are relative to the top left corner of the zoom area
             // with the width and height being scaled versions of the original/unzoomed area's width and height.
             EditorZoomArea.Begin(_zoom, _zoomArea);
-
-            GUILayout.BeginArea(new Rect(-_zoomCoordsOrigin.x, -_zoomCoordsOrigin.y, 1600.0f, 900.0f));
-
-            if (_graphWithPosition != null) DrawGraph(_graphWithPosition);
-
+            GUILayout.BeginArea(new(-_zoomCoordsOrigin.x, -_zoomCoordsOrigin.y, 1600.0f, 900.0f));
+            
+            if (_graphWithPosition != null)
+            {
+                DrawGraph(_graphWithPosition);
+            }
+            
             GUILayout.EndArea();
-
             EditorZoomArea.End();
         }
 
@@ -111,49 +113,37 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         private void DrawNonZoomArea()
         {
-            EditorGUILayout.LabelField("Recipe display", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Recipe display.", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Scroll to zoom, drag to move.");
 
-            if (GUILayout.Button("draw graph"))
+            if (GUILayout.Button("Draw graph"))
             {
-                CraftingRecipe recipe = UnityEditor.Selection.activeObject as CraftingRecipe;
-
-                if (recipe == null) return;
-
-                EditorCoroutineUtility.StartCoroutine(ComputeGraphPositions(recipe), this);
+                if (_recipe == null) return;
+                EditorCoroutineUtility.StartCoroutine(ComputeGraphPositions(_recipe.editorAsset), this);
             }
-
-
-            _zoom = EditorGUILayout.Slider("Zoom", _zoom, KZoomMin, KZoomMax);
-            _repulsiveConstant = EditorGUILayout.Slider("Repulsive constant", _repulsiveConstant, 0, 1000);
-            _attractiveConstant = EditorGUILayout.Slider("Attractive constant", _attractiveConstant, 0, 1000);
-            _idealLenght = EditorGUILayout.Slider("Ideal lenght", _idealLenght, 0, 800);
-            _delta = EditorGUILayout.Slider("Delta", _delta, 0, 50);
-            _forceToStop = EditorGUILayout.Slider("Max force to stop", _forceToStop, 0.001f, 5);
-            _maxIteration = Math.Max(100, EditorGUILayout.IntField("Max iteration", _maxIteration));
+            
+            SerializedObject so = new (this);
+            EditorGUILayout.PropertyField(so.FindProperty(nameof(_recipe)), new GUIContent("Recipe"));
         }
 
         /// <summary>
         /// Apply the spring embedder algorithm and do one step each frame, this is supposed to be called by a coroutine.
         /// </summary>
-        /// <param name="recipe"></param>
-        /// <returns></returns>
-        public IEnumerator ComputeGraphPositions(CraftingRecipe recipe)
+        private IEnumerator ComputeGraphPositions(CraftingRecipe recipe)
         {
-            _graphWithPosition =
-        SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>.InitializeGraphWithPositions(recipe.RecipeGraph);
-
-            int t = 0;
-
-            bool forceReachedMinimum = false;
-
-            while (t < _maxIteration)
+            _graphWithPosition = SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
+                .InitializeGraphWithPositions(recipe.RecipeGraph);
+            
+            for (int i = 0; i < MaxIteration; i++)
             {
-                SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>.SetParameters(_repulsiveConstant, _attractiveConstant,
-                    _idealLenght, _delta, _forceToStop);
-                forceReachedMinimum = SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>.ComputeOneStep(_graphWithPosition);
-
+                SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
+                    .SetParameters(RepulsiveConstant, AttractiveConstant,
+                        IdealLenght, Delta, ForceToStop);
+                
+                bool forceReachedMinimum = SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
+                    .ComputeOneStep(_graphWithPosition);
+                
                 if (forceReachedMinimum) break;
-                t++;
                 Repaint();
                 yield return null;
             }
@@ -172,25 +162,20 @@ namespace SS3D.Systems.Crafting
                 Vector2 screenCoordsMousePos = Event.current.mousePosition;
                 Vector2 delta = Event.current.delta;
                 Vector2 zoomCoordsMousePos = ConvertScreenCoordsToZoomCoords(screenCoordsMousePos);
-                float zoomDelta = -delta.y / 150.0f;
+                float zoomDelta = -delta.y / 50.0f;
                 float oldZoom = _zoom;
                 _zoom += zoomDelta;
                 _zoom = Mathf.Clamp(_zoom, KZoomMin, KZoomMax);
-                _zoomCoordsOrigin += (zoomCoordsMousePos - _zoomCoordsOrigin) - (oldZoom / _zoom) * (zoomCoordsMousePos - _zoomCoordsOrigin);
+                _zoomCoordsOrigin += zoomCoordsMousePos - _zoomCoordsOrigin - (oldZoom / _zoom) * (zoomCoordsMousePos - _zoomCoordsOrigin);
 
                 Event.current.Use();
             }
-
-            // Allow moving the zoom area's origin by dragging with the middle mouse button or dragging
-            // with the left mouse button with Alt pressed.
-            if (Event.current.type == EventType.MouseDrag &&
-                (Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
-                Event.current.button == 2)
+            
+            if (Event.current.type == EventType.MouseDrag && Event.current.button == 0)
             {
                 Vector2 delta = Event.current.delta;
                 delta /= _zoom;
-                _zoomCoordsOrigin += delta;
-
+                _zoomCoordsOrigin -= delta;
                 Event.current.Use();
             }
         }
@@ -202,7 +187,7 @@ namespace SS3D.Systems.Crafting
         public static void ShowWindow()
         {
             CraftingRecipeVisualizerEditorWindow window = GetWindow<CraftingRecipeVisualizerEditorWindow>("Crafting Recipe Display");
-            window.minSize = new Vector2(600.0f, 300.0f);
+            window.minSize = new(600.0f, 300.0f);
             window.wantsMouseMove = true;
         }
 
@@ -225,25 +210,25 @@ namespace SS3D.Systems.Crafting
         {
             foreach (VerticeWithPosition<RecipeStep> stepWithPosition in graphWithPosition.Vertices)
             {
-                Color color = stepWithPosition.vertice.IsTerminal ? Color.red : stepWithPosition.vertice.IsInitialState ? Color.green : Color.gray;
+                Color color = stepWithPosition.Vertice.IsTerminal ? Color.red : stepWithPosition.Vertice.IsInitialState ? Color.green : Color.gray;
                 Handles.color = color;
-                Handles.DrawSolidDisc(new Vector3(stepWithPosition.position.x, stepWithPosition.position.y, 0), Vector3.forward, CircleSize);
+                Handles.DrawSolidDisc(new (stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
                 Handles.color = Color.black;
-                Handles.DrawWireDisc(new Vector3(stepWithPosition.position.x, stepWithPosition.position.y, 0), Vector3.forward, CircleSize);
+                Handles.DrawWireDisc(new (stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
 
-                GUIStyle style = new GUIStyle(GUI.skin.label);
-                style.fontSize = (int)Mathf.Clamp(12f / _zoom, 4f, 25f);
-
-                EditorGUI.LabelField(new Rect(stepWithPosition.position.x, stepWithPosition.position.y, 200, 20), stepWithPosition.vertice.Name, style);
+                GUIStyle style = new(GUI.skin.label)
+                {
+                    fontSize = (int)Mathf.Clamp(12f / _zoom, 4f, 25f),
+                };
+                
+                EditorGUI.LabelField(new(stepWithPosition.Position.x, stepWithPosition.Position.y, 200, 20), stepWithPosition.Vertice.Name, style);
             }
             Handles.color = Color.white;
-
-
+            
             foreach (TaggedEdge<VerticeWithPosition<RecipeStep>, RecipeStepLink> edge in graphWithPosition.Edges)
             {
-                Handles.DrawAAPolyLine(3, edge.Source.position, edge.Target.position);
-
-                DrawArrowhead(edge.Source.position, edge.Target.position, 20, 8f);
+                Handles.DrawAAPolyLine(3, edge.Source.Position, edge.Target.Position);
+                DrawArrowhead(edge.Source.Position, edge.Target.Position, 20, 8f);
             }
         }
 
