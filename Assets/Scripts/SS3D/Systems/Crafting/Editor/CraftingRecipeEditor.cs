@@ -10,15 +10,6 @@ namespace SS3D.Systems.Crafting
         private SerializedProperty _stepLinksProperty;
         private RecipeStep _recipeStep;
 
-        private void OnEnable()
-        {
-            // Initialize SerializedProperties
-            CraftingRecipe recipe = serializedObject.targetObject as CraftingRecipe;
-            _targetProperty = serializedObject.FindProperty(nameof(recipe.Target));
-            _stepsProperty = serializedObject.FindProperty(nameof(recipe.Steps));
-            _stepLinksProperty = serializedObject.FindProperty(nameof(recipe.StepLinks));
-        }
-
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -27,6 +18,14 @@ namespace SS3D.Systems.Crafting
             EditorGUILayout.PropertyField(_stepLinksProperty, true);
             serializedObject.ApplyModifiedProperties();
         }
+
+        protected void OnEnable()
+        {
+            // Initialize SerializedProperties
+            CraftingRecipe recipe = serializedObject.targetObject as CraftingRecipe;
+            _targetProperty = serializedObject.FindProperty(nameof(recipe.Target));
+            _stepsProperty = serializedObject.FindProperty(nameof(recipe.Steps));
+            _stepLinksProperty = serializedObject.FindProperty(nameof(recipe.StepLinks));
+        }
     }
 }
-

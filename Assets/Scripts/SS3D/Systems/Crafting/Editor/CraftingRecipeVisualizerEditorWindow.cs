@@ -1,9 +1,9 @@
-﻿using UnityEditor;
-using UnityEngine;
-using QuikGraph;
+﻿using QuikGraph;
+using SS3D.Utils;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
-using SS3D.Utils;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace SS3D.Systems.Crafting
@@ -18,38 +18,33 @@ namespace SS3D.Systems.Crafting
         /// How much vertices are repulsive to each other.
         /// </summary>
         private const float RepulsiveConstant = 100;
-        
+
         /// <summary>
         /// How much vertices linked by an edge attract each other.
         /// </summary>
         private const float AttractiveConstant = 3;
-        
+
         /// <summary>
         /// Ideal lenght between vertices.
         /// </summary>
         private const float IdealLenght = 80;
-        
+
         /// <summary>
         /// Maximum of interation the force algorithm will make.
         /// </summary>
         private const int MaxIteration = 500;
-        
+
         /// <summary>
         /// "Speed" factor for the algorithm, the higher it is, the faster it converges
         /// toward the solution, but values too high can lead to divergence.
         /// </summary>
         private const float Delta = 10f;
-        
+
         /// <summary>
         /// Another criteria to stop the algorithm is what's the max force exerted on any vertices is at a given iteration.
         /// When lower than a given amount we consider it won't move much, and we stop.
         /// </summary>
         private const float ForceToStop = 0.1f;
-        
-        /// <summary>
-        /// Enhanced recipe Graph with position for vertices. 
-        /// </summary>
-        private AdjacencyGraph<VerticeWithPosition<RecipeStep>, TaggedEdge<VerticeWithPosition<RecipeStep>, RecipeStepLink>> _graphWithPosition;
 
         /// <summary>
         /// Minimum zoom allowed
@@ -62,9 +57,19 @@ namespace SS3D.Systems.Crafting
         private const float KZoomMax = 10.0f;
 
         /// <summary>
+        /// Size of vertices drawn in the window.
+        /// </summary>
+        private const float CircleSize = 5f;
+
+        /// <summary>
         /// Area in which the zooming will occur.
         /// </summary>
         private readonly Rect _zoomArea = new(0.0f, 100.0f, 1200.0f, 600.0f);
+
+        /// <summary>
+        /// Enhanced recipe Graph with position for vertices.
+        /// </summary>
+        private AdjacencyGraph<VerticeWithPosition<RecipeStep>, TaggedEdge<VerticeWithPosition<RecipeStep>, RecipeStepLink>> _graphWithPosition;
 
         /// <summary>
         /// The current value of the zoom.
@@ -72,21 +77,39 @@ namespace SS3D.Systems.Crafting
         private float _zoom = 1.0f;
 
         private Vector2 _zoomCoordsOrigin = Vector2.zero;
-        
+
         [SerializeField]
         private AssetReferenceT<CraftingRecipe> _recipe;
 
         /// <summary>
-        /// Size of vertices drawn in the window.
+        /// Show this window with the right size and parameters.
         /// </summary>
-        private const float CircleSize = 5f;
+        [MenuItem("Window/SS3D/Crafting Recipe Display")]
+        public static void ShowWindow()
+        {
+            CraftingRecipeVisualizerEditorWindow window = GetWindow<CraftingRecipeVisualizerEditorWindow>("Crafting Recipe Display");
+            window.minSize = new(600.0f, 300.0f);
+            window.wantsMouseMove = true;
+        }
+
+        protected void OnGUI()
+        {
+            HandleEvents();
+            DrawNonZoomArea();
+
+            // The zoom area clipping is sometimes not fully confined to the passed in rectangle. At certain
+            // zoom levels you will get a line of pixels rendered outside of the passed in area because of
+            // floating point imprecision in the scaling. Therefore, it is recommended to draw the zoom
+            // area first and then draw everything else so that there is no undesired overlap.
+            DrawZoomArea();
+        }
 
         /// <summary>
         /// Helper method to find coordinates when zooming from the screen coordinates.
         /// </summary>
         private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
         {
-            return (screenCoords - _zoomArea.TopLeft()) / _zoom + _zoomCoordsOrigin;
+            return ((screenCoords - _zoomArea.TopLeft()) / _zoom) + _zoomCoordsOrigin;
         }
 
         /// <summary>
@@ -98,12 +121,12 @@ namespace SS3D.Systems.Crafting
             // with the width and height being scaled versions of the original/unzoomed area's width and height.
             EditorZoomArea.Begin(_zoom, _zoomArea);
             GUILayout.BeginArea(new(-_zoomCoordsOrigin.x, -_zoomCoordsOrigin.y, 1600.0f, 900.0f));
-            
+
             if (_graphWithPosition != null)
             {
                 DrawGraph(_graphWithPosition);
             }
-            
+
             GUILayout.EndArea();
             EditorZoomArea.End();
         }
@@ -118,11 +141,15 @@ namespace SS3D.Systems.Crafting
 
             if (GUILayout.Button("Draw graph"))
             {
-                if (_recipe == null) return;
+                if (_recipe == null)
+                {
+                    return;
+                }
+
                 EditorCoroutineUtility.StartCoroutine(ComputeGraphPositions(_recipe.editorAsset), this);
             }
-            
-            SerializedObject so = new (this);
+
+            SerializedObject so = new(this);
             EditorGUILayout.PropertyField(so.FindProperty(nameof(_recipe)), new GUIContent("Recipe"));
         }
 
@@ -133,17 +160,20 @@ namespace SS3D.Systems.Crafting
         {
             _graphWithPosition = SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
                 .InitializeGraphWithPositions(recipe.RecipeGraph);
-            
+
             for (int i = 0; i < MaxIteration; i++)
             {
                 SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
-                    .SetParameters(RepulsiveConstant, AttractiveConstant,
-                        IdealLenght, Delta, ForceToStop);
-                
+                    .SetParameters(RepulsiveConstant, AttractiveConstant, IdealLenght, Delta, ForceToStop);
+
                 bool forceReachedMinimum = SpringEmbedderAlgorithm<RecipeStep, TaggedEdge<RecipeStep, RecipeStepLink>, RecipeStepLink>
                     .ComputeOneStep(_graphWithPosition);
-                
-                if (forceReachedMinimum) break;
+
+                if (forceReachedMinimum)
+                {
+                    break;
+                }
+
                 Repaint();
                 yield return null;
             }
@@ -166,11 +196,11 @@ namespace SS3D.Systems.Crafting
                 float oldZoom = _zoom;
                 _zoom += zoomDelta;
                 _zoom = Mathf.Clamp(_zoom, KZoomMin, KZoomMax);
-                _zoomCoordsOrigin += zoomCoordsMousePos - _zoomCoordsOrigin - (oldZoom / _zoom) * (zoomCoordsMousePos - _zoomCoordsOrigin);
+                _zoomCoordsOrigin += zoomCoordsMousePos - _zoomCoordsOrigin - ((oldZoom / _zoom) * (zoomCoordsMousePos - _zoomCoordsOrigin));
 
                 Event.current.Use();
             }
-            
+
             if (Event.current.type == EventType.MouseDrag && Event.current.button == 0)
             {
                 Vector2 delta = Event.current.delta;
@@ -181,50 +211,42 @@ namespace SS3D.Systems.Crafting
         }
 
         /// <summary>
-        /// Show this window with the right size and parameters.
-        /// </summary>
-        [MenuItem("Window/SS3D/Crafting Recipe Display")]
-        public static void ShowWindow()
-        {
-            CraftingRecipeVisualizerEditorWindow window = GetWindow<CraftingRecipeVisualizerEditorWindow>("Crafting Recipe Display");
-            window.minSize = new(600.0f, 300.0f);
-            window.wantsMouseMove = true;
-        }
-
-        private void OnGUI()
-        {
-            HandleEvents();
-            DrawNonZoomArea();
-
-            // The zoom area clipping is sometimes not fully confined to the passed in rectangle. At certain
-            // zoom levels you will get a line of pixels rendered outside of the passed in area because of
-            // floating point imprecision in the scaling. Therefore, it is recommended to draw the zoom
-            // area first and then draw everything else so that there is no undesired overlap.
-            DrawZoomArea();
-        }
-
-        /// <summary>
         /// Draw the graph
         /// </summary>
         private void DrawGraph(AdjacencyGraph<VerticeWithPosition<RecipeStep>, TaggedEdge<VerticeWithPosition<RecipeStep>, RecipeStepLink>> graphWithPosition)
         {
             foreach (VerticeWithPosition<RecipeStep> stepWithPosition in graphWithPosition.Vertices)
             {
-                Color color = stepWithPosition.Vertice.IsTerminal ? Color.red : stepWithPosition.Vertice.IsInitialState ? Color.green : Color.gray;
+                Color color;
+
+                if (stepWithPosition.Vertice.IsTerminal)
+                {
+                    color = Color.red;
+                }
+                else if (stepWithPosition.Vertice.IsInitialState)
+                {
+                    color = Color.green;
+                }
+                else
+                {
+                    color = Color.gray;
+                }
+
                 Handles.color = color;
-                Handles.DrawSolidDisc(new (stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
+                Handles.DrawSolidDisc(new(stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
                 Handles.color = Color.black;
-                Handles.DrawWireDisc(new (stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
+                Handles.DrawWireDisc(new(stepWithPosition.Position.x, stepWithPosition.Position.y, 0), Vector3.forward, CircleSize);
 
                 GUIStyle style = new(GUI.skin.label)
                 {
                     fontSize = (int)Mathf.Clamp(12f / _zoom, 4f, 25f),
                 };
-                
+
                 EditorGUI.LabelField(new(stepWithPosition.Position.x, stepWithPosition.Position.y, 200, 20), stepWithPosition.Vertice.Name, style);
             }
+
             Handles.color = Color.white;
-            
+
             foreach (TaggedEdge<VerticeWithPosition<RecipeStep>, RecipeStepLink> edge in graphWithPosition.Edges)
             {
                 Handles.DrawAAPolyLine(3, edge.Source.Position, edge.Target.Position);
@@ -246,4 +268,3 @@ namespace SS3D.Systems.Crafting
         }
     }
 }
-
