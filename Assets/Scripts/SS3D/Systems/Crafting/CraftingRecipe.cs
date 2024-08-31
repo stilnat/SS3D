@@ -13,19 +13,13 @@ namespace SS3D.Systems.Crafting
     [CreateAssetMenu(fileName = "Recipe", menuName = "SS3D/Crafting/Recipe")]
     public class CraftingRecipe : ScriptableObject
     {
-        /// <summary>
-        /// The target of the crafting, what needs to be clicked on by the player to start the crafting.
-        /// </summary>
+        [Tooltip("The target of the crafting, what needs to be clicked on by the player to start the crafting.")]
         public WorldObjectAssetReference Target;
         
-        /// <summary>
-        /// A bunch of recipe steps, representing each steps of the recipe.
-        /// </summary>
+        [Tooltip("A bunch of recipe steps, representing each steps of the recipe.")]
         public List<RecipeStep> Steps;
 
-        /// <summary>
-        /// A bunch of recipe links, which link recipe step together.
-        /// </summary>
+        [Tooltip("A bunch of recipe links, which link recipe step together.")] 
         public List<RecipeStepLink> StepLinks;
 
         /// <summary>
@@ -110,4 +104,3 @@ namespace SS3D.Systems.Crafting
         }
     }
 }
-

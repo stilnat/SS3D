@@ -13,54 +13,38 @@ namespace SS3D.Systems.Crafting
     [Serializable]
     public class RecipeStepLink
     {
-        /// <summary>
-        /// Elements of the recipe, that will be consumed in the crafting process, and the necessary number of each.
-        /// </summary>
+        [Tooltip("Elements of the recipe, that will be consumed in the crafting process, and the necessary number of each.")] 
         [SerializeField]
         private SerializableDictionary<WorldObjectAssetReference, int> _elements = new();
         
-        /// <summary>
-        /// Bunch of conditions for ingredients to be valid.
-        /// </summary>
+        [Tooltip("Bunch of conditions for ingredients to be valid to use in the recipe.")] 
         [SerializeField]
         private List<IngredientCondition> _conditions = new();
 
-        /// <summary>
-        /// The needed type of crafting interaction to go through this link
-        /// </summary>
+        [Tooltip("The needed type of crafting interaction to go through this link.")] 
         [SerializeField]
         private CraftingInteractionType _craftingInteractionType;
 
-        /// <summary>
-        /// The source recipe step.
-        /// </summary>
+        [Tooltip("The source recipe step.")] 
         [SerializeField]
         private string _from;
 
-        /// <summary>
-        /// The target recipe step.
-        /// </summary>
+        [Tooltip("The target recipe step. The step reached once the requirement for this step link are met")] 
         [SerializeField]
         private string _to;
 
-        /// <summary>
-        /// Should the result spawning from reaching the target step be modified ? Useful for deconstruction.
-        /// </summary>
+        [Tooltip("Should the result spawning from reaching the target step be modified ? Useful for deconstruction.")] 
         [SerializeField]
         private bool _modifyResult;
 
-        /// <summary>
-        /// The time the crafting should take.
-        /// </summary>
+        [Tooltip("The time the crafting should take in seconds.")] 
         [SerializeField]
         private float _executionTime;
 
-        /// <summary>
-        ///  Things produced by going through this recipe link, upon reaching next step.
-        /// </summary>
+        [Tooltip("Things produced by going through this recipe link, upon reaching next step. Secondary results"
+            + " are always crafted using the default crafting method")] 
         [SerializeField]
         private List<SecondaryResult> _secondaryResults;
-        
 
         /// <summary>
         /// Time it takes in second for the crafting to finish.
@@ -131,5 +115,3 @@ namespace SS3D.Systems.Crafting
         }
     }
 }
-
-
