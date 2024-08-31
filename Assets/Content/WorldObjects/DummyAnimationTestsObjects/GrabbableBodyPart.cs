@@ -1,13 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
     public class GrabbableBodyPart : MonoBehaviour, IHoldProvider
     {
-        public HandHoldType handHold = HandHoldType.DoubleHandGun;
-        
+        [FormerlySerializedAs("handHold")]
+        [SerializeField]
+        private HandHoldType _handHold = HandHoldType.DoubleHandGun;
+
+        public bool CanHoldTwoHand => true;
+
+        public GameObject GameObject => gameObject;
+
         public Transform GetHold(bool primary, HandType handType)
         {
             return transform;
@@ -15,11 +22,7 @@ namespace DummyStuff
 
         public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow)
         {
-            return handHold;
+            return _handHold;
         }
-
-        public bool CanHoldTwoHand => true;
-
-        public GameObject GameObject => gameObject;
     }
 }

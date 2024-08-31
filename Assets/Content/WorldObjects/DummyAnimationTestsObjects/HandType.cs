@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum HandType
+namespace DummyStuff
 {
-    LeftHand = 0,
-    RightHand = 1,
+    public enum HandType
+    {
+        LeftHand = 0,
+        RightHand = 1,
+    }
 }

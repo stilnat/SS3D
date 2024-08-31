@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class DummyTool : MonoBehaviour
+namespace DummyStuff
 {
+    public class DummyTool : MonoBehaviour
+    {
+        [FormerlySerializedAs("interactionPoint")]
+        [SerializeField]
+        private Transform _interactionPoint;
 
-    [SerializeField]
-    private Transform interactionPoint;
-
-    public Transform InteractionPoint => interactionPoint;
+        public Transform InteractionPoint => _interactionPoint;
+    }
 }

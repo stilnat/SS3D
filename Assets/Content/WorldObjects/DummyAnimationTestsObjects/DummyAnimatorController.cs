@@ -14,13 +14,41 @@ namespace DummyStuff
 
         [SerializeField]
         private Animator _animator;
+
         [SerializeField]
         private float _lerpMultiplier;
 
-        private bool _startMoving = false;
-        private bool _endMoving = false;
-            
-        private bool _wasMovingPreviousUpdate = false;
+        private bool _startMoving;
+        private bool _endMoving;
+
+        private bool _wasMovingPreviousUpdate;
+
+        public void TriggerPickUp()
+        {
+            _animator.SetTrigger("PickUpRight");
+        }
+
+        public void Throw(HandType handtype)
+        {
+            if (handtype == HandType.RightHand)
+            {
+                _animator.SetTrigger("ThrowRight");
+            }
+            else
+            {
+                _animator.SetTrigger("ThrowLeft");
+            }
+        }
+
+        public void Sit(bool sitState)
+        {
+            _animator.SetBool("Sit", sitState);
+        }
+
+        public void Crouch(bool crouchState)
+        {
+            _animator.SetBool("Crouch", crouchState);
+        }
 
         protected override void OnStart()
         {
@@ -39,40 +67,23 @@ namespace DummyStuff
             bool isMoving = speed != 0;
             _startMoving = isMoving && !_wasMovingPreviousUpdate;
             _endMoving = !isMoving && _wasMovingPreviousUpdate;
-            
+
             float currentSpeed = _animator.GetFloat(Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
 
             _animator.SetFloat(Animations.Humanoid.MovementSpeed, speed);
-            if(_startMoving) _animator.SetTrigger(Animations.Humanoid.StartMoving);
-            if(_endMoving) _animator.SetTrigger(Animations.Humanoid.EndMoving);
+            if (_startMoving)
+            {
+                _animator.SetTrigger(Animations.Humanoid.StartMoving);
+            }
+
+            if (_endMoving)
+            {
+                _animator.SetTrigger(Animations.Humanoid.EndMoving);
+            }
 
             _wasMovingPreviousUpdate = isMoving;
         }
-
-        public void TriggerPickUp()
-        {
-            _animator.SetTrigger("PickUpRight");
-        }
-
-        public void Throw(HandType handtype)
-        {
-            if (handtype == HandType.RightHand)
-                _animator.SetTrigger("ThrowRight");
-            else
-                _animator.SetTrigger("ThrowLeft");
-        }
-
-        public void Sit(bool sitState)
-        {
-            _animator.SetBool("Sit", sitState);
-        }
-
-        public void Crouch(bool crouchState)
-        {
-            _animator.SetBool("Crouch", crouchState);
-        }
-
     }
 }

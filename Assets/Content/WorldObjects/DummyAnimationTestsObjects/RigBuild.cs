@@ -2,57 +2,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Serialization;
 
-/// <summary>
-/// Necessary class to initialize the rig builder, because some target for the rigs need to be taken
-/// out of the Human prefab, as they should not depend on the player movement, but also it's convenient to
-/// pack them in the human prefab.
-/// </summary>
-public class RigBuild : MonoBehaviour
+namespace DummyStuff
 {
-    [SerializeField]
-    private Transform rightPickupTargetLocker;
-    
-    [SerializeField]
-    private Transform leftPickupTargetLocker;
-    
-    [SerializeField]
-    private Transform rightHoldTargetLocker;
-    
-    [SerializeField]
-    private Transform leftHoldTargetLocker;
-    
-    [SerializeField]
-    private Transform lookAtTargetLocker;
-    
-    [SerializeField]
-    private Transform leftPlaceTarget;
-    
-    [SerializeField]
-    private Transform rightPlaceTarget;
-    
-    // Start is called before the first frame update
-    void Start()
+    /// <summary>
+    /// Necessary class to initialize the rig builder, because some target for the rigs need to be taken
+    /// out of the Human prefab, as they should not depend on the player movement, but also it's convenient to
+    /// pack them in the human prefab.
+    /// </summary>
+    public class RigBuild : MonoBehaviour
     {
-        rightPickupTargetLocker.transform.parent = null;
-        leftPickupTargetLocker.transform.parent = null;
-        rightHoldTargetLocker.transform.parent = null;
-        leftHoldTargetLocker.transform.parent = null;
-        lookAtTargetLocker.transform.parent = null;
-        leftPlaceTarget.transform.parent = null;
-        rightPlaceTarget.transform.parent = null;
-        
-        var animator = GetComponent<Animator>();
-        var rigBuilder = GetComponent<RigBuilder>();
-     
-        rigBuilder.Build();
-        animator.Rebind();
+        [FormerlySerializedAs("rightPickupTargetLocker")]
+        [SerializeField]
+        private Transform _rightPickupTargetLocker;
 
-    }
+        [FormerlySerializedAs("leftPickupTargetLocker")]
+        [SerializeField]
+        private Transform _leftPickupTargetLocker;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [FormerlySerializedAs("rightHoldTargetLocker")]
+        [SerializeField]
+        private Transform _rightHoldTargetLocker;
+
+        [FormerlySerializedAs("leftHoldTargetLocker")]
+        [SerializeField]
+        private Transform _leftHoldTargetLocker;
+
+        [FormerlySerializedAs("lookAtTargetLocker")]
+        [SerializeField]
+        private Transform _lookAtTargetLocker;
+
+        [FormerlySerializedAs("leftPlaceTarget")]
+        [SerializeField]
+        private Transform _leftPlaceTarget;
+
+        [FormerlySerializedAs("rightPlaceTarget")]
+        [SerializeField]
+        private Transform _rightPlaceTarget;
+
+        // Start is called before the first frame update
+        protected void Start()
+        {
+            _rightPickupTargetLocker.transform.parent = null;
+            _leftPickupTargetLocker.transform.parent = null;
+            _rightHoldTargetLocker.transform.parent = null;
+            _leftHoldTargetLocker.transform.parent = null;
+            _lookAtTargetLocker.transform.parent = null;
+            _leftPlaceTarget.transform.parent = null;
+            _rightPlaceTarget.transform.parent = null;
+
+            Animator animator = GetComponent<Animator>();
+            RigBuilder rigBuilder = GetComponent<RigBuilder>();
+
+            rigBuilder.Build();
+            animator.Rebind();
+        }
     }
 }

@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum HandHoldType
+namespace DummyStuff
 {
-    None,
-    Toolbox,
-    Shoulder,
-    DoubleHandGun,
-    DoubleHandGunHarm,
-    SmallItem,
-    ThrowToolBox,
+    public enum HandHoldType
+    {
+        None = 0,
+        Toolbox = 1,
+        Shoulder = 2,
+        DoubleHandGun = 3,
+        DoubleHandGunHarm = 4,
+        SmallItem = 5,
+        ThrowToolBox = 6,
+    }
 }

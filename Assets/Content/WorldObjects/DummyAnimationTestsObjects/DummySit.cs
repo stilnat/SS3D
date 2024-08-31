@@ -1,20 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
     public class DummySit : MonoBehaviour
     {
+        [FormerlySerializedAs("animatorController")]
+        [SerializeField]
+        private DummyAnimatorController _animatorController;
 
-        public DummyAnimatorController animatorController;
+        [FormerlySerializedAs("movement")]
+        [SerializeField]
+        private DummyMovement _movement;
 
-        public DummyMovement movement;
-
-        private void Update()
+        protected void Update()
         {
             if (!Input.GetKeyDown(KeyCode.J))
+            {
                 return;
+            }
 
             if (GetComponent<DummyPositionController>().Position == PositionType.Standing)
             {
@@ -24,7 +30,6 @@ namespace DummyStuff
             {
                 StopSitting();
             }
-
         }
 
         private void TrySit()
@@ -40,17 +45,16 @@ namespace DummyStuff
 
                 if (obj.TryGetComponent(out DummySittable sit) && GoodDistanceFromRootToSit(sit.transform))
                 {
-                    StartCoroutine(Sit(sit.orientation));
+                    StartCoroutine(Sit(sit.Orientation));
                 }
-
             }
         }
 
         private IEnumerator Sit(Transform sitOrientation)
         {
-            movement.enabled = false;
+            _movement.enabled = false;
 
-            animatorController.Sit(true);
+            _animatorController.Sit(true);
 
             Vector3 initialRotation = transform.eulerAngles;
 
@@ -58,15 +62,15 @@ namespace DummyStuff
 
             StartCoroutine(CoroutineHelper.ModifyVector3OverTime(x => transform.eulerAngles = x, initialRotation, sitOrientation.eulerAngles, 0.5f));
 
-            yield return (CoroutineHelper.ModifyVector3OverTime(x => transform.position = x, initialPosition, sitOrientation.position, 0.5f));
+            yield return CoroutineHelper.ModifyVector3OverTime(x => transform.position = x, initialPosition, sitOrientation.position, 0.5f);
 
             GetComponent<DummyPositionController>().Position = PositionType.Sitting;
         }
 
         private void StopSitting()
         {
-            movement.enabled = true;
-            animatorController.Sit(false);
+            _movement.enabled = true;
+            _animatorController.Sit(false);
             GetComponent<DummyPositionController>().Position = PositionType.Standing;
         }
 

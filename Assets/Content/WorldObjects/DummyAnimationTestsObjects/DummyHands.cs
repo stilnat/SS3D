@@ -1,49 +1,53 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
 public class DummyHands : MonoBehaviour
 {
-
-    public DummyHand leftHand;
-    public DummyHand rightHand;
-
-    public HandType selectedHand = HandType.LeftHand;
-    
-    public DummyHand SelectedHand => selectedHand == HandType.LeftHand ? leftHand : rightHand;
-    
-    public DummyHand UnselectedHand => selectedHand == HandType.LeftHand ? rightHand : leftHand;
-
-    public DummyHand GetHand(HandType hand) => hand == HandType.LeftHand ? leftHand : rightHand;
-    
-    public DummyHand GetOtherHand(HandType hand) => hand == HandType.LeftHand ? rightHand : leftHand;
-    
-    public bool BothHandFull => leftHand.Full && rightHand.Full;
-    public bool BothHandEmpty => leftHand.Empty && rightHand.Empty;
-    
     public event EventHandler<DummyHand> OnSelectedHandChange;
 
+    [FormerlySerializedAs("leftHand")]
+    [SerializeField]
+    private DummyHand _leftHand;
 
-    // Update is called once per frame
-    public void Update()
-    {
-        if (!Input.GetKeyDown(KeyCode.X))
-            return;
-        
-       
+    [FormerlySerializedAs("rightHand")]
+    [SerializeField]
+    private DummyHand _rightHand;
 
-        selectedHand = selectedHand == HandType.LeftHand ? HandType.RightHand : HandType.LeftHand;
-        
-        OnSelectedHandChange?.Invoke(this, SelectedHand );
-        
-        Debug.Log($"Selected hand is {selectedHand}");
-    }
+    private HandType _selectedHand = HandType.LeftHand;
+
+    public bool BothHandFull => _leftHand.Full && _rightHand.Full;
+
+    public bool BothHandEmpty => _leftHand.Empty && _rightHand.Empty;
+
+    public DummyHand SelectedHand => _selectedHand == HandType.LeftHand ? _leftHand : _rightHand;
+
+    public DummyHand UnselectedHand => _selectedHand == HandType.LeftHand ? _rightHand : _leftHand;
+
+    public DummyHand GetHand(HandType hand) => hand == HandType.LeftHand ? _leftHand : _rightHand;
+
+    public DummyHand GetOtherHand(HandType hand) => hand == HandType.LeftHand ? _rightHand : _leftHand;
 
     public IHoldProvider GetItem(bool secondary, DummyHand hand)
     {
-        return secondary ? GetOtherHand(hand.handType).Item : hand.Item;
+        return secondary ? GetOtherHand(hand.HandType).Item : hand.Item;
+    }
+
+    // Update is called once per frame
+    protected void Update()
+    {
+        if (!Input.GetKeyDown(KeyCode.X))
+        {
+            return;
+        }
+
+        _selectedHand = _selectedHand == HandType.LeftHand ? HandType.RightHand : HandType.LeftHand;
+
+        OnSelectedHandChange?.Invoke(this, SelectedHand);
+
+        Debug.Log($"Selected hand is {_selectedHand}");
     }
 }
-    
 }

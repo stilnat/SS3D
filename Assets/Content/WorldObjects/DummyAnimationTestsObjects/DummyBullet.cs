@@ -3,17 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DummyBullet : MonoBehaviour
+namespace DummyStuff
 {
-    // Start is called before the first frame update
-    void Start()
+    public class DummyBullet : MonoBehaviour
     {
-        StartCoroutine(DestroyItself());
-    }
+        // Start is called before the first frame update
+        protected void Start()
+        {
+            StartCoroutine(DestroyItself());
+        }
 
-    private IEnumerator DestroyItself()
-    {
-        yield return new WaitForSeconds(5f);
-        gameObject.Dispose(true);
+        private IEnumerator DestroyItself()
+        {
+            yield return new WaitForSeconds(5f);
+            gameObject.Dispose(true);
+        }
     }
 }

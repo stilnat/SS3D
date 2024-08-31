@@ -4,54 +4,61 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Serialization;
 using Object = System.Object;
 
 namespace DummyStuff
 {
-
     public class DummyThrow : MonoBehaviour
     {
-        public DummyHands hands;
-        public DummyAnimatorController animatorController;
+        public event EventHandler<bool> OnAim;
 
         [SerializeField]
-        private DummyMovement movementController;
-        
-        [SerializeField]
-        private Transform aimTarget;
+        private DummyHands _hands;
 
         [SerializeField]
-        private float maxForce = 20;
+        private DummyAnimatorController _animatorController;
+
+        [FormerlySerializedAs("movementController")]
+        [SerializeField]
+        private DummyMovement _movementController;
+
+        [FormerlySerializedAs("aimTarget")]
+        [SerializeField]
+        private Transform _aimTarget;
+
+        [FormerlySerializedAs("maxForce")]
+        [SerializeField]
+        private float _maxForce = 20;
+
+        [FormerlySerializedAs("secondPerMeterFactorDef")]
+        [SerializeField]
+        private float _secondPerMeterFactorDef = 0.22f;
+
+        [FormerlySerializedAs("secondPerMeterFactorHarm")]
+        [SerializeField]
+        private float _secondPerMeterFactorHarm = 0.15f;
 
         [SerializeField]
-        private float secondPerMeterFactorDef = 0.22f;
-        
+        private Rig _bodyAimRig;
+
         [SerializeField]
-        private float secondPerMeterFactorHarm = 0.15f;
+        private HoldController _holdController;
+
+        [FormerlySerializedAs("intents")]
+        [SerializeField]
+        private IntentController _intents;
 
         private bool _canAim;
 
         private bool _isAiming;
 
-        public HoldController holdController;
-
-        public Rig bodyAimRig;
-
-        [SerializeField]
-        private IntentController intents;
-
         public bool IsAiming => _isAiming;
-        
-        public event EventHandler<bool> OnAim;
-
-        
-        
-
 
         // Update is called once per frame
-        private void Update()
+        protected void Update()
         {
-            UpdateAimAbility(hands.SelectedHand);
+            UpdateAimAbility(_hands.SelectedHand);
 
             if (_canAim && Input.GetKeyDown(KeyCode.R))
             {
@@ -61,7 +68,7 @@ namespace DummyStuff
                 }
                 else
                 {
-                    StopAiming(hands.SelectedHand);
+                    StopAiming(_hands.SelectedHand);
                 }
             }
 
@@ -71,11 +78,11 @@ namespace DummyStuff
 
                 if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
                 {
-                    movementController.RotatePlayerTowardTarget();
+                    _movementController.RotatePlayerTowardTarget();
                 }
             }
-            
-            if (Input.GetKeyDown(KeyCode.Y) && hands.SelectedHand.Full && _isAiming)
+
+            if (Input.GetKeyDown(KeyCode.Y) && _hands.SelectedHand.Full && _isAiming)
             {
                 StartCoroutine(Throw());
             }
@@ -83,29 +90,29 @@ namespace DummyStuff
 
         private IEnumerator Throw()
         {
-            IHoldProvider item = hands.SelectedHand.Item;
-            hands.SelectedHand.itemPositionConstraint.weight = 0f;
-            hands.SelectedHand.holdIkConstraint.weight = 0f;
-            hands.SelectedHand.pickupIkConstraint.weight = 0f;
+            IHoldProvider item = _hands.SelectedHand.Item;
+            _hands.SelectedHand.ItemPositionConstraint.weight = 0f;
+            _hands.SelectedHand.HoldIkConstraint.weight = 0f;
+            _hands.SelectedHand.PickupIkConstraint.weight = 0f;
 
-            if (item.CanHoldTwoHand && hands.UnselectedHand.Empty)
+            if (item.CanHoldTwoHand && _hands.UnselectedHand.Empty)
             {
-                hands.UnselectedHand.itemPositionConstraint.weight = 0f;
-                hands.UnselectedHand.holdIkConstraint.weight = 0f;
-                hands.UnselectedHand.pickupIkConstraint.weight = 0f;
+                _hands.UnselectedHand.ItemPositionConstraint.weight = 0f;
+                _hands.UnselectedHand.HoldIkConstraint.weight = 0f;
+                _hands.UnselectedHand.PickupIkConstraint.weight = 0f;
             }
 
-            item.GameObject.transform.parent = hands.SelectedHand.handBone.transform;
+            item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;
 
-            animatorController.Throw(hands.SelectedHand.handType);
+            _animatorController.Throw(_hands.SelectedHand.HandType);
 
-            StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, aimTarget.transform, 0.18f, false, true));
+            StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, _aimTarget.transform, 0.18f, false, true));
 
             yield return new WaitForSeconds(0.18f);
 
             AddForceToItem(item.GameObject);
 
-            StopAiming(hands.SelectedHand);
+            StopAiming(_hands.SelectedHand);
         }
 
         private Vector2 ComputeInitialVelocity(float timeToReachTarget, Vector2 targetCoordinates, float initialHeight, float initialHorizontalPosition)
@@ -116,10 +123,9 @@ namespace DummyStuff
             float g = Physics.gravity.y;
             float initialHorizontalVelocity = (targetCoordinates.x - initialHorizontalPosition) / timeToReachTarget;
 
-            float initialVerticalVelocity = (targetCoordinates.y - initialHeight - 0.5f * g * (math.pow(targetCoordinates.x - initialHorizontalPosition, 2) / math.pow(initialHorizontalVelocity, 2))) * initialHorizontalVelocity / (targetCoordinates.x - initialHorizontalPosition);
+            float initialVerticalVelocity = (targetCoordinates.y - initialHeight - (0.5f * g * (math.pow(targetCoordinates.x - initialHorizontalPosition, 2) / math.pow(initialHorizontalVelocity, 2)))) * initialHorizontalVelocity / (targetCoordinates.x - initialHorizontalPosition);
 
             return new Vector2(initialHorizontalVelocity, initialVerticalVelocity);
-
         }
 
         /// <summary>
@@ -155,63 +161,57 @@ namespace DummyStuff
             // Check if the ray hits any collider
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                aimTarget.position = hit.point;
+                _aimTarget.position = hit.point;
             }
         }
-        
+
         private void Aim()
         {
             _isAiming = true;
-            bodyAimRig.weight = 0.3f;
+            _bodyAimRig.weight = 0.3f;
 
-            if (intents.Intent == Intent.Harm)
+            if (_intents.Intent == Intent.Harm)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
-                    hands.SelectedHand.Item, false, 0.2f, true);
+                _holdController.UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.Item, false, 0.2f, true);
             }
-            
+
             OnAim?.Invoke(this, true);
         }
 
         private void StopAiming(DummyHand hand)
         {
             _isAiming = false;
-            bodyAimRig.weight = 0f;
-            holdController.UpdateItemPositionConstraintAndRotation(hands.SelectedHand,
-                hands.SelectedHand.Item,false, 0.2f, false);
+            _bodyAimRig.weight = 0f;
+            _holdController.UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.Item, false, 0.2f, false);
             OnAim?.Invoke(this, false);
         }
 
         private void UpdateAimAbility(DummyHand selectedHand)
         {
-            if (selectedHand.Full)
-            {
-                _canAim = true;
-            }
-            else
-            {
-                _canAim = false;
-            }
+            _canAim = selectedHand.Full;
         }
 
         private void AddForceToItem(GameObject item)
         {
-            Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, transform);
+            Vector2 targetCoordinates = ComputeTargetCoordinates(_aimTarget.position, transform);
 
             Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, transform);
 
-            Vector2 initialVelocity = ComputeInitialVelocity( ComputeTimeToReach(intents.Intent, aimTarget.position),
-                targetCoordinates, initialItemCoordinates.y, initialItemCoordinates.x);
+            Vector2 initialVelocity = ComputeInitialVelocity(
+                ComputeTimeToReach(_intents.Intent, _aimTarget.position),
+                targetCoordinates,
+                initialItemCoordinates.y,
+                initialItemCoordinates.x);
 
             Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
 
             Vector3 initialVelocityInWorldCoordinate = transform.TransformDirection(initialVelocityInRootCoordinate);
 
-            hands.SelectedHand.RemoveItem();
+            _hands.SelectedHand.RemoveItem();
 
-            if (initialVelocityInWorldCoordinate.magnitude > maxForce)
+            if (initialVelocityInWorldCoordinate.magnitude > _maxForce)
             {
-                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * maxForce;
+                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * _maxForce;
             }
 
             item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
@@ -221,8 +221,8 @@ namespace DummyStuff
         {
             float distanceToTarget = Vector3.Distance(targetPosition, transform.position);
 
-            return intent == Intent.Def ? 
-                distanceToTarget * secondPerMeterFactorDef : distanceToTarget * secondPerMeterFactorHarm;
+            return intent == Intent.Def ?
+                distanceToTarget * _secondPerMeterFactorDef : distanceToTarget * _secondPerMeterFactorHarm;
         }
     }
 }

@@ -6,10 +6,6 @@ namespace DummyStuff
 {
     public interface IHoldProvider
     {
-        public Transform GetHold(bool primary, HandType handType);
-
-        public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow);
-
         public bool CanHoldTwoHand
         {
             get;
@@ -19,5 +15,9 @@ namespace DummyStuff
         {
             get;
         }
+
+        public Transform GetHold(bool primary, HandType handType);
+
+        public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow);
     }
 }

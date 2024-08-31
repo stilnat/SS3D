@@ -6,34 +6,67 @@ using UnityEngine.Animations.Rigging;
 
 namespace DummyStuff
 {
-
 public class DummyHand : MonoBehaviour
 {
     private IHoldProvider _item;
 
-    public HandType handType;
+    [SerializeField]
+    private HandType _handType;
 
-    public Transform handHoldTargetLocker;
+    [SerializeField]
+    private Transform _handHoldTargetLocker;
 
-    public Transform pickupTargetLocker;
+    [SerializeField]
+    private Transform _pickupTargetLocker;
 
-    public Transform placeTarget;
+    [SerializeField]
+    private Transform _placeTarget;
 
-    public Transform itemPositionTargetLocker;
+    [SerializeField]
+    private Transform _itemPositionTargetLocker;
 
-    public Transform shoulderWeaponPivot;
+    [SerializeField]
+    private Transform _shoulderWeaponPivot;
 
-    public TwoBoneIKConstraint holdIkConstraint;
+    [SerializeField]
+    private TwoBoneIKConstraint _holdIkConstraint;
 
-    public ChainIKConstraint pickupIkConstraint;
+    [SerializeField]
+    private ChainIKConstraint _pickupIkConstraint;
 
-    public MultiPositionConstraint itemPositionConstraint;
-    
-    public Transform upperArm;
+    [SerializeField]
+    private MultiPositionConstraint _itemPositionConstraint;
 
-    public Transform handBone;
+    [SerializeField]
+    private Transform _upperArm;
 
-    public Transform holdTransform;
+    [SerializeField]
+    private Transform _handBone;
+
+    [SerializeField]
+    private Transform _holdTransform;
+
+    public HandType HandType => _handType;
+
+    public Transform PickupTargetLocker => _pickupTargetLocker;
+
+    public Transform PlaceTarget => _placeTarget;
+
+    public Transform ItemPositionTargetLocker => _itemPositionTargetLocker;
+
+    public Transform ShoulderWeaponPivot => _shoulderWeaponPivot;
+
+    public TwoBoneIKConstraint HoldIkConstraint => _holdIkConstraint;
+
+    public ChainIKConstraint PickupIkConstraint => _pickupIkConstraint;
+
+    public MultiPositionConstraint ItemPositionConstraint => _itemPositionConstraint;
+
+    public Transform UpperArm => _upperArm;
+
+    public Transform HandBone => _handBone;
+
+    public Transform HoldTransform => _holdTransform;
 
     public IHoldProvider Item => _item;
 
@@ -55,41 +88,33 @@ public class DummyHand : MonoBehaviour
         _item.GameObject.GetComponent<Rigidbody>().isKinematic = true;
         _item.GameObject.GetComponent<Collider>().enabled = false;
     }
-    
+
     public Transform ChooseTargetLocker(TargetLockerType type)
     {
-        Transform targetToSet;
-        
-        switch (type)
+        Transform targetToSet = type switch
         {
-            case TargetLockerType.Pickup:
-                targetToSet = pickupTargetLocker;
-                break;
-            case TargetLockerType.Hold:
-                targetToSet = handHoldTargetLocker;
-                break;
-            case TargetLockerType.ItemPosition:
-                targetToSet = itemPositionTargetLocker;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+            TargetLockerType.Pickup => _pickupTargetLocker,
+            TargetLockerType.Hold => _handHoldTargetLocker,
+            TargetLockerType.ItemPosition => _itemPositionTargetLocker,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+        };
 
         return targetToSet;
     }
 
-    public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true,
-        bool resetRotation = true)
+    public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true, bool resetRotation = true)
     {
         Transform targetToSet = ChooseTargetLocker(type);
-        
         targetToSet.parent = parent;
-        if(resetPosition)
+        if (resetPosition)
+        {
             targetToSet.localPosition = Vector3.zero;
-        if(resetRotation)
+        }
+
+        if (resetRotation)
+        {
             targetToSet.localRotation = Quaternion.identity;
+        }
     }
-    
 }
-    
 }

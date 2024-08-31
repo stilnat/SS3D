@@ -3,24 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IntentController : MonoBehaviour
+namespace DummyStuff
 {
-    private Intent _intent;
-
-    public Intent Intent => _intent;
-
-    public event EventHandler<Intent> OnIntentChange;
-    
-    // Update is called once per frame
-    private void Update()
+    public class IntentController : MonoBehaviour
     {
-        if (!Input.GetKeyDown(KeyCode.Space))
-            return;
+        public event EventHandler<Intent> OnIntentChange;
 
-        _intent = _intent == Intent.Def ? Intent.Harm : Intent.Def; 
-        
-        OnIntentChange?.Invoke(this, _intent);
-        
-        Debug.Log($"Selected intent is {_intent}");
+        private Intent _intent;
+
+        public Intent Intent => _intent;
+
+        // Update is called once per frame
+        protected void Update()
+        {
+            if (!Input.GetKeyDown(KeyCode.Space))
+            {
+                return;
+            }
+
+            _intent = _intent == Intent.Def ? Intent.Harm : Intent.Def;
+
+            OnIntentChange?.Invoke(this, _intent);
+
+            Debug.Log($"Selected intent is {_intent}");
+        }
     }
 }

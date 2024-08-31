@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DummyPositionController : MonoBehaviour
+namespace DummyStuff
 {
-    private void Start()
+    public class DummyPositionController : MonoBehaviour
     {
-        Position = PositionType.Standing;
-    }
+        public PositionType Position { get; set; }
 
-    public PositionType Position { get; set; }
+        protected void Start()
+        {
+            Position = PositionType.Standing;
+        }
+    }
 }

@@ -1,34 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class DummyFire : MonoBehaviour
+namespace DummyStuff
 {
-    public GameObject bulletPrefab;
-    public Transform spawnPoint;
-    public float fireRate = 10f;    // Bullets fired per second
-    public float bulletSpeed = 10f; // Speed of the bullets
-    private bool _readyToFire = true;
-
-    public void Fire()
+    public class DummyFire : MonoBehaviour
     {
-        if (!_readyToFire)
-            return;
+        [FormerlySerializedAs("bulletPrefab")]
+        [SerializeField]
+        private GameObject _bulletPrefab;
 
-        _readyToFire = false;
+        [FormerlySerializedAs("spawnPoint")]
+        [SerializeField]
+        private Transform _spawnPoint;
 
-        StartCoroutine(ReadyToFire());
-        GameObject bullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
-        Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
-        if (bulletRigidbody != null)
+        [FormerlySerializedAs("fireRate")]
+        [SerializeField]
+        private float _fireRate = 10f; // Bullets fired per second
+
+        [FormerlySerializedAs("bulletSpeed")]
+        [SerializeField]
+        private float _bulletSpeed = 10f; // Speed of the bullets
+
+        [SerializeField]
+        private bool _readyToFire = true;
+
+        public void Fire()
         {
-            bulletRigidbody.velocity = spawnPoint.forward * bulletSpeed;
-        }
-    }
+            if (!_readyToFire)
+            {
+                return;
+            }
 
-    private IEnumerator ReadyToFire()
-    {
-        yield return new WaitForSeconds(1f / fireRate);
-        _readyToFire = true;
+            _readyToFire = false;
+
+            StartCoroutine(ReadyToFire());
+            GameObject bullet = Instantiate(_bulletPrefab, _spawnPoint.position, _spawnPoint.rotation);
+
+            if (bullet.TryGetComponent(out Rigidbody bulletRigidbody))
+            {
+                bulletRigidbody.velocity = _spawnPoint.forward * _bulletSpeed;
+            }
+        }
+
+        private IEnumerator ReadyToFire()
+        {
+            yield return new WaitForSeconds(1f / _fireRate);
+            _readyToFire = true;
+        }
     }
 }

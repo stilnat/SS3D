@@ -1,28 +1,41 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
     public class DummyInteract : MonoBehaviour
     {
+        [FormerlySerializedAs("hands")]
+        [SerializeField]
+        private DummyHands _hands;
 
-        public DummyHands hands;
-        public Transform lookAtTargetLocker;
-        public Transform hips;
+        [FormerlySerializedAs("lookAtTargetLocker")]
+        [SerializeField]
+        private Transform _lookAtTargetLocker;
 
-        public MultiAimConstraint lookAtConstraint;
+        [FormerlySerializedAs("hips")]
+        [SerializeField]
+        private Transform _hips;
 
-        public float interactionMoveDuration;
+        [FormerlySerializedAs("lookAtConstraint")]
+        [SerializeField]
+        private MultiAimConstraint _lookAtConstraint;
 
-        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(hips.position, position) < 1.1f;
+        [FormerlySerializedAs("interactionMoveDuration")]
+        [SerializeField]
+        private float _interactionMoveDuration;
 
+        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.1f;
 
         // Update is called once per frame
-        private void Update()
+        protected void Update()
         {
             if (!Input.GetMouseButtonDown(1))
+            {
                 return;
+            }
 
             TryInteract();
         }
@@ -30,13 +43,12 @@ namespace DummyStuff
         private void TryInteract()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit) && hands.SelectedHand.Full && UnderMaxDistanceFromHips(hit.point) 
-                && hands.SelectedHand.Item.GameObject.TryGetComponent(out DummyTool tool))
-            {
 
+            if (Physics.Raycast(ray, out RaycastHit hit) && _hands.SelectedHand.Full && UnderMaxDistanceFromHips(hit.point)
+                && _hands.SelectedHand.Item.GameObject.TryGetComponent(out DummyTool tool))
+            {
                 GameObject obj = hit.collider.gameObject;
-                StartCoroutine(Interact(obj.transform, hands.SelectedHand, tool));
+                StartCoroutine(Interact(obj.transform, _hands.SelectedHand, tool));
             }
         }
 
@@ -54,14 +66,14 @@ namespace DummyStuff
         private void SetupInteract(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
         {
             // disable position constraint the time of the interaction
-            mainHand.itemPositionConstraint.weight = 0f;
-            mainHand.pickupIkConstraint.weight = 1f;
-            lookAtTargetLocker.position = tool.transform.position;
+            mainHand.ItemPositionConstraint.weight = 0f;
+            mainHand.PickupIkConstraint.weight = 1f;
+            _lookAtTargetLocker.position = tool.transform.position;
         }
 
         private void AlignToolWithShoulder(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
         {
-            Vector3 fromShoulderToTarget = (interactionTarget.transform.position - mainHand.upperArm.transform.position).normalized;
+            Vector3 fromShoulderToTarget = (interactionTarget.transform.position - mainHand.UpperArm.transform.position).normalized;
 
             // rotate the tool such that its interaction transform Z axis align with the fromShoulderToTarget vector.
             Quaternion rotation = Quaternion.FromToRotation(tool.InteractionPoint.TransformDirection(Vector3.forward), fromShoulderToTarget.normalized);
@@ -79,7 +91,7 @@ namespace DummyStuff
             directionFromTransformToTarget.y = 0f;
             Quaternion initialPlayerRotation = transform.rotation;
             transform.rotation = Quaternion.LookRotation(directionFromTransformToTarget);
-            
+
             AlignToolWithShoulder(interactionTarget, mainHand, tool);
 
             // Calculate the difference between the tool position and its interaction point.
@@ -99,47 +111,39 @@ namespace DummyStuff
         private IEnumerator ReachInteractionPoint(Transform interactionTarget, DummyHand mainHand, DummyTool tool)
         {
             // Start looking at item
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x,
-                0f, 1f, interactionMoveDuration));
-            
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _interactionMoveDuration));
+
             Vector3 startPosition = tool.transform.position;
             Vector3 endPosition = ComputeToolEndPosition(interactionTarget, mainHand, tool);
 
             // Rotate player toward item
             if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
             {
-                StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, interactionTarget,
-                    interactionMoveDuration, false, true));
+                StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, interactionTarget, _interactionMoveDuration, false, true));
             }
-            
-            if (mainHand.handBone.transform.position.y - interactionTarget.transform.position.y > 0.3)
+
+            if (mainHand.HandBone.transform.position.y - interactionTarget.transform.position.y > 0.3)
             {
                 GetComponent<DummyAnimatorController>().Crouch(true);
             }
-            
-            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.position = x,
-                startPosition, endPosition, interactionMoveDuration);
+
+            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.position = x, startPosition, endPosition, _interactionMoveDuration);
         }
 
         private IEnumerator StopInteracting(DummyHand mainHand, DummyTool tool)
         {
-            // Stop looking at item         
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x,
-                1f, 0f, interactionMoveDuration));
+            // Stop looking at item
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _interactionMoveDuration));
 
-            StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(x =>
-                    tool.transform.localRotation = x, tool.transform.localRotation,
-                Quaternion.identity, 2 * interactionMoveDuration));
-            
+            StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(x => tool.transform.localRotation = x, tool.transform.localRotation, Quaternion.identity, 2 * _interactionMoveDuration));
+
             GetComponent<DummyAnimatorController>().Crouch(false);
 
-
-            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.localPosition = x,
-                tool.transform.localPosition, Vector3.zero, 2 * interactionMoveDuration);
+            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.transform.localPosition = x, tool.transform.localPosition, Vector3.zero, 2 * _interactionMoveDuration);
 
             tool.transform.localRotation = Quaternion.identity;
-            mainHand.itemPositionConstraint.weight = 1f;
-            mainHand.pickupIkConstraint.weight = 0f;
+            mainHand.ItemPositionConstraint.weight = 1f;
+            mainHand.PickupIkConstraint.weight = 0f;
         }
     }
 }

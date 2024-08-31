@@ -2,42 +2,46 @@ using System.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public delegate void Notify(bool removeItem, DummyHand hand);
-    
     public class DummyPickUp : MonoBehaviour
     {
+        [SerializeField]
+        private float _itemMoveDuration;
 
-        public float itemMoveDuration;
-        public float itemReachDuration;
+        [SerializeField]
+        private float _itemReachDuration;
 
-        public HoldController holdController;
+        [SerializeField]
+        private HoldController _holdController;
 
-        public DummyHands hands;
+        [SerializeField]
+        private DummyHands _hands;
 
-        public Transform hips;
+        [SerializeField]
+        private Transform _hips;
 
-        public MultiAimConstraint lookAtConstraint;
+        [SerializeField]
+        private MultiAimConstraint _lookAtConstraint;
 
-        public Transform lookAtTargetLocker;
+        [SerializeField]
+        private Transform _lookAtTargetLocker;
 
+        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.3f;
 
-        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(hips.position, position) < 1.3f;
-
-        private void Update()
+        protected void Update()
         {
-
             if (!Input.GetMouseButtonDown(0))
+            {
                 return;
+            }
 
-            if (hands.SelectedHand.Empty)
+            if (_hands.SelectedHand.Empty)
             {
                 TryPickUp();
             }
-
         }
 
         private void TryPickUp()
@@ -64,55 +68,53 @@ namespace DummyStuff
         {
             GetComponent<DummyAnimatorController>().TriggerPickUp();
 
-            DummyHand secondaryHand = hands.GetOtherHand(hands.SelectedHand.handType);
+            DummyHand secondaryHand = _hands.GetOtherHand(_hands.SelectedHand.HandType);
 
             bool withTwoHands = secondaryHand.Empty && item.CanHoldTwoHand;
 
-            hands.SelectedHand.AddItem(item);
+            _hands.SelectedHand.AddItem(item);
 
-            SetUpPickup(hands.SelectedHand, secondaryHand, withTwoHands, item);
+            SetUpPickup(_hands.SelectedHand, secondaryHand, withTwoHands, item);
 
-            yield return PickupReach(item, hands.SelectedHand, secondaryHand, withTwoHands);
+            yield return PickupReach(item, _hands.SelectedHand, secondaryHand, withTwoHands);
 
-            yield return PickupPullBack(item, hands.SelectedHand, secondaryHand, withTwoHands);
+            yield return PickupPullBack(item, _hands.SelectedHand, secondaryHand, withTwoHands);
         }
 
         private void SetUpPickup(DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands, DummyItem item)
         {
-            holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item,
-                withTwoHands, 0f, false);
+            _holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item, withTwoHands, 0f, false);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
-            mainHand.itemPositionConstraint.weight = 1f;
+            mainHand.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            holdController.MovePickupAndHoldTargetLocker(mainHand, false,
-                hands.GetItem(false, mainHand));
+            _holdController.MovePickupAndHoldTargetLocker(mainHand, false, _hands.GetItem(false, mainHand));
 
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(mainHand);
 
-            // Needed if this has been changed elsewhere 
-            mainHand.pickupIkConstraint.data.tipRotationWeight = 1f;
+            // Needed if this has been changed elsewhere
+            mainHand.PickupIkConstraint.data.tipRotationWeight = 1f;
 
             // Needed as the hand need to reach when picking up in an extended position, it looks unnatural
             // if it takes directly the rotation of the hold.
-            mainHand.holdIkConstraint.data.targetRotationWeight = 0f;
+            mainHand.HoldIkConstraint.data.targetRotationWeight = 0f;
 
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                holdController.MovePickupAndHoldTargetLocker(secondaryHand, true, 
-                    hands.GetItem(true,secondaryHand));
+                _holdController.MovePickupAndHoldTargetLocker(
+                    secondaryHand, true, _hands.GetItem(true, secondaryHand));
                 OrientTargetForHandRotation(secondaryHand);
-                secondaryHand.pickupIkConstraint.data.tipRotationWeight = 1f;
-                secondaryHand.holdIkConstraint.data.targetRotationWeight = 0f;
+                secondaryHand.PickupIkConstraint.data.tipRotationWeight = 1f;
+                secondaryHand.HoldIkConstraint.data.targetRotationWeight = 0f;
             }
 
             // Set up the look at target locker on the item to pick up.
-            lookAtTargetLocker.transform.parent = item.transform;
-            lookAtTargetLocker.localPosition = Vector3.zero;
-            lookAtTargetLocker.localRotation = Quaternion.identity;
+            _lookAtTargetLocker.transform.parent = item.transform;
+            _lookAtTargetLocker.localPosition = Vector3.zero;
+            _lookAtTargetLocker.localRotation = Quaternion.identity;
         }
 
         private IEnumerator PickupReach(DummyItem item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
@@ -120,10 +122,10 @@ namespace DummyStuff
             // Move player toward item
             if (GetComponent<DummyPositionController>().Position != PositionType.Sitting)
             {
-                StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, item.transform, itemReachDuration, false, true));
+                StartCoroutine(DummyTransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
             }
 
-            if (mainHand.handBone.transform.position.y - item.transform.position.y > 0.3)
+            if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
                 GetComponent<DummyAnimatorController>().Crouch(true);
 
@@ -131,20 +133,21 @@ namespace DummyStuff
             }
 
             // Change hold constraint weight of the main hand from 0 to 1
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => mainHand.holdIkConstraint.weight = x, 0f, 1f, itemReachDuration));
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => mainHand.HoldIkConstraint.weight = x, 0f, 1f, _itemReachDuration));
 
             // Start looking at item
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x, 0f, 1f, itemReachDuration));
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _itemReachDuration));
 
             // Reproduce changes on second hand if picking up with two hands
             if (withTwoHands)
             {
-                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.holdIkConstraint.weight = x, 0f, 1f, itemReachDuration));
-                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.pickupIkConstraint.weight = x, 0f, 1f, itemReachDuration));
+                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.HoldIkConstraint.weight = x, 0f, 1f, _itemReachDuration));
+                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.PickupIkConstraint.weight = x, 0f, 1f, _itemReachDuration));
             }
 
-            // Change pickup constraint weight of the main hand from 0 to 1    
-            yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.pickupIkConstraint.weight = x, 0f, 1f, itemReachDuration);
+            // Change pickup constraint weight of the main hand from 0 to 1
+            yield return CoroutineHelper.ModifyValueOverTime(
+                x => mainHand.PickupIkConstraint.weight = x, 0f, 1f, _itemReachDuration);
         }
 
         private IEnumerator PickupPullBack(DummyItem item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
@@ -152,40 +155,39 @@ namespace DummyStuff
             GetComponent<DummyAnimatorController>().Crouch(false);
 
             // Move item toward its constrained position.
-            StartCoroutine(DummyTransformHelper.LerpTransform(item.transform, hands.SelectedHand.itemPositionTargetLocker, itemMoveDuration));
+            StartCoroutine(DummyTransformHelper.LerpTransform(item.transform, _hands.SelectedHand.ItemPositionTargetLocker, _itemMoveDuration));
 
             // if an item held with two hands, change it with a single hand hold
             if (secondaryHand.Full && secondaryHand.Item.CanHoldTwoHand)
             {
-                holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item,
-                    false, itemMoveDuration, false);
+                _holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item, false, _itemMoveDuration, false);
             }
 
-            // Stop looking at item         
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => lookAtConstraint.weight = x, 1f, 0f, itemReachDuration));
+            // Stop looking at item
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _itemReachDuration));
 
             // increase hold constraint rotation
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => mainHand.holdIkConstraint.data.targetRotationWeight = x, 0f, 1f, itemReachDuration));
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => mainHand.HoldIkConstraint.data.targetRotationWeight = x, 0f, 1f, _itemReachDuration));
 
             if (withTwoHands)
             {
-                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.holdIkConstraint.data.targetRotationWeight = x, 0f, 1f, itemReachDuration));
+                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.HoldIkConstraint.data.targetRotationWeight = x, 0f, 1f, _itemReachDuration));
             }
 
             // Get hand back at its hold position.
             if (withTwoHands)
             {
-                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.pickupIkConstraint.weight = x, 1f, 0f, itemMoveDuration));
+                StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => secondaryHand.PickupIkConstraint.weight = x, 1f, 0f, _itemMoveDuration));
             }
 
-            yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.pickupIkConstraint.weight = x, 1f, 0f, itemMoveDuration);
+            yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.PickupIkConstraint.weight = x, 1f, 0f, _itemMoveDuration);
 
             // Place item on constrained item position
-            item.transform.parent = mainHand.itemPositionTargetLocker;
+            item.transform.parent = mainHand.ItemPositionTargetLocker;
             item.transform.localPosition = Vector3.zero;
             item.transform.localRotation = Quaternion.identity;
 
-            lookAtConstraint.weight = 0f;
+            _lookAtConstraint.weight = 0f;
         }
 
         /// <summary>
@@ -194,14 +196,13 @@ namespace DummyStuff
         /// </summary>
         private void OrientTargetForHandRotation(DummyHand hand)
         {
-            Vector3 armTargetDirection = hand.pickupTargetLocker.position - hand.upperArm.position;
+            Vector3 armTargetDirection = hand.PickupTargetLocker.position - hand.UpperArm.position;
 
             Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
 
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
-            hand.pickupTargetLocker.rotation = targetRotation;
+            hand.PickupTargetLocker.rotation = targetRotation;
         }
-
     }
 }

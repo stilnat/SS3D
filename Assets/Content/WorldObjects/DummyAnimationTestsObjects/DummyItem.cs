@@ -1,78 +1,90 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
     public class DummyItem : MonoBehaviour, IHoldProvider
     {
+        [FormerlySerializedAs("singleHandHold")]
         [SerializeField]
-        private HandHoldType singleHandHold;
+        private HandHoldType _singleHandHold;
 
+        [FormerlySerializedAs("twoHandHold")]
         [SerializeField]
-        private HandHoldType twoHandHold;
+        private HandHoldType _twoHandHold;
 
+        [FormerlySerializedAs("singleHandHoldHarm")]
         [SerializeField]
-        private HandHoldType singleHandHoldHarm;
+        private HandHoldType _singleHandHoldHarm;
 
+        [FormerlySerializedAs("twoHandHoldHarm")]
         [SerializeField]
-        private HandHoldType twoHandHoldHarm;
+        private HandHoldType _twoHandHoldHarm;
 
+        [FormerlySerializedAs("singleHandHoldThrow")]
         [SerializeField]
-        private HandHoldType singleHandHoldThrow;
+        private HandHoldType _singleHandHoldThrow;
 
+        [FormerlySerializedAs("twoHandHoldThrow")]
         [SerializeField]
-        private HandHoldType twoHandHoldThrow;
+        private HandHoldType _twoHandHoldThrow;
 
+        [FormerlySerializedAs("primaryRightHandHold")]
         [SerializeField]
-        private Transform primaryRightHandHold;
+        private Transform _primaryRightHandHold;
 
+        [FormerlySerializedAs("secondaryRightHandHold")]
         [SerializeField]
-        private Transform secondaryRightHandHold;
+        private Transform _secondaryRightHandHold;
 
+        [FormerlySerializedAs("primaryLeftHandHold")]
         [SerializeField]
-        private Transform primaryLeftHandHold;
+        private Transform _primaryLeftHandHold;
 
+        [FormerlySerializedAs("secondaryLeftHandHold")]
         [SerializeField]
-        private Transform secondaryLeftHandHold;
+        private Transform _secondaryLeftHandHold;
 
+        [FormerlySerializedAs("canHoldTwoHand")]
         [SerializeField]
-        private bool canHoldTwoHand;
+        private bool _canHoldTwoHand;
+
+        public bool CanHoldTwoHand => _canHoldTwoHand;
+
+        [NotNull]
+        public GameObject GameObject => gameObject;
 
         public HandHoldType GetHoldType(bool withTwoHands, Intent intent, bool toThrow)
         {
             switch (intent, withTwoHands)
             {
                 case (Intent.Def, true):
-                    return twoHandHold;
+                    return _twoHandHold;
                 case (Intent.Def, false):
-                    return singleHandHold;
+                    return _singleHandHold;
                 case (Intent.Harm, true):
-                    return toThrow ? twoHandHoldThrow : twoHandHoldHarm;
+                    return toThrow ? _twoHandHoldThrow : _twoHandHoldHarm;
                 case (Intent.Harm, false):
-                    return toThrow ? singleHandHoldThrow : singleHandHoldHarm;
+                    return toThrow ? _singleHandHoldThrow : _singleHandHoldHarm;
             }
 
-            return singleHandHold;
+            return _singleHandHold;
         }
-
-        public bool CanHoldTwoHand => canHoldTwoHand;
-
-        [NotNull]
-        public GameObject GameObject => gameObject;
 
         public Transform GetHold(bool primary, HandType handType)
         {
             switch (primary, handType)
             {
                 case (true, HandType.LeftHand):
-                    return primaryLeftHandHold;
+                    return _primaryLeftHandHold;
                 case (false, HandType.LeftHand):
-                    return secondaryLeftHandHold;
+                    return _secondaryLeftHandHold;
                 case (true, HandType.RightHand):
-                    return primaryRightHandHold;
+                    return _primaryRightHandHold;
                 case (false, HandType.RightHand):
-                    return secondaryRightHandHold;
+                    return _secondaryRightHandHold;
                 default:
                     throw new ArgumentException();
             }

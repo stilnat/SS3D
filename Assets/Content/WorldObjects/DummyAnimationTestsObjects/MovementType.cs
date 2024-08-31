@@ -6,8 +6,8 @@ namespace DummyStuff
 {
     public enum MovementType
     {
-        Normal,
-        Aiming,
-        Dragging,
+        Normal = 0,
+        Aiming = 1,
+        Dragging = 2,
     }
 }

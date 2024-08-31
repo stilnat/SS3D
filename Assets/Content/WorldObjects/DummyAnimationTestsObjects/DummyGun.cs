@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class DummyGun : MonoBehaviour
+namespace DummyStuff
 {
+    public class DummyGun : MonoBehaviour
+    {
+        [FormerlySerializedAs("rifleButt")]
+        [SerializeField]
+        private Transform _rifleButt;
 
-    public Transform rifleButt;
+        public Transform RifleButt => _rifleButt;
+    }
 }

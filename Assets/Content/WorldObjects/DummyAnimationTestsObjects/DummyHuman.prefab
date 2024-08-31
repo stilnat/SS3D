@@ -4600,13 +4600,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8617e3a73d0706c42a87a606965fb992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemMoveDuration: 0.3
-  itemReachDuration: 0.3
-  holdController: {fileID: 304844770068834842}
-  hands: {fileID: 4366303252165034965}
-  hips: {fileID: 5433592588855148907}
-  lookAtConstraint: {fileID: 2851688491558728783}
-  lookAtTargetLocker: {fileID: 5358384094254398678}
+  _itemMoveDuration: 1
+  _itemReachDuration: 1
+  _holdController: {fileID: 304844770068834842}
+  _hands: {fileID: 4366303252165034965}
+  _hips: {fileID: 5433592588855148907}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
 --- !u!114 &4366303252165034965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4619,9 +4619,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50440716bed13447980dae8db6593dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftHand: {fileID: 8542638990947268518}
-  rightHand: {fileID: 408292127236538780}
-  selectedHand: 0
+  _leftHand: {fileID: 8542638990947268518}
+  _rightHand: {fileID: 408292127236538780}
 --- !u!114 &8542638990947268518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4634,18 +4633,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6371626722efc843ba2622b9a6d7d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handType: 0
-  handHoldTargetLocker: {fileID: 5441267867618792388}
-  pickupTargetLocker: {fileID: 4846808082985781182}
-  placeTarget: {fileID: 2264229762793431148}
-  itemPositionTargetLocker: {fileID: 3720527799557840007}
-  shoulderWeaponPivot: {fileID: 4647776898251892701}
-  holdIkConstraint: {fileID: 3450567292757048057}
-  pickupIkConstraint: {fileID: 2592208313181239853}
-  itemPositionConstraint: {fileID: 3209808476875596154}
-  upperArm: {fileID: 7446386329022654784}
-  handBone: {fileID: 8420821262611087137}
-  holdTransform: {fileID: 5569489068996507518}
+  _handType: 0
+  _handHoldTargetLocker: {fileID: 5441267867618792388}
+  _pickupTargetLocker: {fileID: 4846808082985781182}
+  _placeTarget: {fileID: 2264229762793431148}
+  _itemPositionTargetLocker: {fileID: 3720527799557840007}
+  _shoulderWeaponPivot: {fileID: 4647776898251892701}
+  _holdIkConstraint: {fileID: 3450567292757048057}
+  _pickupIkConstraint: {fileID: 2592208313181239853}
+  _itemPositionConstraint: {fileID: 3209808476875596154}
+  _upperArm: {fileID: 7446386329022654784}
+  _handBone: {fileID: 8420821262611087137}
+  _holdTransform: {fileID: 5569489068996507518}
 --- !u!114 &408292127236538780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4658,18 +4657,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6371626722efc843ba2622b9a6d7d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handType: 1
-  handHoldTargetLocker: {fileID: 2712046360455809814}
-  pickupTargetLocker: {fileID: 4607633442489985284}
-  placeTarget: {fileID: 925888607827410678}
-  itemPositionTargetLocker: {fileID: 4363011775381521912}
-  shoulderWeaponPivot: {fileID: 4855327836977815790}
-  holdIkConstraint: {fileID: 2142891004495607562}
-  pickupIkConstraint: {fileID: 2532537050071209971}
-  itemPositionConstraint: {fileID: 6263492953658661066}
-  upperArm: {fileID: 802911981376609306}
-  handBone: {fileID: 6356800398579286298}
-  holdTransform: {fileID: 6456791731408993078}
+  _handType: 1
+  _handHoldTargetLocker: {fileID: 2712046360455809814}
+  _pickupTargetLocker: {fileID: 4607633442489985284}
+  _placeTarget: {fileID: 925888607827410678}
+  _itemPositionTargetLocker: {fileID: 4363011775381521912}
+  _shoulderWeaponPivot: {fileID: 4855327836977815790}
+  _holdIkConstraint: {fileID: 2142891004495607562}
+  _pickupIkConstraint: {fileID: 2532537050071209971}
+  _itemPositionConstraint: {fileID: 6263492953658661066}
+  _upperArm: {fileID: 802911981376609306}
+  _handBone: {fileID: 6356800398579286298}
+  _holdTransform: {fileID: 6456791731408993078}
 --- !u!114 &333363580064996929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4694,22 +4693,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e8bd2aad239e974bb1bc493f8db6eeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  intents: {fileID: 333363580064996929}
-  hands: {fileID: 4366303252165034965}
-  pickup: {fileID: 3473079973903976204}
-  gunHoldRight: {fileID: 5850001831997321599}
-  gunHoldLeft: {fileID: 5870208139668738663}
-  toolboxHoldRight: {fileID: 682390552445027629}
-  toolBoxHoldLeft: {fileID: 4606741981008285273}
-  shoulderHoldRight: {fileID: 8867980937904334229}
-  shoulderHoldLeft: {fileID: 6048018365037233454}
-  gunHoldHarmRight: {fileID: 7089849703788316465}
-  gunHoldHarmLeft: {fileID: 9208837563226324795}
-  throwToolboxLeft: {fileID: 4142425369872683902}
-  throwToolboxRight: {fileID: 5020193951115866215}
-  smallItemRight: {fileID: 7151404865513586269}
-  smallItemLeft: {fileID: 7672624758370820705}
-  throwController: {fileID: 3711543053657384972}
+  _intents: {fileID: 333363580064996929}
+  _hands: {fileID: 4366303252165034965}
+  _pickup: {fileID: 3473079973903976204}
+  _gunHoldRight: {fileID: 5850001831997321599}
+  _gunHoldLeft: {fileID: 5870208139668738663}
+  _toolboxHoldRight: {fileID: 682390552445027629}
+  _toolBoxHoldLeft: {fileID: 4606741981008285273}
+  _shoulderHoldRight: {fileID: 8867980937904334229}
+  _shoulderHoldLeft: {fileID: 6048018365037233454}
+  _gunHoldHarmRight: {fileID: 7089849703788316465}
+  _gunHoldHarmLeft: {fileID: 9208837563226324795}
+  _throwToolboxLeft: {fileID: 4142425369872683902}
+  _throwToolboxRight: {fileID: 5020193951115866215}
+  _smallItemRight: {fileID: 7151404865513586269}
+  _smallItemLeft: {fileID: 7672624758370820705}
+  _throwController: {fileID: 3711543053657384972}
 --- !u!114 &3292637383336994458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4722,13 +4721,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3662b4356344d1a4caaefdaaa3a462c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hands: {fileID: 4366303252165034965}
-  itemReachDuration: 0.3
-  itemMoveDuration: 0.3
-  holdController: {fileID: 304844770068834842}
-  lookAtTargetLocker: {fileID: 5358384094254398678}
-  lookAtConstraint: {fileID: 2851688491558728783}
-  hips: {fileID: 5433592588855148907}
+  _hands: {fileID: 4366303252165034965}
+  _itemReachDuration: 0.3
+  _itemMoveDuration: 0.3
+  _holdController: {fileID: 304844770068834842}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _hips: {fileID: 5433592588855148907}
 --- !u!114 &6106348523763162772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4741,11 +4740,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e5034d24094ec4f968bba98ab85387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hands: {fileID: 4366303252165034965}
-  lookAtTargetLocker: {fileID: 5358384094254398678}
-  hips: {fileID: 5433592588855148907}
-  lookAtConstraint: {fileID: 2851688491558728783}
-  interactionMoveDuration: 0.3
+  _hands: {fileID: 4366303252165034965}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _hips: {fileID: 5433592588855148907}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _interactionMoveDuration: 0.3
 --- !u!114 &3087691752500883368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4758,15 +4757,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 766145a5eaeaf4f4fae47ca69fdaff90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aimTarget: {fileID: 2856800849451305125}
-  hands: {fileID: 4366303252165034965}
-  intents: {fileID: 333363580064996929}
-  holdController: {fileID: 304844770068834842}
-  bodyAimRig: {fileID: 4182499762659887119}
-  rotationSpeed: 5
-  canAim: 0
-  isAiming: 0
-  movementController: {fileID: 2500043470628789696}
+  _aimTarget: {fileID: 2856800849451305125}
+  _hands: {fileID: 4366303252165034965}
+  _intents: {fileID: 333363580064996929}
+  _holdController: {fileID: 304844770068834842}
+  _bodyAimRig: {fileID: 4182499762659887119}
+  _rotationSpeed: 5
+  _movementController: {fileID: 2500043470628789696}
 --- !u!114 &534476557379109011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4779,8 +4776,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f3f38cca4120a24682aebbbe72ef018, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animatorController: {fileID: 2643222421258484460}
-  movement: {fileID: 2500043470628789696}
+  _animatorController: {fileID: 2643222421258484460}
+  _movement: {fileID: 2500043470628789696}
 --- !u!114 &3711543053657384972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4793,16 +4790,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcb90a34027ab84d9db16533eeb0d25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hands: {fileID: 4366303252165034965}
-  animatorController: {fileID: 2643222421258484460}
-  movementController: {fileID: 2500043470628789696}
-  aimTarget: {fileID: 2856800849451305125}
-  maxForce: 20
-  secondPerMeterFactorDef: 0.25
-  secondPerMeterFactorHarm: 0.15
-  holdController: {fileID: 304844770068834842}
-  bodyAimRig: {fileID: 4182499762659887119}
-  intents: {fileID: 333363580064996929}
+  _hands: {fileID: 4366303252165034965}
+  _animatorController: {fileID: 2643222421258484460}
+  _movementController: {fileID: 2500043470628789696}
+  _aimTarget: {fileID: 2856800849451305125}
+  _maxForce: 20
+  _secondPerMeterFactorDef: 0.25
+  _secondPerMeterFactorHarm: 0.15
+  _bodyAimRig: {fileID: 4182499762659887119}
+  _holdController: {fileID: 304844770068834842}
+  _intents: {fileID: 333363580064996929}
 --- !u!114 &1045397264392006938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4857,15 +4854,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff1cde6195234ca4b97074ecccdda0b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: 8635375509376998503}
-  aimTarget: {fileID: 2856800849451305125}
-  movementType: 0
-  movementSpeed: 150
-  lerpMultiplier: 5
-  rotationLerpMultiplier: 5
-  movementTarget: {fileID: 5029736816765645950}
-  targetMovement: {x: 0, y: 0, z: 0}
-  aimRotationSpeed: 5
+  _rb: {fileID: 8635375509376998503}
+  _aimTarget: {fileID: 2856800849451305125}
+  _movementType: 0
+  _movementSpeed: 150
+  _lerpMultiplier: 5
+  _rotationLerpMultiplier: 5
+  _movementTarget: {fileID: 5029736816765645950}
+  _targetMovement: {x: 0, y: 0, z: 0}
+  _aimRotationSpeed: 5
 --- !u!114 &6753548122926751948
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4890,18 +4887,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef0c8ff544750ff4390400a1a6276bcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grabRange: 2
-  grabbableLayer:
+  _grabRange: 2
+  _grabbableLayer:
     serializedVersion: 2
     m_Bits: 2147483647
   _jointBreakForce: 15000
+  _holdController: {fileID: 304844770068834842}
+  _itemReachDuration: 0.5
+  _itemMoveDuration: 0.5
   _hands: {fileID: 4366303252165034965}
-  holdController: {fileID: 304844770068834842}
-  itemReachDuration: 0.5
-  itemMoveDuration: 0.5
-  hands: {fileID: 4366303252165034965}
-  lookAtTargetLocker: {fileID: 5358384094254398678}
-  lookAtConstraint: {fileID: 2851688491558728783}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _lookAtConstraint: {fileID: 2851688491558728783}
 --- !u!114 &2852321227773080847
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4914,13 +4910,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8df1dc343eea91c43959b82be0531a3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rightPickupTargetLocker: {fileID: 4607633442489985284}
-  leftPickupTargetLocker: {fileID: 4846808082985781182}
-  rightHoldTargetLocker: {fileID: 2712046360455809814}
-  leftHoldTargetLocker: {fileID: 5441267867618792388}
-  lookAtTargetLocker: {fileID: 5358384094254398678}
-  leftPlaceTarget: {fileID: 2264229762793431148}
-  rightPlaceTarget: {fileID: 925888607827410678}
+  _rightPickupTargetLocker: {fileID: 4607633442489985284}
+  _leftPickupTargetLocker: {fileID: 4846808082985781182}
+  _rightHoldTargetLocker: {fileID: 2712046360455809814}
+  _leftHoldTargetLocker: {fileID: 5441267867618792388}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _leftPlaceTarget: {fileID: 2264229762793431148}
+  _rightPlaceTarget: {fileID: 925888607827410678}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0

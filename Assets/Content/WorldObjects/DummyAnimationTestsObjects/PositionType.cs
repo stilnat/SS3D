@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PositionType
+namespace DummyStuff
 {
-        Standing,
-        Sitting,
-        Crawling
+    public enum PositionType
+    {
+        Standing = 0,
+        Sitting = 1,
+        Crawling = 2,
+    }
 }
