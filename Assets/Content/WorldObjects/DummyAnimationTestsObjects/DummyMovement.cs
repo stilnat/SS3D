@@ -1,5 +1,6 @@
 using Coimbra.Services.Events;
 using Coimbra.Services.PlayerLoopEvents;
+using FishNet;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Inputs;
@@ -214,7 +215,7 @@ namespace DummyStuff
             GetComponent<DummyAim>().OnAim += HandleAimChange;
             GetComponent<Grab>().OnGrab += HandleGrabChange;
 
-            AddHandle(FixedUpdateEvent.AddListener(HandleFixedUpdate));
+            InstanceFinder.TimeManager.OnTick += HandleFixedUpdate;
         }
 
         private void HandleAimChange(object sender, bool aim)
@@ -227,7 +228,7 @@ namespace DummyStuff
             _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
-        private void HandleFixedUpdate(ref EventContext context, in FixedUpdateEvent updateEvent)
+        private void HandleFixedUpdate()
         {
             if (!enabled)
             {
