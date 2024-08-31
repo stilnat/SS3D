@@ -28,12 +28,12 @@ MonoBehaviour:
     IsInitialState: 0
     IsTerminal: 1
     CustomCraft: 0
-    Result: {fileID: 11400000, guid: 3f647cba5228eee4c96dcb4d68c089af, type: 2}
+    Result: {fileID: 0}
   - _name: FloorTile
     IsInitialState: 0
     IsTerminal: 1
     CustomCraft: 0
-    Result: {fileID: 11400000, guid: 943460668ce3db0429d1617490f983ef, type: 2}
+    Result: {fileID: 0}
   StepLinks:
   - _elements:
       _list: []
