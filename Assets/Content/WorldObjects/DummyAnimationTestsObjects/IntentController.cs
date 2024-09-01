@@ -1,3 +1,5 @@
+using FishNet;
+using FishNet.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +18,12 @@ namespace DummyStuff
         // Update is called once per frame
         protected void Update()
         {
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+                return;
+            }
+
             if (!Input.GetKeyDown(KeyCode.Space))
             {
                 return;

@@ -1,6 +1,7 @@
 using Coimbra.Services.Events;
 using Coimbra.Services.PlayerLoopEvents;
 using FishNet;
+using FishNet.Object;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Inputs;
@@ -14,7 +15,7 @@ using Object = System.Object;
 
 namespace DummyStuff
 {
-    public class DummyMovement : Actor
+    public class DummyMovement : NetworkActor
     {
         public event Action<float> OnSpeedChangeEvent;
 
@@ -84,9 +85,15 @@ namespace DummyStuff
             }
         }
 
-        protected override void OnStart()
+        public override void OnStartClient()
         {
-            base.OnStart();
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+                return;
+            }
+
             Setup();
         }
 
@@ -134,7 +141,7 @@ namespace DummyStuff
         /// </summary>
         protected void MovePlayer()
         {
-            _rb.velocity = _targetMovement * (_movementSpeed * Time.fixedDeltaTime);
+            _rb.velocity = _targetMovement * (float)(_movementSpeed * TimeManager.TickDelta);
         }
 
         /// <summary>
@@ -215,7 +222,7 @@ namespace DummyStuff
             GetComponent<DummyAim>().OnAim += HandleAimChange;
             GetComponent<Grab>().OnGrab += HandleGrabChange;
 
-            InstanceFinder.TimeManager.OnTick += HandleFixedUpdate;
+            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
         private void HandleAimChange(object sender, bool aim)
@@ -228,7 +235,7 @@ namespace DummyStuff
             _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
-        private void HandleFixedUpdate()
+        private void HandleNetworkTick()
         {
             if (!enabled)
             {

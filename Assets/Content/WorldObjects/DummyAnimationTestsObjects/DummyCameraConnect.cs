@@ -11,6 +11,11 @@ namespace DummyStuff
         public override void OnStartClient()
         {
             base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                return;
+            }
+
             FindObjectOfType<CameraFollow>().SetTarget(gameObject);
         }
     }

@@ -1,3 +1,4 @@
+using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,12 @@ namespace DummyStuff
 
         protected void Update()
         {
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+                return;
+            }
+
             if (!Input.GetMouseButtonDown(0))
             {
                 return;
