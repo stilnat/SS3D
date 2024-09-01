@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10bdb03db33fb148b858a4a3b646cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0
   m_Data:
     m_ConstrainedObject: {fileID: 3720527799557840007}
     m_SourceObjects:
@@ -4421,6 +4421,7 @@ GameObject:
   - component: {fileID: 241836927429143711}
   - component: {fileID: 3868534335076406504}
   - component: {fileID: 3538538752291718896}
+  - component: {fileID: 5337792808514694743}
   m_Layer: 0
   m_Name: DummyHuman
   m_TagString: Untagged
@@ -4858,6 +4859,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff1cde6195234ca4b97074ecccdda0b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
   _aimTarget: {fileID: 2856800849451305125}
   _movementType: 0
@@ -4933,7 +4937,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 0
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 0
@@ -4982,8 +4986,11 @@ MonoBehaviour:
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours:
+  - {fileID: 2500043470628789696}
   - {fileID: 2959772459502076635}
   - {fileID: 3868534335076406504}
+  - {fileID: 3538538752291718896}
+  - {fileID: 5337792808514694743}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
@@ -5012,7 +5019,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af6ec62197219de45a76faa4eb9e88c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 1
+  _componentIndexCache: 2
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
 --- !u!114 &3538538752291718896
@@ -5027,9 +5034,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb71a310840391540bd62e79754840d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
   _pickup: {fileID: 3473079973903976204}
   _place: {fileID: 3292637383336994458}
   _hands: {fileID: 4366303252165034965}
+--- !u!114 &5337792808514694743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8cac635f24954048aad3a6ff9110beb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
+  IgnoredParameters: []
+  _animator: {fileID: 7307990926274805850}
+  _smoothFloats: 1
+  _interpolation: 2
+  _clientAuthoritative: 1
+  _sendToOwner: 0
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
@@ -5870,7 +5901,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeda7bfbf984f2a4da5ab4b8967b115d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0
   m_Data:
     m_Root: {fileID: 802911981376609306}
     m_Mid: {fileID: 56314186812711448}
@@ -6225,7 +6256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10bdb03db33fb148b858a4a3b646cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0
   m_Data:
     m_ConstrainedObject: {fileID: 4363011775381521912}
     m_SourceObjects:
@@ -7521,7 +7552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeda7bfbf984f2a4da5ab4b8967b115d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0
   m_Data:
     m_Root: {fileID: 7446386329022654784}
     m_Mid: {fileID: 8425781932946354035}
