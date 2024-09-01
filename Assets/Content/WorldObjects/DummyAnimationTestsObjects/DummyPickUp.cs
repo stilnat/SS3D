@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
+    // Todo : Add action choser depending on state
     public class DummyPickUp : MonoBehaviour
     {
         [SerializeField]
@@ -29,22 +30,11 @@ namespace DummyStuff
         [SerializeField]
         private Transform _lookAtTargetLocker;
 
+        public bool IsPicking { get; private set; }
+
         public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.3f;
 
-        protected void Update()
-        {
-            if (!Input.GetMouseButtonDown(0))
-            {
-                return;
-            }
-
-            if (_hands.SelectedHand.Empty)
-            {
-                TryPickUp();
-            }
-        }
-
-        private void TryPickUp()
+        public void TryPickUp()
         {
             // Cast a ray from the mouse position into the scene
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -66,6 +56,7 @@ namespace DummyStuff
 
         private IEnumerator PickUp(DummyItem item)
         {
+            IsPicking = true;
             GetComponent<DummyAnimatorController>().TriggerPickUp();
 
             DummyHand secondaryHand = _hands.GetOtherHand(_hands.SelectedHand.HandType);
@@ -79,6 +70,7 @@ namespace DummyStuff
             yield return PickupReach(item, _hands.SelectedHand, secondaryHand, withTwoHands);
 
             yield return PickupPullBack(item, _hands.SelectedHand, secondaryHand, withTwoHands);
+            IsPicking = false;
         }
 
         private void SetUpPickup(DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands, DummyItem item)

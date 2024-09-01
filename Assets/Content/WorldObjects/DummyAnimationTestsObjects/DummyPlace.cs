@@ -36,22 +36,11 @@ namespace DummyStuff
         [SerializeField]
         private Transform _hips;
 
+        public bool IsPlacing { get; private set; }
+
         public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.3f;
 
-        protected void Update()
-        {
-            if (!Input.GetMouseButtonDown(0))
-            {
-                return;
-            }
-
-            if (_hands.SelectedHand.Full)
-            {
-                TryPlace();
-            }
-        }
-
-        private void TryPlace()
+        public void TryPlace()
         {
             // Cast a ray from the mouse position into the scene
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -68,6 +57,7 @@ namespace DummyStuff
 
         private IEnumerator Place(Vector3 placePosition)
         {
+            IsPlacing = true;
             DummyHand mainHand = _hands.SelectedHand;
             DummyHand secondaryHand = _hands.GetOtherHand(mainHand.HandType);
             bool withTwoHands = secondaryHand.Empty && _hands.SelectedHand.Item.CanHoldTwoHand;
@@ -79,6 +69,8 @@ namespace DummyStuff
             yield return PlaceReach(mainHand, placeTarget, item);
 
             yield return PlaceAndPullBack(mainHand, secondaryHand, withTwoHands);
+
+            IsPlacing = false;
         }
 
         private void SetupPlace(Vector3 placePosition, GameObject item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)

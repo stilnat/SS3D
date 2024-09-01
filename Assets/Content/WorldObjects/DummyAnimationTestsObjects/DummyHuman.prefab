@@ -4420,6 +4420,7 @@ GameObject:
   - component: {fileID: 2959772459502076635}
   - component: {fileID: 241836927429143711}
   - component: {fileID: 3868534335076406504}
+  - component: {fileID: 3538538752291718896}
   m_Layer: 0
   m_Name: DummyHuman
   m_TagString: Untagged
@@ -4982,6 +4983,7 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours:
   - {fileID: 2959772459502076635}
+  - {fileID: 3868534335076406504}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
@@ -5010,9 +5012,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af6ec62197219de45a76faa4eb9e88c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
+--- !u!114 &3538538752291718896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb71a310840391540bd62e79754840d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pickup: {fileID: 3473079973903976204}
+  _place: {fileID: 3292637383336994458}
+  _hands: {fileID: 4366303252165034965}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
