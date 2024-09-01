@@ -276,19 +276,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31f69105775d221409591f2e3dcf4c98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  singleHandHold: 1
-  twoHandHold: 0
-  singleHandHoldHarm: 1
-  twoHandHoldHarm: 0
-  singleHandHoldThrow: 6
-  twoHandHoldThrow: 0
-  primaryRightHandHold: {fileID: 5671188440365690712}
-  secondaryRightHandHold: {fileID: 5671188440365690712}
-  primaryLeftHandHold: {fileID: 4602652067006472687}
-  secondaryLeftHandHold: {fileID: 4602652067006472687}
-  interactionPoint: {fileID: 0}
-  canHoldTwoHand: 0
-  canHoldOneHand: 1
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _singleHandHold: 1
+  _twoHandHold: 0
+  _singleHandHoldHarm: 1
+  _twoHandHoldHarm: 0
+  _singleHandHoldThrow: 6
+  _twoHandHoldThrow: 0
+  _primaryRightHandHold: {fileID: 5671188440365690712}
+  _secondaryRightHandHold: {fileID: 5671188440365690712}
+  _primaryLeftHandHold: {fileID: 4602652067006472687}
+  _secondaryLeftHandHold: {fileID: 4602652067006472687}
+  _canHoldTwoHand: 0
 --- !u!1 &8561565687139493617
 GameObject:
   m_ObjectHideFlags: 0
