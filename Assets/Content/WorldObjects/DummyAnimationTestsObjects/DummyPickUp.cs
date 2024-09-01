@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    // Todo : Add action choser depending on state
     public class DummyPickUp : MonoBehaviour
     {
         [SerializeField]
@@ -34,7 +33,7 @@ namespace DummyStuff
 
         public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.3f;
 
-        public void TryPickUp()
+        public bool CanPickUp(out DummyItem item)
         {
             // Cast a ray from the mouse position into the scene
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -47,14 +46,19 @@ namespace DummyStuff
 
                 // should add conditions to check other objects doesn't require two hands.
                 // also check picked up object doesn't require two hands if other hand is full.
-                if (obj.TryGetComponent(out DummyItem item))
+                if (obj.TryGetComponent(out DummyItem item2))
                 {
-                    StartCoroutine(PickUp(item));
+                    item = item2;
+
+                    return true;
                 }
             }
+
+            item = null;
+            return false;
         }
 
-        private IEnumerator PickUp(DummyItem item)
+        public IEnumerator PickUp(DummyItem item)
         {
             IsPicking = true;
             GetComponent<DummyAnimatorController>().TriggerPickUp();

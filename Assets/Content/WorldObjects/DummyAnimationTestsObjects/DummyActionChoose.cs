@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DummyStuff
 {
-    public class DummyActionChoose : MonoBehaviour
+    public class DummyActionChoose : NetworkBehaviour
     {
         [SerializeField]
         private DummyPickUp _pickup;
@@ -16,14 +16,17 @@ namespace DummyStuff
         [SerializeField]
         private DummyHands _hands;
 
-        protected void Update()
+        public override void OnStartClient()
         {
+            base.OnStartClient();
             if (!GetComponent<NetworkObject>().IsOwner)
             {
                 enabled = false;
-                return;
             }
+        }
 
+        protected void Update()
+        {
             if (!Input.GetMouseButtonDown(0))
             {
                 return;
@@ -31,12 +34,39 @@ namespace DummyStuff
 
             if (_hands.SelectedHand.Empty)
             {
-                    _pickup.TryPickUp();
+                if (_pickup.CanPickUp(out DummyItem item))
+                {
+                    RpcTryPickUp(item);
+                }
             }
-            else
+            else if (_place.CanPlace(out Vector3 point))
             {
-                       _place.TryPlace();
+                RpcTryPlace(point);
             }
+        }
+
+        [ServerRpc]
+        private void RpcTryPickUp(DummyItem item)
+        {
+            ObserversTryPickUp(item);
+        }
+
+        [ServerRpc]
+        private void RpcTryPlace(Vector3 point)
+        {
+            ObserversTryPlace(point);
+        }
+
+        [ObserversRpc]
+        private void ObserversTryPickUp(DummyItem item)
+        {
+            StartCoroutine(_pickup.PickUp(item));
+        }
+
+        [ObserversRpc]
+        private void ObserversTryPlace(Vector3 point)
+        {
+            StartCoroutine(_place.Place(point));
         }
     }
 }
