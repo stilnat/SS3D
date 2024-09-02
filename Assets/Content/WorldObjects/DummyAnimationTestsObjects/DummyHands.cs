@@ -1,10 +1,12 @@
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-public class DummyHands : MonoBehaviour
+public class DummyHands : NetworkBehaviour
 {
     public event EventHandler<DummyHand> OnSelectedHandChange;
 
@@ -16,6 +18,7 @@ public class DummyHands : MonoBehaviour
     [SerializeField]
     private DummyHand _rightHand;
 
+    [SyncVar(OnChange = nameof(SyncSelectedHand))]
     private HandType _selectedHand = HandType.LeftHand;
 
     public bool BothHandFull => _leftHand.Full && _rightHand.Full;
@@ -35,6 +38,15 @@ public class DummyHands : MonoBehaviour
         return secondary ? GetOtherHand(hand.HandType).Item : hand.Item;
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (!GetComponent<NetworkObject>().IsOwner)
+        {
+            enabled = false;
+        }
+    }
+
     // Update is called once per frame
     protected void Update()
     {
@@ -44,10 +56,18 @@ public class DummyHands : MonoBehaviour
         }
 
         _selectedHand = _selectedHand == HandType.LeftHand ? HandType.RightHand : HandType.LeftHand;
+    }
+
+    private void SyncSelectedHand(HandType prev, HandType next, bool asServer)
+    {
+        if (asServer)
+        {
+            return;
+        }
+
+        Debug.Log($"Selected hand of {Owner} is {_selectedHand}");
 
         OnSelectedHandChange?.Invoke(this, SelectedHand);
-
-        Debug.Log($"Selected hand is {_selectedHand}");
     }
 }
 }
