@@ -1,4 +1,6 @@
 ﻿using FishNet.Component.Animating;
+using FishNet.Component.Transforming;
+using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using System;
@@ -67,6 +69,9 @@ namespace SS3D.Systems.Entities.Humanoid
         [SerializeField]
         private AnimationClip _standUpFaceDownClip;
 
+        [SerializeField]
+        private byte _ragdollPartSyncInterval;
+
         private void OnSyncKnockdown(bool prev, bool next, bool asServer)
 		{
 			if (prev == next) return;
@@ -102,7 +107,18 @@ namespace SS3D.Systems.Entities.Humanoid
             }
             // All rigid bodies are kinematic at start, only the owner should be able to change that afterwards.
 			ToggleKinematic(true);
-		}
+            ToggleSyncRagdoll(false);
+        }
+
+        public override void OnOwnershipClient(NetworkConnection prevOwner)
+        {
+            base.OnOwnershipClient(prevOwner);
+
+            foreach (Transform part in _ragdollParts)
+            {
+                part.GetComponent<NetworkTransform>().SetInterval(_ragdollPartSyncInterval);
+            }
+        }
 
         private void OnDisable()
         {
@@ -166,6 +182,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _currentState = RagdollState.Ragdoll;
             Vector3 movement = _humanoidLivingController.TargetMovement * 3;
+            ToggleSyncRagdoll(false);
             ToggleController(false);
             ToggleAnimator(false);
             if (!IsOwner && Owner.ClientId != -1)
@@ -357,6 +374,27 @@ namespace SS3D.Systems.Entities.Humanoid
             if (_networkAnimator != null)
             {
                 _networkAnimator.enabled = enable;
+            }
+        }
+
+        /// <summary>
+        /// Toggle the network transform syncing of the ragdoll parts, to save up on those sweet bytes.
+        /// </summary>
+        /// <param name="isActive"> true if the network transform of the ragdoll parts should sync</param>
+        /// <returns></returns>
+        private void ToggleSyncRagdoll(bool isActive)
+        {
+            // Only the owner should set the network transform, fishnet requirement,
+            // and then fishnet handles sending it to observers.
+            if (!IsOwner)
+            {
+                return;
+            }
+
+            foreach (Transform part in _ragdollParts)
+            {
+                part.GetComponent<NetworkTransform>().SetSynchronizePosition(isActive);
+                part.GetComponent<NetworkTransform>().SetSynchronizeRotation(isActive);
             }
         }
     }
