@@ -144,7 +144,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6c322248b2bbd746911650f246c1501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orientation: {fileID: 5982401897890755012}
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _orientation: {fileID: 5982401897890755012}
 --- !u!1 &7716195917415779632
 GameObject:
   m_ObjectHideFlags: 0

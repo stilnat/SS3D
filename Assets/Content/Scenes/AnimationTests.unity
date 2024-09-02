@@ -847,6 +847,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2168389489981721619, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
   m_PrefabInstance: {fileID: 134745338134360137}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &621152827 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8922038390857918936, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+  m_PrefabInstance: {fileID: 134745338134360137}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 621152826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6c322248b2bbd746911650f246c1501, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &657500997 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6226623702120799867, guid: efb33bc648a1e614eb0af7d290a10461, type: 3}
@@ -868,6 +879,7 @@ GameObject:
   - component: {fileID: 667570445}
   - component: {fileID: 667570444}
   - component: {fileID: 667570451}
+  - component: {fileID: 667570452}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -1015,6 +1027,22 @@ MonoBehaviour:
   _placement: 2
   _showOutgoing: 1
   _showIncoming: 1
+--- !u!114 &667570452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667570443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 756c28cd3141c4140ae776188ee26729, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NetworkTraffic:
+    _updateInteval: 1
+    _updateClient: 1
+    _updateServer: 1
 --- !u!1 &678871293 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7653260483675679172, guid: 4268885ccf3d48e4b9b845f21690e7d1, type: 3}
@@ -2796,6 +2824,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7000076387026493534, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: _scenePathHash
+      value: 1553970943
+      objectReference: {fileID: 0}
+    - target: {fileID: -7000076387026493534, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: <SceneId>k__BackingField
+      value: 6674254381615381735
+      objectReference: {fileID: 0}
+    - target: {fileID: -7000076387026493534, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: _networkBehaviours.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7000076387026493534, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: _networkBehaviours.Array.data[0]
+      value: 
+      objectReference: {fileID: 621152827}
     - target: {fileID: 2168389489981721619, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
       propertyPath: m_Name
       value: DummyChair
@@ -2842,6 +2886,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2903963145403629056, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8922038390857918936, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: _networkObjectCache
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8922038390857918936, guid: 3d188fbae7fdea24bba41cff7b4fe2f0, type: 3}
+      propertyPath: _componentIndexCache
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
