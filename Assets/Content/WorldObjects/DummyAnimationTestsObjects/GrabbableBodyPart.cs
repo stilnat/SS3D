@@ -1,3 +1,4 @@
+using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public class GrabbableBodyPart : MonoBehaviour, IHoldProvider
+    public class GrabbableBodyPart : NetworkBehaviour, IHoldProvider
     {
         [FormerlySerializedAs("handHold")]
         [SerializeField]

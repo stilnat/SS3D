@@ -1,3 +1,4 @@
+using FishNet.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using UnityEngine.Animations.Rigging;
 
 namespace DummyStuff
 {
-public class DummyHand : MonoBehaviour
+public class DummyHand : NetworkBehaviour
 {
     private IHoldProvider _item;
 

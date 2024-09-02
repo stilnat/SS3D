@@ -2140,7 +2140,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &3502021581479330495
 GameObject:
   m_ObjectHideFlags: 0
@@ -3119,7 +3122,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &4592963272417968929
 GameObject:
   m_ObjectHideFlags: 0
@@ -3423,7 +3429,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &5274622112004683681
 GameObject:
   m_ObjectHideFlags: 0
@@ -4462,7 +4471,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 5
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &6611411054922888478
 GameObject:
   m_ObjectHideFlags: 0
@@ -5408,7 +5420,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &7779258469288091143
 GameObject:
   m_ObjectHideFlags: 0
@@ -6406,7 +6421,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dc83a277ae1b64fa0aafb202cb52a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handHold: 3
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _handHold: 3
 --- !u!1 &8378594314045445170
 GameObject:
   m_ObjectHideFlags: 0
