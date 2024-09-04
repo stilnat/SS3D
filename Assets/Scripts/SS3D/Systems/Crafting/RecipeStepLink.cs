@@ -33,7 +33,9 @@ namespace SS3D.Systems.Crafting
         [SerializeField]
         private string _to;
 
-        [Tooltip("Should the result spawning from reaching the target step be modified ? Useful for deconstruction.")] 
+        [Tooltip("If true, The main result of the target step will be modified, using the Modify method of the"
+            + " ICraftable interface. The main result's prefab should have a component implementing the ICraftable interface"
+            + " for it to work.")] 
         [SerializeField]
         private bool _modifyResult;
 
@@ -74,7 +76,9 @@ namespace SS3D.Systems.Crafting
         public string To => _to;
 
         /// <summary>
-        /// Should the result spawning from reaching the target step be modified ? Useful for deconstruction.
+        /// "If true, The main result of the target step will be modified, using the Modify method of the
+        /// ICraftable interface. The main result's prefab should have a component implementing the ICraftable interface
+        /// for it to work.
         /// </summary>
         public bool ModifyResult => _modifyResult;
 
