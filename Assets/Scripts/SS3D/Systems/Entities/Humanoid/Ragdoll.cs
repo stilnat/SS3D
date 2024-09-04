@@ -114,6 +114,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             base.OnOwnershipClient(prevOwner);
 
+            // Set interval need to be called by owner. This allows fast setting
             foreach (Transform part in _ragdollParts)
             {
                 part.GetComponent<NetworkTransform>().SetInterval(_ragdollPartSyncInterval);
@@ -182,9 +183,10 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _currentState = RagdollState.Ragdoll;
             Vector3 movement = _humanoidLivingController.TargetMovement * 3;
-            ToggleSyncRagdoll(false);
+            ToggleSyncRagdoll(true);
             ToggleController(false);
             ToggleAnimator(false);
+
             if (!IsOwner && Owner.ClientId != -1)
                 return;
             
@@ -236,6 +238,8 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _currentState = RagdollState.BonesReset;
             _elapsedResetBonesTime = 0;
+
+            ToggleSyncRagdoll(false);
             
             // Only the owner handles ragdoll's physics
             if (!IsOwner) return;
@@ -382,15 +386,9 @@ namespace SS3D.Systems.Entities.Humanoid
         /// </summary>
         /// <param name="isActive"> true if the network transform of the ragdoll parts should sync</param>
         /// <returns></returns>
+        
         private void ToggleSyncRagdoll(bool isActive)
         {
-            // Only the owner should set the network transform, fishnet requirement,
-            // and then fishnet handles sending it to observers.
-            if (!IsOwner)
-            {
-                return;
-            }
-
             foreach (Transform part in _ragdollParts)
             {
                 part.GetComponent<NetworkTransform>().SetSynchronizePosition(isActive);
