@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using ParrelSync;
 using System.IO;
 using UnityEngine;
 
@@ -19,7 +20,8 @@ namespace SS3D.Data
 		/// Gets the full path to the application folder.
 		/// </summary>
 		[NotNull]
-		private static string FullGamePath => Path.GetFullPath(".");
+		private static string FullGamePath => 
+            ClonesManager.IsClone() ? ClonesManager.GetOriginalProjectPath() : Path.GetFullPath(".");
 
 		/// <summary>
 		/// The path to the Config folder on the Editor project.
@@ -38,7 +40,7 @@ namespace SS3D.Data
 		/// <returns>The path relating to the gamePath.</returns>
 		[NotNull]
 		public static string GetPath(GamePaths gamePath, bool fullPath = false)
-		{
+        {
 			string path = (fullPath ? FullGamePath : string.Empty) + GamePath + "/" + gamePath;
 
 			return path;
