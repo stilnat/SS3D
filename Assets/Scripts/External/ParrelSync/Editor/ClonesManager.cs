@@ -437,7 +437,7 @@ namespace ParrelSync
         /// <returns></returns>
         public static string GetCurrentProjectPath()
         {
-            Path.GetFullPath(".");
+            return Path.GetFullPath(".");
         }
 
         /// <summary>
