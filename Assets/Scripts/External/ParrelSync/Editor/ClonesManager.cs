@@ -437,7 +437,7 @@ namespace ParrelSync
         /// <returns></returns>
         public static string GetCurrentProjectPath()
         {
-            return Application.dataPath.Replace("/Assets", "");
+            Path.GetFullPath(".");
         }
 
         /// <summary>
@@ -482,7 +482,8 @@ namespace ParrelSync
             {
                 /// If this is a clone...
                 /// Original project path can be deduced by removing the suffix from the clone's path.
-                string cloneProjectPath = ClonesManager.GetCurrentProject().projectPath;
+                string cloneProjectPath = Path.GetFullPath(".");
+                Debug.Log("full syncparell path is" + cloneProjectPath);
 
                 int index = cloneProjectPath.LastIndexOf(ClonesManager.CloneNameSuffix);
                 if (index > 0)
