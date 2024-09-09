@@ -1,7 +1,9 @@
 ﻿using JetBrains.Annotations;
-using ParrelSync;
 using System.IO;
-using UnityEngine;
+
+#if UNITY_EDITOR
+using ParrelSync;
+#endif
 
 namespace SS3D.Data
 {
@@ -21,7 +23,11 @@ namespace SS3D.Data
 		/// </summary>
 		[NotNull]
 		private static string FullGamePath => 
+#if UNITY_EDITOR
             ClonesManager.IsClone() ? ClonesManager.GetOriginalProjectPath() : Path.GetFullPath(".");
+#else
+            Path.GetFullPath(".");
+#endif
 
 		/// <summary>
 		/// The path to the Config folder on the Editor project.

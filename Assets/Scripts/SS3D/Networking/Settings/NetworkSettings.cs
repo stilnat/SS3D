@@ -1,10 +1,11 @@
 ﻿using Coimbra;
-using ParrelSync;
-using SS3D.Core.Settings;
 using SS3D.Data;
 using SS3D.Logging;
-using System;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using ParrelSync;
+#endif
 
 namespace SS3D.Networking.Settings
 {
@@ -51,7 +52,12 @@ namespace SS3D.Networking.Settings
 
         public string Ckey
         {
-            get => ClonesManager.IsClone() ? _ckey + ClonesManager.CloneNameSuffix : _ckey;
+            get =>
+                #if UNITY_EDITOR
+                ClonesManager.IsClone() ? _ckey + ClonesManager.CloneNameSuffix : _ckey;
+                #else 
+                _ckey;
+                #endif
             set => _ckey = value;
         }
 
