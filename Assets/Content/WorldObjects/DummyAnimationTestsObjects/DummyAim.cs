@@ -1,4 +1,5 @@
 using Coimbra;
+using FishNet.Object;
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -6,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public sealed class DummyAim : MonoBehaviour
+    public sealed class DummyAim : NetworkBehaviour
     {
         public event EventHandler<bool> OnAim;
 
@@ -42,6 +43,15 @@ namespace DummyStuff
         [SerializeField]
         private DummyMovement _movementController;
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+        }
+
         private void Update()
         {
             UpdateAimAbility(_hands.SelectedHand);
@@ -71,6 +81,18 @@ namespace DummyStuff
             {
                 gun.GetComponent<DummyFire>().Fire();
             }
+        }
+
+        [ServerRpc]
+        private void RpcAim(DummyHand hand, DummyGun gun)
+        {
+            ObserverAim(hand, gun);
+        }
+
+        [ObserversRpc]
+        private void ObserverAim(DummyHand hand, DummyGun gun)
+        {
+            Aim(hand, gun);
         }
 
         private void Aim(DummyHand hand, DummyGun gun)
@@ -107,6 +129,9 @@ namespace DummyStuff
             _canAim = _intents.Intent == Intent.Harm && selectedHand.Full && selectedHand.Item.GameObject.HasComponent<DummyGun>();
         }
 
+        /// <summary>
+        /// Sync the aiming target transform for all observers, target should have a networkTransform component.
+        /// </summary>
         private void UpdateAimTargetPosition()
         {
             // Cast a ray from the mouse position into the scene
