@@ -55,6 +55,12 @@ public class DummyHands : NetworkBehaviour
             return;
         }
 
+        RpcSwitchHand();
+    }
+
+    [ServerRpc]
+    private void RpcSwitchHand()
+    {
         _selectedHand = _selectedHand == HandType.LeftHand ? HandType.RightHand : HandType.LeftHand;
     }
 
