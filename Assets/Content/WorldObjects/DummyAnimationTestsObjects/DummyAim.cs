@@ -62,7 +62,7 @@ namespace DummyStuff
 
                 if (!_isAiming)
                 {
-                    Aim(_hands.SelectedHand, _hands.SelectedHand.Item.GameObject.GetComponent<DummyGun>());
+                    RpcAim(_hands.SelectedHand, _hands.SelectedHand.Item.GameObject.GetComponent<DummyGun>());
                     _isAiming = true;
                 }
 
@@ -73,7 +73,7 @@ namespace DummyStuff
             }
             else if (_isAiming && (!_canAim || !Input.GetMouseButton(1)))
             {
-                StopAiming(_hands.SelectedHand);
+                RpcStopAim(_hands.SelectedHand);
             }
 
             if (Input.GetKey(KeyCode.E) && _hands.SelectedHand.Full
@@ -93,6 +93,18 @@ namespace DummyStuff
         private void ObserverAim(DummyHand hand, DummyGun gun)
         {
             Aim(hand, gun);
+        }
+
+        [ServerRpc]
+        private void RpcStopAim(DummyHand hand)
+        {
+            ObserverStopAim(hand);
+        }
+
+        [ObserversRpc]
+        private void ObserverStopAim(DummyHand hand)
+        {
+            StopAiming(hand);
         }
 
         private void Aim(DummyHand hand, DummyGun gun)
