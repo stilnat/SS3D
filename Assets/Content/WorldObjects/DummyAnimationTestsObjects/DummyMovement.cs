@@ -71,6 +71,8 @@ namespace DummyStuff
         [SerializeField]
         private float _aimRotationSpeed = 5f;
 
+        public float InputAimAngle { get; private set; }
+
         public void RotatePlayerTowardTarget()
         {
             // Get the direction to the target
@@ -230,6 +232,16 @@ namespace DummyStuff
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
+        private void ComputeAngleBetweenAimAndInput()
+        {
+            // Convert the target's position to 2D (XZ plane)
+            Vector2 forward = new Vector2(transform.forward.x, transform.forward.z);
+            Vector2 targetMove = new Vector2(_targetMovement.x, _targetMovement.z);
+
+            InputAimAngle = Vector2.SignedAngle(targetMove, forward);
+            Debug.Log("forward : " + forward + " target move : " + targetMove + " angle" + InputAimAngle);
+        }
+
         private void HandleAimChange(object sender, bool aim)
         {
             _movementType = aim ? MovementType.Aiming : MovementType.Normal;
@@ -248,6 +260,7 @@ namespace DummyStuff
             }
 
             ProcessCharacterMovement();
+            ComputeAngleBetweenAimAndInput();
         }
     }
 }

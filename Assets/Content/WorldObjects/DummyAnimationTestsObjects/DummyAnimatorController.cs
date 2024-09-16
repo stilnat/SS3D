@@ -1,3 +1,4 @@
+using FishNet;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Entities.Data;
 using System.Collections;
@@ -54,6 +55,7 @@ namespace DummyStuff
         {
             base.OnStart();
             _movementController.OnSpeedChangeEvent += UpdateMovement;
+            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
         protected override void OnDestroyed()
@@ -84,6 +86,11 @@ namespace DummyStuff
             }
 
             _wasMovingPreviousUpdate = isMoving;
+        }
+
+        private void HandleNetworkTick()
+        {
+            _animator.SetFloat("AngleAimMove", (_movementController.InputAimAngle / 360f) + 0.5f);
         }
     }
 }
