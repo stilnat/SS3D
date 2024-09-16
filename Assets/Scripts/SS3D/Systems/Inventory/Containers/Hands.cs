@@ -266,6 +266,47 @@ namespace SS3D.Systems.Inventory.Containers
             }
         }
 
+        public IHoldProvider GetItem(bool secondary, Hand hand)
+        {
+            if (secondary && !TryGetOppositeHand(hand, out Hand oppositeHand))
+            {
+                return null;
+            }
+
+            if (secondary && !TryGetOppositeHand(hand, out Hand oppositeHand2))
+            {
+                return oppositeHand2.Item.Holdable;
+            }
+            else
+            {
+                return hand.Item.Holdable;
+            }
+        }
+
+        /// <summary>
+        /// TODO : currently only returns the next hand, but hands should work in pair
+        /// </summary>
+        public bool TryGetOppositeHand(Hand hand, out Hand oppositeHand)
+        {
+            oppositeHand = null;
+
+            if (PlayerHands.Count == 1)
+            {
+                return false;
+            }
+
+            int handIndex = PlayerHands.IndexOf(hand);
+
+            if (handIndex == -1)
+            {
+                return false;
+            }
+
+            oppositeHand = PlayerHands[(handIndex + 1) % PlayerHands.Count];
+
+            return true;
+        }
+
 
     }
 }

@@ -1,4 +1,7 @@
-﻿using SS3D.Core.Behaviours;
+﻿using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using SS3D.Core.Behaviours;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,9 +11,14 @@ namespace SS3D.Interactions
     /// Basically a copy of HumanoidBodyPartTargetSelector.cs
     /// This manages intent and it's done to easily support other intents
     /// </summary>
-    public class IntentController : Actor
+    public class IntentController : NetworkActor
     {
-        private IntentType _selectedIntent;
+        public event EventHandler<IntentType> OnIntentChange;
+
+        [SyncVar(OnChange = nameof(SyncIntent))]
+        private IntentType _intent;
+
+        public IntentType Intent => _intent;
 
         private Image _intentImage;
 
@@ -30,20 +38,60 @@ namespace SS3D.Interactions
             _intentButton.onClick.AddListener(HandleIntentButtonPressed);
         }
 
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+        }
+
+        // Update is called once per frame
+        protected void Update()
+        {
+            if (!Input.GetKeyDown(KeyCode.Space))
+            {
+                return;
+            }
+
+            UpdateIntent();
+            UpdateIntentUI();
+        }
+
+        [ServerRpc]
+        private void UpdateIntent()
+        {
+            _intent = _intent == IntentType.Help ? IntentType.Harm : IntentType.Help;
+        }
+
+        private void SyncIntent(IntentType prev, IntentType next, bool asServer)
+        {
+            Debug.Log($"Selected intent of {Owner} is {_intent}");
+
+            if (asServer)
+            {
+                return;
+            }
+
+            OnIntentChange?.Invoke(this, _intent);
+        }
+
+
         public void HandleIntentButtonPressed()
         {
-            SelectIntent();
+            UpdateIntent();
+            UpdateIntentUI();
         }
 
         /// <summary>
         /// Switches between Help and Harm intent
         /// </summary>
-        public void SelectIntent()
+        public void UpdateIntentUI()
         {
-            bool harm = _selectedIntent == IntentType.Harm;
-            _selectedIntent = harm ? IntentType.Help : IntentType.Harm;
-            _intentImage.sprite = harm ? _spriteHelp : _spriteHarm;
-            _intentImage.color = harm ? _colorHelp : _colorHarm;
+            _intentImage.sprite = _intent == IntentType.Help ? _spriteHelp : _spriteHarm;
+            _intentImage.color = _intent == IntentType.Help ? _colorHelp : _colorHarm;
         }
     }
 }

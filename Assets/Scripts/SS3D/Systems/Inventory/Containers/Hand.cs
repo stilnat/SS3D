@@ -4,6 +4,9 @@ using System.Linq;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
 using FishNet.Object;
+using SS3D.Systems.Animations;
+using System;
+using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Inventory.Containers
 {
@@ -12,6 +15,63 @@ namespace SS3D.Systems.Inventory.Containers
     /// </summary>
     public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider
     {
+        [SerializeField]
+        private Transform _handHoldTargetLocker;
+
+        [SerializeField]
+        private Transform _pickupTargetLocker;
+
+        [SerializeField]
+        private Transform _placeTarget;
+
+        [SerializeField]
+        private Transform _itemPositionTargetLocker;
+
+        [SerializeField]
+        private Transform _shoulderWeaponPivot;
+
+        [SerializeField]
+        private TwoBoneIKConstraint _holdIkConstraint;
+
+        [SerializeField]
+        private ChainIKConstraint _pickupIkConstraint;
+
+        [SerializeField]
+        private MultiPositionConstraint _itemPositionConstraint;
+
+        [SerializeField]
+        private Transform _upperArm;
+
+        [SerializeField]
+        private Transform _handBone;
+
+        [SerializeField]
+        private Transform _holdTransform;
+
+        public Transform PickupTargetLocker => _pickupTargetLocker;
+
+        public Transform PlaceTarget => _placeTarget;
+
+        public Transform ItemPositionTargetLocker => _itemPositionTargetLocker;
+
+        public Transform ShoulderWeaponPivot => _shoulderWeaponPivot;
+
+        public TwoBoneIKConstraint HoldIkConstraint => _holdIkConstraint;
+
+        public ChainIKConstraint PickupIkConstraint => _pickupIkConstraint;
+
+        public MultiPositionConstraint ItemPositionConstraint => _itemPositionConstraint;
+
+        public Transform UpperArm => _upperArm;
+
+        public Transform HandBone => _handBone;
+
+        public Transform HoldTransform => _holdTransform;
+
+        public bool Empty => Container.Empty;
+
+        public bool Full => !Container.Empty;
+
         /// <summary>
         /// Container linked to this hand, necessary to hold stuff.
         /// </summary>
@@ -42,6 +102,13 @@ namespace SS3D.Systems.Inventory.Containers
         public Hands HandsController;
 
         public Vector3 InteractionOrigin => _interactionOrigin.position;
+
+        public Item Item => Container.Items.First();
+
+        [SerializeField]
+        private HandType _handType;
+
+        public HandType HandType => _handType;
 
         public delegate void HandEventHandler(Hand hand);
         public event HandEventHandler OnHandDisabled;
@@ -140,6 +207,34 @@ namespace SS3D.Systems.Inventory.Containers
         public bool CanInteract(GameObject otherObject)
         {
             return GetInteractionRange().IsInRange(InteractionOrigin, otherObject.transform.position);
+        }
+
+        public Transform ChooseTargetLocker(TargetLockerType type)
+        {
+            Transform targetToSet = type switch
+            {
+                TargetLockerType.Pickup => _pickupTargetLocker,
+                TargetLockerType.Hold => _handHoldTargetLocker,
+                TargetLockerType.ItemPosition => _itemPositionTargetLocker,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+            };
+
+            return targetToSet;
+        }
+
+        public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true, bool resetRotation = true)
+        {
+            Transform targetToSet = ChooseTargetLocker(type);
+            targetToSet.parent = parent;
+            if (resetPosition)
+            {
+                targetToSet.localPosition = Vector3.zero;
+            }
+
+            if (resetRotation)
+            {
+                targetToSet.localRotation = Quaternion.identity;
+            }
         }
     }
 }

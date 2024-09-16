@@ -36,11 +36,21 @@ namespace SS3D.Systems.Entities.Humanoid
         private void UpdateMovement(float speed)
         {
             bool isMoving = speed != 0;
-            float currentSpeed = _animator.GetFloat(Animations.Humanoid.MovementSpeed);
+            float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
             
-            _animator.SetFloat(Animations.Humanoid.MovementSpeed, speed);
+            _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
+        }
+
+        public void Sit(bool sitState)
+        {
+            _animator.SetBool("Sit", sitState);
+        }
+
+        public void Crouch(bool crouchState)
+        {
+            _animator.SetBool("Crouch", crouchState);
         }
     }
 }

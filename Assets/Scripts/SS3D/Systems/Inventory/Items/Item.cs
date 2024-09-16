@@ -77,6 +77,8 @@ namespace SS3D.Systems.Inventory.Items
 
         public string Name => _name;
 
+        public Holdable Holdable { get; private set; }
+
         public ReadOnlyCollection<Trait> Traits => ((List<Trait>) _traits.Collection).AsReadOnly();
 
         /// <summary>
@@ -126,6 +128,7 @@ namespace SS3D.Systems.Inventory.Items
         /// </summary>
         public void Init(string itemName, float weight,  List<Trait> traits)
         {
+            Holdable = GetComponent<Holdable>();
             if (_initialised)
             {
                 Log.Error(this, "Item already initialised, returning");
