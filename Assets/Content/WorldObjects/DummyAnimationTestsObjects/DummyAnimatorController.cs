@@ -24,11 +24,6 @@ namespace DummyStuff
 
         private bool _wasMovingPreviousUpdate;
 
-        public void TriggerPickUp()
-        {
-            _animator.SetTrigger("PickUpRight");
-        }
-
         public void Throw(HandType handtype)
         {
             if (handtype == HandType.RightHand)

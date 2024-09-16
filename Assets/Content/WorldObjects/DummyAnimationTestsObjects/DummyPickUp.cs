@@ -61,7 +61,6 @@ namespace DummyStuff
         public IEnumerator PickUp(DummyItem item)
         {
             IsPicking = true;
-            GetComponent<DummyAnimatorController>().TriggerPickUp();
 
             DummyHand secondaryHand = _hands.GetOtherHand(_hands.SelectedHand.HandType);
 
