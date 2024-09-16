@@ -1,3 +1,4 @@
+using FishNet.Object;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public class DummyItem : MonoBehaviour, IHoldProvider
+    public class DummyItem : NetworkBehaviour, IHoldProvider
     {
         [FormerlySerializedAs("singleHandHold")]
         [SerializeField]

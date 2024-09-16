@@ -249,7 +249,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32e5e730fe3a93646af719abb477b964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rifleButt: {fileID: 717531480084463884}
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _rifleButt: {fileID: 717531480084463884}
 --- !u!114 &3833387326287817298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,19 +265,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31f69105775d221409591f2e3dcf4c98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  singleHandHold: 2
-  twoHandHold: 3
-  singleHandHoldHarm: 4
-  twoHandHoldHarm: 4
-  singleHandHoldThrow: 2
-  twoHandHoldThrow: 3
-  primaryRightHandHold: {fileID: 9032172292944705145}
-  secondaryRightHandHold: {fileID: 3556878506697705688}
-  primaryLeftHandHold: {fileID: 578775225469857158}
-  secondaryLeftHandHold: {fileID: 2525255604296202406}
-  interactionPoint: {fileID: 0}
-  canHoldTwoHand: 1
-  canHoldOneHand: 0
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _singleHandHold: 2
+  _twoHandHold: 3
+  _singleHandHoldHarm: 4
+  _twoHandHoldHarm: 4
+  _singleHandHoldThrow: 2
+  _twoHandHoldThrow: 3
+  _primaryRightHandHold: {fileID: 9032172292944705145}
+  _secondaryRightHandHold: {fileID: 3556878506697705688}
+  _primaryLeftHandHold: {fileID: 578775225469857158}
+  _secondaryLeftHandHold: {fileID: 2525255604296202406}
+  _canHoldTwoHand: 1
 --- !u!65 &6781624455850948555
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -300,10 +304,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81251b36625bc4b459b55638008f9fac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 8048644634823827442, guid: 6689365f34e3b994295af9f68b26360b, type: 3}
-  spawnPoint: {fileID: 2876824034063606500}
-  fireRate: 3
-  bulletSpeed: 100
+  _bulletPrefab: {fileID: 8048644634823827442, guid: 6689365f34e3b994295af9f68b26360b, type: 3}
+  _spawnPoint: {fileID: 2876824034063606500}
+  _fireRate: 3
+  _bulletSpeed: 100
+  _readyToFire: 1
 --- !u!1 &3668275914812991115
 GameObject:
   m_ObjectHideFlags: 0

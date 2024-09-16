@@ -1,4 +1,5 @@
 using DummyStuff;
+using FishNet.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,11 +9,9 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public class Grab : MonoBehaviour
+    public class Grab : NetworkBehaviour
     {
         public event EventHandler<bool> OnGrab;
-
-        private GameObject _grabbedObject;
 
         private FixedJoint _fixedJoint;
 
@@ -51,17 +50,28 @@ namespace DummyStuff
         [SerializeField]
         private MultiAimConstraint _lookAtConstraint;
 
+        private GameObject _grabbedObject;
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+        }
+
         protected void Update()
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                if (_grabbedObject == null)
+                if (_grabbedObject == null && CanGrab(out GrabbableBodyPart bodyPart))
                 {
-                    TryGrab();
+                    RpcTryGrab(bodyPart);
                 }
                 else
                 {
-                    ReleaseGrab();
+                    RpcReleaseGrab();
                 }
             }
         }
@@ -72,7 +82,31 @@ namespace DummyStuff
             ReleaseGrab();
         }
 
-        private void TryGrab()
+        [ServerRpc]
+        private void RpcReleaseGrab()
+        {
+            ObserversReleaseGrab();
+        }
+
+        [ServerRpc]
+        private void RpcTryGrab(GrabbableBodyPart bodyPart)
+        {
+            ObserversTryGrab(bodyPart);
+        }
+
+        [ObserversRpc]
+        private void ObserversTryGrab(GrabbableBodyPart bodyPart)
+        {
+            StartCoroutine(GrabObject(bodyPart));
+        }
+
+        [ObserversRpc]
+        private void ObserversReleaseGrab()
+        {
+            ReleaseGrab();
+        }
+
+        private bool CanGrab(out GrabbableBodyPart bodyPart)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -81,18 +115,23 @@ namespace DummyStuff
             {
                 Debug.DrawRay(ray.origin, ray.direction * 5, Color.green, 2f);
 
-                _grabbedObject = hit.transform.gameObject;
-                Debug.Log("grabbed object = " + _grabbedObject);
-
-                if (_grabbedObject.TryGetComponent(out GrabbableBodyPart bodyPart))
+                if (hit.transform.gameObject.TryGetComponent(out GrabbableBodyPart bodyPart2))
                 {
-                    StartCoroutine(GrabObject(_hands.SelectedHand, _hands.UnselectedHand, bodyPart));
+                    bodyPart = bodyPart2;
+
+                    return true;
                 }
             }
+
+            bodyPart = null;
+            return false;
         }
 
-        private IEnumerator GrabObject(DummyHand mainHand, DummyHand secondaryHand, GrabbableBodyPart bodyPart)
+        private IEnumerator GrabObject(GrabbableBodyPart bodyPart)
         {
+            _grabbedObject = bodyPart.GameObject;
+            DummyHand mainHand = _hands.SelectedHand;
+            DummyHand secondaryHand = _hands.UnselectedHand;
             SetUpGrab(bodyPart, mainHand, secondaryHand, false);
 
             yield return GrabReach(bodyPart, mainHand, secondaryHand, false);
@@ -117,7 +156,7 @@ namespace DummyStuff
 
         private void SetUpGrab(GrabbableBodyPart item, DummyHand mainHand, DummyHand secondaryHand, bool withTwoHands)
         {
-            mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, _grabbedObject.transform);
+            mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
 
             // Needed if this has been changed elsewhere
             mainHand.PickupIkConstraint.data.tipRotationWeight = 1f;

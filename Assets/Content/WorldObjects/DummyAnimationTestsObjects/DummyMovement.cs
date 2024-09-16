@@ -1,5 +1,7 @@
 using Coimbra.Services.Events;
 using Coimbra.Services.PlayerLoopEvents;
+using FishNet;
+using FishNet.Object;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Inputs;
@@ -13,7 +15,7 @@ using Object = System.Object;
 
 namespace DummyStuff
 {
-    public class DummyMovement : Actor
+    public class DummyMovement : NetworkActor
     {
         public event Action<float> OnSpeedChangeEvent;
 
@@ -79,13 +81,20 @@ namespace DummyStuff
             if (direction != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _aimRotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation, targetRotation, (float)(_aimRotationSpeed * TimeManager.TickDelta));
             }
         }
 
-        protected override void OnStart()
+        public override void OnStartClient()
         {
-            base.OnStart();
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+                return;
+            }
+
             Setup();
         }
 
@@ -133,7 +142,8 @@ namespace DummyStuff
         /// </summary>
         protected void MovePlayer()
         {
-            _rb.velocity = _targetMovement * (_movementSpeed * Time.fixedDeltaTime);
+            // Debug.Log($"tick delta = {TimeManager.TickDelta}, target movement = {_targetMovement}, movement speed = {_movementSpeed}");
+            _rb.velocity = _targetMovement * (float)(_movementSpeed * TimeManager.TickDelta);
         }
 
         /// <summary>
@@ -146,7 +156,8 @@ namespace DummyStuff
                 + (movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized);
 
             // smoothly changes the target movement
-            _targetMovement = Vector3.Lerp(_targetMovement, newTargetMovement, Time.deltaTime * (_lerpMultiplier * multiplier));
+            _targetMovement = Vector3.Lerp(
+                _targetMovement, newTargetMovement, (float)(TimeManager.TickDelta * (_lerpMultiplier * multiplier)));
 
             Vector3 resultingMovement = _targetMovement + Position;
             _absoluteMovement = resultingMovement;
@@ -159,7 +170,8 @@ namespace DummyStuff
         protected void RotatePlayerToMovement(bool lookOpposite)
         {
             Quaternion lookRotation = Quaternion.LookRotation(lookOpposite ? -_targetMovement : _targetMovement);
-            transform.rotation = Quaternion.Slerp(Rotation, lookRotation, Time.deltaTime * _rotationLerpMultiplier);
+            transform.rotation = Quaternion.Slerp(
+                Rotation, lookRotation, (float)(TimeManager.TickDelta * _rotationLerpMultiplier));
         }
 
         /// <summary>
@@ -173,7 +185,8 @@ namespace DummyStuff
             float inputFilteredSpeed = FilterSpeed();
 
             _input = Vector2.ClampMagnitude(new Vector2(x, y), inputFilteredSpeed);
-            _smoothedInput = Vector2.Lerp(_smoothedInput, _input, Time.deltaTime * (_lerpMultiplier / 10));
+            _smoothedInput = Vector2.Lerp(
+                _smoothedInput, _input, (float)(TimeManager.TickDelta * (_lerpMultiplier / 10)));
 
             OnSpeedChanged(_input.magnitude != 0 ? inputFilteredSpeed : 0);
         }
@@ -214,7 +227,7 @@ namespace DummyStuff
             GetComponent<DummyAim>().OnAim += HandleAimChange;
             GetComponent<Grab>().OnGrab += HandleGrabChange;
 
-            AddHandle(FixedUpdateEvent.AddListener(HandleFixedUpdate));
+            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
         private void HandleAimChange(object sender, bool aim)
@@ -227,7 +240,7 @@ namespace DummyStuff
             _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
-        private void HandleFixedUpdate(ref EventContext context, in FixedUpdateEvent updateEvent)
+        private void HandleNetworkTick()
         {
             if (!enabled)
             {

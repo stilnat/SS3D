@@ -1,3 +1,4 @@
+using FishNet.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using Object = System.Object;
 
 namespace DummyStuff
 {
-    public class DummyThrow : MonoBehaviour
+    public class DummyThrow : NetworkBehaviour
     {
         public event EventHandler<bool> OnAim;
 
@@ -55,6 +56,15 @@ namespace DummyStuff
 
         public bool IsAiming => _isAiming;
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+        }
+
         // Update is called once per frame
         protected void Update()
         {
@@ -64,11 +74,11 @@ namespace DummyStuff
             {
                 if (!_isAiming)
                 {
-                    Aim();
+                    RpcAim();
                 }
                 else
                 {
-                    StopAiming(_hands.SelectedHand);
+                    RpcStopAim();
                 }
             }
 
@@ -84,8 +94,44 @@ namespace DummyStuff
 
             if (Input.GetKeyDown(KeyCode.Y) && _hands.SelectedHand.Full && _isAiming)
             {
-                StartCoroutine(Throw());
+                RpcThrow();
             }
+        }
+
+        [ServerRpc]
+        private void RpcThrow()
+        {
+            ObserverThrow();
+        }
+
+        [ObserversRpc]
+        private void ObserverThrow()
+        {
+            StartCoroutine(Throw());
+        }
+
+        [ServerRpc]
+        private void RpcAim()
+        {
+            ObserverAim();
+        }
+
+        [ObserversRpc]
+        private void ObserverAim()
+        {
+            Aim();
+        }
+
+        [ServerRpc]
+        private void RpcStopAim()
+        {
+            ObserverStopAim();
+        }
+
+        [ObserversRpc]
+        private void ObserverStopAim()
+        {
+            StopAiming();
         }
 
         private IEnumerator Throw()
@@ -112,7 +158,7 @@ namespace DummyStuff
 
             AddForceToItem(item.GameObject);
 
-            StopAiming(_hands.SelectedHand);
+            StopAiming();
         }
 
         private Vector2 ComputeInitialVelocity(float timeToReachTarget, Vector2 targetCoordinates, float initialHeight, float initialHorizontalPosition)
@@ -178,7 +224,7 @@ namespace DummyStuff
             OnAim?.Invoke(this, true);
         }
 
-        private void StopAiming(DummyHand hand)
+        private void StopAiming()
         {
             _isAiming = false;
             _bodyAimRig.weight = 0f;

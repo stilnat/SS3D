@@ -132,19 +132,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31f69105775d221409591f2e3dcf4c98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  singleHandHold: 5
-  twoHandHold: 0
-  singleHandHoldHarm: 5
-  twoHandHoldHarm: 0
-  singleHandHoldThrow: 0
-  twoHandHoldThrow: 0
-  primaryRightHandHold: {fileID: 1845819167083146520}
-  secondaryRightHandHold: {fileID: 0}
-  primaryLeftHandHold: {fileID: 6061226514504239541}
-  secondaryLeftHandHold: {fileID: 0}
-  interactionPoint: {fileID: 1069146344874451862}
-  canHoldTwoHand: 0
-  canHoldOneHand: 0
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  _singleHandHold: 5
+  _twoHandHold: 0
+  _singleHandHoldHarm: 5
+  _twoHandHoldHarm: 0
+  _singleHandHoldThrow: 0
+  _twoHandHoldThrow: 0
+  _primaryRightHandHold: {fileID: 1845819167083146520}
+  _secondaryRightHandHold: {fileID: 0}
+  _primaryLeftHandHold: {fileID: 6061226514504239541}
+  _secondaryLeftHandHold: {fileID: 0}
+  _canHoldTwoHand: 0
 --- !u!114 &-573867884372606775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -157,6 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e2402d4e97e674f8b10465445380ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _interactionPoint: {fileID: 0}
 --- !u!1 &247595367122041715
 GameObject:
   m_ObjectHideFlags: 0

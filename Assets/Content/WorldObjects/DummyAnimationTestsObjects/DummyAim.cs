@@ -1,4 +1,5 @@
 using Coimbra;
+using FishNet.Object;
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -6,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace DummyStuff
 {
-    public sealed class DummyAim : MonoBehaviour
+    public sealed class DummyAim : NetworkBehaviour
     {
         public event EventHandler<bool> OnAim;
 
@@ -42,6 +43,15 @@ namespace DummyStuff
         [SerializeField]
         private DummyMovement _movementController;
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+        }
+
         private void Update()
         {
             UpdateAimAbility(_hands.SelectedHand);
@@ -52,7 +62,7 @@ namespace DummyStuff
 
                 if (!_isAiming)
                 {
-                    Aim(_hands.SelectedHand, _hands.SelectedHand.Item.GameObject.GetComponent<DummyGun>());
+                    RpcAim(_hands.SelectedHand, _hands.SelectedHand.Item.GameObject.GetComponent<DummyGun>());
                     _isAiming = true;
                 }
 
@@ -63,7 +73,7 @@ namespace DummyStuff
             }
             else if (_isAiming && (!_canAim || !Input.GetMouseButton(1)))
             {
-                StopAiming(_hands.SelectedHand);
+                RpcStopAim(_hands.SelectedHand);
             }
 
             if (Input.GetKey(KeyCode.E) && _hands.SelectedHand.Full
@@ -71,6 +81,30 @@ namespace DummyStuff
             {
                 gun.GetComponent<DummyFire>().Fire();
             }
+        }
+
+        [ServerRpc]
+        private void RpcAim(DummyHand hand, DummyGun gun)
+        {
+            ObserverAim(hand, gun);
+        }
+
+        [ObserversRpc]
+        private void ObserverAim(DummyHand hand, DummyGun gun)
+        {
+            Aim(hand, gun);
+        }
+
+        [ServerRpc]
+        private void RpcStopAim(DummyHand hand)
+        {
+            ObserverStopAim(hand);
+        }
+
+        [ObserversRpc]
+        private void ObserverStopAim(DummyHand hand)
+        {
+            StopAiming(hand);
         }
 
         private void Aim(DummyHand hand, DummyGun gun)
@@ -107,6 +141,9 @@ namespace DummyStuff
             _canAim = _intents.Intent == Intent.Harm && selectedHand.Full && selectedHand.Item.GameObject.HasComponent<DummyGun>();
         }
 
+        /// <summary>
+        /// Sync the aiming target transform for all observers, target should have a networkTransform component.
+        /// </summary>
         private void UpdateAimTargetPosition()
         {
             // Cast a ray from the mouse position into the scene
