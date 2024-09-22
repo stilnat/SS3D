@@ -81,13 +81,13 @@ namespace SS3D.Systems.Animations
 
         private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item)
         {
-            _holdController.UpdateItemPositionConstraintAndRotation(mainHand, mainHand.Item.Holdable, withTwoHands, 0f, false);
+            _holdController.UpdateItemPositionConstraintAndRotation(mainHand, item.Holdable, withTwoHands, 0f, false);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             mainHand.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            _holdController.MovePickupAndHoldTargetLocker(mainHand, false, _hands.GetItem(false, mainHand));
+            _holdController.MovePickupAndHoldTargetLocker(mainHand, false, item.Holdable);
 
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(mainHand);
@@ -155,10 +155,11 @@ namespace SS3D.Systems.Animations
             // Move item toward its constrained position.
             StartCoroutine(TransformHelper.LerpTransform(item.transform, _hands.SelectedHand.ItemPositionTargetLocker, _itemMoveDuration));
 
-            // if an item held with two hands, change it with a single hand hold
-            if (secondaryHand.Full && secondaryHand.Item.Holdable.CanHoldTwoHand)
+            // if an item held with two hands in the unselected hand, change it with a single hand hold
+            if (secondaryHand.Full && secondaryHand.ItemInHand.Holdable != null && secondaryHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
-                _holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.Item.Holdable, false, _itemMoveDuration, false);
+                _holdController.UpdateItemPositionConstraintAndRotation(
+                    secondaryHand, secondaryHand.ItemInHand.Holdable, false, _itemMoveDuration, false);
             }
 
             // Stop looking at item

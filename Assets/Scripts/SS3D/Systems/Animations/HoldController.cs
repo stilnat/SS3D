@@ -122,26 +122,26 @@ namespace SS3D.Systems.Animations
             Hand mainHand = _hands.SelectedHand;
             _hands.TryGetOppositeHand(mainHand, out Hand secondaryHand);
 
-            if (mainHand.Full && secondaryHand.Empty && mainHand.Item.Holdable.CanHoldTwoHand)
+            if (mainHand.Full && secondaryHand.Empty && mainHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    mainHand, mainHand.Item.Holdable, true, 0.25f, false);
+                    mainHand, mainHand.ItemInHand.Holdable, true, 0.25f, false);
             }
             else if (mainHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    mainHand, mainHand.Item.Holdable, false, 0.25f, false);
+                    mainHand, mainHand.ItemInHand.Holdable, false, 0.25f, false);
             }
 
-            if (secondaryHand.Full && mainHand.Empty && secondaryHand.Item.Holdable.CanHoldTwoHand)
+            if (secondaryHand.Full && mainHand.Empty && secondaryHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    secondaryHand, secondaryHand.Item.Holdable, true, 0.25f, false);
+                    secondaryHand, secondaryHand.ItemInHand.Holdable, true, 0.25f, false);
             }
             else if (secondaryHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    secondaryHand, secondaryHand.Item.Holdable, false, 0.25f, false);
+                    secondaryHand, secondaryHand.ItemInHand.Holdable, false, 0.25f, false);
             }
         }
 

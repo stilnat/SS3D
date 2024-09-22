@@ -275,11 +275,11 @@ namespace SS3D.Systems.Inventory.Containers
 
             if (secondary && !TryGetOppositeHand(hand, out Hand oppositeHand2))
             {
-                return oppositeHand2.Item.Holdable;
+                return oppositeHand2.ItemInHand?.Holdable;
             }
             else
             {
-                return hand.Item.Holdable;
+                return hand.ItemInHand?.Holdable;
             }
         }
 

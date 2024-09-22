@@ -6,6 +6,7 @@ using SS3D.Interactions;
 using FishNet.Object;
 using SS3D.Systems.Animations;
 using System;
+using System.Collections;
 using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Inventory.Containers
@@ -103,8 +104,6 @@ namespace SS3D.Systems.Inventory.Containers
 
         public Vector3 InteractionOrigin => _interactionOrigin.position;
 
-        public Item Item => Container.Items.First();
-
         [SerializeField]
         private HandType _handType;
 
@@ -163,17 +162,24 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-			if (item.Container != null && item.Container != Container)
-			{
-				item.Container.RemoveItem(item);
-			}
-
-			Container.AddItem(item);
+            StartCoroutine(PickUp(item)); 
 		}
+
+        private IEnumerator PickUp(Item item)
+        {
+            yield return GetComponentInParent<PickUpAnimation>().PickUp(item);
+            if (item.Container != null && item.Container != Container)
+            {
+                item.Container.RemoveItem(item);
+            }
+
+            Container.AddItem(item);
+        }
 
         [ServerRpc]
         public void CmdDropHeldItem()
         {
+            
             if (IsEmpty())
             {
                 return;
