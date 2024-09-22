@@ -122,9 +122,9 @@ MonoBehaviour:
   <ParentNetworkObject>k__BackingField: {fileID: 3258417366846669140}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    LocalScale: {x: 0, y: 0, z: 0}
+    Position: {x: 0.00000016391277, y: 0.13206047, z: 0.23918046}
+    Rotation: {x: -0, y: -0, z: -0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
   _initializeOrder: 0
@@ -363,6 +363,7 @@ GameObject:
   - component: {fileID: 7199567936746149742}
   - component: {fileID: 6954863941470117704}
   - component: {fileID: -594752012234974818}
+  - component: {fileID: 7366737573399753339}
   m_Layer: 10
   m_Name: ToolboxBlue
   m_TagString: Untagged
@@ -531,8 +532,8 @@ MonoBehaviour:
   - {fileID: 57976260605683709}
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    LocalScale: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
   _initializeOrder: 0
@@ -586,6 +587,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: {fileID: 11400000, guid: f8d4d1baf366ce54c83e654f1d641a09, type: 2}
+--- !u!114 &7366737573399753339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5533951594911835035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2f43d6592863cc4c9dcad00f8a27ce7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _singleHandHold: 1
+  _twoHandHold: 0
+  _singleHandHoldHarm: 1
+  _twoHandHoldHarm: 0
+  _singleHandHoldThrow: 6
+  _twoHandHoldThrow: 0
+  _primaryRightHandHold: {fileID: 6311512130502363032}
+  _secondaryRightHandHold: {fileID: 2809404673239714095}
+  _primaryLeftHandHold: {fileID: 6311512130502363032}
+  _secondaryLeftHandHold: {fileID: 2809404673239714095}
+  _canHoldTwoHand: 0
 --- !u!1 &8066562249021099569
 GameObject:
   m_ObjectHideFlags: 0
