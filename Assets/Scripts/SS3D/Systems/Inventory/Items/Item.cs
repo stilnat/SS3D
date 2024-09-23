@@ -128,7 +128,6 @@ namespace SS3D.Systems.Inventory.Items
         /// </summary>
         public void Init(string itemName, float weight,  List<Trait> traits)
         {
-            Holdable = GetComponent<Holdable>();
             if (_initialised)
             {
                 Log.Error(this, "Item already initialised, returning");
@@ -152,6 +151,8 @@ namespace SS3D.Systems.Inventory.Items
         protected override void OnStart()
         {
             base.OnStart();
+
+            Holdable = GetComponent<Holdable>();
 
             foreach (Animator animator in GetComponents<Animator>())
             {
