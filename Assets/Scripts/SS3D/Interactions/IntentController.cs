@@ -34,8 +34,8 @@ namespace SS3D.Interactions
         {
             base.OnStart();
 
-            _intentButton = GetComponent<Button>();
-            _intentButton.onClick.AddListener(HandleIntentButtonPressed);
+           // _intentButton = GetComponent<Button>();
+           // _intentButton.onClick.AddListener(HandleIntentButtonPressed);
         }
 
 
