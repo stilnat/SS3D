@@ -200,10 +200,15 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 return;
             }
-            ItemInHand.GiveOwnership(null);
-            Item item = ItemInHand;
-            item.Container.RemoveItem(item);
-            ItemUtility.Place(item, position, rotation);
+
+            StartCoroutine(Drop(ItemInHand, position));
+        }
+
+        private IEnumerator Drop(Item item, Vector3 position)
+        {
+            yield return GetComponentInParent<PlaceAnimation>().Place(position);
+            Container.RemoveItem(item);
+            item.GiveOwnership(null);
         }
 
         /// <summary>

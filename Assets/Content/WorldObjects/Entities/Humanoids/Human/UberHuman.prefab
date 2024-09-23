@@ -6137,6 +6137,7 @@ GameObject:
   - component: {fileID: 3899653582605172798}
   - component: {fileID: 7568747683536695618}
   - component: {fileID: 2744598832793855224}
+  - component: {fileID: 6631598313071898775}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -6573,8 +6574,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da66e3c280128824e9df2095de5d44be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _itemMoveDuration: 0.2
-  _itemReachDuration: 0.2
+  _itemMoveDuration: 0.4
+  _itemReachDuration: 0.4
   _holdController: {fileID: 5029722283718734781}
   _hands: {fileID: 3222345056416986628}
   _hips: {fileID: 5433592588855148907}
@@ -6728,6 +6729,25 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _inventory: {fileID: 7878631375339778391}
+--- !u!114 &6631598313071898775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12a780336538c8d47a349142df2c1cf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hands: {fileID: 3222345056416986628}
+  _itemReachDuration: 0.4
+  _itemMoveDuration: 0.4
+  _holdController: {fileID: 5029722283718734781}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _hips: {fileID: 5433592588855148907}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
