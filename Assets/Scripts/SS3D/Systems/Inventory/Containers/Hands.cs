@@ -306,7 +306,5 @@ namespace SS3D.Systems.Inventory.Containers
 
             return true;
         }
-
-
     }
 }

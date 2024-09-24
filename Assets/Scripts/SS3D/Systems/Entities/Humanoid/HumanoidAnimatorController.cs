@@ -1,5 +1,6 @@
 ﻿using SS3D.Core.Behaviours;
 using SS3D.Systems.Entities.Data;
+using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -51,6 +52,18 @@ namespace SS3D.Systems.Entities.Humanoid
         public void Crouch(bool crouchState)
         {
             _animator.SetBool("Crouch", crouchState);
+        }
+
+        public void Throw(HandType handtype)
+        {
+            if (handtype == HandType.RightHand)
+            {
+                _animator.SetTrigger("ThrowRight");
+            }
+            else
+            {
+                _animator.SetTrigger("ThrowLeft");
+            }
         }
     }
 }

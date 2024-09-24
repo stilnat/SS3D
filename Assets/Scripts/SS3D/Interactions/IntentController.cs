@@ -57,7 +57,7 @@ namespace SS3D.Interactions
             }
 
             UpdateIntent();
-            UpdateIntentUI();
+            //UpdateIntentUI();
         }
 
         [ServerRpc]
@@ -82,7 +82,7 @@ namespace SS3D.Interactions
         public void HandleIntentButtonPressed()
         {
             UpdateIntent();
-            UpdateIntentUI();
+            //UpdateIntentUI();
         }
 
         /// <summary>
