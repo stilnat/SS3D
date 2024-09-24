@@ -6611,6 +6611,7 @@ MonoBehaviour:
   _throwToolboxRight: {fileID: 5020193951115866215}
   _smallItemRight: {fileID: 7151404865513586269}
   _smallItemLeft: {fileID: 7672624758370820705}
+  _throwAnimations: {fileID: 814667727278639600}
 --- !u!114 &4083960901991266909
 MonoBehaviour:
   m_ObjectHideFlags: 0

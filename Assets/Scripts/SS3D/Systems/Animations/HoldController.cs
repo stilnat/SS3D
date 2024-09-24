@@ -63,6 +63,9 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Transform _smallItemLeft;
 
+        [SerializeField]
+        private ThrowAnimations _throwAnimations;
+
         public void UpdateItemPositionConstraintAndRotation(
             Hand hand, IHoldProvider item, bool withTwoHands, float duration, bool toThrow)
         {
@@ -125,23 +128,23 @@ namespace SS3D.Systems.Animations
             if (mainHand.Full && secondaryHand.Empty && mainHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    mainHand, mainHand.ItemInHand.Holdable, true, 0.25f, false);
+                    mainHand, mainHand.ItemInHand.Holdable, true, 0.25f, _throwAnimations.IsAiming);
             }
             else if (mainHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    mainHand, mainHand.ItemInHand.Holdable, false, 0.25f, false);
+                    mainHand, mainHand.ItemInHand.Holdable, false, 0.25f, _throwAnimations.IsAiming);
             }
 
             if (secondaryHand.Full && mainHand.Empty && secondaryHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    secondaryHand, secondaryHand.ItemInHand.Holdable, true, 0.25f, false);
+                    secondaryHand, secondaryHand.ItemInHand.Holdable, true, 0.25f, _throwAnimations.IsAiming);
             }
             else if (secondaryHand.Full)
             {
                 UpdateItemPositionConstraintAndRotation(
-                    secondaryHand, secondaryHand.ItemInHand.Holdable, false, 0.25f, false);
+                    secondaryHand, secondaryHand.ItemInHand.Holdable, false, 0.25f, _throwAnimations.IsAiming);
             }
         }
 
