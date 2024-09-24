@@ -6642,7 +6642,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
-  _aimTarget: {fileID: 3901422935290294017}
+  _aimTarget: {fileID: 2856800849451305125}
   _movementType: 0
   _movementSpeed: 100
   _lerpMultiplier: 5

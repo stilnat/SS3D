@@ -2,6 +2,7 @@ using FishNet.Object;
 using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
 using System;
 using System.Collections;
@@ -146,9 +147,13 @@ namespace SS3D.Systems.Animations
 
             _animatorController.Throw(_hands.SelectedHand.HandType);
 
+            _hands.SelectedHand.Container.RemoveItem(_hands.SelectedHand.ItemInHand);
+
             StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, _aimTarget.transform, 0.18f, false, true));
 
             yield return new WaitForSeconds(0.18f);
+
+            item.GameObject.transform.parent = null;
 
             AddForceToItem(item.GameObject);
 
@@ -223,7 +228,14 @@ namespace SS3D.Systems.Animations
         {
             _isAiming = false;
             _bodyAimRig.weight = 0f;
-            _holdController.UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, false, 0.2f, false);
+            Item item = _hands.SelectedHand.ItemInHand;
+
+            if (item != null)
+            {
+                _holdController.UpdateItemPositionConstraintAndRotation(
+                    _hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, false, 0.2f, false);
+            }
+
             OnAim?.Invoke(this, false);
         }
 
