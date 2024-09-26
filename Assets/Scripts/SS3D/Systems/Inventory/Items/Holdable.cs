@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using NaughtyAttributes;
 using SS3D.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
@@ -9,37 +10,42 @@ namespace SS3D.Systems.Inventory.Items
     public class Holdable : MonoBehaviour,  IHoldProvider
     {
         [SerializeField]
+        private bool _canHoldTwoHand;
+
+        [SerializeField]
         private HandHoldType _singleHandHold;
 
+        [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private HandHoldType _twoHandHold;
 
         [SerializeField]
         private HandHoldType _singleHandHoldHarm;
 
+        [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private HandHoldType _twoHandHoldHarm;
 
         [SerializeField]
         private HandHoldType _singleHandHoldThrow;
 
+        [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private HandHoldType _twoHandHoldThrow;
 
         [SerializeField]
         private Transform _primaryRightHandHold;
 
+        [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private Transform _secondaryRightHandHold;
 
         [SerializeField]
         private Transform _primaryLeftHandHold;
 
+        [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private Transform _secondaryLeftHandHold;
-
-        [SerializeField]
-        private bool _canHoldTwoHand;
 
         public bool CanHoldTwoHand => _canHoldTwoHand;
 
