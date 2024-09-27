@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 5296084984690686628}
   - component: {fileID: 1034747657592807112}
   - component: {fileID: 326915721417618478}
+  - component: {fileID: 305599764104158038}
   m_Layer: 10
   m_Name: SteelSheet
   m_TagString: Untagged
@@ -314,12 +315,13 @@ MonoBehaviour:
   _networkBehaviours:
   - {fileID: 2568864249795578972}
   - {fileID: 5296084984690686628}
+  - {fileID: 326915721417618478}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    LocalScale: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
   _initializeOrder: 0
@@ -377,6 +379,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49d37ab5b82ded9419a6e3ab3d05af02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 1773710978803455870}
+  _networkObjectCache: {fileID: 1773710978803455870}
+--- !u!114 &305599764104158038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7125681683583715523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2f43d6592863cc4c9dcad00f8a27ce7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canHoldTwoHand: 0
+  _singleHandHold: 1
+  _twoHandHold: 0
+  _singleHandHoldHarm: 1
+  _twoHandHoldHarm: 0
+  _singleHandHoldThrow: 1
+  _twoHandHoldThrow: 0
+  _primaryRightHandHold: {fileID: 8309000899177645629}
+  _secondaryRightHandHold: {fileID: 0}
+  _primaryLeftHandHold: {fileID: 8309000899177645629}
+  _secondaryLeftHandHold: {fileID: 0}
 --- !u!1 &7393894785072713980
 GameObject:
   m_ObjectHideFlags: 0

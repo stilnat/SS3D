@@ -4,6 +4,7 @@ using QuikGraph;
 using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Systems.Animations;
 using System.Linq;
 using UnityEngine;
 
@@ -88,6 +89,7 @@ namespace SS3D.Systems.Crafting
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
             ViewLocator.Get<CraftingMenu>().First().HideMenu();
+            interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().TryInteract();
             return true;
         }
 

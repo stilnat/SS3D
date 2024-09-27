@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace DummyStuff
+namespace SS3D.Systems.Crafting
 {
-    public class DummyTool : MonoBehaviour
+    public class Tool : MonoBehaviour
     {
         [SerializeField]
         private Transform _interactionPoint;
