@@ -123,6 +123,7 @@ namespace SS3D.Systems.Animations
                 StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
             }
 
+            // If item is too low, crouch to reach
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
                 GetComponent<HumanoidAnimatorController>().Crouch(true);
