@@ -1,5 +1,6 @@
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
 using System.Collections;
 using UnityEngine;
@@ -32,18 +33,17 @@ namespace SS3D.Systems.Animations
 
         public bool IsPlacing { get; private set; }
 
-        public IEnumerator Place(Vector3 placePosition)
+        public IEnumerator Place(Vector3 placePosition, Item item)
         {
             IsPlacing = true;
             Hand mainHand = _hands.SelectedHand;
             _hands.TryGetOppositeHand(mainHand, out Hand secondaryHand);
-            bool withTwoHands = secondaryHand.Empty && _hands.SelectedHand.ItemInHand.Holdable.CanHoldTwoHand;
+            bool withTwoHands = secondaryHand.Empty && item.Holdable.CanHoldTwoHand;
             Transform placeTarget = mainHand.PlaceTarget;
-            GameObject item = mainHand.ItemInHand.Holdable.GameObject;
 
-            SetupPlace(placePosition, item, mainHand, secondaryHand, withTwoHands);
+            SetupPlace(placePosition, item.gameObject, mainHand, secondaryHand, withTwoHands);
 
-            yield return PlaceReach(mainHand, placeTarget, item);
+            yield return PlaceReach(mainHand, placeTarget, item.gameObject);
 
             yield return PlaceAndPullBack(mainHand, secondaryHand, withTwoHands);
 

@@ -208,14 +208,21 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            StartCoroutine(Drop(ItemInHand, position));
+            ObserversDrop(ItemInHand, position);
+            Item item = ItemInHand;
+            item.GiveOwnership(null);
+            Container.RemoveItem(item);
+        }
+
+        [ObserversRpc]
+        private void ObserversDrop(Item item, Vector3 position)
+        {
+            StartCoroutine(Drop(item, position));
         }
 
         private IEnumerator Drop(Item item, Vector3 position)
         {
-            yield return GetComponentInParent<PlaceAnimation>().Place(position);
-            Container.RemoveItem(item);
-            item.GiveOwnership(null);
+            yield return GetComponentInParent<PlaceAnimation>().Place(position, item);
         }
 
         /// <summary>
