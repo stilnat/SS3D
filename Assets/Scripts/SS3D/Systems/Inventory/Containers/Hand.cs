@@ -162,18 +162,25 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            StartCoroutine(PickUp(item)); 
-		}
-
-        private IEnumerator PickUp(Item item)
-        {
-            yield return GetComponentInParent<PickUpAnimation>().PickUp(item);
             if (item.Container != null && item.Container != Container)
             {
                 item.Container.RemoveItem(item);
             }
 
             Container.AddItem(item);
+
+            ObserverPickUp(item);
+		}
+
+        [ObserversRpc]
+        private void ObserverPickUp(Item item)
+        {
+            StartCoroutine(PickUp(item)); 
+        }
+
+        private IEnumerator PickUp(Item item)
+        {
+            yield return GetComponentInParent<PickUpAnimation>().PickUp(item);
         }
 
         [ServerRpc]
