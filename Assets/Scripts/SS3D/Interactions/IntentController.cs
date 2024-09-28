@@ -16,7 +16,7 @@ namespace SS3D.Interactions
         public event EventHandler<IntentType> OnIntentChange;
 
         [SyncVar(OnChange = nameof(SyncIntent))]
-        private IntentType _intent;
+        private IntentType _intent = IntentType.Help;
 
         public IntentType Intent => _intent;
 
@@ -36,6 +36,12 @@ namespace SS3D.Interactions
 
            // _intentButton = GetComponent<Button>();
            // _intentButton.onClick.AddListener(HandleIntentButtonPressed);
+        }
+
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            _intent = IntentType.Help;
         }
 
 
