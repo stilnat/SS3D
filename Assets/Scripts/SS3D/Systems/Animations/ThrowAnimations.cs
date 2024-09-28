@@ -96,13 +96,27 @@ namespace SS3D.Systems.Animations
         [ServerRpc]
         private void RpcThrow()
         {
-            ObserverThrow();
+            Item item = _hands.SelectedHand.ItemInHand;
+            item.RemoveOwnership();
+            ObserverThrow(item);
+            StartCoroutine(ServerThrow(item));
+        }
+
+        private IEnumerator ServerThrow(Item item)
+        {
+            item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;
+            yield return new WaitForSeconds(0.18f);    
+            _hands.SelectedHand.Container.RemoveItem(item);
+            item.GameObject.transform.parent = null;
+            item.GameObject.GetComponent<Rigidbody>().isKinematic = false;
+            item.GameObject.GetComponent<Collider>().enabled = true;
+            AddForceToItem(item.GameObject);
         }
 
         [ObserversRpc]
-        private void ObserverThrow()
+        private void ObserverThrow(Item item)
         {
-            StartCoroutine(Throw());
+            StartCoroutine(Throw(item));
         }
 
         [ServerRpc]
@@ -129,14 +143,14 @@ namespace SS3D.Systems.Animations
             StopAiming();
         }
 
-        private IEnumerator Throw()
+        private IEnumerator Throw(Item item)
         {
-            IHoldProvider item = _hands.SelectedHand.ItemInHand.Holdable;
+            IHoldProvider holdable = item.Holdable;
             _hands.SelectedHand.ItemPositionConstraint.weight = 0f;
             _hands.SelectedHand.HoldIkConstraint.weight = 0f;
             _hands.SelectedHand.PickupIkConstraint.weight = 0f;
 
-            if (item.CanHoldTwoHand && _hands.TryGetOppositeHand(_hands.SelectedHand, out Hand oppositeHand))
+            if (holdable.CanHoldTwoHand && _hands.TryGetOppositeHand(_hands.SelectedHand, out Hand oppositeHand))
             {
                 oppositeHand.ItemPositionConstraint.weight = 0f;
                 oppositeHand.HoldIkConstraint.weight = 0f;
@@ -147,15 +161,11 @@ namespace SS3D.Systems.Animations
 
             _animatorController.Throw(_hands.SelectedHand.HandType);
 
-            _hands.SelectedHand.Container.RemoveItem(_hands.SelectedHand.ItemInHand);
-
             StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, _aimTarget.transform, 0.18f, false, true));
 
             yield return new WaitForSeconds(0.18f);
 
             item.GameObject.transform.parent = null;
-
-            AddForceToItem(item.GameObject);
 
             StopAiming();
         }
@@ -272,8 +282,10 @@ namespace SS3D.Systems.Animations
         {
             float distanceToTarget = Vector3.Distance(targetPosition, transform.position);
 
-            return intent == IntentType.Help ?
+            float timeToReach = intent == IntentType.Help ?
                 distanceToTarget * _secondPerMeterFactorDef : distanceToTarget * _secondPerMeterFactorHarm;
+
+            return timeToReach;
         }
     }
 }
