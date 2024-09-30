@@ -2,6 +2,7 @@ using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -10,6 +11,7 @@ namespace SS3D.Systems.Animations
 {
     public class PickUpAnimation : MonoBehaviour
     {
+
         [SerializeField]
         private float _itemMoveDuration;
 
@@ -33,32 +35,7 @@ namespace SS3D.Systems.Animations
 
         public bool IsPicking { get; private set; }
 
-        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.3f;
-
-        public bool CanPickUp(out Item item)
-        {
-            // Cast a ray from the mouse position into the scene
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            // Check if the ray hits any collider
-            if (Physics.Raycast(ray, out RaycastHit hit) && UnderMaxDistanceFromHips(hit.point))
-            {
-                // Check if the collider belongs to a GameObject
-                GameObject obj = hit.collider.gameObject;
-
-                // should add conditions to check other objects doesn't require two hands.
-                // also check picked up object doesn't require two hands if other hand is full.
-                if (obj.TryGetComponent(out Item item2))
-                {
-                    item = item2;
-
-                    return true;
-                }
-            }
-
-            item = null;
-            return false;
-        }
+        public float ItemReachDuration => _itemReachDuration;
 
         public IEnumerator PickUp(Item item)
         {
