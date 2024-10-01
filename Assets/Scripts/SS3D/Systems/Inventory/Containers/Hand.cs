@@ -155,7 +155,7 @@ namespace SS3D.Systems.Inventory.Containers
         }
 
         [Server]
-        public void Pickup(Item item)
+        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem)
         {
             item.GiveOwnership(Owner);
             if (!IsEmpty())
@@ -168,7 +168,7 @@ namespace SS3D.Systems.Inventory.Containers
                 item.Container.RemoveItem(item);
             }
 
-            GetComponentInParent<PickUpAnimation>().Pickup(item);
+            GetComponentInParent<PickUpAnimation>().Pickup(item, timeToMoveBackItem, timeToReachItem);
         }
 
         [ServerRpc]

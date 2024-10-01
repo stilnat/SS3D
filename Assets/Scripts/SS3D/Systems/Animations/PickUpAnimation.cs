@@ -15,10 +15,9 @@ namespace SS3D.Systems.Animations
     public class PickUpAnimation : NetworkBehaviour
     {
 
-        [SerializeField]
+
         private float _itemMoveDuration;
 
-        [SerializeField]
         private float _itemReachDuration;
 
         [SerializeField]
@@ -26,9 +25,6 @@ namespace SS3D.Systems.Animations
 
         [SerializeField]
         private Hands _hands;
-
-        [SerializeField]
-        private Transform _hips;
 
         [SerializeField]
         private MultiAimConstraint _lookAtConstraint;
@@ -40,16 +36,14 @@ namespace SS3D.Systems.Animations
 
         public bool IsPicking { get; private set; }
 
-        public float ItemReachDuration => _itemReachDuration;
-
         [Server]
-        public void Pickup(Item item)
+        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem)
         {
-            ObserverPickUp(item);
+            ObserverPickUp(item, timeToMoveBackItem, timeToReachItem);
         }
 
         [Client]
-        public void CancelPickup(Hand hand, Item tem)
+        public void CancelPickup(Hand hand)
         {
             Debug.Log("cancel pick up animation");
             StopCoroutine(_pickupCoroutine);
@@ -71,8 +65,10 @@ namespace SS3D.Systems.Animations
         }
 
         [ObserversRpc]
-        private void ObserverPickUp(Item item)
+        private void ObserverPickUp(Item item,  float timeToMoveBackItem, float timeToReachItem)
         {
+            _itemMoveDuration = timeToMoveBackItem;
+            _itemReachDuration = timeToReachItem;
             _pickupCoroutine = StartCoroutine(PickupAnimate(item)); 
         }
 

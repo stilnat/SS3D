@@ -18,15 +18,15 @@ namespace SS3D.Systems.Inventory.Interactions
 
         private bool _hasItemInHand;
 
-        public float TimeToPickup { get; private set; }
+        public float TimeToMoveBackItem { get; private set; }
 
         public float TimeToReachItem { get; private set; }
 
-        public PickupInteraction(float timeToPickup, float timeToReachItem)
+        public PickupInteraction(float timeToMoveBackItem, float timeToReachItem)
         {
-            TimeToPickup = timeToPickup;
+            TimeToMoveBackItem = timeToMoveBackItem;
             TimeToReachItem = timeToReachItem;
-            Delay = TimeToPickup + TimeToReachItem;
+            Delay = TimeToMoveBackItem + TimeToReachItem;
         }
 
         public override string GetName(InteractionEvent interactionEvent)
@@ -83,7 +83,7 @@ namespace SS3D.Systems.Inventory.Interactions
         public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
         {
 
-            if (StartTime + TimeToPickup >= Time.time || !HasStarted || _hasItemInHand)
+            if (StartTime + TimeToMoveBackItem >= Time.time || !HasStarted || _hasItemInHand)
             {
                 return base.Update(interactionEvent, reference);
             }
@@ -111,7 +111,7 @@ namespace SS3D.Systems.Inventory.Interactions
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
             {
                 // and then we run the function that adds it to the container
-                hand.Pickup(target);
+                hand.Pickup(target, TimeToMoveBackItem, TimeToReachItem);
 
 
                 try {
@@ -136,7 +136,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
             {
-                hand.GetComponentInParent<PickUpAnimation>().CancelPickup(hand, target);
+                hand.GetComponentInParent<PickUpAnimation>().CancelPickup(hand);
             }
         }
     }
