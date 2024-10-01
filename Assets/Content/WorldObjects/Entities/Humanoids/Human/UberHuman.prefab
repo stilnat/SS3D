@@ -149,9 +149,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 19
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -665,10 +665,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 8
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -1040,7 +1040,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 14
+  _componentIndexCache: 17
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 0
@@ -1682,7 +1682,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 24
+  _componentIndexCache: 32
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 0
@@ -2337,10 +2337,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 11
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -2686,10 +2686,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 1
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: -0.1025897, y: -0.6519826, z: -0.44750518}
@@ -2795,7 +2795,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 25
+  _componentIndexCache: 33
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -3148,7 +3148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e60c09e136263a44eb7996c9a5dc742a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 15
+  _componentIndexCache: 20
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _handHoldTargetLocker: {fileID: 5441267867618792388}
@@ -3164,7 +3164,7 @@ MonoBehaviour:
   _holdTransform: {fileID: 5569489068996507518}
   Container: {fileID: 106693697180811514}
   _range:
-    Horizontal: 1.5
+    Horizontal: 0.7
     Vertical: 2
   _pickupIcon: {fileID: 0}
   _interactionOrigin: {fileID: 5569489068996507518}
@@ -3182,7 +3182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 16
+  _componentIndexCache: 21
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -3369,10 +3369,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 9
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -3581,10 +3581,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 4
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -3773,9 +3773,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 26
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 5257508295790914349}
   ContainerItemDisplay: {fileID: 0}
@@ -3855,9 +3855,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 24
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -4032,7 +4032,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 27
+  _componentIndexCache: 35
   _addedNetworkObject: {fileID: 7892022672265885063, guid: 4a9d34a6cf84ef045a740513d8ae30b1, type: 3}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -4206,10 +4206,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 10
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -4350,9 +4350,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 25
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -4536,9 +4536,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 18
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -4785,7 +4785,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 28
+  _componentIndexCache: 36
   _addedNetworkObject: {fileID: 7892022672265885063, guid: 4a9d34a6cf84ef045a740513d8ae30b1, type: 3}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -6318,10 +6318,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 2
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -6666,10 +6666,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 6
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -6887,6 +6887,7 @@ MonoBehaviour:
   - {fileID: 6974988727788291784}
   - {fileID: 7878631375339778391}
   - {fileID: 3222345056416986628}
+  - {fileID: 1372639142798272682}
   - {fileID: 313020066527916364}
   - {fileID: 8922211754620765195}
   - {fileID: 3899653582605172798}
@@ -6895,23 +6896,42 @@ MonoBehaviour:
   - {fileID: 814667727278639600}
   - {fileID: 3265741626988572248}
   - {fileID: 6345364980800757135}
+  - {fileID: 5257508295790914349}
+  - {fileID: 909431137198346835}
   - {fileID: 3624753817424616501}
+  - {fileID: 7933397141592770015}
+  - {fileID: 6542929628633050340}
   - {fileID: 3587815548084978834}
   - {fileID: 106693697180811514}
   - {fileID: 6031405573252463301}
   - {fileID: 2264540800286188451}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 80927889512978097}
+  - {fileID: 4811350129803086360}
+  - {fileID: 8932444241067885183}
+  - {fileID: 497531110711129920}
+  - {fileID: 2190563154038973925}
+  - {fileID: 3639005700974696734}
+  - {fileID: 7976878711070107912}
+  - {fileID: 1844305910269124494}
   - {fileID: 8256505731342381852}
   - {fileID: 392795926133191058}
   - {fileID: 5407550854769002064}
   - {fileID: 5482738034181427131}
   - {fileID: 8269793876665771011}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
-  <ChildNetworkObjects>k__BackingField: []
+  <ChildNetworkObjects>k__BackingField:
+  - {fileID: 2154795175352712385}
+  - {fileID: 3135343523912750413}
+  - {fileID: 6992984559118851960}
+  - {fileID: 4948046590716406014}
+  - {fileID: 442396070314720702}
+  - {fileID: 2480388954406705258}
+  - {fileID: 6893314143956492343}
+  - {fileID: 5330455606081810940}
+  - {fileID: 4247403548101064886}
+  - {fileID: 5341300250767357491}
+  - {fileID: 4331028914668572295}
+  - {fileID: 7159218805411253598}
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -7204,8 +7224,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da66e3c280128824e9df2095de5d44be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _itemMoveDuration: 0.4
-  _itemReachDuration: 0.4
+  _componentIndexCache: 6
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
+  _itemMoveDuration: 0.25
+  _itemReachDuration: 0.25
   _holdController: {fileID: 5029722283718734781}
   _hands: {fileID: 3222345056416986628}
   _hips: {fileID: 5433592588855148907}
@@ -7266,7 +7289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 318cd55c1238afd41875e5eb60b62493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 6
+  _componentIndexCache: 7
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
@@ -7290,7 +7313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da620d1cfa3d9fd49b22c28e910884f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 7
+  _componentIndexCache: 8
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   inventory: {fileID: 7878631375339778391}
@@ -7306,7 +7329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c0362743a29c3f4bb97acacf5ad39f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 8
+  _componentIndexCache: 9
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _selectionMask:
@@ -7324,7 +7347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9496c8cd3a6f0b54f959057eec2528e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 9
+  _componentIndexCache: 10
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _position: 0
@@ -7340,7 +7363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a156dec7da2f53419befce71ba9bcff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 10
+  _componentIndexCache: 11
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _inventory: {fileID: 7878631375339778391}
@@ -7375,7 +7398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c815e64fcd1eb0499ca51dab4a05e91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 11
+  _componentIndexCache: 12
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _hands: {fileID: 3222345056416986628}
@@ -7400,7 +7423,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d1d2e4c2e9e00459702112565314a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 12
+  _componentIndexCache: 13
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _intent: 0
@@ -7416,7 +7439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c567fc47e27cb948ade338fde3d1b2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 13
+  _componentIndexCache: 14
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _animatorController: {fileID: 4083960901991266909}
@@ -7450,9 +7473,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 15
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
   OverrideOpenIcon: {fileID: 0}
   attachedContainer: {fileID: 8932444241067885183}
@@ -7468,9 +7491,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 16
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
   OverrideOpenIcon: {fileID: 0}
   attachedContainer: {fileID: 5482738034181427131}
@@ -7782,10 +7805,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 7
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -7890,9 +7913,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 28
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -8114,7 +8137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 26
+  _componentIndexCache: 34
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -9133,9 +9156,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 27
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -10526,9 +10549,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 29
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -11471,9 +11494,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 31
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
@@ -12444,10 +12467,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 5
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -12691,7 +12714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e60c09e136263a44eb7996c9a5dc742a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 17
+  _componentIndexCache: 22
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _handHoldTargetLocker: {fileID: 2712046360455809814}
@@ -12707,7 +12730,7 @@ MonoBehaviour:
   _holdTransform: {fileID: 6456791731408993078}
   Container: {fileID: 2264540800286188451}
   _range:
-    Horizontal: 1.5
+    Horizontal: 0.7
     Vertical: 2
   _pickupIcon: {fileID: 0}
   _interactionOrigin: {fileID: 6456791731408993078}
@@ -12725,7 +12748,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 18
+  _componentIndexCache: 23
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
@@ -13164,10 +13187,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 3
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -13499,10 +13522,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 1
-  <ComponentIndex>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 12
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours: []
-  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ParentNetworkObject>k__BackingField: {fileID: 241836927429143711}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -13692,9 +13715,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25696236470760b41b375e9b6939444c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 30
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
   ContainerInteractive: {fileID: 0}
   ContainerItemDisplay: {fileID: 0}
