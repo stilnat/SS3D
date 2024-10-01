@@ -32,7 +32,7 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 Icon = InteractionIcons.Take
         };
-            TakeFirstInteraction takeFirstInteraction = new(attachedContainer)
+            TakeFirstInteraction takeFirstInteraction = new(attachedContainer, Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime)
             {
                 Icon = InteractionIcons.Take
             };
