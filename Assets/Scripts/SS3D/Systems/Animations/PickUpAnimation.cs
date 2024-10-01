@@ -1,15 +1,18 @@
+using FishNet.Object;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class PickUpAnimation : MonoBehaviour
+    public class PickUpAnimation : NetworkBehaviour
     {
 
         [SerializeField]
@@ -33,11 +36,49 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Transform _lookAtTargetLocker;
 
+        private Coroutine _pickupCoroutine;
+
         public bool IsPicking { get; private set; }
 
         public float ItemReachDuration => _itemReachDuration;
 
-        public IEnumerator PickUp(Item item)
+        [Server]
+        public void Pickup(Item item)
+        {
+            ObserverPickUp(item);
+        }
+
+        [Client]
+        public void CancelPickup(Hand hand, Item tem)
+        {
+            Debug.Log("cancel pick up animation");
+            StopCoroutine(_pickupCoroutine);
+
+            // Those times are to keep the speed of movements pretty much the same as when it was reaching
+            float timeToCancelHold = (1 - hand.HoldIkConstraint.weight) * _itemReachDuration;
+            float timeToCancelLookAt = (1 - _lookAtConstraint.weight) * _itemReachDuration;
+            float timeToCancelPickup = (1 - hand.PickupIkConstraint.weight) * _itemReachDuration;
+
+            // Change hold constraint weight of the main hand from 0 to 1
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => hand.HoldIkConstraint.weight = x, hand.HoldIkConstraint.weight, 0f, timeToCancelHold));
+
+            // Start looking at item
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, _lookAtConstraint.weight, 0f, timeToCancelLookAt));
+
+            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => hand.PickupIkConstraint.weight = x, hand.PickupIkConstraint.weight, 0f, timeToCancelPickup));
+
+            GetComponent<HumanoidAnimatorController>().Crouch(false);
+        }
+
+        [ObserversRpc]
+        private void ObserverPickUp(Item item)
+        {
+            _pickupCoroutine = StartCoroutine(PickupAnimate(item)); 
+        }
+
+
+        [Client]
+        private IEnumerator PickupAnimate(Item item)
         {
             IsPicking = true;
 
@@ -56,6 +97,7 @@ namespace SS3D.Systems.Animations
             IsPicking = false;
         }
 
+        [Client]
         private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item)
         {
             _holdController.UpdateItemPositionConstraintAndRotation(mainHand, item.Holdable, withTwoHands, 0f, false);
@@ -92,9 +134,10 @@ namespace SS3D.Systems.Animations
             _lookAtTargetLocker.localRotation = Quaternion.identity;
         }
 
+        [Client]
         private IEnumerator PickupReach(Item item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
-            // Move player toward item
+            // Rotate player toward item
             if (GetComponent<PositionController>().Position != PositionType.Sitting)
             {
                 StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
@@ -126,6 +169,7 @@ namespace SS3D.Systems.Animations
                 x => mainHand.PickupIkConstraint.weight = x, 0f, 1f, _itemReachDuration);
         }
 
+        [Client]
         private IEnumerator PickupPullBack(Item item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
             GetComponent<HumanoidAnimatorController>().Crouch(false);
@@ -171,6 +215,7 @@ namespace SS3D.Systems.Animations
         /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
         /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
         /// </summary>
+        [Client]
         private void OrientTargetForHandRotation(Hand hand)
         {
             Vector3 armTargetDirection = hand.PickupTargetLocker.position - hand.UpperArm.position;

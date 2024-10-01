@@ -4,6 +4,7 @@ using SS3D.Interactions.Interfaces;
 using SS3D.Systems.GameModes.Events;
 using UnityEngine;
 using SS3D.Data.Generated;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 
@@ -12,8 +13,22 @@ namespace SS3D.Systems.Inventory.Interactions
     // A pickup interaction is when you pick an item and
     // add it into a container (in this case, the hands)
     // you can only pick things that are not in a container
-    public class PickupInteraction : Interaction
+    public class PickupInteraction : GradualInteraction
     {
+
+        private bool _hasItemInHand;
+
+        public float TimeToPickup { get; private set; }
+
+        public float TimeToReachItem { get; private set; }
+
+        public PickupInteraction(float timeToPickup, float timeToReachItem)
+        {
+            TimeToPickup = timeToPickup;
+            TimeToReachItem = timeToReachItem;
+            Delay = TimeToPickup + TimeToReachItem;
+        }
+
         public override string GetName(InteractionEvent interactionEvent)
         {
             return "Pick up";
@@ -39,12 +54,6 @@ namespace SS3D.Systems.Inventory.Interactions
                     return false;
                 }
 
-                // check that our hand is empty
-                if (!hand.IsEmpty())
-                {
-                    return false;
-                }
-
                 // try to get the Item component from the GameObject we just interacted with
                 // you can only pickup items (for now, TODO: we have to consider people too), which makes sense
                 Item item = targetBehaviour.GameObject.GetComponent<Item>();
@@ -53,8 +62,14 @@ namespace SS3D.Systems.Inventory.Interactions
                     return false;
                 }
 
+                // check that our hand is empty
+                if (!hand.IsEmpty() && hand.ItemInHand != item)
+                {
+                    return false;
+                }
+
                 // check the item is not in a container
-                if (item.IsInContainer())
+                if (item.IsInContainer() && item.Container != hand.Container)
                 {
                     return false;
                 }
@@ -65,8 +80,32 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
+        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+
+            if (StartTime + TimeToPickup >= Time.time || !HasStarted || _hasItemInHand)
+            {
+                return base.Update(interactionEvent, reference);
+            }
+
+            // After time to pick up has passed, put the item in the container
+            _hasItemInHand = true;
+            IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
+
+            if (target is IGameObjectProvider targetBehaviour && source is Hand hand)
+            {
+                Item item = targetBehaviour.GameObject.GetComponent<Item>();
+                hand.Container.AddItem(item);
+            }
+
+            return base.Update(interactionEvent, reference);
+        }
+
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
+            base.Start(interactionEvent, reference);
+
             // remember that when we call this Start, we are starting the interaction per se
             // so we check if the source of the interaction is a Hand, and if the target is an Item
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
@@ -84,7 +123,21 @@ namespace SS3D.Systems.Inventory.Interactions
                 catch { Debug.Log("Couldn't get Player Ckey"); }
             }
 
-            return false;
+            return true;
+        }
+
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            // We don't want to cancel the interaction if the item is already in hand
+            if (_hasItemInHand)
+            {
+                return;
+            }
+
+            if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
+            {
+                hand.GetComponentInParent<PickUpAnimation>().CancelPickup(hand, target);
+            }
         }
     }
 }

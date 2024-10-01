@@ -275,7 +275,7 @@ namespace SS3D.Systems.Inventory.Items
 
         public virtual IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
-            return new IInteraction[] { new PickupInteraction { Icon = null } };
+            return new IInteraction[] { new PickupInteraction(Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime) { Icon = null } };
         }
 
         // this creates the base interactions for an item, in this case, the drop interaction

@@ -81,7 +81,7 @@ namespace SS3D.Systems.Inventory.Containers
         /// <summary>
         /// Horizontal and vertical max distance to interact with stuff.
         /// </summary>
-        [SerializeField] private RangeLimit _range = new(1.5f, 2);
+        [SerializeField] private RangeLimit _range = new(0.5f, 2);
 
         // pickup icon that this hand uses when there's a pickup interaction
         // TODO: When AssetData is on, we should update this to not use this
@@ -110,6 +110,7 @@ namespace SS3D.Systems.Inventory.Containers
         public HandType HandType => _handType;
 
         public delegate void HandEventHandler(Hand hand);
+
         public event HandEventHandler OnHandDisabled;
 
         protected override void OnDisabled()
@@ -167,20 +168,7 @@ namespace SS3D.Systems.Inventory.Containers
                 item.Container.RemoveItem(item);
             }
 
-            Container.AddItem(item);
-
-            ObserverPickUp(item);
-		}
-
-        [ObserversRpc]
-        private void ObserverPickUp(Item item)
-        {
-            StartCoroutine(PickUp(item)); 
-        }
-
-        private IEnumerator PickUp(Item item)
-        {
-            yield return GetComponentInParent<PickUpAnimation>().PickUp(item);
+            GetComponentInParent<PickUpAnimation>().Pickup(item);
         }
 
         [ServerRpc]
