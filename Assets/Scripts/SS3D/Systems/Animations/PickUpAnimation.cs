@@ -143,8 +143,6 @@ namespace SS3D.Systems.Animations
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
                 GetComponent<HumanoidAnimatorController>().Crouch(true);
-
-                yield return new WaitForSeconds(0.25f);
             }
 
             // Change hold constraint weight of the main hand from 0 to 1
