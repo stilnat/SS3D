@@ -2,16 +2,25 @@
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.Items;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
     // a drop interaction is when we remove an item from the hand
     [Serializable]
-    public class DropInteraction : Interaction
+    public class DropInteraction : GradualInteraction
     {
+        private bool _hasDroppedItem;
+
+        public float TimeToMoveBackHand { get; private set; }
+
+        public float TimeToReachDropPlace { get; private set; }
+
         /// <summary>
         /// The maximum angle of surface the item will allow being dropped on
         /// </summary>
@@ -21,6 +30,13 @@ namespace SS3D.Systems.Inventory.Interactions
         /// Only raycast the default layer for seeing if we are vision blocked
         /// </summary>
         private LayerMask _defaultMask = LayerMask.GetMask("Default");
+
+        public DropInteraction(float timeToMoveBackHand, float timeToReachDropPlace)
+        {
+            TimeToReachDropPlace = timeToReachDropPlace;
+            TimeToMoveBackHand = timeToMoveBackHand;
+            Delay = TimeToReachDropPlace + TimeToMoveBackHand;
+        }
 
         public override string GetName(InteractionEvent interactionEvent)
         {
@@ -57,13 +73,14 @@ namespace SS3D.Systems.Inventory.Interactions
 
             // Confirm raycasted hit point is near the interaction point.
             // This is necessary because interaction rays are casted from the camera, not from view point
-            if (Vector3.Distance(interactionEvent.Point, hit.point) > 0.1)
-            {
-                return false;
-            }
+           // if (Vector3.Distance(interactionEvent.Point, hit.point) > 0.1)
+            //{
+            //    return false;
+           // }
             
             // Consider if the surface is facing up
             float angle = Vector3.Angle(interactionEvent.Normal, Vector3.up);
+            Debug.Log($"surface angle is {angle}, interaction norma is {interactionEvent.Normal}");
             if (angle > _maxSurfaceAngle)
             {
                 return false;
@@ -74,19 +91,56 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
+            Debug.Log($"can drop interact : {InteractionExtensions.RangeCheck(interactionEvent)}");
             return InteractionExtensions.RangeCheck(interactionEvent);
+        }
+
+        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+
+            if (StartTime + TimeToMoveBackHand >= Time.time || !HasStarted || _hasDroppedItem)
+            {
+                return base.Update(interactionEvent, reference);
+            }
+
+            // After time to pick up has passed, put the item in the container
+            _hasDroppedItem = true;
+            IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
+
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+            Item item = hand.ItemInHand;
+            item.Container.RemoveItem(item);
+            item.GiveOwnership(null);
+            item.transform.parent = null;
+
+            return base.Update(interactionEvent, reference);
         }
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            // rotate the item based on the facing direction of the entity
-            Entity entity = interactionEvent.Source.GetComponentInParent<Entity>();
-            Quaternion rotation = Quaternion.Euler(0, entity.transform.eulerAngles.y, 0);
-            
+            base.Start(interactionEvent, reference);
+
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            hand.PlaceHeldItemOutOfHand(interactionEvent.Point, rotation);
+            hand.GetComponentInParent<PlaceAnimation>().Place(interactionEvent.Point, hand.ItemInHand, TimeToMoveBackHand, TimeToReachDropPlace);
             
-            return false;
+            return true;
+        }
+
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            Debug.Log("attempting to cancel animation");
+            // We don't want to cancel the interaction if the item is already dropped
+            /*if (_hasDroppedItem)
+            {
+                return;
+            } */
+
+            if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand != null)
+            {
+                hand.GetComponentInParent<PlaceAnimation>().CancelPlace(hand, hand.ItemInHand);
+            }
         }
     }
 }

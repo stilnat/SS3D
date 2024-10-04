@@ -154,6 +154,8 @@ namespace SS3D.Systems.Inventory.Containers
             return _range;
         }
 
+
+        // TODO remove and do this stuff in pickup interaction
         [Server]
         public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem)
         {
@@ -183,35 +185,6 @@ namespace SS3D.Systems.Inventory.Containers
 			Container.Dump();
             ItemInHand?.GiveOwnership(null);
 		}
-
-
-        /// <summary>
-        /// Place item on the floor, or on any other surface, place it out of its container.
-        /// </summary>
-        [Server]
-        public void PlaceHeldItemOutOfHand(Vector3 position, Quaternion rotation)
-        {
-            if (IsEmpty())
-            {
-                return;
-            }
-
-            ObserversDrop(ItemInHand, position);
-            Item item = ItemInHand;
-            item.GiveOwnership(null);
-            Container.RemoveItem(item);
-        }
-
-        [ObserversRpc]
-        private void ObserversDrop(Item item, Vector3 position)
-        {
-            StartCoroutine(Drop(item, position));
-        }
-
-        private IEnumerator Drop(Item item, Vector3 position)
-        {
-            yield return GetComponentInParent<PlaceAnimation>().Place(position, item);
-        }
 
         /// <summary>
         /// Checks if the creature can interact with an object
