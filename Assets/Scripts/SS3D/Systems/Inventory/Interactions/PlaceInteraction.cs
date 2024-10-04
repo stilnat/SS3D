@@ -13,7 +13,7 @@ namespace SS3D.Systems.Inventory.Interactions
 {
     // a drop interaction is when we remove an item from the hand
     [Serializable]
-    public class DropInteraction : GradualInteraction
+    public class PlaceInteraction : GradualInteraction
     {
         private bool _hasDroppedItem;
 
@@ -31,7 +31,7 @@ namespace SS3D.Systems.Inventory.Interactions
         /// </summary>
         private LayerMask _defaultMask = LayerMask.GetMask("Default");
 
-        public DropInteraction(float timeToMoveBackHand, float timeToReachDropPlace)
+        public PlaceInteraction(float timeToMoveBackHand, float timeToReachDropPlace)
         {
             TimeToReachDropPlace = timeToReachDropPlace;
             TimeToMoveBackHand = timeToMoveBackHand;
@@ -40,7 +40,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public override string GetName(InteractionEvent interactionEvent)
         {
-            return "Drop";
+            return "Place";
         }
 
         public override Sprite GetIcon(InteractionEvent interactionEvent)
