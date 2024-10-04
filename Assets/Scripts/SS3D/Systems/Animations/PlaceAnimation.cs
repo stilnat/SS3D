@@ -18,6 +18,7 @@ namespace SS3D.Systems.Animations
 
         private Coroutine _placeCoroutine;
         private Coroutine _orientTowardTarget;
+        private Coroutine _lookTowardTarget;
 
         [SerializeField]
         private Hands _hands;
@@ -100,7 +101,7 @@ namespace SS3D.Systems.Animations
             }
 
             // Slowly increase looking at place item position
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _itemReachPlaceDuration));
+            _lookTowardTarget = StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _itemReachPlaceDuration));
 
             // Slowly move item toward the position it should be placed.
             yield return TransformHelper.LerpTransform(item.transform, placeTarget, _handMoveBackDuration, true, false, false);
@@ -156,6 +157,7 @@ namespace SS3D.Systems.Animations
             Debug.Log("Cancel place animation");
             StopCoroutine(_placeCoroutine);
             StopCoroutine(_orientTowardTarget);
+            StopCoroutine(_lookTowardTarget);
 
             // This allow
             float timeToCancelPlace = _lookAtConstraint.weight * _handMoveBackDuration;
