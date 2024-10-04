@@ -282,9 +282,11 @@ namespace SS3D.Systems.Inventory.Items
         public override void CreateSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> interactions)
         {
             base.CreateSourceInteractions(targets, interactions);
-            DropInteraction dropInteraction = new(Entities.Data.Animations.Humanoid.PickupMoveItemTime, Entities.Data.Animations.Humanoid.PickupReachTime);
+            DropInteraction dropInteraction = new();
+            PlaceInteraction placeInteraction = new(Entities.Data.Animations.Humanoid.PickupMoveItemTime, Entities.Data.Animations.Humanoid.PickupReachTime);
 
-            interactions.Add(new InteractionEntry(null, dropInteraction));
+            interactions.Add(new(null, dropInteraction));
+            interactions.Add(new(null, placeInteraction));
         }
 
         /// <summary>

@@ -30,7 +30,8 @@ namespace SS3D.Systems.Inventory.Containers
         /// <summary>
         /// List of hands currently on the player, should be modified on server only.
         /// </summary>
-        [SerializeField] public List<Hand> PlayerHands;
+        [SyncObject]
+        public readonly SyncList<Hand> PlayerHands = new();
 
 
         private Controls.HotkeysActions _controls;
@@ -69,9 +70,16 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         public List<AttachedContainer> HandContainers => PlayerHands.Select(x => x.Container).ToList();
 
+        public Hand HandFromContainer(AttachedContainer container)
+        {
+            return PlayerHands.FirstOrDefault(x => x.Container == container);
+        } 
+
         public override void OnStartServer()
         {
             base.OnStartServer();
+
+            PlayerHands.AddRange(GetComponentsInChildren<Hand>());
             foreach(Hand hand in PlayerHands)
             {
                 hand.HandsController = this;
@@ -187,7 +195,7 @@ namespace SS3D.Systems.Inventory.Containers
         [Server]
         private void NextHand()
         {
-            int index = PlayerHands.FindIndex(0, x => x == SelectedHand);
+            int index = PlayerHands.FindIndex(x => x == SelectedHand);
             _selectedHand = PlayerHands[(index + 1) % PlayerHands.Count];
         }
 

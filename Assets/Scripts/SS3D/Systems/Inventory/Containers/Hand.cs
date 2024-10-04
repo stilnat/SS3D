@@ -182,6 +182,8 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
+            _holdIkConstraint.weight = 0f;
+            ItemInHand.transform.parent = null;
 			Container.Dump();
             ItemInHand?.GiveOwnership(null);
 		}

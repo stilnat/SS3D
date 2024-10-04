@@ -290,7 +290,15 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            attachedTo.RemoveItem(item);
+            if (attachedTo.ContainerType == ContainerType.Hand)
+            {
+                Hands.HandFromContainer(attachedTo).CmdDropHeldItem();
+            }
+            else
+            {
+                attachedTo.RemoveItem(item); 
+            }
+
         }
 
 
