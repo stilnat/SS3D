@@ -113,11 +113,25 @@ namespace SS3D.Systems.Inventory.Containers
 
         public event HandEventHandler OnHandDisabled;
 
-        public override void OnStartClient()
+        public void Awake()
         {
-            base.OnStartClient();
-
+            Container.OnContentsChanged += ContainerOnOnContentsChanged ;
         }
+
+        private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
+        {
+            if (GetComponentInParent<PickUpAnimation>().IsPicking)
+            {
+                return;
+            }
+
+            if (type == ContainerChangeType.Add)
+            {
+                GetComponentInParent<PickUpAnimation>().Pickup(newitem, 0f, 0f);
+            }
+        }
+
+
 
         protected override void OnDisabled()
         {
