@@ -350,6 +350,11 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
+            if (itemContainer.ContainerType == ContainerType.Hand)
+            {
+                Hands.HandFromContainer(itemContainer).StopHolding();
+            }
+
             itemContainer.TransferItemToOther(item, position, container);     
         }
 

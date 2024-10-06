@@ -113,6 +113,12 @@ namespace SS3D.Systems.Inventory.Containers
 
         public event HandEventHandler OnHandDisabled;
 
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+
+        }
+
         protected override void OnDisabled()
         {
             if (!IsServer)
@@ -187,6 +193,11 @@ namespace SS3D.Systems.Inventory.Containers
 			Container.Dump();
             ItemInHand?.GiveOwnership(null);
 		}
+
+        public void StopHolding()
+        {
+            _holdIkConstraint.weight = 0f;
+        }
 
         /// <summary>
         /// Checks if the creature can interact with an object
