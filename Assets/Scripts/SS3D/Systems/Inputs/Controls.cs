@@ -1025,6 +1025,15 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AimThrow"",
+                    ""type"": ""Button"",
+                    ""id"": ""c5588b17-9187-4faa-85cb-de02ee5d3ae0"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1047,6 +1056,17 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""View Interactions"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d5b35a8-c9d4-4446-af81-c6176d230b61"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AimThrow"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1106,6 +1126,7 @@ namespace SS3D.Systems.Inputs
             m_Interactions = asset.FindActionMap("Interactions", throwIfNotFound: true);
             m_Interactions_RunPrimary = m_Interactions.FindAction("Run Primary", throwIfNotFound: true);
             m_Interactions_ViewInteractions = m_Interactions.FindAction("View Interactions", throwIfNotFound: true);
+            m_Interactions_AimThrow = m_Interactions.FindAction("AimThrow", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -1677,12 +1698,14 @@ namespace SS3D.Systems.Inputs
         private List<IInteractionsActions> m_InteractionsActionsCallbackInterfaces = new List<IInteractionsActions>();
         private readonly InputAction m_Interactions_RunPrimary;
         private readonly InputAction m_Interactions_ViewInteractions;
+        private readonly InputAction m_Interactions_AimThrow;
         public struct InteractionsActions
         {
             private @Controls m_Wrapper;
             public InteractionsActions(@Controls wrapper) { m_Wrapper = wrapper; }
             public InputAction @RunPrimary => m_Wrapper.m_Interactions_RunPrimary;
             public InputAction @ViewInteractions => m_Wrapper.m_Interactions_ViewInteractions;
+            public InputAction @AimThrow => m_Wrapper.m_Interactions_AimThrow;
             public InputActionMap Get() { return m_Wrapper.m_Interactions; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1698,6 +1721,9 @@ namespace SS3D.Systems.Inputs
                 @ViewInteractions.started += instance.OnViewInteractions;
                 @ViewInteractions.performed += instance.OnViewInteractions;
                 @ViewInteractions.canceled += instance.OnViewInteractions;
+                @AimThrow.started += instance.OnAimThrow;
+                @AimThrow.performed += instance.OnAimThrow;
+                @AimThrow.canceled += instance.OnAimThrow;
             }
 
             private void UnregisterCallbacks(IInteractionsActions instance)
@@ -1708,6 +1734,9 @@ namespace SS3D.Systems.Inputs
                 @ViewInteractions.started -= instance.OnViewInteractions;
                 @ViewInteractions.performed -= instance.OnViewInteractions;
                 @ViewInteractions.canceled -= instance.OnViewInteractions;
+                @AimThrow.started -= instance.OnAimThrow;
+                @AimThrow.performed -= instance.OnAimThrow;
+                @AimThrow.canceled -= instance.OnAimThrow;
             }
 
             public void RemoveCallbacks(IInteractionsActions instance)
@@ -1782,6 +1811,7 @@ namespace SS3D.Systems.Inputs
         {
             void OnRunPrimary(InputAction.CallbackContext context);
             void OnViewInteractions(InputAction.CallbackContext context);
+            void OnAimThrow(InputAction.CallbackContext context);
         }
     }
 }

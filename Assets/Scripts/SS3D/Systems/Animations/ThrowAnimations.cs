@@ -1,4 +1,5 @@
 using FishNet.Object;
+using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
@@ -8,6 +9,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.InputSystem;
+using UnityEngine.Localization.Settings;
+using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Animations
 {
@@ -45,8 +49,6 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private IntentController _intents;
 
-        private bool _canAim;
-
         private bool _isAiming;
 
         public bool IsAiming => _isAiming;
@@ -58,14 +60,12 @@ namespace SS3D.Systems.Animations
             {
                 enabled = false;
             }
+            Subsystems.Get<InputSystem>().Inputs.Interactions.AimThrow.performed += AimThrowOnperformed;
         }
 
-        // Update is called once per frame
-        protected void Update()
+        private void AimThrowOnperformed(InputAction.CallbackContext obj)
         {
-            UpdateAimAbility(_hands.SelectedHand);
-
-            if (_canAim && Input.GetKeyDown(KeyCode.R))
+            if (_hands.SelectedHand.Full)
             {
                 if (!_isAiming)
                 {
@@ -76,7 +76,11 @@ namespace SS3D.Systems.Animations
                     RpcStopAim();
                 }
             }
+        }
 
+        // Update is called once per frame
+        protected void Update()
+        {
             if (_isAiming)
             {
                 UpdateAimTargetPosition();
@@ -86,15 +90,10 @@ namespace SS3D.Systems.Animations
                     _movementController.RotatePlayerTowardTarget();
                 }
             }
-
-            if (Input.GetKeyDown(KeyCode.Y) && _hands.SelectedHand.Full && _isAiming)
-            {
-                RpcThrow();
-            }
         }
 
-        [ServerRpc]
-        private void RpcThrow()
+        [Server]
+        public void ThrowAnimate()
         {
             Item item = _hands.SelectedHand.ItemInHand;
             item.RemoveOwnership();
@@ -247,11 +246,6 @@ namespace SS3D.Systems.Animations
             }
 
             OnAim?.Invoke(this, false);
-        }
-
-        private void UpdateAimAbility(Hand selectedHand)
-        {
-            _canAim = selectedHand.Full;
         }
 
         private void AddForceToItem(GameObject item)

@@ -284,9 +284,11 @@ namespace SS3D.Systems.Inventory.Items
             base.CreateSourceInteractions(targets, interactions);
             DropInteraction dropInteraction = new();
             PlaceInteraction placeInteraction = new(Entities.Data.Animations.Humanoid.PickupMoveItemTime, Entities.Data.Animations.Humanoid.PickupReachTime);
+            ThrowInteraction throwInteraction = new();
 
             interactions.Add(new(null, dropInteraction));
             interactions.Add(new(null, placeInteraction));
+            interactions.Add(new(null, throwInteraction));
         }
 
         /// <summary>

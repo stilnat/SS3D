@@ -1001,6 +1001,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "AimThrow",
+                    "type": "Button",
+                    "id": "c5588b17-9187-4faa-85cb-de02ee5d3ae0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1023,6 +1032,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "View Interactions",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0d5b35a8-c9d4-4446-af81-c6176d230b61",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimThrow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
