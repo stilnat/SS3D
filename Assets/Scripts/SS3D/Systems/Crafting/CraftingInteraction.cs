@@ -5,6 +5,7 @@ using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Inventory.Containers;
 using System.Linq;
 using UnityEngine;
 
@@ -89,7 +90,14 @@ namespace SS3D.Systems.Crafting
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
             ViewLocator.Get<CraftingMenu>().First().HideMenu();
-            interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().TryInteract();
+
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+            if (hand != null && hand.ItemInHand.TryGetComponent(out Tool tool))
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(interactionEvent.Target.GetGameObject().GetComponent<NetworkObject>(), tool, Delay);
+            }
+            
             return true;
         }
 

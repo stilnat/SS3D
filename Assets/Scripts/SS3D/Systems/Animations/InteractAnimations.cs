@@ -1,3 +1,4 @@
+using FishNet.Object;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
@@ -8,7 +9,7 @@ using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class InteractAnimations : MonoBehaviour
+    public class InteractAnimations : NetworkBehaviour
     {
         [SerializeField]
         private Hands _hands;
@@ -27,25 +28,19 @@ namespace SS3D.Systems.Animations
 
         public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.1f;
 
-        public void TryInteract()
+        [Server]
+        public void ServerInteract(NetworkObject target, Tool tool, float delay)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hit) && _hands.SelectedHand.Full && UnderMaxDistanceFromHips(hit.point)
-                && _hands.SelectedHand.ItemInHand.GameObject.TryGetComponent(out Tool tool))
-            {
-                GameObject obj = hit.collider.gameObject;
-                StartCoroutine(Interact(obj.transform, _hands.SelectedHand, tool));
-            }
+            StartCoroutine(Interact(target.transform, _hands.SelectedHand, tool, delay));
         }
 
-        private IEnumerator Interact(Transform interactionTarget, Hand mainHand, Tool tool)
+        private IEnumerator Interact(Transform interactionTarget, Hand mainHand, Tool tool, float delay)
         {
             SetupInteract(interactionTarget, mainHand, tool);
 
             yield return ReachInteractionPoint(interactionTarget, mainHand, tool);
 
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSeconds(delay);
 
             yield return StopInteracting(mainHand, tool);
         }
