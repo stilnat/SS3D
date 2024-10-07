@@ -139,7 +139,7 @@ namespace SS3D.Systems.Animations
             if (secondaryHand.Full && secondaryHand.ItemInHand.Holdable is not null && secondaryHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 _holdController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.ItemInHand.Holdable, true, _itemReachPlaceDuration, false);
-                _holdController.MovePickupAndHoldTargetLocker(mainHand, true, _hands.GetItem(true, mainHand));
+                _holdController.MovePickupAndHoldTargetLocker(mainHand, true, item.Holdable);
 
                 yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.HoldIkConstraint.weight = x, 0f, 1f, _itemReachPlaceDuration / 2);
             }

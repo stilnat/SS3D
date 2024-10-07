@@ -274,23 +274,6 @@ namespace SS3D.Systems.Inventory.Containers
             }
         }
 
-        public IHoldProvider GetItem(bool secondary, Hand hand)
-        {
-            if (secondary && !TryGetOppositeHand(hand, out Hand oppositeHand))
-            {
-                return null;
-            }
-
-            if (secondary && TryGetOppositeHand(hand, out Hand oppositeHand2))
-            {
-                return oppositeHand2.ItemInHand?.Holdable;
-            }
-            else
-            {
-                return hand.ItemInHand?.Holdable;
-            }
-        }
-
         /// <summary>
         /// TODO : currently only returns the next hand, but hands should work in pair
         /// </summary>
