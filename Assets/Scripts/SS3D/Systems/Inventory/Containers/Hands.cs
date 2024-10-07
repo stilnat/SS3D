@@ -281,7 +281,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return null;
             }
 
-            if (secondary && !TryGetOppositeHand(hand, out Hand oppositeHand2))
+            if (secondary && TryGetOppositeHand(hand, out Hand oppositeHand2))
             {
                 return oppositeHand2.ItemInHand?.Holdable;
             }

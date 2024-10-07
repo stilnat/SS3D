@@ -115,7 +115,7 @@ namespace SS3D.Systems.Inventory.Containers
 
         public void Awake()
         {
-            Container.OnContentsChanged += ContainerOnOnContentsChanged ;
+            Container.OnContentsChanged += ContainerOnOnContentsChanged;
         }
 
         private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)

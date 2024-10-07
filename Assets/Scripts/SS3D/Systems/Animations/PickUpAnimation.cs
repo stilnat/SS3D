@@ -118,7 +118,7 @@ namespace SS3D.Systems.Animations
             if (withTwoHands)
             {
                 _holdController.MovePickupAndHoldTargetLocker(
-                    secondaryHand, true, _hands.GetItem(true, secondaryHand));
+                    secondaryHand, true, item.Holdable);
                 OrientTargetForHandRotation(secondaryHand);
                 secondaryHand.PickupIkConstraint.data.tipRotationWeight = 1f;
                 secondaryHand.HoldIkConstraint.data.targetRotationWeight = 0f;
