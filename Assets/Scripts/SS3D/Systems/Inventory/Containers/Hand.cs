@@ -203,6 +203,14 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             _holdIkConstraint.weight = 0f;
+            HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
+            bool withTwoHands = oppositeHand.Empty && ItemInHand.Holdable.CanHoldTwoHand;
+
+            if (withTwoHands)
+            {
+                oppositeHand._holdIkConstraint.weight = 0f;
+            }
+
             ItemInHand.transform.parent = null;
 			Container.Dump();
             ItemInHand?.GiveOwnership(null);
@@ -211,6 +219,14 @@ namespace SS3D.Systems.Inventory.Containers
         public void StopHolding()
         {
             _holdIkConstraint.weight = 0f;
+            HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
+            bool withTwoHands = oppositeHand.Empty && ItemInHand.Holdable.CanHoldTwoHand;
+
+            if (withTwoHands)
+            {
+                oppositeHand._holdIkConstraint.weight = 0f;
+            }
+
         }
 
         /// <summary>

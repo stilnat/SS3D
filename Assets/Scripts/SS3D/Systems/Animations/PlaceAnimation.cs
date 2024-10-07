@@ -60,7 +60,7 @@ namespace SS3D.Systems.Animations
 
             yield return PlaceReach(mainHand, placeTarget, item.gameObject);
 
-            yield return PlaceAndPullBack(mainHand, secondaryHand, withTwoHands);
+            yield return PlaceAndPullBack(mainHand, secondaryHand, withTwoHands, item);
         }
 
         [Client]
@@ -113,7 +113,7 @@ namespace SS3D.Systems.Animations
         }
 
         [Client]
-        private IEnumerator PlaceAndPullBack(Hand mainHand, Hand secondaryHand, bool withTwoHands)
+        private IEnumerator PlaceAndPullBack(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item)
         {
             GetComponent<HumanoidAnimatorController>().Crouch(false);
 
