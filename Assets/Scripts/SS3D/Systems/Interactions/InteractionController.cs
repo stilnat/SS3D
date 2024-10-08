@@ -84,8 +84,6 @@ namespace SS3D.Systems.Interactions
         [Client]
         public void HandleRunPrimary(InputAction.CallbackContext callbackContext)
         {
-            
-            Debug.Log("run primary : " + Mouse.current.position.ReadValue());
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 return;
@@ -98,11 +96,22 @@ namespace SS3D.Systems.Interactions
                 return;
             }
 
-            InteractionEntry interaction = viableInteractions[0];
+            InteractionEntry interaction = ChooseMostImportantInteraction(viableInteractions);
             string interactionName = interaction.Interaction.GetName(interactionEvent);
             interactionEvent.Target = interaction.Target;
 
             CmdRunInteraction(ray, interactionName);
+        }
+
+        private InteractionEntry ChooseMostImportantInteraction(List<InteractionEntry> viableInteractions)
+        {
+            InteractionEntry throwInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Throw");
+            if (throwInteraction.Interaction != null)
+            {
+                return throwInteraction;
+            }
+
+            return viableInteractions[0];
         }
 
         [Client]

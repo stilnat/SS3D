@@ -115,11 +115,13 @@ namespace SS3D.Systems.Inventory.Containers
 
         public void Awake()
         {
+            // should only be called on server, however it's too late if listening in OnStartServer (again, issue with initialization timing of our systems...)
             Container.OnContentsChanged += ContainerOnOnContentsChanged;
         }
 
         private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
         {
+
             if (GetComponentInParent<PickUpAnimation>().IsPicking)
             {
                 return;
