@@ -42,8 +42,14 @@ namespace SS3D.Systems.Animations
             ObserverPickUp(item, timeToMoveBackItem, timeToReachItem);
         }
 
-        [Client]
+        [Server]
         public void CancelPickup(Hand hand)
+        {
+              ObserverCancelPickUp(hand);
+        }
+
+        [ObserversRpc]
+        private void ObserverCancelPickUp(Hand hand)
         {
             Debug.Log("cancel pick up animation");
             StopCoroutine(_pickupCoroutine);
