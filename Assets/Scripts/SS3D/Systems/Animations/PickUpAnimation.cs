@@ -37,9 +37,9 @@ namespace SS3D.Systems.Animations
         public bool IsPicking { get; private set; }
 
         [Server]
-        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem)
+        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem, float delay = 0f)
         {
-            ObserverPickUp(item, timeToMoveBackItem, timeToReachItem);
+            ObserverPickUp(item, timeToMoveBackItem, timeToReachItem, delay);
         }
 
         [Server]
@@ -70,18 +70,23 @@ namespace SS3D.Systems.Animations
             GetComponent<HumanoidAnimatorController>().Crouch(false);
         }
 
-        [ObserversRpc]
-        private void ObserverPickUp(Item item,  float timeToMoveBackItem, float timeToReachItem)
+        [ObserversRpc(BufferLast = true)]
+        private void ObserverPickUp(Item item,  float timeToMoveBackItem, float timeToReachItem, float delay)
         {
             _itemMoveDuration = timeToMoveBackItem;
             _itemReachDuration = timeToReachItem;
-            _pickupCoroutine = StartCoroutine(PickupAnimate(item)); 
+            _pickupCoroutine = StartCoroutine(PickupAnimate(item, delay)); 
         }
 
 
         [Client]
-        private IEnumerator PickupAnimate(Item item)
+        private IEnumerator PickupAnimate(Item item, float delay)
         {
+            if (delay > 0f)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+
             IsPicking = true;
 
             if (!_hands.TryGetOppositeHand(_hands.SelectedHand, out Hand secondaryHand))

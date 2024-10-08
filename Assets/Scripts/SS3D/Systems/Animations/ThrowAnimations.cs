@@ -101,6 +101,7 @@ namespace SS3D.Systems.Animations
             StartCoroutine(ServerThrow(item));
         }
 
+        [Server]
         private IEnumerator ServerThrow(Item item)
         {
             item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;

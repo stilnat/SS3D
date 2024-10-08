@@ -127,7 +127,8 @@ namespace SS3D.Systems.Inventory.Containers
 
             if (type == ContainerChangeType.Add)
             {
-                GetComponentInParent<PickUpAnimation>().Pickup(newitem, 0f, 0f);
+                // Delay necessary otherwise item holdable is not set ... messy.
+                GetComponentInParent<PickUpAnimation>().Pickup(newitem, 0f, 0f, 0.1f);
             }
         }
 
