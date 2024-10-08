@@ -105,8 +105,10 @@ namespace SS3D.Systems.Animations
         private IEnumerator ServerThrow(Item item)
         {
             item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;
-            // ignore collisions while in hand
+            // ignore collisions while in hand, the time the item gets a bit out of the player collider.
             Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), true);
+
+            // wait roughly the time of animation on client before actually throwing
             yield return new WaitForSeconds(0.18f);    
             _hands.SelectedHand.Container.RemoveItem(item);
             item.GameObject.transform.parent = null;
@@ -115,7 +117,7 @@ namespace SS3D.Systems.Animations
             AddForceToItem(item.GameObject);
 
             // after a short amount of time, stop ignoring collisions
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.3f);
             Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), false);
 
         }
@@ -152,11 +154,13 @@ namespace SS3D.Systems.Animations
 
         private IEnumerator Throw(Item item)
         {
+            // remove all IK constraint
             IHoldProvider holdable = item.Holdable;
             _hands.SelectedHand.ItemPositionConstraint.weight = 0f;
             _hands.SelectedHand.HoldIkConstraint.weight = 0f;
             _hands.SelectedHand.PickupIkConstraint.weight = 0f;
 
+            // remove all IK constraint on second hand if needed
             if (holdable.CanHoldTwoHand && _hands.TryGetOppositeHand(_hands.SelectedHand, out Hand oppositeHand))
             {
                 oppositeHand.ItemPositionConstraint.weight = 0f;
@@ -164,15 +168,20 @@ namespace SS3D.Systems.Animations
                 oppositeHand.PickupIkConstraint.weight = 0f;
             }
 
-            item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;
+            // Ignore collision between thrown item and player for a short while
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), true);
 
+            item.GameObject.transform.parent = null;
+
+             // Play the throw animation
             _animatorController.Throw(_hands.SelectedHand.HandType);
 
             StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, _aimTarget.transform, 0.18f, false, true));
 
-            yield return new WaitForSeconds(0.18f);
+            yield return new WaitForSeconds(0.3f);
 
-            item.GameObject.transform.parent = null;
+            // Allow back collision between thrown item and player
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), false);
 
             StopAiming();
         }
