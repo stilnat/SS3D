@@ -61,7 +61,7 @@ namespace SS3D.Systems.Inventory.Interactions
         {
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
-            hand.CmdDropHeldItem();
+            hand.ServerDropHeldItem();
 
             return false;
         }

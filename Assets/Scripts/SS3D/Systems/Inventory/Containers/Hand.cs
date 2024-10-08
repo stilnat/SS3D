@@ -196,25 +196,36 @@ namespace SS3D.Systems.Inventory.Containers
         [ServerRpc]
         public void CmdDropHeldItem()
         {
-            
+             ServerDropHeldItem();
+		}
+
+        public void ServerDropHeldItem()
+        {
             if (IsEmpty())
             {
                 return;
             }
 
+            Item item = ItemInHand;
+
+            Container.Dump();
+            item?.GiveOwnership(null);
+            ObserverDropHeldItem(item);
+        }
+
+        [ObserversRpc]
+        public void ObserverDropHeldItem(Item item)
+        {
             _holdIkConstraint.weight = 0f;
+            item.transform.parent = null;
             HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
-            bool withTwoHands = oppositeHand.Empty && ItemInHand.Holdable.CanHoldTwoHand;
+            bool withTwoHands = oppositeHand.Empty && item.Holdable.CanHoldTwoHand;
 
             if (withTwoHands)
             {
                 oppositeHand._holdIkConstraint.weight = 0f;
             }
-
-            ItemInHand.transform.parent = null;
-			Container.Dump();
-            ItemInHand?.GiveOwnership(null);
-		}
+        }
 
         public void StopHolding()
         {
