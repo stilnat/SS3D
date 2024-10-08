@@ -237,10 +237,8 @@ namespace SS3D.Systems.Entities.Humanoid
 
             _inputSystem.ToggleActionMap(_movementControls, true);
             _inputSystem.ToggleActionMap(_hotkeysControls, true);
-            GetComponent<ThrowAnimations>().OnAim += HandleAimChange;
-
-
-           // GetComponent<DummyAim>().OnAim += HandleAimChange;
+            GetComponent<ThrowAnimations>().OnAim += HandleAimChange; 
+            GetComponent<GunAimAnimation>().OnAim += HandleAimChange;
            // GetComponent<Grab>().OnGrab += HandleGrabChange;
 
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
