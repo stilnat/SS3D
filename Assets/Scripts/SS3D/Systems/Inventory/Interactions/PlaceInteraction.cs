@@ -43,6 +43,8 @@ namespace SS3D.Systems.Inventory.Interactions
             return "Place";
         }
 
+        public override string GetGenericName() => "Place";
+
         public override Sprite GetIcon(InteractionEvent interactionEvent)
         {
             return Icon ? Icon : InteractionIcons.Discard;
@@ -80,7 +82,7 @@ namespace SS3D.Systems.Inventory.Interactions
             
             // Consider if the surface is facing up
             float angle = Vector3.Angle(interactionEvent.Normal, Vector3.up);
-            Debug.Log($"surface angle is {angle}, interaction norma is {interactionEvent.Normal}");
+            // Debug.Log($"surface angle is {angle}, interaction norma is {interactionEvent.Normal}");
             if (angle > _maxSurfaceAngle)
             {
                 return false;
@@ -91,7 +93,6 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            Debug.Log($"can drop interact : {InteractionExtensions.RangeCheck(interactionEvent)}");
             return InteractionExtensions.RangeCheck(interactionEvent);
         }
 

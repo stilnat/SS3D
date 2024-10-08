@@ -105,12 +105,19 @@ namespace SS3D.Systems.Animations
         private IEnumerator ServerThrow(Item item)
         {
             item.GameObject.transform.parent = _hands.SelectedHand.HandBone.transform;
+            // ignore collisions while in hand
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), true);
             yield return new WaitForSeconds(0.18f);    
             _hands.SelectedHand.Container.RemoveItem(item);
             item.GameObject.transform.parent = null;
             item.GameObject.GetComponent<Rigidbody>().isKinematic = false;
             item.GameObject.GetComponent<Collider>().enabled = true;
             AddForceToItem(item.GameObject);
+
+            // after a short amount of time, stop ignoring collisions
+            yield return new WaitForSeconds(0.1f);
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), GetComponent<Collider>(), false);
+
         }
 
         [ObserversRpc]
@@ -254,6 +261,7 @@ namespace SS3D.Systems.Animations
             Vector2 targetCoordinates = ComputeTargetCoordinates(_aimTarget.position, transform);
 
             Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, transform);
+
 
             Vector2 initialVelocity = ComputeInitialVelocity(
                 ComputeTimeToReach(_intents.Intent, _aimTarget.position),

@@ -34,6 +34,8 @@ namespace SS3D.Systems.Inventory.Interactions
             return "Pick up";
         }
 
+        public override string GetGenericName() => "Pickup";
+
         public override Sprite GetIcon(InteractionEvent interactionEvent)
         {
             return Icon != null ? Icon : InteractionIcons.Take;

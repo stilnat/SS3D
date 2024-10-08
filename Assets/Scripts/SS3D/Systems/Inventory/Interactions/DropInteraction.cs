@@ -13,9 +13,9 @@ namespace SS3D.Systems.Inventory.Interactions
 {
     public class DropInteraction : Interaction
     {
-  public virtual string GetGenericName()
+        public override string GetGenericName()
         {
-            throw new NotImplementedException();
+            return "Drop";
         }
 
         /// <summary>

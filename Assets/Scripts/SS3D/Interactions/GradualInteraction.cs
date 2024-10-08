@@ -48,6 +48,9 @@ namespace SS3D.Interactions
         }
 
         public abstract override string GetName(InteractionEvent interactionEvent);
+
+        public abstract override string GetGenericName();
+
         public override Sprite GetIcon(InteractionEvent interactionEvent) { return Icon; }
         public abstract override bool CanInteract(InteractionEvent interactionEvent);
 
