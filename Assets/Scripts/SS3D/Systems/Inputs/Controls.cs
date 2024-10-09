@@ -1034,6 +1034,15 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AimGun"",
+                    ""type"": ""Button"",
+                    ""id"": ""ef9edcc5-d3be-4f6f-9d69-9891176ec460"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1067,6 +1076,17 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""AimThrow"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bb00306e-3375-402b-ad69-a6c2387a7e5f"",
+                    ""path"": ""<Keyboard>/t"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AimGun"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1127,6 +1147,7 @@ namespace SS3D.Systems.Inputs
             m_Interactions_RunPrimary = m_Interactions.FindAction("Run Primary", throwIfNotFound: true);
             m_Interactions_ViewInteractions = m_Interactions.FindAction("View Interactions", throwIfNotFound: true);
             m_Interactions_AimThrow = m_Interactions.FindAction("AimThrow", throwIfNotFound: true);
+            m_Interactions_AimGun = m_Interactions.FindAction("AimGun", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -1699,6 +1720,7 @@ namespace SS3D.Systems.Inputs
         private readonly InputAction m_Interactions_RunPrimary;
         private readonly InputAction m_Interactions_ViewInteractions;
         private readonly InputAction m_Interactions_AimThrow;
+        private readonly InputAction m_Interactions_AimGun;
         public struct InteractionsActions
         {
             private @Controls m_Wrapper;
@@ -1706,6 +1728,7 @@ namespace SS3D.Systems.Inputs
             public InputAction @RunPrimary => m_Wrapper.m_Interactions_RunPrimary;
             public InputAction @ViewInteractions => m_Wrapper.m_Interactions_ViewInteractions;
             public InputAction @AimThrow => m_Wrapper.m_Interactions_AimThrow;
+            public InputAction @AimGun => m_Wrapper.m_Interactions_AimGun;
             public InputActionMap Get() { return m_Wrapper.m_Interactions; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1724,6 +1747,9 @@ namespace SS3D.Systems.Inputs
                 @AimThrow.started += instance.OnAimThrow;
                 @AimThrow.performed += instance.OnAimThrow;
                 @AimThrow.canceled += instance.OnAimThrow;
+                @AimGun.started += instance.OnAimGun;
+                @AimGun.performed += instance.OnAimGun;
+                @AimGun.canceled += instance.OnAimGun;
             }
 
             private void UnregisterCallbacks(IInteractionsActions instance)
@@ -1737,6 +1763,9 @@ namespace SS3D.Systems.Inputs
                 @AimThrow.started -= instance.OnAimThrow;
                 @AimThrow.performed -= instance.OnAimThrow;
                 @AimThrow.canceled -= instance.OnAimThrow;
+                @AimGun.started -= instance.OnAimGun;
+                @AimGun.performed -= instance.OnAimGun;
+                @AimGun.canceled -= instance.OnAimGun;
             }
 
             public void RemoveCallbacks(IInteractionsActions instance)
@@ -1812,6 +1841,7 @@ namespace SS3D.Systems.Inputs
             void OnRunPrimary(InputAction.CallbackContext context);
             void OnViewInteractions(InputAction.CallbackContext context);
             void OnAimThrow(InputAction.CallbackContext context);
+            void OnAimGun(InputAction.CallbackContext context);
         }
     }
 }

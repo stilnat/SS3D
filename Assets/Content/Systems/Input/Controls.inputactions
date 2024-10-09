@@ -1010,6 +1010,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "AimGun",
+                    "type": "Button",
+                    "id": "ef9edcc5-d3be-4f6f-9d69-9891176ec460",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1043,6 +1052,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "AimThrow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bb00306e-3375-402b-ad69-a6c2387a7e5f",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimGun",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
