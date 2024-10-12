@@ -1,12 +1,15 @@
 using Coimbra;
 using FishNet.Object;
+using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
+using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Animations
 {
@@ -32,8 +35,6 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private float _rotationSpeed = 5f;
 
-        private bool _canAim;
-
         private bool _isAiming;
 
         [SerializeField]
@@ -46,30 +47,35 @@ namespace SS3D.Systems.Animations
             {
                 enabled = false;
             }
+            Subsystems.Get<InputSystem>().Inputs.Interactions.AimGun.performed += AimGunOnperformed;
+        }
+
+        private void AimGunOnperformed(InputAction.CallbackContext obj)
+        {
+            bool canAim = _intents.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemInHand.GameObject.HasComponent<Gun>();
+
+            if (canAim && !_isAiming)
+            {
+                RpcAim(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.GameObject.GetComponent<Gun>());
+                _isAiming = true;
+
+            }
+            else if (_isAiming)
+            {
+                RpcStopAim(_hands.SelectedHand);
+            }
+
         }
 
         private void Update()
         {
-            UpdateAimAbility(_hands.SelectedHand);
-
-            if (_canAim && Input.GetMouseButton(1))
+            if (_isAiming)
             {
                 UpdateAimTargetPosition();
-
-                if (!_isAiming)
-                {
-                    RpcAim(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.GameObject.GetComponent<Gun>());
-                    _isAiming = true;
-                }
-
                 if (GetComponent<PositionController>().Position != PositionType.Sitting)
                 {
                     _movementController.RotatePlayerTowardTarget();
                 }
-            }
-            else if (_isAiming && (!_canAim || !Input.GetMouseButton(1)))
-            {
-                RpcStopAim(_hands.SelectedHand);
             }
 
             if (Input.GetKey(KeyCode.E) && _hands.SelectedHand.Full
@@ -130,11 +136,6 @@ namespace SS3D.Systems.Animations
             hand.ItemInHand.GameObject.transform.localPosition = Vector3.zero;
             hand.ItemInHand.GameObject.transform.localRotation = Quaternion.identity;
             OnAim?.Invoke(this, false);
-        }
-
-        private void UpdateAimAbility(Hand selectedHand)
-        {
-            _canAim = _intents.Intent == IntentType.Harm && selectedHand.Full && selectedHand.ItemInHand.GameObject.HasComponent<Gun>();
         }
 
         /// <summary>
