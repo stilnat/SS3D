@@ -57,7 +57,7 @@ namespace SS3D.Systems.Animations
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                if (_grabbedObject == null && CanGrab(out GrabbableBodyPart bodyPart))
+                if (_grabbedObject is null && CanGrab(out GrabbableBodyPart bodyPart))
                 {
                     RpcGrab(bodyPart);
                 }
@@ -129,14 +129,14 @@ namespace SS3D.Systems.Animations
 
         private void ReleaseGrab()
         {
-            if (_grabbedObject != null)
+            if (_grabbedObject is not null)
             {
                     if (_grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
                     {
                         grabbedRb.detectCollisions = true; // Enable collisions again
                     }
 
-                    if(_fixedJoint != null)
+                    if (_fixedJoint is not null)
                     { 
                         Destroy(_fixedJoint);
                     }
@@ -145,7 +145,6 @@ namespace SS3D.Systems.Animations
             }
 
             OnGrab?.Invoke(this, false);
-
         }
 
         private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -196,6 +195,7 @@ namespace SS3D.Systems.Animations
 
             GetComponent<HumanoidAnimatorController>().Crouch(false);
 
+            // Since transforms are client autoritative, only the client owner should deal with the physics, in this case creating a fixed joint between grabbed part and client hand. 
             if (IsOwner)
             {
                 item.transform.position = mainHand.HoldTransform.position;

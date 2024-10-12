@@ -388,6 +388,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 _humanoidLivingController.enabled = enable;
             }
         }
+
         private void ToggleAnimator(bool enable)
         {
             // Speed=0 prevents animator from choosing Walking animations after enabling it
@@ -409,7 +410,6 @@ namespace SS3D.Systems.Entities.Humanoid
         /// </summary>
         /// <param name="isActive"> true if the network transform of the ragdoll parts should sync</param>
         /// <returns></returns>
-        
         private void ToggleSyncRagdoll(bool isActive)
         {
             foreach (Transform part in _ragdollParts)
