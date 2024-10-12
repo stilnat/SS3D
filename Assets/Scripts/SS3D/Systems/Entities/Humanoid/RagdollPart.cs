@@ -6,5 +6,8 @@ using UnityEngine;
 /// </summary>
 public class RagdollPart : MonoBehaviour
 {
-    
+    protected void OnJointBreak(float breakForce)
+    {
+        Debug.Log("A joint has just been broken!, force: " + breakForce);
+    }
 }

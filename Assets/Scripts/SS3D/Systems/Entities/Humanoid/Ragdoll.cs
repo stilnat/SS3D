@@ -413,5 +413,11 @@ namespace SS3D.Systems.Entities.Humanoid
                 part.GetComponent<NetworkTransform>().SetSynchronizeRotation(isActive);
             }
         }
+
+        public void SetRagdollPhysic(bool isOn)
+        {
+            ToggleTrigger(!isOn);
+            ToggleKinematic(!isOn);
+        }
     }
 }
