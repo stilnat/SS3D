@@ -7791,7 +7791,17 @@ MonoBehaviour:
   _componentIndexCache: 20
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
+  _grabRange: 2
+  _grabbableLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _jointBreakForce: 25000
+  _holdController: {fileID: 5029722283718734781}
+  _itemReachDuration: 0.25
+  _itemMoveDuration: 0.25
   _hands: {fileID: 3222345056416986628}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _lookAtConstraint: {fileID: 2851688491558728783}
 --- !u!114 &2768583506857238720
 MonoBehaviour:
   m_ObjectHideFlags: 0
