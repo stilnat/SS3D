@@ -131,22 +131,21 @@ namespace SS3D.Systems.Animations
         {
             if (_grabbedObject != null)
             {
-                if (_grabbedObject.IsOwner)
-                {
-                    _grabbedObject.GetComponentInParent<Ragdoll>().SetRagdollPhysic(false);
                     if (_grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
                     {
                         grabbedRb.detectCollisions = true; // Enable collisions again
                     }
 
-                    Destroy(_fixedJoint);
-                    _grabbedObject = null;
-                }
-               
+                    if(_fixedJoint != null)
+                    { 
+                        Destroy(_fixedJoint);
+                    }
 
-                OnGrab?.Invoke(this, false);
+                    _grabbedObject = null;
             }
-            
+
+            OnGrab?.Invoke(this, false);
+
         }
 
         private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -199,7 +198,6 @@ namespace SS3D.Systems.Animations
 
             if (IsOwner)
             {
-                item.GetComponentInParent<Ragdoll>().SetRagdollPhysic(true);
                 item.transform.position = mainHand.HoldTransform.position;
                 _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
                 Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
@@ -207,10 +205,6 @@ namespace SS3D.Systems.Animations
                 grabbedRb.velocity = Vector3.zero;
                 _fixedJoint.breakForce = _jointBreakForce;
                 grabbedRb.detectCollisions = false; // Disable collisions between the two characters
-            }
-            else
-            {
-                item.GetComponentInParent<Ragdoll>().SetRagdollPhysic(false); 
             }
 
             StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _itemReachDuration));

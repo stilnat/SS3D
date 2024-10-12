@@ -125,6 +125,11 @@ namespace SS3D.Systems.Entities.Humanoid
             {
                 part.GetComponent<NetworkTransform>().SetInterval(_ragdollPartSyncInterval);
             }
+
+            if (_currentState == RagdollState.Ragdoll)
+            {
+                SetRagdollPhysic(IsOwner);
+            }
         }
 
         private void OnDisable()
