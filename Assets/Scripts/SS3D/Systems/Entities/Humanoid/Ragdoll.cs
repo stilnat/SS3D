@@ -16,12 +16,18 @@ namespace SS3D.Systems.Entities.Humanoid
 	{
         [SerializeField]
 		private Transform _armatureRoot;
+
+        [SerializeField]
+        private Collider _characterCollider;
+
+        [SerializeField]
+        private Rigidbody _characterRigidBody;
+
         private Transform _hips;
         private Transform _character;
         private Animator _animator; 
         private NetworkAnimator _networkAnimator; 
         private HumanoidLivingController _humanoidLivingController; 
-        private CharacterController _characterController; 
         private Transform[] _ragdollParts;
         /// <summary>
         /// If knockdown is supposed to expire
@@ -71,6 +77,7 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField]
         private byte _ragdollPartSyncInterval;
+        
 
         private void OnSyncKnockdown(bool prev, bool next, bool asServer)
 		{
@@ -90,7 +97,6 @@ namespace SS3D.Systems.Entities.Humanoid
 
 			_animator = GetComponent<Animator>();
 			_humanoidLivingController = GetComponent<HumanoidLivingController>();
-			_characterController = GetComponent<CharacterController>();
 			_networkAnimator = GetComponent<NetworkAnimator>();
             _knockdownTimer = 0;
             _hips = _armatureRoot.GetChild(0);
@@ -191,6 +197,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 return;
             
             ToggleKinematic(false);
+            ToggleTrigger(false);
             foreach (Transform part in _ragdollParts)
             {
                 part.GetComponent<Rigidbody>().AddForce(movement, ForceMode.VelocityChange);
@@ -244,6 +251,7 @@ namespace SS3D.Systems.Entities.Humanoid
             // Only the owner handles ragdoll's physics
             if (!IsOwner) return;
             ToggleKinematic(true);
+            ToggleTrigger(true);
             PopulatePartsTransforms(_ragdollBones);
             PopulateStandUpPartsTransforms(_standUpBones, IsFacingDown ? _standUpFaceDownClip : _standUpFaceUpClip);
         }
@@ -345,24 +353,34 @@ namespace SS3D.Systems.Entities.Humanoid
         }
         
 		/// <summary>
-		/// Switch isKinematic for each ragdoll part
+		/// Switch isKinematic for each ragdoll part and for the character collider
 		/// </summary>
 		private void ToggleKinematic(bool isKinematic)
-		{
+        {
+
+            _characterRigidBody.isKinematic = !isKinematic;
 			foreach (Transform part in _ragdollParts)
 			{
 				part.GetComponent<Rigidbody>().isKinematic = isKinematic;
 			}
 		}
+
+        private void ToggleTrigger(bool isTrigger)
+        {
+
+            _characterCollider.isTrigger = !isTrigger;
+
+            foreach (Transform part in _ragdollParts)
+            {
+                part.GetComponent<Collider>().isTrigger = isTrigger;
+            }
+        }
+
         private void ToggleController(bool enable)
         {
             if (_humanoidLivingController != null)
             {
                 _humanoidLivingController.enabled = enable;
-            }
-            if (_characterController != null)
-            {
-                _characterController.enabled = enable;
             }
         }
         private void ToggleAnimator(bool enable)
