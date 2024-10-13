@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 namespace SS3D.Systems.Animations
 {
     /// <summary>
-    /// Handle moving around the hold target lockers.
+    /// Handle the state of holding items and hand positions
     /// </summary>
     public class HoldController : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private PickUpAnimation _pickup;
 
-        // Hold positions
+        // Hold positions, the place where 
         [SerializeField]
         private Transform _gunHoldRight;
 
@@ -66,6 +66,15 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private ThrowAnimations _throwAnimations;
 
+
+        /// <summary>
+        /// Update the held item position and rotation. 
+        /// </summary>
+        /// <param name="hand"> The main hand holding the item</param>
+        /// <param name="item"> The item held</param>
+        /// <param name="withTwoHands"> If the item should be held with two hands </param>
+        /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
+        /// <param name="toThrow"> True the item should be in a ready to throw position</param>
         public void UpdateItemPositionConstraintAndRotation(
             Hand hand, IHoldProvider item, bool withTwoHands, float duration, bool toThrow)
         {
@@ -74,16 +83,20 @@ namespace SS3D.Systems.Animations
                 return;
             }
 
+            // Fetch how the item should be held
             HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
 
+            // The position where the item should be, given its hold type
             Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
+            // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
             Vector3 startingOffset = hand.ItemPositionConstraint.data.offset;
             Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
             StartCoroutine(CoroutineHelper.ModifyVector3OverTime(
                 x => hand.ItemPositionConstraint.data.offset = x, startingOffset, finalOffset, duration));
 
+            // Do the same with interpolating rotation.
             Quaternion startingRotation = hand.ItemPositionConstraint.data.constrainedObject.localRotation;
             Quaternion finalRotation = hold.localRotation;
 
@@ -91,6 +104,12 @@ namespace SS3D.Systems.Animations
                 x => hand.ItemPositionConstraint.data.constrainedObject.localRotation = x, startingRotation, finalRotation, duration));
         }
 
+        /// <summary>
+        /// For a given hand, move its pickup and hold target lockers at the right place on the item.
+        /// </summary>
+        /// <param name="hand"> The hand for which we want to set picking and holding </param>
+        /// <param name="secondary"> Is it the hand with the primary hold on the item, or is it just there in support of the first one ? </param>
+        /// <param name="holdProvider"> The item we want to hold, and onto which we're going to move the targets.</param>
         public void MovePickupAndHoldTargetLocker(Hand hand, bool secondary, IHoldProvider holdProvider)
         {
             Transform parent = holdProvider.GetHold(!secondary, hand.HandType);
@@ -101,10 +120,10 @@ namespace SS3D.Systems.Animations
 
         protected void Start()
         {
-            Debug.Log("start hold controller");
-
             _intents.OnIntentChange += HandleIntentChange;
 
+            // Had to manually enter the offset for each possible position.
+            // The first idea was to use game objects for that, which would allow a more dynamic way of setting the items position.
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldLeft, new Vector3(0.15f, -0.08f, 0.26f), HandType.LeftHand));
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldRight, new Vector3(-0.15f, -0.08f, 0.26f), HandType.RightHand));
             _holdData.Add(new(HandHoldType.Toolbox, _toolBoxHoldLeft, new Vector3(-0.1f, -0.4f, 0.1f), HandType.LeftHand));

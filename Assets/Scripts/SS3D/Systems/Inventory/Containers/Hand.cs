@@ -256,19 +256,6 @@ namespace SS3D.Systems.Inventory.Containers
             return GetInteractionRange().IsInRange(InteractionOrigin, otherObject.transform.position);
         }
 
-        public Transform ChooseTargetLocker(TargetLockerType type)
-        {
-            Transform targetToSet = type switch
-            {
-                TargetLockerType.Pickup => _pickupTargetLocker,
-                TargetLockerType.Hold => _handHoldTargetLocker,
-                TargetLockerType.ItemPosition => _itemPositionTargetLocker,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-            };
-
-            return targetToSet;
-        }
-
         public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true, bool resetRotation = true)
         {
             Transform targetToSet = ChooseTargetLocker(type);
@@ -282,6 +269,19 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 targetToSet.localRotation = Quaternion.identity;
             }
+        }
+
+        private Transform ChooseTargetLocker(TargetLockerType type)
+        {
+            Transform targetToSet = type switch
+            {
+                TargetLockerType.Pickup => _pickupTargetLocker,
+                TargetLockerType.Hold => _handHoldTargetLocker,
+                TargetLockerType.ItemPosition => _itemPositionTargetLocker,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+            };
+
+            return targetToSet;
         }
     }
 }
