@@ -53,21 +53,6 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        protected void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                if (_grabbedObject is null && CanGrab(out GrabbableBodyPart bodyPart))
-                {
-                    RpcGrab(bodyPart);
-                }
-                else
-                {
-                    RpcReleaseGrab();
-                }
-            }
-        }
-
         [ServerRpc]
         private void RpcReleaseGrab()
         {
@@ -75,11 +60,11 @@ namespace SS3D.Systems.Animations
             ObserversReleaseGrab();
         }
 
-        [ServerRpc]
-        private void RpcGrab(GrabbableBodyPart bodyPart, NetworkConnection conn = null)
+        [Server]
+        public void Grab(GrabbableBodyPart bodyPart, NetworkConnection grabbingPlayer, float timeToMoveBackHand, float timeToReachGrabPlace)
         {
             _previousOwner = bodyPart.Owner;
-            bodyPart.NetworkObject.GiveOwnership(conn);
+            bodyPart.NetworkObject.GiveOwnership(grabbingPlayer);
             ObserversGrab(bodyPart);
         }
 
@@ -93,27 +78,6 @@ namespace SS3D.Systems.Animations
         private void ObserversReleaseGrab()
         {
             ReleaseGrab();
-        }
-
-        private bool CanGrab(out GrabbableBodyPart bodyPart)
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, _grabbableLayer))
-            {
-                Debug.DrawRay(ray.origin, ray.direction * 5, Color.green, 2f);
-
-                if (hit.transform.gameObject.TryGetComponent(out GrabbableBodyPart bodyPart2))
-                {
-                    bodyPart = bodyPart2;
-
-                    return true;
-                }
-            }
-
-            bodyPart = null;
-            return false;
         }
 
         private IEnumerator GrabObject(GrabbableBodyPart bodyPart)
@@ -228,6 +192,12 @@ namespace SS3D.Systems.Animations
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
             hand.PickupTargetLocker.rotation = targetRotation;
+        }
+
+        [Server]
+        public void CancelGrab()
+        {
+
         }
     }
 }

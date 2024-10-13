@@ -1,20 +1,19 @@
 using FishNet.Object;
+using SS3D.Interactions;
+using SS3D.Interactions.Interfaces;
 using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    public class GrabbableBodyPart : NetworkBehaviour
+    public class GrabbableBodyPart : NetworkBehaviour, IInteractionTarget
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-        
-        }
 
-        // Update is called once per frame
-        void Update()
+        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
-        
+            return new IInteraction[]
+            {
+                new GrabInteraction(Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime),
+            };
         }
     }
 }

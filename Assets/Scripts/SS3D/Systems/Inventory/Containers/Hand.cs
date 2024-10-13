@@ -4,6 +4,7 @@ using System.Linq;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using SS3D.Systems.Animations;
 using System;
 using System.Collections;
@@ -48,6 +49,9 @@ namespace SS3D.Systems.Inventory.Containers
 
         [SerializeField]
         private Transform _holdTransform;
+
+        [SyncVar]
+        public bool IsGrabbing;
 
         public Transform PickupTargetLocker => _pickupTargetLocker;
 

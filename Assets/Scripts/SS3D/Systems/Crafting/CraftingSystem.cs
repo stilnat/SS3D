@@ -90,7 +90,12 @@ namespace SS3D.Systems.Crafting
         private bool TryGetRecipeLinks(CraftingInteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
         {
             links = new();
-            
+
+            if (target is null)
+            {
+                return false;
+            }
+
             if (!target.TryGetComponent(out IWorldObjectAsset targetAssetReference)) return false;
 
             if (targetAssetReference.Asset is null)
@@ -653,4 +658,3 @@ namespace SS3D.Systems.Crafting
         }
     }
 }
-
