@@ -112,9 +112,9 @@ namespace SS3D.Systems.Inventory.Interactions
             // so we check if the source of the interaction is a Hand, and if the target is an Item
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
             {
-                // and then we run the function that adds it to the container
-                hand.Pickup(target, TimeToMoveBackItem, TimeToReachItem);
 
+                target.GiveOwnership(hand.Owner);
+                hand.GetComponentInParent<PickUpAnimation>().Pickup(target, TimeToMoveBackItem, TimeToReachItem);
 
                 try {
                     string ckey = hand.HandsController.Inventory.Body.Mind.player.Ckey;

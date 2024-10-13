@@ -58,7 +58,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (pickupItem != null)
             {
-                hand.Pickup(pickupItem, TimeToMoveBackItem, TimeToReachItem);
+                //hand.Pickup(pickupItem, TimeToMoveBackItem, TimeToReachItem);
             }
 
             return false;

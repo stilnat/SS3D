@@ -60,9 +60,8 @@ namespace SS3D.Systems.Inventory.Interactions
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-
-            hand.ServerDropHeldItem();
-
+            hand.ItemInHand?.GiveOwnership(null);
+            hand.Container.Dump();
             return false;
         }
     }

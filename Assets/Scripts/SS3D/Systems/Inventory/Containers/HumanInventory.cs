@@ -290,15 +290,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            if (attachedTo.ContainerType == ContainerType.Hand)
-            {
-                Hands.HandFromContainer(attachedTo).CmdDropHeldItem();
-            }
-            else
-            {
-                attachedTo.RemoveItem(item); 
-            }
-
+            attachedTo.RemoveItem(item); 
         }
 
 
@@ -348,11 +340,6 @@ namespace SS3D.Systems.Inventory.Containers
             if (hands == null || !hands.SelectedHand.CanInteract(container.gameObject))
             {
                 return;
-            }
-
-            if (itemContainer.ContainerType == ContainerType.Hand)
-            {
-                Hands.HandFromContainer(itemContainer).StopHolding();
             }
 
             itemContainer.TransferItemToOther(item, position, container);     

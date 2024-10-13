@@ -131,10 +131,16 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            if (type == ContainerChangeType.Add)
+            if (type == ContainerChangeType.Add && IsServer)
             {
                 // Delay necessary otherwise item holdable is not set ... messy.
                 GetComponentInParent<PickUpAnimation>().Pickup(newitem, 0f, 0f, 0.1f);
+            }
+
+            if (type == ContainerChangeType.Remove)
+            {
+                
+                StopHolding(olditem);
             }
         }
 
@@ -181,50 +187,16 @@ namespace SS3D.Systems.Inventory.Containers
             return _range;
         }
 
-
-        // TODO remove and do this stuff in pickup interaction
-        [Server]
-        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem)
-        {
-            item.GiveOwnership(Owner);
-            if (!IsEmpty())
-            {
-                return;
-            }
-
-            if (item.Container != null && item.Container != Container)
-            {
-                item.Container.RemoveItem(item);
-            }
-
-            GetComponentInParent<PickUpAnimation>().Pickup(item, timeToMoveBackItem, timeToReachItem);
-        }
-
         [ServerRpc]
         public void CmdDropHeldItem()
         {
-             ServerDropHeldItem();
+            Container.Dump();
 		}
 
-        public void ServerDropHeldItem()
+        private void StopHolding(Item item)
         {
-            if (IsEmpty())
-            {
-                return;
-            }
-
-            Item item = ItemInHand;
-
-            Container.Dump();
-            item?.GiveOwnership(null);
-            ObserverDropHeldItem(item);
-        }
-
-        [ObserversRpc]
-        public void ObserverDropHeldItem(Item item)
-        {
-            _holdIkConstraint.weight = 0f;
             item.transform.parent = null;
+            _holdIkConstraint.weight = 0f;
             HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
             bool withTwoHands = oppositeHand.Empty && item.Holdable.CanHoldTwoHand;
 
@@ -232,19 +204,6 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 oppositeHand._holdIkConstraint.weight = 0f;
             }
-        }
-
-        public void StopHolding()
-        {
-            _holdIkConstraint.weight = 0f;
-            HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
-            bool withTwoHands = oppositeHand.Empty && ItemInHand.Holdable.CanHoldTwoHand;
-
-            if (withTwoHands)
-            {
-                oppositeHand._holdIkConstraint.weight = 0f;
-            }
-
         }
 
         /// <summary>
