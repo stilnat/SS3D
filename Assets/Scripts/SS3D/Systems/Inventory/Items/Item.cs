@@ -412,52 +412,5 @@ namespace SS3D.Systems.Inventory.Items
 
         #endregion
 
-        #region Editor
-#if UNITY_EDITOR
-        private void OnDrawGizmos()
-        {
-            // Make sure gizmo only draws in prefab mode
-            if (EditorApplication.isPlaying || UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
-            {
-                return;
-            }
-
-            Mesh handGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Other/HoldGizmo.fbx", typeof(Mesh));
-
-            // Don't even have to check without attachment
-            if (AttachmentPoint != null)
-            {
-                Gizmos.color = new Color32(255, 120, 20, 170);
-                Quaternion localRotation = AttachmentPoint.localRotation;
-                Vector3 eulerAngles = localRotation.eulerAngles;
-                Vector3 parentPosition = AttachmentPoint.parent.position;
-                Vector3 position = AttachmentPoint.localPosition;
-                // Draw a wire mesh of the rotated model
-                Vector3 rotatedPoint = RotatePointAround(parentPosition, position, eulerAngles);
-                rotatedPoint += new Vector3(0, position.z, position.y);
-                Gizmos.DrawWireMesh(handGuide, AttachmentPoint.position, localRotation);
-            }
-
-            // Same for the Left Hand
-            if (AttachmentPointAlt != null)
-            {
-                Gizmos.color = new Color32(255, 120, 20, 170);
-                Quaternion localRotation = AttachmentPointAlt.localRotation;
-                Vector3 eulerAngles = localRotation.eulerAngles;
-                Vector3 parentPosition = AttachmentPointAlt.parent.position;
-                Vector3 position = AttachmentPointAlt.localPosition;
-                // Draw a wire mesh of the rotated model
-                Vector3 rotatedPoint = RotatePointAround(parentPosition, position, eulerAngles);
-                rotatedPoint += new Vector3(0, position.z, position.y);
-                Gizmos.DrawWireMesh(handGuide, AttachmentPointAlt.position, localRotation);
-            }
-        }
-
-        private static Vector3 RotatePointAround(Vector3 point, Vector3 pivot, Vector3 angles)
-        {
-            return Quaternion.Euler(angles) * (point - pivot);
-        }
-#endif
-        #endregion
     }
 }

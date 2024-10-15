@@ -3,6 +3,7 @@ using NaughtyAttributes;
 using SS3D.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Items
@@ -36,12 +37,12 @@ namespace SS3D.Systems.Inventory.Items
         [SerializeField]
         private Transform _primaryRightHandHold;
 
+        [SerializeField]
+        private Transform _primaryLeftHandHold;
+
         [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
         private Transform _secondaryRightHandHold;
-
-        [SerializeField]
-        private Transform _primaryLeftHandHold;
 
         [ShowIf(nameof(_canHoldTwoHand))]
         [SerializeField]
@@ -85,5 +86,55 @@ namespace SS3D.Systems.Inventory.Items
                     throw new ArgumentException();
             }
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            // Make sure gizmo only draws in prefab mode
+            if (EditorApplication.isPlaying || UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
+            {
+                return;
+            }
+
+            Mesh leftHandGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Entities/Humanoids/Human/HumanHandLeft.mesh", typeof(Mesh));
+            Mesh rightHandGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Entities/Humanoids/Human/HumanHandRight.mesh", typeof(Mesh));
+
+
+            if (_primaryRightHandHold != null && UnityEditor.Selection.activeTransform == _primaryRightHandHold)
+            {
+                DrawHand(rightHandGuide, true, _primaryRightHandHold.position, _primaryRightHandHold.localRotation, new Color32(20, 120, 255, 200));
+            }
+            else if (_primaryLeftHandHold != null && UnityEditor.Selection.activeTransform == _primaryLeftHandHold)
+            {
+                DrawHand(leftHandGuide, false,_primaryLeftHandHold.position, _primaryLeftHandHold.localRotation, new Color32(255, 120, 20, 200));
+            }
+            else if (_secondaryRightHandHold != null && UnityEditor.Selection.activeTransform == _secondaryRightHandHold)
+            {
+                DrawHand(rightHandGuide, true, _secondaryRightHandHold.position, _secondaryRightHandHold.localRotation, new Color32(255, 120, 20, 200));
+            }
+            else if (_secondaryLeftHandHold != null && UnityEditor.Selection.activeTransform == _secondaryLeftHandHold)
+            {
+                DrawHand(leftHandGuide, false, _secondaryLeftHandHold.position, _secondaryLeftHandHold.localRotation, new Color32(20, 120, 255, 200));
+            }
+        }
+
+        private void DrawHand(Mesh model, bool isRight, Vector3 position, Quaternion rotation, Color color)
+        {
+            Gizmos.color = color;
+
+            if (isRight)
+            {
+                rotation *= Quaternion.AngleAxis(-90, Vector3.back);
+                position += rotation * new Vector3(0.0875f,-0.0304f,-0.0184f);
+            }
+            else
+            {
+                rotation *= Quaternion.AngleAxis(90, Vector3.back);
+                position += rotation * new Vector3(-0.0875f,-0.0304f,-0.0184f);
+            }
+
+            Gizmos.DrawMesh(model, position, rotation);
+        }
+#endif
     }
 }
