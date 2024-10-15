@@ -1,4 +1,6 @@
-﻿using SS3D.Core.Behaviours;
+﻿using FishNet;
+using SS3D.Core.Behaviours;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Data;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
@@ -27,6 +29,25 @@ namespace SS3D.Systems.Entities.Humanoid
         private void SubscribeToEvents()
         {
             _movementController.OnSpeedChangeEvent += UpdateMovement;
+            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
+            GetComponent<GunAimAnimation>().OnAim += HandleGunAim;
+        }
+
+        private void HandleGunAim(object sender, bool isAiming)
+        {
+            if (isAiming)
+            {
+                // Get the index of the layer named "UpperBody"
+                int gunAimingLayerIndex = _animator.GetLayerIndex("Aiming");
+                // Set the weight of the "UpperBody" layer to fully active
+                _animator.SetLayerWeight(gunAimingLayerIndex, 1.0f);
+            }
+            else
+            {
+                int gunAimingLayerIndex = _animator.GetLayerIndex("Aiming");
+                // Set the weight of the "UpperBody" layer to fully active
+                _animator.SetLayerWeight(gunAimingLayerIndex, 0.0f);
+            }
         }
 
         private void UnsubscribeFromEvents()
@@ -64,6 +85,11 @@ namespace SS3D.Systems.Entities.Humanoid
             {
                 _animator.SetTrigger("ThrowLeft");
             }
+        }
+
+        private void HandleNetworkTick()
+        {
+            _animator.SetFloat("AngleAimMove", (_movementController.InputAimAngle / 360f) + 0.5f);
         }
     }
 }
