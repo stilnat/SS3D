@@ -1,14 +1,12 @@
-using JetBrains.Annotations;
 using NaughtyAttributes;
 using SS3D.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Items
 {
-    public class Holdable : AbstractHoldable
+    [CreateAssetMenu(fileName = "HoldableScriptableObject", menuName = "Holdable/HoldableScriptableObject", order = 0)]
+    public class HoldableScriptableObject : ScriptableObject
     {
         [SerializeField]
         private bool _canHoldTwoHand;
@@ -41,23 +39,22 @@ namespace SS3D.Systems.Inventory.Items
         [SerializeField]
         private FingerPoseType _secondaryHandPoseType;
 
-        public override bool CanHoldTwoHand => _canHoldTwoHand;
+        public bool CanHoldTwoHand => _canHoldTwoHand;
 
-        public override FingerPoseType PrimaryHandPoseType => _primaryHandPoseType;
+        public FingerPoseType PrimaryHandPoseType => _primaryHandPoseType;
 
-        public override FingerPoseType SecondaryHandPoseType => _secondaryHandPoseType;
+        public FingerPoseType SecondaryHandPoseType => _secondaryHandPoseType;
 
-        public override HandHoldType SingleHandHold => _singleHandHold;
+        public HandHoldType SingleHandHold => _singleHandHold;
 
-        public override HandHoldType TwoHandHold => _twoHandHold;
+        public HandHoldType TwoHandHold => _twoHandHold;
 
-        public override HandHoldType SingleHandHoldHarm => _singleHandHoldHarm;
+        public HandHoldType SingleHandHoldHarm => _singleHandHoldHarm;
 
-        public override HandHoldType TwoHandHoldHarm => _twoHandHoldHarm;
+        public HandHoldType TwoHandHoldHarm => _twoHandHoldHarm;
 
-        public override HandHoldType SingleHandHoldThrow => _singleHandHoldThrow;
+        public HandHoldType SingleHandHoldThrow => _singleHandHoldThrow;
 
-        public override HandHoldType TwoHandHoldThrow => _twoHandHoldThrow;
-
+        public HandHoldType TwoHandHoldThrow => _twoHandHoldThrow;
     }
 }

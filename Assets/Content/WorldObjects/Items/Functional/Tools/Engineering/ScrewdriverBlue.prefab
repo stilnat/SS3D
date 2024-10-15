@@ -80,8 +80,8 @@ GameObject:
   - component: {fileID: 6800495836141411361}
   - component: {fileID: 8006545930481202674}
   - component: {fileID: 4170937876849552939}
-  - component: {fileID: 9023533843925694569}
   - component: {fileID: 8951911793673662305}
+  - component: {fileID: 5559689214874696556}
   m_Layer: 10
   m_Name: ScrewdriverBlue
   m_TagString: Untagged
@@ -313,33 +313,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
---- !u!114 &9023533843925694569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2402587210622244651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2f43d6592863cc4c9dcad00f8a27ce7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _canHoldTwoHand: 0
-  _singleHandHold: 5
-  _twoHandHold: 0
-  _singleHandHoldHarm: 5
-  _twoHandHoldHarm: 0
-  _singleHandHoldThrow: 5
-  _twoHandHoldThrow: 0
-  _primaryRightHandHold: {fileID: 7991373112210367801}
-  _primaryLeftHandHold: {fileID: 7994989484289601227}
-  _secondaryRightHandHold: {fileID: 0}
-  _secondaryLeftHandHold: {fileID: 0}
-  _showPrimaryRightHandGizmo: 0
-  _showPrimaryLeftHandGizmo: 1
-  _showSecondaryRightHandGizmo: 0
-  _showSecondaryLeftHandGizmo: 0
 --- !u!114 &8951911793673662305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,6 +326,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interactionPoint: {fileID: 7184925500366350300}
+--- !u!114 &5559689214874696556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2402587210622244651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99df7ac2c21c2d944818b5da5be3dd53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _primaryRightHandHold: {fileID: 7991373112210367801}
+  _primaryLeftHandHold: {fileID: 7994989484289601227}
+  _secondaryRightHandHold: {fileID: 0}
+  _secondaryLeftHandHold: {fileID: 0}
+  _holdableScriptableObject: {fileID: 11400000, guid: f93ccad7cfbe46b4fa3f8cfb8be8a1d9, type: 2}
 --- !u!1 &6219081307512385233
 GameObject:
   m_ObjectHideFlags: 0

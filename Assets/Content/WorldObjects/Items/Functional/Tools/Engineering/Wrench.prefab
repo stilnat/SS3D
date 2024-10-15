@@ -49,7 +49,7 @@ GameObject:
   - component: {fileID: 8540712827701727508}
   - component: {fileID: 246485557779806861}
   - component: {fileID: 2543825028282008237}
-  - component: {fileID: 2267403794299930067}
+  - component: {fileID: 7555427621416321058}
   m_Layer: 10
   m_Name: Wrench
   m_TagString: Untagged
@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
---- !u!114 &2267403794299930067
+--- !u!114 &7555427621416321058
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -289,24 +289,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 3792017003477948967}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2f43d6592863cc4c9dcad00f8a27ce7, type: 3}
+  m_Script: {fileID: 11500000, guid: 99df7ac2c21c2d944818b5da5be3dd53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canHoldTwoHand: 0
-  _singleHandHold: 5
-  _twoHandHold: 0
-  _singleHandHoldHarm: 5
-  _twoHandHoldHarm: 0
-  _singleHandHoldThrow: 5
-  _twoHandHoldThrow: 0
   _primaryRightHandHold: {fileID: 8876393141157652533}
   _primaryLeftHandHold: {fileID: 4069600695964099484}
   _secondaryRightHandHold: {fileID: 0}
   _secondaryLeftHandHold: {fileID: 0}
-  _showPrimaryRightHandGizmo: 0
-  _showPrimaryLeftHandGizmo: 0
-  _showSecondaryRightHandGizmo: 0
-  _showSecondaryLeftHandGizmo: 0
+  _holdableScriptableObject: {fileID: 11400000, guid: f93ccad7cfbe46b4fa3f8cfb8be8a1d9, type: 2}
 --- !u!1 &8558462657142112242
 GameObject:
   m_ObjectHideFlags: 0
