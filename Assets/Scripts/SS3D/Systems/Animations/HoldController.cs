@@ -124,6 +124,7 @@ namespace SS3D.Systems.Animations
 
             // Had to manually enter the offset for each possible position.
             // The first idea was to use game objects for that, which would allow a more dynamic way of setting the items position.
+            // The offset is relative to the human shoulder.
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldLeft, new Vector3(0.15f, -0.08f, 0.26f), HandType.LeftHand));
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldRight, new Vector3(-0.15f, -0.08f, 0.26f), HandType.RightHand));
             _holdData.Add(new(HandHoldType.Toolbox, _toolBoxHoldLeft, new Vector3(-0.1f, -0.4f, 0.1f), HandType.LeftHand));

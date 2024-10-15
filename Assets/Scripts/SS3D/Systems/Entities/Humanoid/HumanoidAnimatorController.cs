@@ -3,6 +3,7 @@ using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Data;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.Items;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -84,6 +85,36 @@ namespace SS3D.Systems.Entities.Humanoid
             else
             {
                 _animator.SetTrigger("ThrowLeft");
+            }
+        }
+
+        public void RemoveHandHolding(Hand hand, Holdable holdable)
+        {
+            _animator.SetTrigger(hand.HandType == HandType.LeftHand ? "FingerRelaxedLeft" : "FingerRelaxedRight");
+
+            if (holdable.CanHoldTwoHand && GetComponent<Hands>().TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Empty)
+            {
+                _animator.SetTrigger(oppositeHand.HandType == HandType.LeftHand ? "FingerRelaxedLeft" : "FingerRelaxedRight");
+            }
+        }
+
+        public void AddHandHolding(Hand hand, Holdable holdable)
+        {
+            switch (holdable.PrimaryHandPoseType)
+            {
+                 case FingerPoseType.Gun :
+                     _animator.SetTrigger(hand.HandType == HandType.LeftHand ? "FingerGunLeft" : "FingerGunRight");
+                     break;
+            }
+
+            if (holdable.CanHoldTwoHand && GetComponent<Hands>().TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Empty)
+            {
+                switch (holdable.PrimaryHandPoseType)
+                {
+                    case FingerPoseType.Gun :
+                        _animator.SetTrigger(hand.HandType == HandType.LeftHand ? "FingerGunLeft" : "FingerGunRight");
+                        break;
+                }
             }
         }
 

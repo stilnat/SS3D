@@ -366,6 +366,8 @@ MonoBehaviour:
   _primaryLeftHandHold: {fileID: 8906533836334754445}
   _secondaryRightHandHold: {fileID: 8906533836425649104}
   _secondaryLeftHandHold: {fileID: 8906533836651741202}
+  _primaryHandPoseType: 1
+  _secondaryHandPoseType: 0
 --- !u!64 &-7577314135643401636
 MeshCollider:
   m_ObjectHideFlags: 0

@@ -48,7 +48,18 @@ namespace SS3D.Systems.Inventory.Items
         [SerializeField]
         private Transform _secondaryLeftHandHold;
 
+        [SerializeField]
+        private FingerPoseType _primaryHandPoseType;
+
+        [ShowIf(nameof(_canHoldTwoHand))]
+        [SerializeField]
+        private FingerPoseType _secondaryHandPoseType;
+
         public bool CanHoldTwoHand => _canHoldTwoHand;
+
+        public FingerPoseType PrimaryHandPoseType => _primaryHandPoseType;
+
+        public FingerPoseType SecondaryHandPoseType => _primaryHandPoseType;
 
         [NotNull]
         public GameObject GameObject => gameObject;

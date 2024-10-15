@@ -6,6 +6,7 @@ using SS3D.Interactions;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Entities.Humanoid;
 using System;
 using System.Collections;
 using UnityEngine.Animations.Rigging;
@@ -125,6 +126,17 @@ namespace SS3D.Systems.Inventory.Containers
 
         private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
         {
+
+            if (type == ContainerChangeType.Remove)
+            {
+                GetComponentInParent<HumanoidAnimatorController>().RemoveHandHolding(this, olditem.Holdable);
+                StopHolding(olditem);
+            }
+
+            if (type == ContainerChangeType.Add)
+            {
+                GetComponentInParent<HumanoidAnimatorController>().AddHandHolding(this, newitem.Holdable);
+            }
 
             if (GetComponentInParent<PickUpAnimation>().IsPicking)
             {
