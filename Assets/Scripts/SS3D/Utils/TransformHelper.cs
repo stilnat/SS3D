@@ -51,9 +51,14 @@ namespace SS3D.Utils
 
         public static IEnumerator OrientTransformTowardTarget(Transform transform, Transform target, float duration, bool ignoreX = false, bool ignoreY = false, bool ignoreZ = false)
         {
+           yield return OrientTransformTowardTarget(transform, target.position, duration, ignoreX, ignoreY, ignoreZ);
+        }
+
+        public static IEnumerator OrientTransformTowardTarget(Transform transform, Vector3 target, float duration, bool ignoreX = false, bool ignoreY = false, bool ignoreZ = false)
+        {
             float elapsedTime = 0f;
 
-            Vector3 directionFromTransformToTarget = target.position - transform.position;
+            Vector3 directionFromTransformToTarget = target - transform.position;
 
             if (ignoreX)
             {

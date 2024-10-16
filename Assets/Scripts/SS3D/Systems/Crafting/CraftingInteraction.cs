@@ -95,7 +95,7 @@ namespace SS3D.Systems.Crafting
 
             if (hand != null && hand.ItemInHand.TryGetComponent(out Tool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(interactionEvent.Target.GetGameObject().GetComponent<NetworkObject>(), tool, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(interactionEvent.Point, tool, Delay);
             }
             
             return true;

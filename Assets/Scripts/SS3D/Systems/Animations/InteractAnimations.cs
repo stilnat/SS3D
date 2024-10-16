@@ -26,26 +26,24 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private float _interactionMoveDuration;
 
-        public bool UnderMaxDistanceFromHips(Vector3 position) => Vector3.Distance(_hips.position, position) < 1.1f;
-
         [Server]
-        public void ServerInteract(NetworkObject target, Tool tool, float delay)
+        public void ServerInteract(Vector3 interactionPoint, Tool tool, float delay)
         {
-            StartCoroutine(Interact(target.transform, _hands.SelectedHand, tool, delay));
+            StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay));
         }
 
-        private IEnumerator Interact(Transform interactionTarget, Hand mainHand, Tool tool, float delay)
+        private IEnumerator Interact(Vector3 interactionPoint, Hand mainHand, Tool tool, float delay)
         {
-            SetupInteract(interactionTarget, mainHand, tool);
+            SetupInteract(mainHand, tool);
 
-            yield return ReachInteractionPoint(interactionTarget, mainHand, tool);
+            yield return ReachInteractionPoint(interactionPoint, mainHand, tool);
 
             yield return new WaitForSeconds(delay);
 
             yield return StopInteracting(mainHand, tool);
         }
 
-        private void SetupInteract(Transform interactionTarget, Hand mainHand, Tool tool)
+        private void SetupInteract(Hand mainHand, Tool tool)
         {
             // disable position constraint the time of the interaction
             mainHand.ItemPositionConstraint.weight = 0f;
@@ -53,9 +51,9 @@ namespace SS3D.Systems.Animations
             _lookAtTargetLocker.position = tool.transform.position;
         }
 
-        private void AlignToolWithShoulder(Transform interactionTarget, Hand mainHand, Tool tool)
+        private void AlignToolWithShoulder(Vector3 interactionPoint, Hand mainHand, Tool tool)
         {
-            Vector3 fromShoulderToTarget = (interactionTarget.transform.position - mainHand.UpperArm.transform.position).normalized;
+            Vector3 fromShoulderToTarget = (interactionPoint - mainHand.UpperArm.transform.position).normalized;
 
             // rotate the tool such that its interaction transform Z axis align with the fromShoulderToTarget vector.
             Quaternion rotation = Quaternion.FromToRotation(tool.InteractionPoint.TransformDirection(Vector3.forward), fromShoulderToTarget.normalized);
@@ -64,24 +62,24 @@ namespace SS3D.Systems.Animations
             tool.transform.rotation = rotation * tool.transform.rotation;
         }
 
-        private Vector3 ComputeToolEndPosition(Transform interactionTarget, Hand mainHand, Tool tool)
+        private Vector3 ComputeToolEndPosition(Vector3 interactionPoint, Hand mainHand, Tool tool)
         {
             // turn the player toward its target so all subsequent computations
             // are correctly done with player oriented toward target. Then, in the same frame,
             // put player at its initial rotation.
-            Vector3 directionFromTransformToTarget = interactionTarget.position - transform.position;
+            Vector3 directionFromTransformToTarget = interactionPoint - transform.position;
             directionFromTransformToTarget.y = 0f;
             Quaternion initialPlayerRotation = transform.rotation;
             transform.rotation = Quaternion.LookRotation(directionFromTransformToTarget);
 
-            AlignToolWithShoulder(interactionTarget, mainHand, tool);
+            AlignToolWithShoulder(interactionPoint, mainHand, tool);
 
             // Calculate the difference between the tool position and its interaction point.
             // Warning : do it only after applying the tool rotation.
             Vector3 difference = tool.InteractionPoint.position - tool.transform.position;
 
             // Compute the desired position for the tool
-            Vector3 endPosition = interactionTarget.position - difference;
+            Vector3 endPosition = interactionPoint - difference;
 
             // take back initial rotation after insuring all computations above are done
             // with the right orientation.
@@ -90,21 +88,21 @@ namespace SS3D.Systems.Animations
             return endPosition;
         }
 
-        private IEnumerator ReachInteractionPoint(Transform interactionTarget, Hand mainHand, Tool tool)
+        private IEnumerator ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, Tool tool)
         {
             // Start looking at item
             StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _interactionMoveDuration));
 
             Vector3 startPosition = tool.transform.position;
-            Vector3 endPosition = ComputeToolEndPosition(interactionTarget, mainHand, tool);
+            Vector3 endPosition = ComputeToolEndPosition(interactionPoint, mainHand, tool);
 
             // Rotate player toward item
             if (GetComponent<PositionController>().Position != PositionType.Sitting)
             {
-                StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, interactionTarget, _interactionMoveDuration, false, true));
+                StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, interactionPoint, _interactionMoveDuration, false, true));
             }
 
-            if (mainHand.HandBone.transform.position.y - interactionTarget.transform.position.y > 0.3)
+            if (mainHand.HandBone.transform.position.y - interactionPoint.y > 0.3)
             {
                 GetComponent<HumanoidAnimatorController>().Crouch(true);
             }
