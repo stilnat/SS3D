@@ -24,7 +24,7 @@ namespace SS3D.Systems.Crafting
 
         private void AnimateScrewdriver()
         {
-            _animation = transform.DORotate(new Vector3(0, 30, 0), 0.5f, RotateMode.LocalAxisAdd)
+            _animation = transform.DORotate(new Vector3(0, 30, 0), 0.3f, RotateMode.LocalAxisAdd)
                 .SetLoops(-1, LoopType.Yoyo)
                 .SetEase(Ease.InOutSine);
         }
