@@ -7661,7 +7661,7 @@ MonoBehaviour:
   _movementController: {fileID: 313020066527916364}
   _aimTarget: {fileID: 2856800849451305125}
   _maxForce: 20
-  _secondPerMeterFactorDef: 0.22
+  _secondPerMeterFactorDef: 0.3
   _secondPerMeterFactorHarm: 0.15
   _bodyAimRig: {fileID: 4182499762659887119}
   _holdController: {fileID: 5029722283718734781}
