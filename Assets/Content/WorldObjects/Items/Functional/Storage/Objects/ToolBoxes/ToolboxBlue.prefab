@@ -23,14 +23,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318338049256948420}
-  m_LocalRotation: {x: -0.122787856, y: -0.6963643, z: -0.122787856, w: 0.6963643}
-  m_LocalPosition: {x: -0.015, y: 0.258, z: 0.239}
+  m_LocalRotation: {x: -0.99985856, y: 0.013735804, z: 0.009710168, w: 0.00013342133}
+  m_LocalPosition: {x: -0.013, y: 0.37, z: 0.212}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8833760637642068360}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: -20, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: -179.969, y: 1.1119995, z: 1.5740051}
 --- !u!1 &1570969446840237701
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,12 +440,10 @@ MonoBehaviour:
   _weight: 1
   _startingTraits: []
   _rigidbody: {fileID: 2081909342595332650}
-  AttachmentPoint: {fileID: 6311512130502363032}
-  AttachmentPointAlt: {fileID: 2809404673239714095}
   _container: {fileID: 0}
 --- !u!95 &5206759755089209485
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -462,7 +460,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &3298710121668139635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,17 +598,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f43d6592863cc4c9dcad00f8a27ce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _primaryRightHandHold: {fileID: 6311512130502363032}
+  _primaryLeftHandHold: {fileID: 6311512130502363032}
+  _secondaryRightHandHold: {fileID: 2809404673239714095}
+  _secondaryLeftHandHold: {fileID: 2809404673239714095}
+  _canHoldTwoHand: 0
   _singleHandHold: 1
   _twoHandHold: 0
   _singleHandHoldHarm: 1
   _twoHandHoldHarm: 0
   _singleHandHoldThrow: 6
   _twoHandHoldThrow: 0
-  _primaryRightHandHold: {fileID: 6311512130502363032}
-  _secondaryRightHandHold: {fileID: 2809404673239714095}
-  _primaryLeftHandHold: {fileID: 6311512130502363032}
-  _secondaryLeftHandHold: {fileID: 2809404673239714095}
-  _canHoldTwoHand: 0
+  _primaryHandPoseType: 0
+  _secondaryHandPoseType: 0
 --- !u!1 &8066562249021099569
 GameObject:
   m_ObjectHideFlags: 0
@@ -633,11 +634,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8066562249021099569}
-  m_LocalRotation: {x: -0.122787856, y: 0.6963643, z: 0.122787856, w: 0.6963643}
-  m_LocalPosition: {x: 0.015, y: 0.258, z: 0.239}
+  m_LocalRotation: {x: 0.073600024, y: 0.0036036384, z: 0.9931634, w: -0.090535134}
+  m_LocalPosition: {x: -0.002, y: 0.374, z: 0.269}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8833760637642068360}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: -20, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: -178.826, y: 188.37, z: 10.330994}
