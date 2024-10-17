@@ -50,6 +50,7 @@ GameObject:
   - component: {fileID: 246485557779806861}
   - component: {fileID: 2543825028282008237}
   - component: {fileID: 7555427621416321058}
+  - component: {fileID: 7296799606748695713}
   m_Layer: 10
   m_Name: Wrench
   m_TagString: Untagged
@@ -71,6 +72,7 @@ Transform:
   m_Children:
   - {fileID: 8876393141157652533}
   - {fileID: 4069600695964099484}
+  - {fileID: 9003863549386358971}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -219,8 +221,8 @@ MonoBehaviour:
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Position: {x: 0, y: -0.0002392903, z: 0.0010859836}
+    Rotation: {x: -0.0046695666, y: -0, z: -0, w: 0.9999891}
     LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
@@ -252,8 +254,6 @@ MonoBehaviour:
   _weight: 1
   _startingTraits: []
   _rigidbody: {fileID: 6273620634696728203}
-  AttachmentPoint: {fileID: 8876393141157652533}
-  AttachmentPointAlt: {fileID: 8876393141157652533}
   _container: {fileID: 0}
 --- !u!114 &246485557779806861
 MonoBehaviour:
@@ -297,6 +297,50 @@ MonoBehaviour:
   _secondaryRightHandHold: {fileID: 0}
   _secondaryLeftHandHold: {fileID: 0}
   _holdableScriptableObject: {fileID: 11400000, guid: f93ccad7cfbe46b4fa3f8cfb8be8a1d9, type: 2}
+--- !u!114 &7296799606748695713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792017003477948967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4108b98460286644380527864e4f8382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interactionPoint: {fileID: 9003863549386358971}
+--- !u!1 &7780218464811753928
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9003863549386358971}
+  m_Layer: 0
+  m_Name: InteractionPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9003863549386358971
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7780218464811753928}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.302, z: 0.08}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 199471781468022836}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8558462657142112242
 GameObject:
   m_ObjectHideFlags: 0

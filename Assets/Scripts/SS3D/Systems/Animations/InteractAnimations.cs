@@ -38,9 +38,13 @@ namespace SS3D.Systems.Animations
 
             yield return ReachInteractionPoint(interactionPoint, mainHand, tool);
 
+            tool.PlayAnimation();
+
             yield return new WaitForSeconds(delay);
 
             yield return StopInteracting(mainHand, tool);
+
+            tool.StopAnimation();
         }
 
         private void SetupInteract(Hand mainHand, Tool tool)

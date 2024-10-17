@@ -80,8 +80,8 @@ GameObject:
   - component: {fileID: 6800495836141411361}
   - component: {fileID: 8006545930481202674}
   - component: {fileID: 4170937876849552939}
-  - component: {fileID: 8951911793673662305}
   - component: {fileID: 5559689214874696556}
+  - component: {fileID: 8907230820372212465}
   m_Layer: 10
   m_Name: ScrewdriverBlue
   m_TagString: Untagged
@@ -96,8 +96,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2402587210622244651}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0.010807989, z: -0, w: 0.9999416}
+  m_LocalPosition: {x: -0.0000013468845, y: 0, z: -0.000000014588295}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -106,7 +106,7 @@ Transform:
   - {fileID: 7994989484289601227}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -1.239, z: 0}
 --- !u!33 &7662851888128253710
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -252,8 +252,8 @@ MonoBehaviour:
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Position: {x: -0.0000013468845, y: 0, z: -0.000000014588295}
+    Rotation: {x: -0, y: -0.010807989, z: -0, w: 0.9999416}
     LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
@@ -285,8 +285,6 @@ MonoBehaviour:
   _weight: 1
   _startingTraits: []
   _rigidbody: {fileID: 3368721005309584205}
-  AttachmentPoint: {fileID: 7991373112210367801}
-  AttachmentPointAlt: {fileID: 7991373112210367801}
   _container: {fileID: 0}
 --- !u!114 &8006545930481202674
 MonoBehaviour:
@@ -313,19 +311,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
---- !u!114 &8951911793673662305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2402587210622244651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 746d3bf5858c37e4c9aec510bf7961b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _interactionPoint: {fileID: 7184925500366350300}
 --- !u!114 &5559689214874696556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -343,6 +328,19 @@ MonoBehaviour:
   _secondaryRightHandHold: {fileID: 0}
   _secondaryLeftHandHold: {fileID: 0}
   _holdableScriptableObject: {fileID: 11400000, guid: f93ccad7cfbe46b4fa3f8cfb8be8a1d9, type: 2}
+--- !u!114 &8907230820372212465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2402587210622244651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a83a58131f57334299afd7fb4b29ee7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interactionPoint: {fileID: 7184925500366350300}
 --- !u!1 &6219081307512385233
 GameObject:
   m_ObjectHideFlags: 0
