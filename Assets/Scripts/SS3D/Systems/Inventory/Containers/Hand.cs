@@ -133,7 +133,7 @@ namespace SS3D.Systems.Inventory.Containers
                 StopHolding(olditem);
             }
 
-            if (type == ContainerChangeType.Add)
+            if (type == ContainerChangeType.Add && newitem.Holdable != null)
             {
                 GetComponentInParent<HumanoidAnimatorController>().AddHandHolding(this, newitem.Holdable);
             }
