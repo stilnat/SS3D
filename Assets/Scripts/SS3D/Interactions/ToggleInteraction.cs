@@ -36,6 +36,11 @@ namespace SS3D.Interactions
         /// If the interaction should be range limited
         /// </summary>
         public bool RangeCheck { get; set; } = true;
+
+        public override string GetGenericName()
+        {
+            return "Toggle";
+        }
         
 
         public override string GetName(InteractionEvent interactionEvent)
