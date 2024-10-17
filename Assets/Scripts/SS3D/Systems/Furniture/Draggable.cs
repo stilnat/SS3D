@@ -3,6 +3,7 @@ using Coimbra.Services.PlayerLoopEvents;
 using FishNet.Object.Synchronizing;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Furniture;
 using SS3D.Systems.Inventory.Interactions;
@@ -40,6 +41,8 @@ public class Draggable : NetworkActor, IInteractionTarget, IGameObjectProvider
 
         return new IInteraction[] { dragInteraction };
     }
+
+    public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
     protected override void OnStart()
     {

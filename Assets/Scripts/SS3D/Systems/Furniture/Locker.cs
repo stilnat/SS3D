@@ -1,6 +1,7 @@
 using FishNet.Object.Synchronizing;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Inventory.Interactions;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace SS3D.Systems.Furniture
         public GameObject LockLight;
         private MaterialPropertyBlock propertyBlock;
         private Renderer _renderer;
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         private void OnLocked(bool prev, bool next, bool asServer)
         {

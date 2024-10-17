@@ -8,6 +8,8 @@ using FishNet.Object.Synchronizing;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Interactions.Interfaces;
 using SS3D.Core;
+using SS3D.Core.Behaviours;
+using SS3D.Interactions.Extensions;
 using System.Collections.ObjectModel;
 using SS3D.Logging;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -17,7 +19,7 @@ namespace SS3D.Substances
     /// <summary>
     /// Stores substances, allows transfer between different containers. 
     /// </summary>
-    public class SubstanceContainer : InteractionTargetNetworkBehaviour
+    public class SubstanceContainer : NetworkActor, IInteractionTarget
     {
         /// <summary>
         /// A list of initial substances in this container
@@ -186,13 +188,15 @@ namespace SS3D.Substances
             ContentsChanged?.Invoke(this);
         }
 
-        public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             return new IInteraction[]
             {
                 new TransferSubstanceInteraction()
             };
         }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         /// <summary>
         /// Transfers moles to a different container

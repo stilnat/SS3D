@@ -8,6 +8,7 @@ using FishNet.Object.Synchronizing;
 using SS3D.Attributes;
 using SS3D.Data.AssetDatabases;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
 using SS3D.Systems.Inventory.Containers;
@@ -122,6 +123,8 @@ namespace SS3D.Systems.Inventory.Items
         }
 
         public Item Prefab => Asset.Get<Item>();
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         /// <summary>
         /// Initialise this item fields. Can only be called once.

@@ -10,6 +10,8 @@ using SS3D.Systems.Health;
 using System.Linq;
 using System.Collections.ObjectModel;
 using FishNet;
+using SS3D.Core.Behaviours;
+using SS3D.Interactions.Extensions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using System;
@@ -18,7 +20,7 @@ using System.Collections;
 /// <summary>
 /// Class to handle all networking stuff related to a body part, there should be only one on a given game object.
 /// </summary>
-public abstract class BodyPart : InteractionTargetNetworkBehaviour
+public abstract class BodyPart : NetworkActor, IInteractionTarget
 {
     /// <summary>
     /// Body part to which this body part is attached, from an anatomy perspective. (left hand is attached to left arm, attached to torso...)
@@ -513,10 +515,13 @@ public abstract class BodyPart : InteractionTargetNetworkBehaviour
         return Name;
     }
 
-    public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+    public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
     {
         return new IInteraction[] {};
     }
+
+    public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
+
 
     [Server]
     public void AddInternalBodyPart(BodyPart part)

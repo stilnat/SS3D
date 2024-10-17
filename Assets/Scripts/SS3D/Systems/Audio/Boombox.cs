@@ -4,6 +4,8 @@ using SS3D.Interactions;
 using System.Collections.Generic;
 using UnityEngine;
 using SS3D.Core;
+using SS3D.Core.Behaviours;
+using SS3D.Interactions.Extensions;
 using System.Electricity;
 using UnityEngine.Serialization;
 
@@ -12,7 +14,7 @@ namespace SS3D.Systems.Audio
     /// <summary>
     /// Script for jukeboxes and boomboxes, allowing switching between different sounds and toggling it on and off.
     /// </summary>
-    public class Boombox : InteractionTargetNetworkBehaviour, IToggleable
+    public class Boombox : NetworkActor, IToggleable, IInteractionTarget
     {
         [SerializeField]
         private MachinePowerConsumer _powerConsumer;
@@ -91,7 +93,7 @@ namespace SS3D.Systems.Audio
                 false, 0.7f, 1, 1, 5);
         }
 
-        public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             List<IInteraction> interactions = new List<IInteraction>(2)
             {
@@ -106,5 +108,7 @@ namespace SS3D.Systems.Audio
             interactions.Insert(GetState() ? interactions.Count : interactions.Count - 1, toggleInteraction);
             return interactions.ToArray();
         }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
     }
 }
