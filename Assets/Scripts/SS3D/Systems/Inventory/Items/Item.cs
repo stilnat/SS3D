@@ -56,14 +56,6 @@ namespace SS3D.Systems.Inventory.Items
 
         private Sprite _sprite;
 
-        [Header("Attachment settings")]
-
-        [Tooltip("a point we use to know how the item should be oriented when held in a hand")]
-        public Transform AttachmentPoint;
-
-        [Tooltip("same point but for the left hand, in cases where it's needed")]
-        public Transform AttachmentPointAlt;
-
         /// <summary>
         /// The list of characteristics this Item has
         /// </summary>
