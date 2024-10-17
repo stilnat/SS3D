@@ -335,13 +335,11 @@ MonoBehaviour:
   _componentIndexCache: 1
   _addedNetworkObject: {fileID: 1072406932805509441}
   _networkObjectCache: {fileID: 1072406932805509441}
-  _asset: {fileID: 0}
+  _asset: {fileID: 11400000, guid: 5d2a070d416c66d46a29c59ae17d4e92, type: 2}
   _name: M4
   _weight: 0
   _startingTraits: []
   _rigidbody: {fileID: 1072406932805509455}
-  AttachmentPoint: {fileID: 0}
-  AttachmentPointAlt: {fileID: 0}
   _container: {fileID: 0}
 --- !u!64 &-7577314135643401636
 MeshCollider:
