@@ -127,8 +127,8 @@ namespace SS3D.Systems.Animations
             // The offset is relative to the human shoulder.
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldLeft, new Vector3(0.15f, -0.08f, 0.26f), HandType.LeftHand));
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldRight, new Vector3(-0.15f, -0.08f, 0.26f), HandType.RightHand));
-            _holdData.Add(new(HandHoldType.Toolbox, _toolBoxHoldLeft, new Vector3(-0.1f, -0.4f, 0.1f), HandType.LeftHand));
-            _holdData.Add(new(HandHoldType.Toolbox, _toolboxHoldRight, new Vector3(0.1f, -0.4f, 0.1f), HandType.RightHand));
+            _holdData.Add(new(HandHoldType.Toolbox, _toolBoxHoldLeft, new Vector3(-0.2f, -0.5f, 0.1f), HandType.LeftHand));
+            _holdData.Add(new(HandHoldType.Toolbox, _toolboxHoldRight, new Vector3(0.2f, -0.5f, 0.1f), HandType.RightHand));
             _holdData.Add(new(HandHoldType.Shoulder, _shoulderHoldLeft, new Vector3(0f, 0.18f, 0f), HandType.LeftHand));
             _holdData.Add(new(HandHoldType.Shoulder, _shoulderHoldRight, new Vector3(0f, 0.18f, 0f), HandType.RightHand));
             _holdData.Add(new(HandHoldType.DoubleHandGunHarm, _gunHoldHarmLeft, new Vector3(0f, -0.07f, 0.18f), HandType.LeftHand));
