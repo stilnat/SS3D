@@ -7,7 +7,6 @@ namespace SS3D.Data.Generated
     {
         public static DatabaseAsset BikeHorn = new DatabaseAsset("BikeHorn", "Items");
         public static DatabaseAsset NuclearAuthenticationDisk = new DatabaseAsset("NuclearAuthenticationDisk", "Items");
-        public static DatabaseAsset ToolboxBlue = new DatabaseAsset("ToolboxBlue", "Items");
         public static DatabaseAsset SecurityPDA = new DatabaseAsset("SecurityPDA", "Items");
         public static DatabaseAsset SecurityIDCard = new DatabaseAsset("SecurityIDCard", "Items");
         public static DatabaseAsset PDA = new DatabaseAsset("PDA", "Items");
@@ -103,6 +102,7 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset HeadsetSecurityLeft = new DatabaseAsset("HeadsetSecurityLeft", "Items");
         public static DatabaseAsset HeadsetSecurityRight = new DatabaseAsset("HeadsetSecurityRight", "Items");
         public static DatabaseAsset M4 = new DatabaseAsset("M4", "Items");
+        public static DatabaseAsset ToolboxBlue = new DatabaseAsset("ToolboxBlue", "Items");
     }
 }
 
