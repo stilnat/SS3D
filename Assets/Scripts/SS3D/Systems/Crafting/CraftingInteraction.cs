@@ -93,9 +93,16 @@ namespace SS3D.Systems.Crafting
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
             if (hand != null && hand.ItemInHand.TryGetComponent(out Tool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(interactionEvent.Point, tool, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(point, tool, Delay);
             }
             
             return true;

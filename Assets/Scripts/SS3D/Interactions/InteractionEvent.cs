@@ -28,15 +28,7 @@ namespace SS3D.Interactions
             Source = source;
             Target = target;
             Normal = normal;
-
-            if (target != null && source != null && target.TryGetInteractionPoint(source, out Vector3 customPoint))
-            {
-                Point = customPoint;
-            }
-            else
-            {
-                Point = point;
-            }
+            Point = point;
         }
     }
 }
