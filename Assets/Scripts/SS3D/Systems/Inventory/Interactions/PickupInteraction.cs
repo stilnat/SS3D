@@ -13,7 +13,7 @@ namespace SS3D.Systems.Inventory.Interactions
     // A pickup interaction is when you pick an item and
     // add it into a container (in this case, the hands)
     // you can only pick things that are not in a container
-    public class PickupInteraction : GradualInteraction
+    public class PickupInteraction : DelayedInteraction
     {
 
         private bool _hasItemInHand;
@@ -82,28 +82,6 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
-        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-
-            if (StartTime + TimeToMoveBackItem >= Time.time || !HasStarted || _hasItemInHand)
-            {
-                return base.Update(interactionEvent, reference);
-            }
-
-            // After time to pick up has passed, put the item in the container
-            _hasItemInHand = true;
-            IInteractionTarget target = interactionEvent.Target;
-            IInteractionSource source = interactionEvent.Source;
-
-            if (target is IGameObjectProvider targetBehaviour && source is Hand hand)
-            {
-                Item item = targetBehaviour.GameObject.GetComponent<Item>();
-                hand.Container.AddItem(item);
-            }
-
-            return base.Update(interactionEvent, reference);
-        }
-
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             base.Start(interactionEvent, reference);
@@ -139,6 +117,19 @@ namespace SS3D.Systems.Inventory.Interactions
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
             {
                 hand.GetComponentInParent<PickUpAnimation>().CancelPickup(hand);
+            }
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            _hasItemInHand = true;
+            IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
+
+            if (target is IGameObjectProvider targetBehaviour && source is Hand hand)
+            {
+                Item item = targetBehaviour.GameObject.GetComponent<Item>();
+                hand.Container.AddItem(item);
             }
         }
     }

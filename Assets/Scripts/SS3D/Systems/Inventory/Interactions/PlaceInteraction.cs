@@ -13,7 +13,7 @@ namespace SS3D.Systems.Inventory.Interactions
 {
     // a drop interaction is when we remove an item from the hand
     [Serializable]
-    public class PlaceInteraction : GradualInteraction
+    public class PlaceInteraction : DelayedInteraction
     {
         private bool _hasDroppedItem;
 
@@ -96,29 +96,6 @@ namespace SS3D.Systems.Inventory.Interactions
             return InteractionExtensions.RangeCheck(interactionEvent);
         }
 
-        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-
-            if (StartTime + TimeToMoveBackHand >= Time.time || !HasStarted || _hasDroppedItem)
-            {
-                return base.Update(interactionEvent, reference);
-            }
-
-            // After time to pick up has passed, put the item in the container
-            _hasDroppedItem = true;
-            IInteractionTarget target = interactionEvent.Target;
-            IInteractionSource source = interactionEvent.Source;
-
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-
-            Item item = hand.ItemInHand;
-            item.Container.RemoveItem(item);
-            item.GiveOwnership(null);
-            item.transform.parent = null;
-
-            return base.Update(interactionEvent, reference);
-        }
-
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             base.Start(interactionEvent, reference);
@@ -142,6 +119,20 @@ namespace SS3D.Systems.Inventory.Interactions
             {
                 hand.GetComponentInParent<PlaceAnimation>().CancelPlace(hand, hand.ItemInHand);
             }
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            _hasDroppedItem = true;
+            IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
+
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+            Item item = hand.ItemInHand;
+            item.Container.RemoveItem(item);
+            item.GiveOwnership(null);
+            item.transform.parent = null;
         }
     }
 }

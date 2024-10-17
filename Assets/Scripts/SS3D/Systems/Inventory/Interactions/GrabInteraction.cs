@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrabInteraction : GradualInteraction
+public class GrabInteraction : DelayedInteraction
 {
     private bool _hasGrabbedItem;
 
@@ -64,14 +64,14 @@ public class GrabInteraction : GradualInteraction
         return true;
     }
 
-    public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
+    public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
     {
+        Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+        hand.GetComponentInParent<GrabAnimation>().CancelGrab();
+    }
 
-        if (StartTime + TimeToMoveBackHand >= Time.time || !HasStarted || _hasGrabbedItem)
-        {
-            return base.Update(interactionEvent, reference);
-        }
-
+    protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+    {
         // After time to grab has passed, tell the hand that it grabbed something
         _hasGrabbedItem = true;
 
@@ -81,13 +81,5 @@ public class GrabInteraction : GradualInteraction
         // Grabbed thing is now owned by the hand's client, as we move thing based on client authority currently. 
         grabbable.GiveOwnership(hand.Owner);
         hand.IsGrabbing = true;
-
-        return base.Update(interactionEvent, reference);
-    }
-
-    public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
-    {
-        Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-        hand.GetComponentInParent<GrabAnimation>().CancelGrab();
     }
 }
