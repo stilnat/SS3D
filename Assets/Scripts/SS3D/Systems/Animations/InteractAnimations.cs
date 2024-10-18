@@ -26,10 +26,12 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private float _interactionMoveDuration;
 
+        private Coroutine _interactCoroutine;
+
         [Server]
         public void ServerInteract(Vector3 interactionPoint, IInteractiveTool tool, float delay)
         {
-            StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay));
+            _interactCoroutine = StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay));
         }
 
         private IEnumerator Interact(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, float delay)
@@ -44,7 +46,6 @@ namespace SS3D.Systems.Animations
 
             yield return StopInteracting(mainHand, tool);
 
-            tool.StopAnimation();
         }
 
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
@@ -116,6 +117,8 @@ namespace SS3D.Systems.Animations
 
         private IEnumerator StopInteracting(Hand mainHand, IInteractiveTool tool)
         {
+            tool.StopAnimation();
+
             // Stop looking at item
             StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _interactionMoveDuration));
 
@@ -128,6 +131,20 @@ namespace SS3D.Systems.Animations
             tool.GameObject.transform.localRotation = Quaternion.identity;
             mainHand.ItemPositionConstraint.weight = 1f;
             mainHand.PickupIkConstraint.weight = 0f;
+        }
+
+        [Server]
+        public void Cancel(Hand hand, IInteractiveTool tool)
+        {
+            ObserverCancel(hand, tool.NetworkBehaviour);
+        }
+
+        [ObserversRpc]
+        private void ObserverCancel(Hand hand, NetworkBehaviour tool)
+        {
+            StopCoroutine(_interactCoroutine);
+
+            StartCoroutine(StopInteracting(hand, tool as IInteractiveTool));
         }
     }
 }

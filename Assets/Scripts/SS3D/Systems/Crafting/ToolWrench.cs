@@ -1,10 +1,11 @@
 using DG.Tweening;
+using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
 {
-    public class ToolWrench : MonoBehaviour, IInteractiveTool
+    public class ToolWrench : NetworkActor, IInteractiveTool
     {
         private Tween _animation;
 

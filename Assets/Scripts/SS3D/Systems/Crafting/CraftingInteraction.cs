@@ -127,6 +127,12 @@ namespace SS3D.Systems.Crafting
         {
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
+
+            if (interactionEvent.Source.GameObject.TryGetComponent(out IInteractiveTool tool) && interactionEvent.Source.GetRootSource() is Hand hand)
+            {
+                hand.GetComponentInParent<InteractAnimations>().Cancel(hand, tool);
+            }
+
         }
     }
 }
