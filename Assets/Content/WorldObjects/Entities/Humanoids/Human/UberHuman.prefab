@@ -1217,7 +1217,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 547331446051564162}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -7840,7 +7840,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
-  _timeRagdolled: 180
+  _timeRagdolled: 2
 --- !u!114 &5525477133763386630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13566,7 +13566,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8797928814924332265}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
