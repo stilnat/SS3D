@@ -18,5 +18,7 @@ namespace SS3D.Systems.Animations
         }
 
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
+
+        public GameObject GameObject => gameObject;
     }
 }

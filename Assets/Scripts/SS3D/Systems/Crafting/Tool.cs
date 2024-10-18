@@ -1,17 +1,11 @@
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
 {
-    public abstract class Tool : MonoBehaviour, IPlayAnimation
+    public interface IInteractiveTool : IPlayAnimation, IGameObjectProvider
     {
-        [SerializeField]
-        private Transform _interactionPoint;
-
-        public Transform InteractionPoint => _interactionPoint;
-
-        public abstract void PlayAnimation();
-
-        public abstract void StopAnimation();
+        public Transform InteractionPoint { get; }
     }
 }

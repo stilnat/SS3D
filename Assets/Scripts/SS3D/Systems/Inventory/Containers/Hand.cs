@@ -6,6 +6,7 @@ using SS3D.Interactions;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
 using System;
 using System.Collections;
@@ -16,7 +17,7 @@ namespace SS3D.Systems.Inventory.Containers
     /// <summary>
     /// A hand is what an entity uses to grab and hold items, to interact with things in range.
     /// </summary>
-    public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider
+    public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider, IInteractiveTool
     {
         [SerializeField]
         private Transform _handHoldTargetLocker;
@@ -111,6 +112,9 @@ namespace SS3D.Systems.Inventory.Containers
 
         [SerializeField]
         private HandType _handType;
+
+        [SerializeField]
+        private Transform _interactionPoint;
 
         public HandType HandType => _handType;
 
@@ -254,5 +258,17 @@ namespace SS3D.Systems.Inventory.Containers
 
             return targetToSet;
         }
+
+        public void PlayAnimation()
+        {
+            
+        }
+
+        public void StopAnimation()
+        {
+            
+        }
+
+        public Transform InteractionPoint => _interactionPoint;
     }
 }

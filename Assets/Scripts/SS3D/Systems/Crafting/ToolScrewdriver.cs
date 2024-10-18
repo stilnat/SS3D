@@ -5,16 +5,23 @@ using UnityEngine;
 
 namespace SS3D.Systems.Crafting
 {
-    public class ToolScrewdriver : Tool
+    public class ToolScrewdriver : MonoBehaviour, IInteractiveTool
     {
         private Tween _animation;
 
-        public override void PlayAnimation()
+        [SerializeField]
+        private Transform _interactionPoint;
+
+        public GameObject GameObject => gameObject;
+
+        public Transform InteractionPoint => _interactionPoint;
+
+        public void PlayAnimation()
         {
             AnimateScrewdriver();
         }
 
-        public override void StopAnimation()
+        public void StopAnimation()
         {
             if (_animation != null && _animation.IsPlaying())
             {

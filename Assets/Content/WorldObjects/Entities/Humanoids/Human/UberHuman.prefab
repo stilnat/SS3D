@@ -3217,6 +3217,7 @@ MonoBehaviour:
   _interactionOrigin: {fileID: 5569489068996507518}
   HandsController: {fileID: 3222345056416986628}
   _handType: 0
+  _interactionPoint: {fileID: 4831511282220009542}
 --- !u!114 &106693697180811514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5515,7 +5516,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3662688532868555398}
-  m_LocalRotation: {x: 0.0080041, y: 0.71887404, z: 0.008328403, w: 0.6950444}
+  m_LocalRotation: {x: -0.05291604, y: -0.7071049, z: 0.0015709543, w: 0.7051242}
   m_LocalPosition: {x: 0, y: 0.23644215, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5527,7 +5528,7 @@ Transform:
   - {fileID: 5569489068996507518}
   m_Father: {fileID: 8425781932946354035}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -4.152, y: 269.67902, z: -355.569}
 --- !u!54 &1273653354869445718
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7022,6 +7023,7 @@ GameObject:
   - component: {fileID: 364735414394041015}
   - component: {fileID: 2768583506857238720}
   - component: {fileID: 7601720951202063522}
+  - component: {fileID: 5525477133763386630}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -7839,6 +7841,21 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
   _timeRagdolled: 180
+--- !u!114 &5525477133763386630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4f78a9011fc05442a4fdcd7cc1733f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _interactionMoveDuration: 0.5
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
@@ -13417,6 +13434,7 @@ MonoBehaviour:
   _interactionOrigin: {fileID: 6456791731408993078}
   HandsController: {fileID: 3222345056416986628}
   _handType: 1
+  _interactionPoint: {fileID: 7333641033910239129}
 --- !u!114 &2264540800286188451
 MonoBehaviour:
   m_ObjectHideFlags: 0

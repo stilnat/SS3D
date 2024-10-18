@@ -100,7 +100,7 @@ namespace SS3D.Systems.Crafting
                 point = customPoint;
             }
 
-            if (hand != null && hand.ItemInHand.TryGetComponent(out Tool tool))
+            if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
             {
                 interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(point, tool, Delay);
             }

@@ -5,7 +5,7 @@ namespace SS3D.Interactions.Interfaces
     /// <summary>
     /// Represents a target that can be interacted with
     /// </summary>
-    public interface IInteractionTarget
+    public interface IInteractionTarget : IGameObjectProvider
     {
         /// <summary>
         /// Creates possible interactions (not checked for CanExecute)
