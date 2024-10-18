@@ -24,6 +24,11 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
+        public override string GetGenericName()
+        {
+            return "Open";
+        }
+
         public override string GetName(InteractionEvent interactionEvent)
         {
             Animator animator = ((IGameObjectProvider)interactionEvent.Target).GameObject.GetComponent<Animator>();
