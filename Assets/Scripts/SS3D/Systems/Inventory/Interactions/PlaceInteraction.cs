@@ -35,7 +35,7 @@ namespace SS3D.Systems.Inventory.Interactions
         {
             TimeToReachDropPlace = timeToReachDropPlace;
             TimeToMoveBackHand = timeToMoveBackHand;
-            Delay = TimeToReachDropPlace + TimeToMoveBackHand;
+            Delay = TimeToReachDropPlace;
         }
 
         public override string GetName(InteractionEvent interactionEvent)
