@@ -1,13 +1,16 @@
-﻿using SS3D.Interactions.Extensions;
+﻿using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
+using SS3D.Systems.Animations;
+using SS3D.Systems.Inventory.Containers;
 using System;
 using UnityEngine;
 
-namespace SS3D.Interactions
+namespace SS3D.Systems.Interactions
 {
     /// <summary>
     /// Utility class for toggle interactions
     /// </summary>
-    public class ToggleInteraction : Interaction
+    public class ToggleInteraction : DelayedInteraction
     {
         /// <summary>
         /// The icon when state is true
@@ -37,11 +40,15 @@ namespace SS3D.Interactions
         /// </summary>
         public bool RangeCheck { get; set; } = true;
 
+        public ToggleInteraction()
+        {
+            Delay = 0.2f;
+        }
+
         public override string GetGenericName()
         {
             return "Toggle";
         }
-        
 
         public override string GetName(InteractionEvent interactionEvent)
         {
@@ -74,6 +81,31 @@ namespace SS3D.Interactions
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
+            base.Start(interactionEvent, reference);
+            Hand hand = interactionEvent.Source as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null)
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay);
+            }
+            
+            return true;
+        }
+
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
             if (interactionEvent.Target is IToggleable toggle1)
             {
                 toggle1.Toggle();
@@ -83,7 +115,6 @@ namespace SS3D.Interactions
                 toggle.Toggle();
             }
 
-            return false;
         }
     }
 }
