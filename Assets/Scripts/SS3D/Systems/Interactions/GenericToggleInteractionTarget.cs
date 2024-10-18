@@ -1,6 +1,7 @@
 ﻿using FishNet.Object.Synchronizing;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -30,19 +31,7 @@ namespace SS3D.Systems.Interactions
             return interactions.ToArray();
         }
 
-        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point)
-        {
-            point = Vector3.zero;
-
-            if (_toggle != null)
-            {
-                point = _toggle.position;
-
-                return true;
-            }
-
-            return false;
-        }
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         public bool GetState()
         {
