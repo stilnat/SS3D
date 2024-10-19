@@ -221,8 +221,6 @@ MonoBehaviour:
   _weight: 1
   _startingTraits: []
   _rigidbody: {fileID: 8316413619239954654}
-  AttachmentPoint: {fileID: 4263568945307503621}
-  AttachmentPointAlt: {fileID: 4263568945307503621}
   _container: {fileID: 0}
 --- !u!114 &8720207852131239820
 MonoBehaviour:
@@ -261,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd866b0631d05441982a4824740ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 4
+  type: 5
 --- !u!1 &2468349444349537438
 GameObject:
   m_ObjectHideFlags: 0

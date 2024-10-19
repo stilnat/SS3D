@@ -252,8 +252,6 @@ MonoBehaviour:
   _startingTraits:
   - {fileID: 11400000, guid: 9fce2bd65c51b5b40ad2346bedb63121, type: 2}
   _rigidbody: {fileID: 7971893193691774296}
-  AttachmentPoint: {fileID: 5498809548548644902}
-  AttachmentPointAlt: {fileID: 5498809548548644902}
   _container: {fileID: 0}
 --- !u!114 &926079960710381547
 MonoBehaviour:
@@ -292,4 +290,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd866b0631d05441982a4824740ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 5
+  type: 6

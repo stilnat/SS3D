@@ -310,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd866b0631d05441982a4824740ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  type: 1
 --- !u!114 &5559689214874696556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,6 +340,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a83a58131f57334299afd7fb4b29ee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1602098408367427586}
+  _networkObjectCache: {fileID: 0}
   _interactionPoint: {fileID: 7184925500366350300}
 --- !u!1 &6219081307512385233
 GameObject:
