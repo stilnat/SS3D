@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS3D.Systems.Interactions;
+using System;
 using UnityEngine;
 
 namespace SS3D.Interactions.Interfaces
@@ -26,6 +27,8 @@ namespace SS3D.Interactions.Interfaces
         /// </summary>
         /// <returns></returns>
         string GetGenericName();
+
+        InteractionType InteractionType { get; }
 
         /// <summary>
         /// Gets the interaction icon

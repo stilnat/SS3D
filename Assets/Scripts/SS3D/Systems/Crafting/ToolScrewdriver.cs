@@ -3,6 +3,7 @@ using DG.Tweening;
 using FishNet.Object;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
 using System.Collections;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace SS3D.Systems.Crafting
         public Transform InteractionPoint => _interactionPoint;
         public NetworkBehaviour NetworkBehaviour => this;
 
-        public void PlayAnimation()
+        public void PlayAnimation(InteractionType interactionType)
         {
             AnimateScrewdriver();
         }

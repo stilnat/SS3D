@@ -93,7 +93,7 @@ namespace SS3D.Systems.Interactions
 
             if (hand != null)
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay, InteractionType);
             }
             
             return true;

@@ -1,6 +1,7 @@
 using FishNet.Object;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
 using System.Collections;
@@ -29,18 +30,18 @@ namespace SS3D.Systems.Animations
         private Coroutine _interactCoroutine;
 
         [Server]
-        public void ServerInteract(Vector3 interactionPoint, IInteractiveTool tool, float delay)
+        public void ServerInteract(Vector3 interactionPoint, IInteractiveTool tool, float delay, InteractionType interactionType)
         {
-            _interactCoroutine = StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay));
+            _interactCoroutine = StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay, interactionType));
         }
 
-        private IEnumerator Interact(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, float delay)
+        private IEnumerator Interact(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, float delay, InteractionType interactionType)
         {
             SetupInteract(mainHand, tool);
 
             yield return ReachInteractionPoint(interactionPoint, mainHand, tool);
 
-            tool.PlayAnimation();
+            tool.PlayAnimation(interactionType);
 
             yield return new WaitForSeconds(delay);
 

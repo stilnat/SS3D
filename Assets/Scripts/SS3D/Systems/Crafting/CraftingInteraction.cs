@@ -5,6 +5,7 @@ using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System.Linq;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Type of this interaction, defines which recipe will be available.
         /// </summary>
-        private readonly CraftingInteractionType _type;
+        private readonly InteractionType _type;
 
         /// <summary>
         /// The start position of the source of the interaction, when the interaction begins.
@@ -46,7 +47,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Type of this interaction, defines which recipe will be available.
         /// </summary>
-        public CraftingInteractionType CraftingInteractionType => _type;
+        public InteractionType InteractionType => _type;
 
         /// <summary>
         /// The transform of the game object executing the crafting interaction, useful to check if the source moved
@@ -59,7 +60,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         public TaggedEdge<RecipeStep, RecipeStepLink> ChosenLink => _chosenLink;
 
-        public CraftingInteraction(float delay, Transform characterTransform, CraftingInteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
+        public CraftingInteraction(float delay, Transform characterTransform, InteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
         {
             _characterTransform = characterTransform;
             _startPosition = characterTransform.position;
@@ -102,7 +103,7 @@ namespace SS3D.Systems.Crafting
 
             if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(point, tool, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(point, tool, Delay, InteractionType);
             }
             
             return true;

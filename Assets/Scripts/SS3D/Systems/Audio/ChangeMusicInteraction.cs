@@ -2,6 +2,7 @@
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace SS3D.Systems.Audio
     /// </summary>
     public class ChangeMusicInteraction : DelayedInteraction
     {
+    
+        public override InteractionType InteractionType => InteractionType.Press;
+
         public override IClientInteraction CreateClient(InteractionEvent interactionEvent)
         {
             return null;
@@ -65,7 +69,7 @@ namespace SS3D.Systems.Audio
 
             if (hand != null)
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay, InteractionType);
             }
             
             return true;

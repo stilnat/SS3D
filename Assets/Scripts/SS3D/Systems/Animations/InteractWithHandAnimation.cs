@@ -1,6 +1,7 @@
 using FishNet.Object;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
 using System.Collections;
@@ -21,12 +22,12 @@ namespace SS3D.Systems.Animations
         private float _interactionMoveDuration;
 
         [Server]
-        public void ServerInteract(Hand hand, Vector3 interactionPoint, float delay)
+        public void ServerInteract(Hand hand, Vector3 interactionPoint, float delay, InteractionType interactionType)
         {
-            StartCoroutine(Interact(hand, interactionPoint, 0.3f));
+            StartCoroutine(Interact(hand, interactionPoint, 0.3f, interactionType));
         }
 
-        private IEnumerator Interact(Hand hand, Vector3 interactionPoint, float delay)
+        private IEnumerator Interact(Hand hand, Vector3 interactionPoint, float delay, InteractionType interactionType)
         {
             SetupInteract(hand, interactionPoint);
 
@@ -34,7 +35,7 @@ namespace SS3D.Systems.Animations
 
             yield return ReachInteractionPoint(interactionPoint, hand);
 
-            hand.PlayAnimation();
+            hand.PlayAnimation(interactionType);
 
             StopInteracting(hand);
 

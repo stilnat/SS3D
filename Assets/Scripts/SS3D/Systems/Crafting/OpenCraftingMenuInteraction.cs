@@ -2,20 +2,23 @@
 using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Systems.Crafting;
+using SS3D.Systems.Interactions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class OpenCraftingMenuInteraction : Interaction
 {
-    private CraftingInteractionType _craftingInteractionType;
+    private InteractionType _interactionType;
 
-    public OpenCraftingMenuInteraction(CraftingInteractionType craftingInteraction)
+    public OpenCraftingMenuInteraction(InteractionType craftingInteraction)
     {
-        _craftingInteractionType = craftingInteraction;
+        _interactionType = craftingInteraction;
     }
 
     public override string GetGenericName() => "Open crafting menu";
+
+    public override InteractionType InteractionType => InteractionType.None;
     
     /// <summary>
     /// Get the name of the interaction
@@ -45,7 +48,7 @@ public class OpenCraftingMenuInteraction : Interaction
         if (!Subsystems.TryGet(out CraftingSystem craftingSystem)) return false;
 
         bool recipesAvailable = true;
-        recipesAvailable &= craftingSystem.AvailableRecipeLinks(_craftingInteractionType, interactionEvent,
+        recipesAvailable &= craftingSystem.AvailableRecipeLinks(_interactionType, interactionEvent,
             out List<TaggedEdge<RecipeStep, RecipeStepLink>> _);
 
         return recipesAvailable;
@@ -60,8 +63,8 @@ public class OpenCraftingMenuInteraction : Interaction
     public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
     {
         Subsystems.TryGet(out CraftingSystem craftingSystem);
-        List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, _craftingInteractionType);
-        ViewLocator.Get<CraftingMenu>().First().DisplayMenu(craftingInteractions, interactionEvent, reference, _craftingInteractionType);
+        List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, _interactionType);
+        ViewLocator.Get<CraftingMenu>().First().DisplayMenu(craftingInteractions, interactionEvent, reference, _interactionType);
         return true;
     }
 }

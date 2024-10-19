@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 using SS3D.Systems.Inventory.Items;
 using System.Linq;
 using SS3D.Interactions.Interfaces;
@@ -8,6 +9,7 @@ using FishNet.Object.Synchronizing;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Interactions;
 using System;
 using System.Collections;
 using UnityEngine.Animations.Rigging;
@@ -259,14 +261,34 @@ namespace SS3D.Systems.Inventory.Containers
             return targetToSet;
         }
 
-        public void PlayAnimation()
+        public void PlayAnimation(InteractionType interactionType)
         {
-            
+            switch (interactionType)
+            {
+                case InteractionType.Open:
+                    PlayOpenAnimation();
+                    break;
+            }
         }
 
         public void StopAnimation()
         {
             
+        }
+
+        private void PlayOpenAnimation()
+        {
+            // Define the points for the parabola
+            Vector3[] path = new Vector3[] {
+                _handBone.position,                              // Starting position
+                _handBone.position + (_handBone.forward * 0.1f), // Peak (the highest point)
+                _handBone.position + (_handBone.up * 0.1f),        // Final position
+            };
+
+            // Animate the GameObject along the path in a smooth parabolic motion
+            _pickupTargetLocker.DOPath(path, 0.1f, PathType.CatmullRom)
+                .SetEase(Ease.Linear) // You can adjust the ease function as needed
+                .SetLoops(1, LoopType.Restart); // Play the animation once, no loops
         }
 
         public Transform InteractionPoint => _interactionPoint;

@@ -3,6 +3,7 @@ using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ public class GrabInteraction : DelayedInteraction
     public override string GetName(InteractionEvent interactionEvent) => "Grab";
 
     public override string GetGenericName() => "Grab";
+
+    public override InteractionType InteractionType => InteractionType.None;
 
     public override bool CanInteract(InteractionEvent interactionEvent)
     {

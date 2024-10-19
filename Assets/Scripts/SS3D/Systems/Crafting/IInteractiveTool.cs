@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SS3D.Systems.Crafting
 {
-    public interface IInteractiveTool : IPlayAnimation, IGameObjectProvider, INetworkObjectProvider
+    public interface IInteractiveTool : IPlayInteractionAnimation, IGameObjectProvider, INetworkObjectProvider
     {
         public Transform InteractionPoint { get; }
 

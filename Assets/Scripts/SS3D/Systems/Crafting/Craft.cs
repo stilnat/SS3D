@@ -1,5 +1,6 @@
 ﻿using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
+using SS3D.Systems.Interactions;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace SS3D.Systems.Crafting
         /// The different types of interaction the game object with this component on can support. 
         /// </summary>
         [SerializeField]
-        private CraftingInteractionType type;
+        private InteractionType type;
         
         public void GetSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> interactions)
         {

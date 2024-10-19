@@ -1,6 +1,7 @@
 using DG.Tweening;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
 using UnityEngine;
 
 namespace SS3D.Systems.Crafting
@@ -20,7 +21,7 @@ namespace SS3D.Systems.Crafting
 
         public Transform InteractionPoint => _interactionPoint;
 
-        public void PlayAnimation()
+        public void PlayAnimation(InteractionType interactionType)
         {
             RotateAroundPivot();
         }

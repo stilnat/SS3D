@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Coimbra;
 using SS3D.Data.AssetDatabases;
+using SS3D.Systems.Interactions;
 using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Crafting
@@ -23,7 +24,7 @@ namespace SS3D.Systems.Crafting
 
         [Tooltip("The needed type of crafting interaction to go through this link.")] 
         [SerializeField]
-        private CraftingInteractionType _craftingInteractionType;
+        private InteractionType _craftingInteractionType;
 
         [Tooltip("The source recipe step.")] 
         [SerializeField]
@@ -58,7 +59,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// The needed type of crafting interaction to go through this link
         /// </summary>
-        public CraftingInteractionType CraftingInteractionType => _craftingInteractionType;
+        public InteractionType CraftingInteractionType => _craftingInteractionType;
 
         /// <summary>
         /// Bunch of conditions for ingredients to be valid.
