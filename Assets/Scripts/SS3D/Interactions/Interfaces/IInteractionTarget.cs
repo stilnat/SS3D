@@ -15,5 +15,6 @@ namespace SS3D.Interactions.Interfaces
         IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent);
 
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point);
+
     }
 }

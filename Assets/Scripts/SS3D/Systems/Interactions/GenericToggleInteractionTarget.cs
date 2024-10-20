@@ -17,9 +17,13 @@ namespace SS3D.Systems.Interactions
         [SyncVar]
         private bool _on;
         public Action<bool> OnToggle;
+ 
+        private IInteractionPointProvider _interactionPointProvider;
 
-        [SerializeField]
-        private Transform _toggle;
+        protected override void OnAwake()
+        {
+            _interactionPointProvider = GetComponent<IInteractionPointProvider>();
+        }
 
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
@@ -31,7 +35,7 @@ namespace SS3D.Systems.Interactions
             return interactions.ToArray();
         }
 
-        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => _interactionPointProvider != null ? _interactionPointProvider.TryGetInteractionPoint(source, out point) : this.GetInteractionPoint(source, out point);
 
         public bool GetState()
         {
