@@ -7166,7 +7166,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 171
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
@@ -7790,7 +7790,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
-  _timeRagdolled: 2
+  _timeRagdolled: 60
 --- !u!114 &5525477133763386630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7822,6 +7822,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _hands: {fileID: 3222345056416986628}
+  _lookAtTargetLocker: {fileID: 0}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
