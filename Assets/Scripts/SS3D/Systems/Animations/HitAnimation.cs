@@ -19,6 +19,9 @@ namespace SS3D.Systems.Animations
         private Hands _hands;
 
         [SerializeField]
+        private MultiAimConstraint _lookAtConstraint;
+
+        [SerializeField]
         private Transform _lookAtTargetLocker;
 
 
@@ -66,17 +69,9 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
 
-            float duration = 1f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
-
-           // If item is too low, crouch to reach
-            if (_hands.SelectedHand.HandBone.transform.position.y - hitTargetPosition.y > 0.3)
-            {
-                GetComponent<HumanoidAnimatorController>().Crouch(true);
-            }
+            float duration = 0.7f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
 
             _hands.SelectedHand.PickupTargetLocker.transform.rotation = _hands.SelectedHand.HandBone.transform.rotation;
-            
-            GetComponent<HumanoidAnimatorController>().Crouch(false);
 
             Vector3 directionFromTransformToTarget = hitTargetPosition - transform.position;
             directionFromTransformToTarget.y = 0f;
@@ -85,11 +80,34 @@ namespace SS3D.Systems.Animations
 
             float timeToRotate = (Quaternion.Angle(transform.rotation, finalRotationPlayer) / 180f) * duration;
 
-            // In sequence, we first rotate toward the target, we then start ani
             Sequence sequence = DOTween.Sequence();
+
+            // In sequence, we first rotate toward the target
             sequence.Append(transform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
-            sequence.Insert(timeToRotate*0.4f, AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer));
-            sequence.Join(AnimateHandRotation(hitTargetPosition, duration, finalRotationPlayer));
+
+            sequence.Join(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 1f, timeToRotate));
+
+            // A bit later but still while rotating, we start changing the hand position 
+            sequence.Insert(timeToRotate * 0.4f, AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer));
+
+            // At the same time we move the hand, we start rotating it as well.
+            // We have only half the duration here so that hand is pointing in the right direction approximately when reaching the hit target
+            sequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer));
+
+            sequence.OnStart(() =>
+            {
+                _lookAtTargetLocker.position = hitTargetPosition;
+                if (_hands.SelectedHand.HandBone.transform.position.y - hitTargetPosition.y > 0.3)
+                {
+                    GetComponent<HumanoidAnimatorController>().Crouch(true);
+                }
+                GetComponent<HumanoidAnimatorController>().MakeFist(true, _hands.SelectedHand.HandType == HandType.RightHand);
+            }); 
+            sequence.OnComplete(() =>
+            {
+                GetComponent<HumanoidAnimatorController>().Crouch(false);
+                GetComponent<HumanoidAnimatorController>().MakeFist(false, _hands.SelectedHand.HandType == HandType.RightHand);
+            });
         }
 
         private Tween AnimateHandRotation(Vector3 hitTargetPosition, float duration, Quaternion finalRotation)
@@ -100,7 +118,7 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
             Quaternion newRotation = Quaternion.FromToRotation(_hands.SelectedHand.PickupTargetLocker.transform.up, transform.InverseTransformDirection(fromHandToHit)) * _hands.SelectedHand.PickupTargetLocker.transform.rotation;
-            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DOLocalRotate(newRotation.eulerAngles, duration / 2, RotateMode.Fast);
+            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DOLocalRotate(newRotation.eulerAngles, duration, RotateMode.Fast);
             tween.Pause();
 
             // restore the modified rotation
@@ -199,15 +217,20 @@ namespace SS3D.Systems.Animations
                 if (value == 2)
                 {
                     DOTween.To(() => _hands.SelectedHand.PickupIkConstraint.weight, x => _hands.SelectedHand.PickupIkConstraint.weight = x, 0f, duration);
+                    DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 0f, duration);
+
                 }
             };
 
+            // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
                 DebugExtension.DebugWireSphere(_hands.SelectedHand.PickupTargetLocker.position, 0.01f, 2f);
             };
 
             tween.Pause();
+
+            // We restore the rotation we modified
             transform.rotation = currentRotation;
             return tween;
         }

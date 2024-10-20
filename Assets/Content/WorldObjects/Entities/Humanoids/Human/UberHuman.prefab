@@ -7822,7 +7822,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _hands: {fileID: 3222345056416986628}
-  _lookAtTargetLocker: {fileID: 0}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0

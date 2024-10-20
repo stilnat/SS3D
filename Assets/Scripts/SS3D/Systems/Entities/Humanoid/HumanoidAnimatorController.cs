@@ -76,6 +76,18 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetBool("Crouch", crouchState);
         }
 
+        public void MakeFist(bool makeFist, bool isRight)
+        {
+            if (makeFist)
+            {
+              _animator.SetTrigger(isRight ? "FingerFistRight" : "FingerFistLeft");
+            }
+            else
+            {
+                _animator.SetTrigger(isRight ? "FingerRelaxedRight" : "FingerRelaxedLeft");
+            }
+        }
+
         public void Throw(HandType handtype)
         {
             if (handtype == HandType.RightHand)
