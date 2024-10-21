@@ -71,7 +71,6 @@ namespace SS3D.Systems.Animations
 
             float duration = 0.7f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
 
-            _hands.SelectedHand.PickupTargetLocker.transform.rotation = _hands.SelectedHand.HandBone.transform.rotation;
 
             Vector3 directionFromTransformToTarget = hitTargetPosition - transform.position;
             directionFromTransformToTarget.y = 0f;
@@ -112,13 +111,20 @@ namespace SS3D.Systems.Animations
 
         private Tween AnimateHandRotation(Vector3 hitTargetPosition, float duration, Quaternion finalRotation)
         {
+
             // All computations have to be done like if the player was already facing the direction it's facing in the end of its rotation
             Quaternion currentRotation = transform.rotation;
             transform.rotation = finalRotation;
 
+            _hands.SelectedHand.PickupTargetLocker.transform.rotation = _hands.SelectedHand.HandBone.transform.rotation;
+
             Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
-            Quaternion newRotation = Quaternion.FromToRotation(_hands.SelectedHand.PickupTargetLocker.transform.up, transform.InverseTransformDirection(fromHandToHit)) * _hands.SelectedHand.PickupTargetLocker.transform.rotation;
-            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DOLocalRotate(newRotation.eulerAngles, duration, RotateMode.Fast);
+            Vector3 fromHandToHitRelativeToPlayer = transform.InverseTransformDirection(fromHandToHit);
+
+
+            Quaternion newRotation = Quaternion.FromToRotation(_hands.SelectedHand.PickupTargetLocker.transform.up, fromHandToHit) * _hands.SelectedHand.PickupTargetLocker.transform.rotation;
+
+            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration, RotateMode.Fast);
             tween.Pause();
 
             // restore the modified rotation
