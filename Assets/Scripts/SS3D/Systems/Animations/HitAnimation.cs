@@ -24,6 +24,8 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Transform _lookAtTargetLocker;
 
+        private Sequence _sequence;
+
 
         public override void OnStartClient()
         {
@@ -71,7 +73,6 @@ namespace SS3D.Systems.Animations
 
             float duration = 0.7f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
 
-
             Vector3 directionFromTransformToTarget = hitTargetPosition - transform.position;
             directionFromTransformToTarget.y = 0f;
 
@@ -79,21 +80,26 @@ namespace SS3D.Systems.Animations
 
             float timeToRotate = (Quaternion.Angle(transform.rotation, finalRotationPlayer) / 180f) * duration;
 
-            Sequence sequence = DOTween.Sequence();
+            if (_sequence != null)
+            {
+                _sequence.Kill();
+            }
+
+            _sequence = DOTween.Sequence();
 
             // In sequence, we first rotate toward the target
-            sequence.Append(transform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
+            _sequence.Append(transform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
 
-            sequence.Join(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 1f, timeToRotate));
+            _sequence.Join(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 1f, timeToRotate));
 
             // A bit later but still while rotating, we start changing the hand position 
-            sequence.Insert(timeToRotate * 0.4f, AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer));
+            _sequence.Insert(timeToRotate * 0.4f, AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer, _hands.SelectedHand.HandType == HandType.RightHand));
 
             // At the same time we move the hand, we start rotating it as well.
             // We have only half the duration here so that hand is pointing in the right direction approximately when reaching the hit target
-            sequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer));
+            _sequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer));
 
-            sequence.OnStart(() =>
+            _sequence.OnStart(() =>
             {
                 _lookAtTargetLocker.position = hitTargetPosition;
                 if (_hands.SelectedHand.HandBone.transform.position.y - hitTargetPosition.y > 0.3)
@@ -102,10 +108,11 @@ namespace SS3D.Systems.Animations
                 }
                 GetComponent<HumanoidAnimatorController>().MakeFist(true, _hands.SelectedHand.HandType == HandType.RightHand);
             }); 
-            sequence.OnComplete(() =>
+            _sequence.OnComplete(() =>
             {
                 GetComponent<HumanoidAnimatorController>().Crouch(false);
                 GetComponent<HumanoidAnimatorController>().MakeFist(false, _hands.SelectedHand.HandType == HandType.RightHand);
+                _sequence = null;
             });
         }
 
@@ -119,12 +126,10 @@ namespace SS3D.Systems.Animations
             _hands.SelectedHand.PickupTargetLocker.transform.rotation = _hands.SelectedHand.HandBone.transform.rotation;
 
             Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
-            Vector3 fromHandToHitRelativeToPlayer = transform.InverseTransformDirection(fromHandToHit);
-
 
             Quaternion newRotation = Quaternion.FromToRotation(_hands.SelectedHand.PickupTargetLocker.transform.up, fromHandToHit) * _hands.SelectedHand.PickupTargetLocker.transform.rotation;
 
-            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration, RotateMode.Fast);
+            Tween tween = _hands.SelectedHand.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration);
             tween.Pause();
 
             // restore the modified rotation
@@ -140,7 +145,7 @@ namespace SS3D.Systems.Animations
         /// <param name="duration"> The duration of the whole animation hit </param>
         /// <param name="finalRotation"> The rotation of the player after it's facing the </param>
         /// <returns></returns>
-        private Tween AnimateHandPosition(Vector3 hitTargetPosition, float duration, Quaternion finalRotation)
+        private Tween AnimateHandPosition(Vector3 hitTargetPosition, float duration, Quaternion finalRotation, bool isRight)
         {
 
             // All computations have to be done like if the player was already facing the direction it's facing in the end
@@ -176,13 +181,15 @@ namespace SS3D.Systems.Animations
             // compute the middle between hand and hit position, still in player's root referential
             Vector3 middleFromHandToHit =  (hitPositionRelativeToPlayer + handPositionRelativeToPlayer) / 2;
 
+            int deviationRightOrLeft = isRight ? 1 : -1;
+
             // compute the trajectory deviation point, using the cross product to get a vector orthogonal to the hit direction,
             // then, from the middle of the distance between hand and hit, step on the side from a given quantity.
             // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically 
-            Vector3 trajectoryPeak = middleFromHandToHit + (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory);
+            Vector3 trajectoryPeak = middleFromHandToHit + (deviationRightOrLeft * (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory));
 
             // Same as trajectoryPeak but for when the hand gets back in rest position
-            Vector3 trajectoryPeakBack = middleFromHandToHit - (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory);
+            Vector3 trajectoryPeakBack = middleFromHandToHit - (deviationRightOrLeft * (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory));
 
             // show the hit target position in the player referential
             DebugExtension.DebugPoint((transform.rotation * hitPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
