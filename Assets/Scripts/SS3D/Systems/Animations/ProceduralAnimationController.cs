@@ -41,17 +41,20 @@ namespace SS3D.Systems.Animations
         public void PlayAnimation(InteractionType interactionType, Hand hand,  NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
         {
             Hands.TryGetOppositeHand(hand, out Hand oppositeHand);
-            ObserversPlayAnimation(interactionType, hand, Hands.SelectedHand, oppositeHand, target, targetPosition, time, delay);
+            ObserversPlayAnimation(interactionType, hand, oppositeHand, target, targetPosition, time, delay);
         }
 
         [ObserversRpc]
-        public void ObserversPlayAnimation(InteractionType interactionType, Hand hand, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
+        public void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
         {
             IProceduralAnimation proceduralAnimation;
             switch (interactionType)
             {
                   case InteractionType.Pickup:
                       proceduralAnimation = new PickUpAnimation();
+                      break;
+                  case InteractionType.Place:
+                      proceduralAnimation = new PlaceAnimation();
                       break;
                   default:
                       return;

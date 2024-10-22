@@ -12,5 +12,6 @@ namespace SS3D.Systems.Interactions
         Open,
         Press,
         Pickup,
+        Place,
     }
 }

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using FishNet.Object;
+using System;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using UnityEngine;
@@ -30,6 +32,8 @@ namespace SS3D.Systems.Inventory.Interactions
         /// Only raycast the default layer for seeing if we are vision blocked
         /// </summary>
         private LayerMask _defaultMask = LayerMask.GetMask("Default");
+
+        public override InteractionType InteractionType => InteractionType.Place;
 
         public PlaceInteraction(float timeToMoveBackHand, float timeToReachDropPlace)
         {
@@ -101,7 +105,8 @@ namespace SS3D.Systems.Inventory.Interactions
             base.Start(interactionEvent, reference);
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            hand.GetComponentInParent<PlaceAnimation>().Place(interactionEvent.Point, hand.ItemInHand, TimeToMoveBackHand, TimeToReachDropPlace);
+            hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
+                InteractionType.Place, hand, hand.ItemInHand.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
             
             return true;
         }
@@ -117,7 +122,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand != null)
             {
-                hand.GetComponentInParent<PlaceAnimation>().CancelPlace(hand, hand.ItemInHand);
+                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
         }
 
