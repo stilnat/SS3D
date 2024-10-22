@@ -71,7 +71,7 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
 
-            float duration = 0.7f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
+            float duration = 3f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
 
             Vector3 directionFromTransformToTarget = hitTargetPosition - transform.position;
             directionFromTransformToTarget.y = 0f;
