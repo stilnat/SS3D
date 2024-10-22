@@ -5,6 +5,7 @@ using SS3D.Systems.GameModes.Events;
 using UnityEngine;
 using SS3D.Data.Generated;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 
@@ -92,7 +93,7 @@ namespace SS3D.Systems.Inventory.Interactions
             {
 
                 target.GiveOwnership(hand.Owner);
-                hand.GetComponentInParent<PickUpAnimation>().Pickup(target, TimeToMoveBackItem, TimeToReachItem);
+                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Pickup, hand, target.NetworkObject, Vector3.zero, TimeToMoveBackItem + TimeToReachItem);
 
                 try {
                     string ckey = hand.HandsController.Inventory.Body.Mind.player.Ckey;
@@ -116,7 +117,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
             {
-                hand.GetComponentInParent<PickUpAnimation>().CancelPickup(hand);
+                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
         }
 

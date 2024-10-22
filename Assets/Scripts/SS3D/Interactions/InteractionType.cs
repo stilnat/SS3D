@@ -11,5 +11,6 @@ namespace SS3D.Systems.Interactions
         Weld,
         Open,
         Press,
+        Pickup,
     }
 }

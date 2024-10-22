@@ -13,44 +13,40 @@ using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class PickUpAnimation : NetworkBehaviour
+    public class PickUpAnimation : IProceduralAnimation
     {
-
-
         private float _itemMoveDuration;
 
         private float _itemReachDuration;
 
-        [SerializeField]
-        private HoldController _holdController;
-
-        [SerializeField]
-        private Hands _hands;
-
-        [SerializeField]
-        private MultiAimConstraint _lookAtConstraint;
-
-        [SerializeField]
-        private Transform _lookAtTargetLocker;
-
         private Sequence _pickUpSequence;
 
+        private ProceduralAnimationController _controller;
+
+        private Hand _mainHand;
+
         public bool IsPicking { get; private set; }
+        public event Action<IProceduralAnimation> OnCompletion;
 
-        [Server]
-        public void Pickup(Item item, float timeToMoveBackItem, float timeToReachItem, float delay = 0f)
+        public void ServerPerform(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
+
+        public void ClientPlay(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            ObserverPickUp(item, timeToMoveBackItem, timeToReachItem, delay);
+            _controller = proceduralAnimationController;
+            _itemMoveDuration = time / 2;
+            _itemReachDuration = time / 2;
+            _mainHand = mainHand;
+
+            Item item = target.GetComponent<Item>();
+
+            bool withTwoHands = secondaryHand != null && secondaryHand.Empty && item.Holdable.CanHoldTwoHand;
+
+            SetUpPickup(mainHand, secondaryHand, withTwoHands, item, proceduralAnimationController.HoldController, proceduralAnimationController.LookAtTargetLocker);
+
+            PickupReach(item, mainHand, secondaryHand, withTwoHands, delay);
         }
 
-        [Server]
-        public void CancelPickup(Hand hand)
-        {
-              ObserverCancelPickUp(hand);
-        }
-
-        [ObserversRpc]
-        private void ObserverCancelPickUp(Hand hand)
+        public void Cancel()
         {
             Debug.Log("cancel pick up animation");
 
@@ -59,48 +55,27 @@ namespace SS3D.Systems.Animations
             Sequence sequence = DOTween.Sequence();
 
             // Those times are to keep the speed of movements pretty much the same as when it was reaching
-            float timeToCancelHold = (1 - hand.HoldIkConstraint.weight) * _itemReachDuration;
-            float timeToCancelLookAt = (1 - _lookAtConstraint.weight) * _itemReachDuration;
-            float timeToCancelPickup = (1 - hand.PickupIkConstraint.weight) * _itemReachDuration;
+            float timeToCancelHold = (1 - _mainHand.HoldIkConstraint.weight) * _itemReachDuration;
+            float timeToCancelLookAt = (1 - _controller.LookAtConstraint.weight) * _itemReachDuration;
+            float timeToCancelPickup = (1 - _mainHand.PickupIkConstraint.weight) * _itemReachDuration;
 
-            sequence.Append(DOTween.To(() => hand.HoldIkConstraint.weight, x => hand.HoldIkConstraint.weight = x, 0f, timeToCancelHold));
-            sequence.Join(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 0f, timeToCancelLookAt));
-            sequence.Join(DOTween.To(() => hand.PickupIkConstraint.weight, x => hand.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
-            GetComponent<HumanoidAnimatorController>().Crouch(false);
-        }
-
-        [ObserversRpc(BufferLast = true)]
-        private void ObserverPickUp(Item item,  float timeToMoveBackItem, float timeToReachItem, float delay)
-        {
-            _itemMoveDuration = timeToMoveBackItem;
-            _itemReachDuration = timeToReachItem;
-            PickupAnimate(item, delay); 
+            sequence.Append(DOTween.To(() => _mainHand.HoldIkConstraint.weight, x => _mainHand.HoldIkConstraint.weight = x, 0f, timeToCancelHold));
+            sequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, timeToCancelLookAt));
+            sequence.Join(DOTween.To(() => _mainHand.PickupIkConstraint.weight, x => _mainHand.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
+            _controller.AnimatorController.Crouch(false);
         }
 
 
         [Client]
-        private void PickupAnimate(Item item, float delay)
+        private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item, HoldController holdController, Transform lookAtTargetLocker)
         {
-            _hands.TryGetOppositeHand(_hands.SelectedHand, out Hand secondaryHand);
-
-            bool withTwoHands = secondaryHand != null && secondaryHand.Empty && item.Holdable.CanHoldTwoHand;
-
-            SetUpPickup(_hands.SelectedHand, secondaryHand, withTwoHands, item);
-
-            PickupReach(item, _hands.SelectedHand, secondaryHand, withTwoHands, delay);
-
-        }
-
-        [Client]
-        private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item)
-        {
-            _holdController.UpdateItemPositionConstraintAndRotation(mainHand, item.Holdable, withTwoHands, 0f, false);
+            holdController.UpdateItemPositionConstraintAndRotation(mainHand, item.Holdable, withTwoHands, 0f, false);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             mainHand.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            _holdController.MovePickupAndHoldTargetLocker(mainHand, false, item.Holdable);
+            holdController.MovePickupAndHoldTargetLocker(mainHand, false, item.Holdable);
 
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(mainHand);
@@ -115,7 +90,7 @@ namespace SS3D.Systems.Animations
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                _holdController.MovePickupAndHoldTargetLocker(
+                holdController.MovePickupAndHoldTargetLocker(
                     secondaryHand, true, item.Holdable);
                 OrientTargetForHandRotation(secondaryHand);
                 secondaryHand.PickupIkConstraint.data.tipRotationWeight = 1f;
@@ -123,30 +98,30 @@ namespace SS3D.Systems.Animations
             }
 
             // Set up the look at target locker on the item to pick up.
-            _lookAtTargetLocker.transform.parent = item.transform;
-            _lookAtTargetLocker.localPosition = Vector3.zero;
-            _lookAtTargetLocker.localRotation = Quaternion.identity;
+            lookAtTargetLocker.transform.parent = item.transform;
+            lookAtTargetLocker.localPosition = Vector3.zero;
+            lookAtTargetLocker.localRotation = Quaternion.identity;
         }
 
         [Client]
         private void PickupReach(Item item, Hand mainHand, Hand secondaryHand, bool withTwoHands, float delay)
         {
             // Rotate player toward item
-            if (GetComponent<PositionController>().Position != PositionType.Sitting)
+            if (_controller.PositionController.Position != PositionType.Sitting)
             {
-                StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
+                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
             }
 
             // If item is too low, crouch to reach
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
-                GetComponent<HumanoidAnimatorController>().Crouch(true);
+                _controller.AnimatorController.Crouch(true);
             }
 
             _pickUpSequence = DOTween.Sequence();
 
             // Start looking at item
-            _pickUpSequence.Append(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 1f, _itemReachDuration));
+            _pickUpSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change hold and pickup constraint weight of the main hand from 0 to 1
             _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.weight, x =>  mainHand.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
@@ -166,7 +141,8 @@ namespace SS3D.Systems.Animations
             _pickUpSequence.Join(item.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _itemMoveDuration));
 
             // At the same time stop looking at the item and uncrouch
-            _pickUpSequence.Join(DOTween.To(() => _lookAtConstraint.weight, x => _lookAtConstraint.weight = x, 0f, _itemMoveDuration).OnStart(Uncrouch));
+            _pickUpSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemMoveDuration).
+                OnStart(() => _controller.AnimatorController.Crouch(false)));
 
             // At the same time start getting the right rotation for the hand
             _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.data.targetRotationWeight, x => mainHand.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
@@ -183,12 +159,11 @@ namespace SS3D.Systems.Animations
 
             _pickUpSequence.SetDelay(delay);
             _pickUpSequence.OnStart(() => IsPicking = true);
-            _pickUpSequence.OnComplete(() => IsPicking = false);
-        }
-
-        private void Uncrouch()
-        {
-            GetComponent<HumanoidAnimatorController>().Crouch(false);
+            _pickUpSequence.OnComplete(() =>
+            {
+                OnCompletion?.Invoke(this);
+                IsPicking = false;
+            });
         }
 
         /// <summary>
