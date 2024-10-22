@@ -56,6 +56,9 @@ namespace SS3D.Systems.Animations
                   case InteractionType.Place:
                       proceduralAnimation = new PlaceAnimation();
                       break;
+                  case InteractionType.Screw:
+                      proceduralAnimation = new InteractAnimations();
+                      break;
                   default:
                       return;
 
@@ -63,7 +66,7 @@ namespace SS3D.Systems.Animations
             
             _animations.Add(new(mainHand, proceduralAnimation));
 
-            proceduralAnimation.ClientPlay(mainHand, secondaryHand, target, targetPosition, this, time, delay);
+            proceduralAnimation.ClientPlay(interactionType, mainHand, secondaryHand, target, targetPosition, this, time, delay);
             proceduralAnimation.OnCompletion += RemoveAnimation;
         }
 

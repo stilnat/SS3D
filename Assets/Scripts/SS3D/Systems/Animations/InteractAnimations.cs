@@ -1,60 +1,40 @@
+using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class InteractAnimations : NetworkBehaviour
+    public class InteractAnimations : IProceduralAnimation
     {
-        [SerializeField]
-        private Hands _hands;
 
-        [SerializeField]
-        private Transform _lookAtTargetLocker;
-
-        [SerializeField]
-        private Transform _hips;
-
-        [SerializeField]
-        private MultiAimConstraint _lookAtConstraint;
-
-        [SerializeField]
         private float _interactionMoveDuration;
 
         private Coroutine _interactCoroutine;
 
-        [Server]
-        public void ServerInteract(Vector3 interactionPoint, IInteractiveTool tool, float delay, InteractionType interactionType)
-        {
-            _interactCoroutine = StartCoroutine(Interact(interactionPoint, _hands.SelectedHand, tool, delay, interactionType));
-        }
+        private Sequence _interactSequence;
 
-        private IEnumerator Interact(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, float delay, InteractionType interactionType)
-        {
-            SetupInteract(mainHand, tool);
+        private ProceduralAnimationController _controller;
 
-            yield return ReachInteractionPoint(interactionPoint, mainHand, tool);
+        private Hand _mainHand;
 
-            tool.PlayAnimation(interactionType);
+        private IInteractiveTool _tool;
 
-            yield return new WaitForSeconds(delay);
-
-            yield return StopInteracting(mainHand, tool);
-
-        }
+        private InteractionType _interactionType;
 
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
         {
             // disable position constraint the time of the interaction
             mainHand.ItemPositionConstraint.weight = 0f;
             mainHand.PickupIkConstraint.weight = 1f;
-            _lookAtTargetLocker.position = tool.InteractionPoint.position;
+            _controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
         }
 
         private void AlignToolWithShoulder(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
@@ -73,6 +53,7 @@ namespace SS3D.Systems.Animations
             // turn the player toward its target so all subsequent computations
             // are correctly done with player oriented toward target. Then, in the same frame,
             // put player at its initial rotation.
+            Transform transform = mainHand.HandsController.transform;
             Vector3 directionFromTransformToTarget = interactionPoint - transform.position;
             directionFromTransformToTarget.y = 0f;
             Quaternion initialPlayerRotation = transform.rotation;
@@ -94,58 +75,57 @@ namespace SS3D.Systems.Animations
             return endPosition;
         }
 
-        private IEnumerator ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
+        private void ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
         {
-            // Start looking at item
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _interactionMoveDuration));
+            _interactSequence = DOTween.Sequence();
 
-            Vector3 startPosition = tool.GameObject.transform.position;
             Vector3 endPosition = ComputeToolEndPosition(interactionPoint, mainHand, tool);
 
             // Rotate player toward item
-            if (GetComponent<PositionController>().Position != PositionType.Sitting)
+            if (_controller.PositionController.Position != PositionType.Sitting)
             {
-                StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, interactionPoint, _interactionMoveDuration, false, true));
+                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, interactionPoint, _interactionMoveDuration, false, true));
             }
 
             if (mainHand.HandBone.transform.position.y - interactionPoint.y > 0.3)
             {
-                GetComponent<HumanoidAnimatorController>().Crouch(true);
+                _controller.AnimatorController.Crouch(true);
             }
 
-            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.GameObject.transform.position = x, startPosition, endPosition, _interactionMoveDuration);
-        }
+            // Start looking at item
+            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _interactionMoveDuration));
 
-        private IEnumerator StopInteracting(Hand mainHand, IInteractiveTool tool)
-        {
-            tool.StopAnimation();
+            // Move tool to the interaction position
+            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _interactionMoveDuration).OnComplete(() => tool.PlayAnimation(_interactionType)));
 
             // Stop looking at item
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _interactionMoveDuration));
+            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _interactionMoveDuration));
 
-            StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(x => tool.GameObject.transform.localRotation = x, tool.GameObject.transform.localRotation, Quaternion.identity, 2 * _interactionMoveDuration));
+            // Rotate tool back to its hold rotation
+            _interactSequence.Append(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, 2 * _interactionMoveDuration).OnStart(() => tool.StopAnimation()));
 
-            GetComponent<HumanoidAnimatorController>().Crouch(false);
+            _interactSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, 2 * _interactionMoveDuration));
 
-            yield return CoroutineHelper.ModifyVector3OverTime(x => tool.GameObject.transform.localPosition = x, tool.GameObject.transform.localPosition, Vector3.zero, 2 * _interactionMoveDuration);
-
-            tool.GameObject.transform.localRotation = Quaternion.identity;
-            mainHand.ItemPositionConstraint.weight = 1f;
-            mainHand.PickupIkConstraint.weight = 0f;
+            _controller.AnimatorController.Crouch(false);
         }
 
-        [Server]
-        public void Cancel(Hand hand, IInteractiveTool tool)
+        public event Action<IProceduralAnimation> OnCompletion;
+        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
+
+        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            ObserverCancel(hand, tool.NetworkBehaviour);
+            _mainHand = mainHand;
+            _tool = target.GetComponent<IInteractiveTool>();
+            _controller = proceduralAnimationController;
+            _interactionMoveDuration = time;
+
+            SetupInteract(mainHand, _tool);
+            ReachInteractionPoint(targetPosition, mainHand, _tool);
         }
 
-        [ObserversRpc]
-        private void ObserverCancel(Hand hand, NetworkBehaviour tool)
+        public void Cancel()
         {
-            StopCoroutine(_interactCoroutine);
-
-            StartCoroutine(StopInteracting(hand, tool as IInteractiveTool));
+            
         }
     }
 }

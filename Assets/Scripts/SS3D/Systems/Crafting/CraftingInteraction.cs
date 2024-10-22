@@ -103,7 +103,7 @@ namespace SS3D.Systems.Crafting
 
             if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractAnimations>().ServerInteract(point, tool, Delay, InteractionType);
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkObject, point, Delay);
             }
             
             return true;
@@ -131,7 +131,7 @@ namespace SS3D.Systems.Crafting
 
             if (interactionEvent.Source.GameObject.TryGetComponent(out IInteractiveTool tool) && interactionEvent.Source.GetRootSource() is Hand hand)
             {
-                hand.GetComponentInParent<InteractAnimations>().Cancel(hand, tool);
+                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
 
         }

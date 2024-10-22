@@ -1,4 +1,5 @@
 using FishNet.Object;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
 using UnityEngine;
@@ -11,9 +12,9 @@ namespace SS3D.Systems.Animations
 
         public event Action<IProceduralAnimation> OnCompletion;
 
-        public void ServerPerform(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition,  ProceduralAnimationController proceduralAnimationController, float time, float delay);
+        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition,  ProceduralAnimationController proceduralAnimationController, float time, float delay);
 
-        public void ClientPlay(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay);
+        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay);
 
         public void Cancel();
     }

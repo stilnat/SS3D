@@ -1,6 +1,7 @@
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
@@ -28,9 +29,9 @@ namespace SS3D.Systems.Animations
         public bool IsPicking { get; private set; }
         public event Action<IProceduralAnimation> OnCompletion;
 
-        public void ServerPerform(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
+        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
 
-        public void ClientPlay(Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             _itemMoveDuration = time / 2;
