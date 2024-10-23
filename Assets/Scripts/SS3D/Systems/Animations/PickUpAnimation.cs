@@ -16,6 +16,8 @@ namespace SS3D.Systems.Animations
 {
     public class PickUpAnimation : IProceduralAnimation
     {
+        public event Action<IProceduralAnimation> OnCompletion;
+
         private float _itemMoveDuration;
 
         private float _itemReachDuration;
@@ -27,7 +29,6 @@ namespace SS3D.Systems.Animations
         private Hand _mainHand;
 
         public bool IsPicking { get; private set; }
-        public event Action<IProceduralAnimation> OnCompletion;
 
         public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
 

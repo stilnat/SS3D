@@ -59,6 +59,9 @@ namespace SS3D.Systems.Animations
                   case InteractionType.Screw:
                       proceduralAnimation = new InteractAnimations();
                       break;
+                  case InteractionType.Press:
+                      proceduralAnimation = new InteractWithHandAnimation();
+                      break;
                   default:
                       return;
 

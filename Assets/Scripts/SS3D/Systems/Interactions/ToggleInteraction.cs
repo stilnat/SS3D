@@ -40,6 +40,8 @@ namespace SS3D.Systems.Interactions
         /// </summary>
         public bool RangeCheck { get; set; } = true;
 
+        public override InteractionType InteractionType => InteractionType.Press;
+
         public ToggleInteraction()
         {
             Delay = 0.2f;
@@ -93,7 +95,7 @@ namespace SS3D.Systems.Interactions
 
             if (hand != null)
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay, InteractionType);
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
             }
             
             return true;

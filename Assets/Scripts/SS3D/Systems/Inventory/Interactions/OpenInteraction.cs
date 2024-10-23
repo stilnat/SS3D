@@ -118,7 +118,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (hand != null)
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<InteractWithHandAnimation>().ServerInteract(hand, point, Delay, InteractionType);
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
             }
 
             return true;
