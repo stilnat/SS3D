@@ -1,6 +1,8 @@
+using DG.Tweening;
 using FishNet.Connection;
 using FishNet.Object;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
 using System;
@@ -13,82 +15,62 @@ using CoroutineHelper = SS3D.Utils.CoroutineHelper;
 
 namespace SS3D.Systems.Animations
 {
-    public class GrabAnimation : NetworkBehaviour
+
+    // TODO : the ownership part should be handled into the interaction system, and the interaction should be a true continuous interaction, only cancelled by client asking or by constraint 
+    public class GrabAnimation : IProceduralAnimation
     {
-        public event EventHandler<bool> OnGrab;
 
         private FixedJoint _fixedJoint;
 
-        [SerializeField]
         private LayerMask _grabbableLayer;
 
-        [SerializeField]
         private float _jointBreakForce = 25000f;
 
-        [SerializeField]
         private float _itemReachDuration;
 
-        [SerializeField]
         private float _itemMoveDuration;
-
-        [SerializeField]
-        private Hands _hands;
-
-        [SerializeField]
-        private Transform _lookAtTargetLocker;
-
-        [SerializeField]
-        private MultiAimConstraint _lookAtConstraint;
 
         private GrabbableBodyPart _grabbedObject;
 
         private NetworkConnection _previousOwner;
 
-        public override void OnStartClient()
-        {
-            base.OnStartClient();
-            if (!GetComponent<NetworkObject>().IsOwner)
-            {
-                enabled = false;
-            }
-        }
+        private ProceduralAnimationController _controller;
 
-        [ServerRpc]
+        private Sequence _grabSequence;
+
+
         private void RpcReleaseGrab()
         {
+            // TODO move into interaction cancel
             _grabbedObject.NetworkObject.GiveOwnership(_previousOwner);
-            ObserversReleaseGrab();
         }
 
-        [Server]
-        public void Grab(GrabbableBodyPart bodyPart, NetworkConnection grabbingPlayer, float timeToMoveBackHand, float timeToReachGrabPlace)
+
+        private void Grab(GrabbableBodyPart bodyPart, NetworkConnection grabbingPlayer, float timeToMoveBackHand, float timeToReachGrabPlace)
         {
+            // TODO move into interaction start
             _previousOwner = bodyPart.Owner;
             bodyPart.NetworkObject.GiveOwnership(grabbingPlayer);
-            ObserversGrab(bodyPart);
         }
 
-        [ObserversRpc]
-        private void ObserversGrab(GrabbableBodyPart bodyPart)
+        public event Action<IProceduralAnimation> OnCompletion;
+
+        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            StartCoroutine(GrabObject(bodyPart));
+
         }
 
-        [ObserversRpc]
-        private void ObserversReleaseGrab()
+        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            ReleaseGrab();
+            _controller = proceduralAnimationController;
+            _grabbedObject = target.GetComponent<GrabbableBodyPart>();
+            SetUpGrab(_grabbedObject, mainHand, secondaryHand, false);
+            GrabReach(_grabbedObject, mainHand);
         }
 
-        private IEnumerator GrabObject(GrabbableBodyPart bodyPart)
+        public void Cancel()
         {
-            _grabbedObject = bodyPart;
-            Hand mainHand = _hands.SelectedHand;
-            _hands.TryGetOppositeHand(mainHand, out Hand secondaryHand);
-            SetUpGrab(bodyPart, mainHand, secondaryHand, false);
-
-            yield return GrabReach(bodyPart, mainHand, secondaryHand, false);
-            yield return GrabPullBack(bodyPart, mainHand, secondaryHand, false);
+            throw new NotImplementedException();
         }
 
         private void ReleaseGrab()
@@ -102,13 +84,11 @@ namespace SS3D.Systems.Animations
 
                     if (_fixedJoint is not null)
                     { 
-                        Destroy(_fixedJoint);
+                       MonoBehaviour.Destroy(_fixedJoint);
                     }
 
                     _grabbedObject = null;
             }
-
-            OnGrab?.Invoke(this, false);
         }
 
         private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -125,42 +105,41 @@ namespace SS3D.Systems.Animations
             }
 
             // Set up the look at target locker on the item to pick up.
-            _lookAtTargetLocker.parent = item.transform;
-            _lookAtTargetLocker.localPosition = Vector3.zero;
-            _lookAtTargetLocker.localRotation = Quaternion.identity;
+            _controller.LookAtTargetLocker.parent = item.transform;
+            _controller.LookAtTargetLocker.localPosition = Vector3.zero;
+            _controller.LookAtTargetLocker.localRotation = Quaternion.identity;
 
             OrientTargetForHandRotation(mainHand);
         }
 
-        private IEnumerator GrabReach(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
+        private void GrabReach(GrabbableBodyPart item, Hand mainHand)
         {
-            if (GetComponent<PositionController>().Position != PositionType.Sitting)
+            _grabSequence = DOTween.Sequence();
+
+            if (_controller.PositionController.Position != PositionType.Sitting)
             {
-                StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
+                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
             }
 
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
-                GetComponent<HumanoidAnimatorController>().Crouch(true);
-
-                yield return new WaitForSeconds(0.25f);
+                _controller.AnimatorController.Crouch(true);
             }
 
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 0f, 1f, _itemReachDuration));
+            // Start looking at grabbed part
+            _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
-            yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.PickupIkConstraint.weight = x, 0f, 1f, _itemReachDuration);
-        }
+            // At the same time change  pickup constraint weight of the main hand from 0 to 1
+            _grabSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
-        private IEnumerator GrabPullBack(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
-        {
             // those two lines necessary to smooth pulling back
             mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
             mainHand.PickupTargetLocker.transform.position = item.transform.position;
 
-            GetComponent<HumanoidAnimatorController>().Crouch(false);
+            _controller.AnimatorController.Crouch(false);
 
             // Since transforms are client autoritative, only the client owner should deal with the physics, in this case creating a fixed joint between grabbed part and client hand. 
-            if (IsOwner)
+            if (mainHand.IsOwner)
             {
                 item.transform.position = mainHand.HoldTransform.position;
                 _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
@@ -171,12 +150,14 @@ namespace SS3D.Systems.Animations
                 grabbedRb.detectCollisions = false; // Disable collisions between the two characters
             }
 
-            StartCoroutine(CoroutineHelper.ModifyValueOverTime(x => _lookAtConstraint.weight = x, 1f, 0f, _itemReachDuration));
+            // Stop looking
+            _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
-            yield return CoroutineHelper.ModifyValueOverTime(x => mainHand.PickupIkConstraint.weight = x, 1f, 0f, _itemMoveDuration);
+            // Stop picking
+            _grabSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
+
 
             Debug.Log("Grabbed object is " + item.name);
-            OnGrab?.Invoke(this, true);
         }
 
         /// <summary>
@@ -192,12 +173,6 @@ namespace SS3D.Systems.Animations
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
             hand.PickupTargetLocker.rotation = targetRotation;
-        }
-
-        [Server]
-        public void CancelGrab()
-        {
-
         }
     }
 }

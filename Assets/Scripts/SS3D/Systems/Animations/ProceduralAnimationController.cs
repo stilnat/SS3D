@@ -38,14 +38,14 @@ namespace SS3D.Systems.Animations
         private List<Tuple<Hand, IProceduralAnimation>> _animations = new();
 
         [Server]
-        public void PlayAnimation(InteractionType interactionType, Hand hand,  NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
+        public void PlayAnimation(InteractionType interactionType, Hand hand,  NetworkBehaviour target, Vector3 targetPosition, float time, float delay = 0f)
         {
             Hands.TryGetOppositeHand(hand, out Hand oppositeHand);
             ObserversPlayAnimation(interactionType, hand, oppositeHand, target, targetPosition, time, delay);
         }
 
         [ObserversRpc]
-        public void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
+        public void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, float time, float delay = 0f)
         {
             IProceduralAnimation proceduralAnimation;
             switch (interactionType)
@@ -61,6 +61,9 @@ namespace SS3D.Systems.Animations
                       break;
                   case InteractionType.Press:
                       proceduralAnimation = new InteractWithHandAnimation();
+                      break;
+                  case InteractionType.Grab:
+                      proceduralAnimation = new GrabAnimation();
                       break;
                   default:
                       return;

@@ -28,12 +28,17 @@ public class GrabInteraction : DelayedInteraction
 
     public override string GetGenericName() => "Grab";
 
-    public override InteractionType InteractionType => InteractionType.None;
+    public override InteractionType InteractionType => InteractionType.Grab;
 
     public override bool CanInteract(InteractionEvent interactionEvent)
     {
         // Can only grab with hand
         if (interactionEvent.Source.GetRootSource() is not Hand hand)
+        {
+            return false;
+        }
+
+        if (interactionEvent.Target is not GrabbableBodyPart grabbable)
         {
             return false;
         }
@@ -62,7 +67,7 @@ public class GrabInteraction : DelayedInteraction
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         GrabbableBodyPart grabbable = interactionEvent.Target as GrabbableBodyPart;
         
-        hand.GetComponentInParent<GrabAnimation>().Grab(grabbable, hand.Owner, TimeToMoveBackHand, TimeToReachGrabPlace);
+        hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, TimeToMoveBackHand, TimeToReachGrabPlace);
                 
         return true;
     }
@@ -70,7 +75,7 @@ public class GrabInteraction : DelayedInteraction
     public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
     {
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-        hand.GetComponentInParent<GrabAnimation>().CancelGrab();
+        hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
     }
 
     protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)

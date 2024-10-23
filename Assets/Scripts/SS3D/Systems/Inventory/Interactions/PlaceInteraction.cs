@@ -106,7 +106,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
             hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
-                InteractionType.Place, hand, hand.ItemInHand.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
+                InteractionType.Place, hand, hand.ItemInHand, interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
             
             return true;
         }

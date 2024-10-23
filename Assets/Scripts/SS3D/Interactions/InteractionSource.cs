@@ -152,7 +152,6 @@ namespace SS3D.Interactions
             {
                 _clientInteractions.Add(new ClientInteractionInstance(clientInteraction, interactionEvent, reference));
             }
-
         }
 
         [Server]
