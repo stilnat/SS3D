@@ -287,7 +287,7 @@ namespace SS3D.Systems.Interactions
             // Raycast to find target game object
             Vector3 point = Vector3.zero;
             Vector3 normal = Vector3.zero;
-            bool raycast = Physics.Raycast(ray, out RaycastHit hit, float.PositiveInfinity, _selectionMask, QueryTriggerInteraction.Ignore);
+            bool raycast = Physics.Raycast(ray, out RaycastHit hit, float.PositiveInfinity, _selectionMask);
             if (raycast)
             {
                 point = hit.point;
