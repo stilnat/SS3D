@@ -1,123 +1,63 @@
+using DG.Tweening;
 using FishNet.Object;
+using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Furniture;
+using SS3D.Systems.Interactions;
+using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Animations
 {
-    public class Sit : NetworkBehaviour
+    public class Sit : IProceduralAnimation
     {
+        public event Action<IProceduralAnimation> OnCompletion;
 
-        [SerializeField]
-        private HumanoidAnimatorController _animatorController;
+        private ProceduralAnimationController _controller;
 
-        [SerializeField]
-        private HumanoidController _movement;
+        private Sequence _sitSequence;
 
-        public override void OnStartClient()
-        {
-            base.OnStartClient();
-            if (!GetComponent<NetworkObject>().IsOwner)
-            {
-                enabled = false;
-            }
+        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        { 
+            
         }
 
-        protected void Update()
+        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            if (!Input.GetKeyDown(KeyCode.J))
-            {
-                return;
-            }
-
-            if (GetComponent<PositionController>().Position == PositionType.Standing && CanSit(out Sittable sit))
-            {
-                RcpSit(sit);
-            }
-            else if (GetComponent<PositionController>().Position == PositionType.Sitting)
-            {
-                RcpStopSitting();
-            }
+            _controller = proceduralAnimationController;
+            AnimateSit(target.transform);
         }
 
-        [ServerRpc]
-        private void RcpSit(Sittable sit)
+        public void Cancel()
         {
-            ObserversSit(sit);
+
         }
 
-        [ObserversRpc]
-        private void ObserversSit(Sittable sit)
+        private void AnimateSit(Transform sit)
         {
-            StartCoroutine(AnimateSit(sit.transform));
-        }
+            _controller.MovementController.enabled = false;
 
-        [ServerRpc]
-        private void RcpStopSitting()
-        {
-             ObserversStopSitting();
-        }
+            _controller.AnimatorController.Sit(true);
 
-        [ServerRpc]
-        private void ObserversStopSitting()
-        {
-            StopSitting();
-        }
+            _sitSequence = DOTween.Sequence();
 
-        private bool CanSit(out Sittable sit)
-        {
-            // Cast a ray from the mouse position into the scene
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            _sitSequence.Join(_controller.transform.DOMove(sit.position, 0.5f));
+            _sitSequence.Join(_controller.transform.DORotate(sit.rotation.eulerAngles, 0.5f));
 
-            // Check if the ray hits any collider
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                // Check if the collider belongs to a GameObject
-                GameObject obj = hit.collider.gameObject;
+            _controller.PositionController.Position = PositionType.Sitting;
 
-                if (obj.TryGetComponent(out Sittable sit2) && GoodDistanceFromRootToSit(sit2.transform))
-                {
-                    sit = sit2;
-
-                    return true;
-                }
-            }
-
-            sit = null;
-
-            return false;
-        }
-
-        private IEnumerator AnimateSit(Transform sitOrientation)
-        {
-            _movement.enabled = false;
-
-            _animatorController.Sit(true);
-
-            Vector3 initialRotation = transform.eulerAngles;
-
-            Vector3 initialPosition = transform.position;
-
-            StartCoroutine(CoroutineHelper.ModifyVector3OverTime(x => transform.eulerAngles = x, initialRotation, sitOrientation.eulerAngles, 0.5f));
-
-            yield return CoroutineHelper.ModifyVector3OverTime(x => transform.position = x, initialPosition, sitOrientation.position, 0.5f);
-
-            GetComponent<PositionController>().Position = PositionType.Sitting;
+            _sitSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
 
         private void StopSitting()
         {
-            _movement.enabled = true;
-            _animatorController.Sit(false);
-            GetComponent<PositionController>().Position = PositionType.Standing;
-        }
-
-        private bool GoodDistanceFromRootToSit(Transform sit)
-        {
-            return Vector3.Distance(transform.position, sit.position) < 0.8f;
+            _controller.MovementController.enabled = true;
+            _controller.AnimatorController.Sit(false);
+            _controller.PositionController.Position = PositionType.Standing;
         }
     }
 }

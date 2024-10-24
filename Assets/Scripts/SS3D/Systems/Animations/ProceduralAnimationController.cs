@@ -23,16 +23,19 @@ namespace SS3D.Systems.Animations
         public HoldController HoldController { get; private set; }
 
         [field: SerializeField]
-        public MultiAimConstraint LookAtConstraint {get; private set; }
+        public MultiAimConstraint LookAtConstraint { get; private set; }
 
         [field: SerializeField]
-        public PositionController PositionController {get; private set; }
+        public PositionController PositionController { get; private set; }
 
         [field: SerializeField]
-        public HumanoidAnimatorController AnimatorController {get; private set; }
+        public HumanoidAnimatorController AnimatorController { get; private set; }
 
         [field: SerializeField]
-        public Hands Hands {get; private set; }
+        public HumanoidLivingController MovementController { get; private set; }
+
+        [field: SerializeField]
+        public Hands Hands { get; private set; }
 
         // We can't have more than one procedural animation running at the same time per hand
         private List<Tuple<Hand, IProceduralAnimation>> _animations = new();
@@ -64,6 +67,9 @@ namespace SS3D.Systems.Animations
                       break;
                   case InteractionType.Grab:
                       proceduralAnimation = new GrabAnimation();
+                      break;
+                  case InteractionType.Sit:
+                      proceduralAnimation = new Sit();
                       break;
                   default:
                       return;
