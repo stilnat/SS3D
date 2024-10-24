@@ -39,15 +39,11 @@ namespace SS3D.Systems.Entities.Humanoid
             if (isAiming)
             {
                 // Get the index of the layer named "UpperBody"
-                int gunAimingLayerIndex = _animator.GetLayerIndex("Aiming");
-                // Set the weight of the "UpperBody" layer to fully active
-                _animator.SetLayerWeight(gunAimingLayerIndex, 1.0f);
+                _animator.SetBool("Aim", true);
             }
             else
             {
-                int gunAimingLayerIndex = _animator.GetLayerIndex("Aiming");
-                // Set the weight of the "UpperBody" layer to fully active
-                _animator.SetLayerWeight(gunAimingLayerIndex, 0.0f);
+                _animator.SetBool("Aim", false);
             }
         }
 
