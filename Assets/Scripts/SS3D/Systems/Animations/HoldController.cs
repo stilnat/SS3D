@@ -175,7 +175,9 @@ namespace SS3D.Systems.Animations
 
         private Vector3 OffsetFromHoldTypeAndHand(HandHoldType handHoldType, HandType selectedHand)
         {
-            return _holdData.First(x => x.HandHoldType == handHoldType && x.PrimaryHand == selectedHand).Offset;
+            Transform selected = TargetFromHoldTypeAndHand(handHoldType, selectedHand);
+
+            return selected.localPosition;
         }
     }
 }
