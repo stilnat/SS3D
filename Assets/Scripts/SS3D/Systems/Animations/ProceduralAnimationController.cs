@@ -71,6 +71,9 @@ namespace SS3D.Systems.Animations
                   case InteractionType.Sit:
                       proceduralAnimation = new Sit();
                       break;
+                  case InteractionType.Throw:
+                      proceduralAnimation = new ThrowAnimation();
+                      break;
                   default:
                       return;
 

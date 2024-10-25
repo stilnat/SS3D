@@ -6949,7 +6949,6 @@ GameObject:
   - component: {fileID: 3899653582605172798}
   - component: {fileID: 7568747683536695618}
   - component: {fileID: 2744598832793855224}
-  - component: {fileID: 814667727278639600}
   - component: {fileID: 3265741626988572248}
   - component: {fileID: 5257508295790914349}
   - component: {fileID: 909431137198346835}
@@ -6957,6 +6956,7 @@ GameObject:
   - component: {fileID: 2768583506857238720}
   - component: {fileID: 7601720951202063522}
   - component: {fileID: 8615535220686661918}
+  - component: {fileID: 3054724180155005980}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -7077,7 +7077,6 @@ MonoBehaviour:
   - {fileID: 3899653582605172798}
   - {fileID: 7568747683536695618}
   - {fileID: 2744598832793855224}
-  - {fileID: 814667727278639600}
   - {fileID: 3265741626988572248}
   - {fileID: 5257508295790914349}
   - {fileID: 909431137198346835}
@@ -7085,6 +7084,7 @@ MonoBehaviour:
   - {fileID: 2768583506857238720}
   - {fileID: 7601720951202063522}
   - {fileID: 8615535220686661918}
+  - {fileID: 3054724180155005980}
   - {fileID: 3624753817424616501}
   - {fileID: 4379150911436436683}
   - {fileID: 7933397141592770015}
@@ -7427,7 +7427,7 @@ MonoBehaviour:
   _throwToolboxRight: {fileID: 5020193951115866215}
   _smallItemRight: {fileID: 7151404865513586269}
   _smallItemLeft: {fileID: 7672624758370820705}
-  _throwAnimations: {fileID: 814667727278639600}
+  _throwAnimations: {fileID: 0}
 --- !u!114 &4083960901991266909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7533,31 +7533,6 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _inventory: {fileID: 7878631375339778391}
---- !u!114 &814667727278639600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4089496606853742746}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c815e64fcd1eb0499ca51dab4a05e91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 11
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _hands: {fileID: 3222345056416986628}
-  _animatorController: {fileID: 4083960901991266909}
-  _movementController: {fileID: 313020066527916364}
-  _aimTarget: {fileID: 2856800849451305125}
-  _maxForce: 20
-  _secondPerMeterFactorDef: 0.3
-  _secondPerMeterFactorHarm: 0.15
-  _bodyAimRig: {fileID: 4182499762659887119}
-  _holdController: {fileID: 5029722283718734781}
-  _intents: {fileID: 3265741626988572248}
 --- !u!114 &3265741626988572248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7570,7 +7545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d1d2e4c2e9e00459702112565314a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 12
+  _componentIndexCache: 11
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _intent: 0
@@ -7586,7 +7561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 13
+  _componentIndexCache: 12
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
@@ -7604,7 +7579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c75d17834848bb4f83ee6e730a65519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 14
+  _componentIndexCache: 13
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
@@ -7622,7 +7597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4ff32dc0709afc4990941dc6637c6f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 15
+  _componentIndexCache: 14
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _aimTarget: {fileID: 2856800849451305125}
@@ -7644,7 +7619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c820c500b2966a940907fe7f9855c107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 16
+  _componentIndexCache: 15
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _armatureRoot: {fileID: 3362543718434004155}
@@ -7665,7 +7640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 524774ef343211042b18bd7442ba4ee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 17
+  _componentIndexCache: 16
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
@@ -7682,7 +7657,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7caa3b96ae405e74d9512d65caf2385f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 18
+  _componentIndexCache: 17
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   <LookAtTargetLocker>k__BackingField: {fileID: 5358384094254398678}
@@ -7692,6 +7667,27 @@ MonoBehaviour:
   <AnimatorController>k__BackingField: {fileID: 4083960901991266909}
   <MovementController>k__BackingField: {fileID: 313020066527916364}
   <Hands>k__BackingField: {fileID: 3222345056416986628}
+--- !u!114 &3054724180155005980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd3cc10aaeffdd44682180f6eb9bea3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 18
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
+  <AimTarget>k__BackingField: {fileID: 2856800849451305125}
+  _intents: {fileID: 0}
+  _hands: {fileID: 3222345056416986628}
+  _movementController: {fileID: 313020066527916364}
+  _bodyAimRig: {fileID: 4182499762659887119}
+  _holdController: {fileID: 5029722283718734781}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
