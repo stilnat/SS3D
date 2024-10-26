@@ -214,6 +214,8 @@ namespace SS3D.Systems.Animations
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
+                hand.HoldIkConstraint.weight = 1f;
+                MovePickupAndHoldTargetLocker(hand, true, oppositeHand.ItemInHand.Holdable);
             }
         }
 
