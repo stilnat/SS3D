@@ -3,7 +3,8 @@ using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 
-    public interface IHoldProvider : IGameObjectProvider
+    
+    public interface IHoldProvider : IGameObjectProvider, INetworkBehaviourProvider
     {
         public bool CanHoldTwoHand { get; }
 

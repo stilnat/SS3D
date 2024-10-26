@@ -150,15 +150,6 @@ namespace SS3D.Systems.Animations
                 _placeSequence.Join(DOTween.To(() => secondaryHand.HoldIkConstraint.weight, x => secondaryHand.HoldIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
             }
 
-            // Catch two hands holdable item in other hand with main hand, just freed.
-            if (secondaryHand.Full && secondaryHand.ItemInHand.Holdable is not null && secondaryHand.ItemInHand.Holdable.CanHoldTwoHand)
-            {
-                _controller.HoldController.UpdateItemPositionConstraintAndRotation(secondaryHand, secondaryHand.ItemInHand.Holdable, true, _itemReachPlaceDuration, false);
-                _controller.HoldController.MovePickupAndHoldTargetLocker(mainHand, true, item.Holdable);
-
-                _placeSequence.Append(DOTween.To(() => mainHand.HoldIkConstraint.weight, x => mainHand.HoldIkConstraint.weight = x, 1f, _itemReachPlaceDuration/2));
-            }
-
             _placeSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
 

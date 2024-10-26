@@ -131,8 +131,6 @@ namespace SS3D.Systems.Animations
             }
 
             hand.ItemInHand.GameObject.transform.parent = hand.ItemPositionTargetLocker;
-            _holdController.UpdateItemPositionConstraintAndRotation(
-                hand, hand.ItemInHand.Holdable, true, 0.25f, false);
             hand.ItemInHand.GameObject.transform.localPosition = Vector3.zero;
             hand.ItemInHand.GameObject.transform.localRotation = Quaternion.identity;
             OnAim?.Invoke(this, false);

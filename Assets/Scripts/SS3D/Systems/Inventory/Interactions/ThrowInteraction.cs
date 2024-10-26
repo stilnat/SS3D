@@ -89,8 +89,6 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand; 
-            
-            ThrowAnimations throwAnimations = source.GameObject.GetComponentInParent<ThrowAnimations>();
 
             AimController aimController = source.GameObject.GetComponentInParent<AimController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();

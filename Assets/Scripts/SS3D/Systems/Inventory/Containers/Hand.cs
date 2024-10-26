@@ -9,9 +9,11 @@ using FishNet.Object.Synchronizing;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Inventory.Containers
@@ -124,15 +126,34 @@ namespace SS3D.Systems.Inventory.Containers
 
         public event HandEventHandler OnHandDisabled;
 
+        public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
+
+        /// <summary>
+        /// Called when the contents of the container change
+        /// </summary>
+        public event HandContentsHandler OnContentsChanged;
+
+
         public void Awake()
         {
             // should only be called on server, however it's too late if listening in OnStartServer (again, issue with initialization timing of our systems...)
             Container.OnContentsChanged += ContainerOnOnContentsChanged;
         }
 
+        public override void CreateSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> entries)
+        {
+            base.CreateSourceInteractions(targets, entries);
+            IInteractionTarget target = targets.FirstOrDefault(x => x?.GameObject.GetComponent<Sittable>());
+
+            if (target is Sittable)
+            {
+                entries.Add(new InteractionEntry(target, new SitInteraction(1f)));
+            }
+            
+        }
+
         private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
         {
-
             if (type == ContainerChangeType.Remove)
             {
                 GetComponentInParent<HumanoidAnimatorController>().RemoveHandHolding(this, olditem.Holdable);
@@ -144,22 +165,13 @@ namespace SS3D.Systems.Inventory.Containers
                 GetComponentInParent<HumanoidAnimatorController>().AddHandHolding(this, newitem.Holdable);
             }
 
-            if (GetComponentInParent<PickUpAnimation>().IsPicking)
-            {
-                return;
-            }
-
-            if (type == ContainerChangeType.Add && IsServer)
-            {
-                // Delay necessary otherwise item holdable is not set ... messy.
-                GetComponentInParent<PickUpAnimation>().Pickup(newitem, 0f, 0f, 0.1f);
-            }
-
             if (type == ContainerChangeType.Remove)
             {
                 
                 StopHolding(olditem);
             }
+
+            OnContentsChanged?.Invoke(this, olditem, newitem, type);
         }
 
 

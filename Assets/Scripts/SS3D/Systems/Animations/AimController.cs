@@ -106,12 +106,6 @@ namespace SS3D.Systems.Animations
         {
             IsAiming = true;
             _bodyAimRig.weight = 0.3f;
-
-            if (_intentController.Intent == IntentType.Harm)
-            {
-                _holdController.UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, false, 0.2f, true);
-            }
-
             OnAim?.Invoke(this, true);
         }
 
@@ -119,14 +113,6 @@ namespace SS3D.Systems.Animations
         {
             IsAiming = false;
             _bodyAimRig.weight = 0f;
-            Item item = _hands.SelectedHand.ItemInHand;
-
-            if (item != null)
-            {
-                _holdController.UpdateItemPositionConstraintAndRotation(
-                    _hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, false, 0.2f, false);
-            }
-
             OnAim?.Invoke(this, false);
         }
 

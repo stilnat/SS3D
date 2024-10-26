@@ -71,7 +71,7 @@ namespace SS3D.Systems.Animations
         [Client]
         private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item, HoldController holdController, Transform lookAtTargetLocker)
         {
-            holdController.UpdateItemPositionConstraintAndRotation(mainHand, item.Holdable, withTwoHands, 0f, false);
+            holdController.SetItemConstraintPositionAndRotation(mainHand, item.Holdable);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             mainHand.ItemPositionConstraint.weight = 1f;
@@ -129,7 +129,8 @@ namespace SS3D.Systems.Animations
             _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.weight, x =>  mainHand.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
 
             // When reached for the item, parent it to the item position target locker
-            _pickUpSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() => item.transform.parent = mainHand.ItemPositionTargetLocker));
+            _pickUpSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+                item.transform.parent = mainHand.ItemPositionTargetLocker));
 
             // Reproduce changes on second hand if picking up with two hands
             if (withTwoHands)
@@ -149,7 +150,7 @@ namespace SS3D.Systems.Animations
             // At the same time start getting the right rotation for the hand
             _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.data.targetRotationWeight, x => mainHand.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
 
-            // At the same time, remove the pickup constraint
+            // At the same time, remove the pickup constraint, and if the second hand has an item, update its hold
             _pickUpSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x => mainHand.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
 
             // Reproduce changes on second hand if picking up with two hands
@@ -159,7 +160,6 @@ namespace SS3D.Systems.Animations
                 _pickUpSequence.Join(DOTween.To(() => secondaryHand.PickupIkConstraint.weight, x => secondaryHand.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
             }
 
-            _pickUpSequence.SetDelay(delay);
             _pickUpSequence.OnStart(() => IsPicking = true);
             _pickUpSequence.OnComplete(() =>
             {

@@ -1,4 +1,5 @@
 using NaughtyAttributes;
+using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public abstract class AbstractHoldable : MonoBehaviour, IHoldProvider
+public abstract class AbstractHoldable : NetworkActor, IHoldProvider
 {
     [SerializeField]
     protected Transform _primaryRightHandHold;
