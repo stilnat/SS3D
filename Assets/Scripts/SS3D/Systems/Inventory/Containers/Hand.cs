@@ -142,6 +142,7 @@ namespace SS3D.Systems.Inventory.Containers
 
         public override void CreateSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> entries)
         {
+            // todo : hands should not handle sit interactions, ass should, but the interaction controller needs some changes to handle interaction sources other than hands
             base.CreateSourceInteractions(targets, entries);
             IInteractionTarget target = targets.FirstOrDefault(x => x?.GameObject.GetComponent<Sittable>());
 

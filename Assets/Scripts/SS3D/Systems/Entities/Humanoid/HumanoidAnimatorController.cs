@@ -27,40 +27,6 @@ namespace SS3D.Systems.Entities.Humanoid
             UnsubscribeFromEvents();
         }
 
-        private void SubscribeToEvents()
-        {
-            _movementController.OnSpeedChangeEvent += UpdateMovement;
-            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-        }
-
-        private void HandleGunAim(object sender, bool isAiming)
-        {
-            if (isAiming)
-            {
-                // Get the index of the layer named "UpperBody"
-                _animator.SetBool("Aim", true);
-            }
-            else
-            {
-                _animator.SetBool("Aim", false);
-            }
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            _movementController.OnSpeedChangeEvent -= UpdateMovement;
-        }
-
-        private void UpdateMovement(float speed)
-        {
-            bool isMoving = speed != 0;
-            float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
-            float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
-            speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
-            
-            _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
-        }
-
         public void Sit(bool sitState)
         {
             _animator.SetBool("Sit", sitState);
@@ -128,6 +94,40 @@ namespace SS3D.Systems.Entities.Humanoid
         private void HandleNetworkTick()
         {
             _animator.SetFloat("AngleAimMove", (_movementController.InputAimAngle / 360f) + 0.5f);
+        }
+
+        private void SubscribeToEvents()
+        {
+            _movementController.OnSpeedChangeEvent += UpdateMovement;
+            InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
+        }
+
+        private void HandleGunAim(object sender, bool isAiming)
+        {
+            if (isAiming)
+            {
+                // Get the index of the layer named "UpperBody"
+                _animator.SetBool("Aim", true);
+            }
+            else
+            {
+                _animator.SetBool("Aim", false);
+            }
+        }
+
+        private void UnsubscribeFromEvents()
+        {
+            _movementController.OnSpeedChangeEvent -= UpdateMovement;
+        }
+
+        private void UpdateMovement(float speed)
+        {
+            bool isMoving = speed != 0;
+            float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
+            float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
+            speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
+            
+            _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
         }
     }
 }
