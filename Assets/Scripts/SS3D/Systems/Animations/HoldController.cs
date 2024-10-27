@@ -102,7 +102,6 @@ namespace SS3D.Systems.Animations
             _itemsInHands.OnChange += HandleItemsInHandsChanged;
             _intents.OnIntentChange += HandleIntentChange;
             _aimController.OnAim += HandleAimChange;
-            GetComponent<GunAimAnimation>().OnAim += HandleGunAimChange;
 
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldLeft, HandType.LeftHand));
             _holdData.Add(new(HandHoldType.DoubleHandGun, _gunHoldRight, HandType.RightHand));
@@ -120,7 +119,7 @@ namespace SS3D.Systems.Animations
 
         public void SetItemConstraintPositionAndRotation(Hand hand, IHoldProvider item)
         {
-            bool toThrow = _aimController.IsAiming;
+            bool toThrow = _aimController.IsAimingToThrow;
             bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
 
             // Fetch how the item should be held
@@ -149,7 +148,7 @@ namespace SS3D.Systems.Animations
                 return;
             }
 
-            bool toThrow = _aimController.IsAiming;
+            bool toThrow = _aimController.IsAimingToThrow;
             bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
 
             // Fetch how the item should be held
@@ -273,15 +272,34 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        private void HandleAimChange(object sender, bool e)
+        private void HandleAimChange(object sender, Tuple<bool, bool, AbstractHoldable> aimParameters)
         {
-            UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
-        }
+            bool isAiming = aimParameters.Item1;
+            bool toThrow = aimParameters.Item2;
+            AbstractHoldable holdable = aimParameters.Item3;
 
+            // handle aiming with shoulder aim
+            if (holdable.TryGetComponent(out Gun gun) && !toThrow && isAiming)
+            {
+                gun.transform.parent = _hands.SelectedHand.ShoulderWeaponPivot;
 
-        private void HandleGunAimChange(object sender, bool e)
-        {
-            UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
+                // position correctly the gun on the shoulder, assuming the rifle butt transform is defined correctly
+                gun.transform.localPosition = -gun.RifleButt.localPosition;
+                gun.transform.localRotation = Quaternion.identity;
+            }
+            // Stop aiming with shoulder aim
+            else if (gun && !isAiming)
+            {
+                _hands.SelectedHand.ItemInHand.GameObject.transform.parent = _hands.SelectedHand.ItemPositionTargetLocker;
+                _hands.SelectedHand.ItemInHand.GameObject.transform.localPosition = Vector3.zero;
+                _hands.SelectedHand.ItemInHand.GameObject.transform.localRotation = Quaternion.identity;
+                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
+            }
+            // if it's not a gun, or if its to throw it
+            else
+            {
+                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
+            }
         }
 
         private Transform TargetFromHoldTypeAndHand(HandHoldType handHoldType, HandType selectedHand)

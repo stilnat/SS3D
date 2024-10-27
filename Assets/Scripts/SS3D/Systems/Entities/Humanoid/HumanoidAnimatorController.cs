@@ -31,7 +31,6 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _movementController.OnSpeedChangeEvent += UpdateMovement;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-            GetComponent<GunAimAnimation>().OnAim += HandleGunAim;
         }
 
         private void HandleGunAim(object sender, bool isAiming)

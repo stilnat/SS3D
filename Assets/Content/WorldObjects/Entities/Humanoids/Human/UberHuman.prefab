@@ -6952,7 +6952,6 @@ GameObject:
   - component: {fileID: 3265741626988572248}
   - component: {fileID: 5257508295790914349}
   - component: {fileID: 909431137198346835}
-  - component: {fileID: 8621494274385040166}
   - component: {fileID: 2768583506857238720}
   - component: {fileID: 7601720951202063522}
   - component: {fileID: 8615535220686661918}
@@ -7081,7 +7080,7 @@ MonoBehaviour:
   - {fileID: 3265741626988572248}
   - {fileID: 5257508295790914349}
   - {fileID: 909431137198346835}
-  - {fileID: 8621494274385040166}
+  - {fileID: 0}
   - {fileID: 2768583506857238720}
   - {fileID: 7601720951202063522}
   - {fileID: 8615535220686661918}
@@ -7589,28 +7588,6 @@ MonoBehaviour:
   _openState: 0
   OverrideOpenIcon: {fileID: 0}
   attachedContainer: {fileID: 5482738034181427131}
---- !u!114 &8621494274385040166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4089496606853742746}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4ff32dc0709afc4990941dc6637c6f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 15
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _aimTarget: {fileID: 2856800849451305125}
-  _hands: {fileID: 3222345056416986628}
-  _intents: {fileID: 3265741626988572248}
-  _holdController: {fileID: 5029722283718734781}
-  _bodyAimRig: {fileID: 4182499762659887119}
-  _rotationSpeed: 5
-  _movementController: {fileID: 313020066527916364}
 --- !u!114 &2768583506857238720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7691,6 +7668,8 @@ MonoBehaviour:
   _bodyAimRig: {fileID: 4182499762659887119}
   _holdController: {fileID: 5029722283718734781}
   <AimTarget>k__BackingField: {fileID: 2856800849451305125}
+  _isAimingToThrow: 0
+  _isAimingToShoot: 0
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0

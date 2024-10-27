@@ -103,7 +103,6 @@ namespace SS3D.Systems.Entities.Humanoid
         public override void OnStartClient()
         {
             base.OnStartClient();
-            //UnityEngine.Debug.Log("Start client humanoid controller");
             if (!GetComponent<NetworkObject>().IsOwner)
             {
                 enabled = false;
@@ -237,11 +236,15 @@ namespace SS3D.Systems.Entities.Humanoid
 
             _inputSystem.ToggleActionMap(_movementControls, true);
             _inputSystem.ToggleActionMap(_hotkeysControls, true);
-            GetComponent<AimController>().OnAim += HandleAimChange; 
-            GetComponent<GunAimAnimation>().OnAim += HandleAimChange;
-           // GetComponent<Grab>().OnGrab += HandleGrabChange;
+            GetComponent<AimController>().OnAim += HandleAimChange;
+            //GetComponent<Grab>().OnGrab += HandleGrabChange;
 
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
+        }
+
+        private void HandleAimChange(object sender, Tuple<bool, bool, AbstractHoldable> e)
+        {
+            _movementType = e.Item1 ? MovementType.Aiming : MovementType.Normal;
         }
 
         private void ComputeAngleBetweenAimAndInput()
@@ -251,11 +254,6 @@ namespace SS3D.Systems.Entities.Humanoid
             Vector2 targetMove = new Vector2(_targetMovement.x, _targetMovement.z);
 
             InputAimAngle = Vector2.SignedAngle(targetMove, forward);
-        }
-
-        private void HandleAimChange(object sender, bool aim)
-        {
-            _movementType = aim ? MovementType.Aiming : MovementType.Normal;
         }
 
         private void HandleGrabChange(object sender, bool grab)

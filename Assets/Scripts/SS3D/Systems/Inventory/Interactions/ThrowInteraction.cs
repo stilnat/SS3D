@@ -62,7 +62,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            if (!aimController.IsAiming)
+            if (!aimController.IsAimingToThrow)
             {
                 return false;
             }

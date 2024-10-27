@@ -1,4 +1,6 @@
+using Coimbra;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
@@ -16,7 +18,7 @@ namespace SS3D.Systems.Animations
     public class AimController : NetworkActor
     {
 
-        public event EventHandler<bool> OnAim;
+        public event EventHandler<Tuple<bool, bool, AbstractHoldable>> OnAim;
 
         [SerializeField]
         private Hands _hands;
@@ -27,15 +29,20 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Rig _bodyAimRig;
 
-        [SerializeField]
-        private HoldController _holdController;
-
         private IntentController _intentController;
+
+        [SyncVar(OnChange = nameof(SyncAimingToThrow))]
+        private bool _isAimingToThrow;
+
+        [SyncVar(OnChange = nameof(SyncAimingToShoot))]
+        private bool _isAimingToShoot;
+
+        public bool IsAimingToThrow => _isAimingToThrow;
+
+        public bool IsAimingToShoot => _isAimingToShoot;
 
         [field: SerializeField]
         public Transform AimTarget { get; private set; }
-
-        public bool IsAiming { get; private set; }
 
         public override void OnStartClient()
         {
@@ -45,28 +52,14 @@ namespace SS3D.Systems.Animations
             {
                 enabled = false;
             }
-            Subsystems.Get<InputSystem>().Inputs.Interactions.AimThrow.performed += AimThrowOnperformed;
+
+            Subsystems.Get<InputSystem>().Inputs.Interactions.AimThrow.performed += AimThrowOnPerformed;
+            Subsystems.Get<InputSystem>().Inputs.Interactions.AimGun.performed += AimGunOnPerformed;
         }
 
-        private void AimThrowOnperformed(InputAction.CallbackContext obj)
-        {
-            if (_hands.SelectedHand.Full)
-            {
-                if (!IsAiming)
-                {
-                    RpcAim();
-                }
-                else
-                {
-                    RpcStopAim();
-                }
-            }
-        }
-
-        // Update is called once per frame
         protected void Update()
         {
-            if (IsAiming)
+            if (IsAimingToThrow || IsAimingToShoot)
             {
                 UpdateAimTargetPosition();
 
@@ -77,43 +70,48 @@ namespace SS3D.Systems.Animations
             }
         }
 
+        private void SyncAimingToThrow(bool wasAiming, bool isAiming, bool asServer)
+        {
+            _bodyAimRig.weight = isAiming ? 0.3f : 0f;
+            OnAim?.Invoke(this, new(isAiming, true, _hands.SelectedHand.ItemInHand.Holdable as AbstractHoldable));
+        }
+
+        private void SyncAimingToShoot(bool wasAiming, bool isAiming, bool asServer)
+        {
+            _bodyAimRig.weight = isAiming ? 0.3f : 0f;
+            OnAim?.Invoke(this, new(isAiming, false, _hands.SelectedHand.ItemInHand.Holdable as AbstractHoldable));
+        }
+
+        private void AimThrowOnPerformed(InputAction.CallbackContext obj)
+        {
+            if (!_hands.SelectedHand.Full)
+            {
+                return;
+            }
+
+            RpcAimToThrow(!IsAimingToThrow);
+        }
+
+        private void AimGunOnPerformed(InputAction.CallbackContext obj)
+        {
+            bool canAim = _intentController.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemInHand.GameObject.HasComponent<Gun>();
+
+            if (canAim)
+            {
+                RpcAimToShoot(!IsAimingToShoot);
+            }
+        }
+
         [ServerRpc]
-        private void RpcAim()
+        private void RpcAimToThrow(bool isAimingToThrow)
         {
-            ObserverAim();
-        }
-
-        [ObserversRpc]
-        private void ObserverAim()
-        {
-            Aim();
+            _isAimingToThrow = isAimingToThrow;
         }
 
         [ServerRpc]
-        private void RpcStopAim()
+        private void RpcAimToShoot(bool isAimingToShoot)
         {
-            ObserverStopAim();
-        }
-
-        [ObserversRpc]
-        private void ObserverStopAim()
-        {
-            StopAiming();
-        }
-
-
-        private void Aim()
-        {
-            IsAiming = true;
-            _bodyAimRig.weight = 0.3f;
-            OnAim?.Invoke(this, true);
-        }
-
-        private void StopAiming()
-        {
-            IsAiming = false;
-            _bodyAimRig.weight = 0f;
-            OnAim?.Invoke(this, false);
+            _isAimingToShoot = isAimingToShoot;
         }
 
         private void UpdateAimTargetPosition()
@@ -127,6 +125,5 @@ namespace SS3D.Systems.Animations
                 AimTarget.position = hit.point;
             }
         }
-
     }
 }
