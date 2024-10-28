@@ -74,6 +74,9 @@ namespace SS3D.Systems.Animations
                   case InteractionType.Throw:
                       proceduralAnimation = new ThrowAnimation();
                       break;
+                  case InteractionType.Hit:
+                      proceduralAnimation = mainHand.Full ? new HitWithItemAnimation() : new HitAnimation();
+                      break;
                   default:
                       return;
 

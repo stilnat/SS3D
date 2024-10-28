@@ -111,6 +111,12 @@ namespace SS3D.Systems.Interactions
                 return throwInteraction;
             }
 
+            InteractionEntry hitInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Hit");
+            if (hitInteraction.Interaction != null)
+            {
+                return hitInteraction;
+            }
+
             return viableInteractions[0];
         }
 

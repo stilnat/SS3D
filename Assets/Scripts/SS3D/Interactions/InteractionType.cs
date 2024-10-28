@@ -16,5 +16,6 @@ namespace SS3D.Systems.Interactions
         Grab,
         Sit,
         Throw,
+        Hit,
     }
 }
