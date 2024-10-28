@@ -6956,7 +6956,8 @@ GameObject:
   - component: {fileID: 7601720951202063522}
   - component: {fileID: 8615535220686661918}
   - component: {fileID: 3054724180155005980}
-  - component: {fileID: 1949858558513743142}
+  - component: {fileID: 5105693212393500607}
+  - component: {fileID: 4819896081439289793}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -7085,7 +7086,7 @@ MonoBehaviour:
   - {fileID: 7601720951202063522}
   - {fileID: 8615535220686661918}
   - {fileID: 3054724180155005980}
-  - {fileID: 1949858558513743142}
+  - {fileID: 5105693212393500607}
   - {fileID: 3624753817424616501}
   - {fileID: 4379150911436436683}
   - {fileID: 7933397141592770015}
@@ -7670,7 +7671,25 @@ MonoBehaviour:
   _isAimingToThrow: 0
   _isAimingToShoot: 0
   <AimTarget>k__BackingField: {fileID: 2856800849451305125}
---- !u!114 &1949858558513743142
+--- !u!114 &5105693212393500607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e83c59806a38100498044ba245fdda5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 19
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
+  _hands: {fileID: 3222345056416986628}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
+--- !u!114 &4819896081439289793
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7682,9 +7701,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f08a3260b736784db0ff14279854a34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 19
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 0}
   _hands: {fileID: 3222345056416986628}
   _lookAtConstraint: {fileID: 2851688491558728783}
   _lookAtTargetLocker: {fileID: 5358384094254398678}

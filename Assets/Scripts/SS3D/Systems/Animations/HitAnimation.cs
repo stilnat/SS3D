@@ -69,7 +69,7 @@ namespace SS3D.Systems.Animations
         private void HitAnimate(Vector3 hitTargetPosition)
         {
 
-            Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
+            Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.UpperArm.position;
 
             float duration = 3f * Mathf.Min(fromHandToHit.magnitude, 0.7f);
 
@@ -157,64 +157,12 @@ namespace SS3D.Systems.Animations
             _hands.SelectedHand.PickupTargetLocker.transform.position = _hands.SelectedHand.HandBone.transform.position;
             _hands.SelectedHand.PickupTargetLocker.transform.rotation = _hands.SelectedHand.HandBone.transform.rotation;
 
-            float deviationFromStraightTrajectory = 0.2f;
-
             // direction vector from the hand to the hit in world space.
-            Vector3 fromHandToHit = hitTargetPosition - _hands.SelectedHand.HandBone.position;
+            Vector3 fromShoulderToHit = hitTargetPosition - _hands.SelectedHand.UpperArm.position;
 
-            // direction vector from the hand to the hit in transform parent space.
-            Vector3 fromHandToHitRelativeToPlayer = transform.InverseTransformDirection(fromHandToHit);
+            Vector3 handTargetPosition = ComputeTargetHandPosition(fromShoulderToHit, hitTargetPosition);
+            Vector3[] path = ComputeHandPath(handTargetPosition, fromShoulderToHit, isRight);
 
-
-            // We don't want our trajectory to be to streched, so we put the hit point closer if necessary, reachable by human
-            if (fromHandToHit.magnitude > 0.7f)
-            {
-                hitTargetPosition = _hands.SelectedHand.HandBone.position + (fromHandToHit.normalized * 0.7f);
-            }
-
-            // compute the hit position relative to player root
-            Vector3 hitPositionRelativeToPlayer = transform.InverseTransformPoint(hitTargetPosition);
-
-            // compute the hand position relative to player root
-            Vector3 handPositionRelativeToPlayer = transform.InverseTransformPoint( _hands.SelectedHand.HandBone.position);
-
-            // compute the middle between hand and hit position, still in player's root referential
-            Vector3 middleFromHandToHit =  (hitPositionRelativeToPlayer + handPositionRelativeToPlayer) / 2;
-
-            int deviationRightOrLeft = isRight ? 1 : -1;
-
-            // compute the trajectory deviation point, using the cross product to get a vector orthogonal to the hit direction,
-            // then, from the middle of the distance between hand and hit, step on the side from a given quantity.
-            // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically 
-            Vector3 trajectoryPeak = middleFromHandToHit + (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
-
-            // Same as trajectoryPeak but for when the hand gets back in rest position
-            Vector3 trajectoryPeakBack = middleFromHandToHit - (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
-
-            // show the hit target position in the player referential
-            DebugExtension.DebugPoint((transform.rotation * hitPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
-
-            // show the beginning of the animation
-            DebugExtension.DebugPoint((transform.rotation * handPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
-
-            // show the middle of the two precedent points
-            DebugExtension.DebugPoint((transform.rotation * middleFromHandToHit) + transform.position, Color.green, 1f, 2f);
-
-            Debug.DrawRay((transform.rotation * middleFromHandToHit) + transform.position, Vector3.Cross(Vector3.up, fromHandToHit).normalized * 0.6f, Color.green, 2f);
-
-            // show the direction from hand to the hit target
-            Debug.DrawRay( _hands.SelectedHand.HandBone.position, fromHandToHit, Color.red, 2f);
-
-            // show the trajectory point guiding the hand outside
-            DebugExtension.DebugPoint( (transform.rotation *trajectoryPeak) + transform.position, Color.cyan, 0.2f,2f);
-
-            // Define the points for the trajectory in the player's root referential
-            Vector3[] path = new Vector3[] {
-                handPositionRelativeToPlayer,
-                trajectoryPeak,
-                hitPositionRelativeToPlayer,
-                trajectoryPeakBack, 
-            };
 
             // Set the IK target to be parented by human so that we can use local path to animate the IK target,
             // while keeping the trajectory relative to the player's root transform.
@@ -246,6 +194,83 @@ namespace SS3D.Systems.Animations
             // We restore the rotation we modified
             transform.rotation = currentRotation;
             return tween;
+        }
+
+        /// <summary>
+        /// Compute the path the hand will take for the hit animation.
+        /// </summary>
+        /// <param name="targetHandHoldPosition"> The target hand hold position in world space.</param>
+        /// <param name="fromHandToHit"></param>
+        /// <param name="isRight"></param>
+        /// <returns></returns>
+        private Vector3[] ComputeHandPath(Vector3 handTargetPosition, Vector3 fromShoulderToHit, bool isRight)
+        {
+            float deviationFromStraightTrajectory = 0.2f;
+
+            // direction vector from the hand to the hit in transform parent space.
+            Vector3 fromShoulderToHitRelativeToPlayer = transform.InverseTransformDirection(fromShoulderToHit);
+
+            // compute the hit position relative to player root
+            Vector3 handTargetPositionRelativeToPlayer = transform.InverseTransformPoint(handTargetPosition);
+
+            // compute the hand position relative to player root
+            Vector3 shoulderPositionRelativeToPlayer = transform.InverseTransformPoint( _hands.SelectedHand.UpperArm.position);
+
+            // compute the middle between hand and hit position, still in player's root referential
+            Vector3 middleFromShoulderToHit = (handTargetPositionRelativeToPlayer + shoulderPositionRelativeToPlayer) / 2;
+
+            int deviationRightOrLeft = isRight ? 1 : -1;
+
+            // compute the trajectory deviation point, using the cross product to get a vector orthogonal to the hit direction,
+            // then, from the middle of the distance between hand and hit, step on the side from a given quantity.
+            // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically 
+            Vector3 trajectoryPeak = middleFromShoulderToHit + (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
+
+            // Same as trajectoryPeak but for when the hand gets back in rest position
+            Vector3 trajectoryPeakBack = middleFromShoulderToHit - (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
+
+            // show the hit target position in the player referential
+            DebugExtension.DebugPoint((transform.rotation * handTargetPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
+
+            // show the beginning of the animation
+            DebugExtension.DebugPoint((transform.rotation * handTargetPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
+
+            // show the middle of the two precedent points
+            DebugExtension.DebugPoint((transform.rotation * middleFromShoulderToHit) + transform.position, Color.green, 1f, 2f);
+
+            Debug.DrawRay((transform.rotation * middleFromShoulderToHit) + transform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
+
+            // show the direction from shoulder to the hit target
+            Debug.DrawRay( _hands.SelectedHand.UpperArm.position, fromShoulderToHit, Color.red, 2f);
+
+            // show the trajectory point guiding the hand outside
+            DebugExtension.DebugPoint( (transform.rotation *trajectoryPeak) + transform.position, Color.cyan, 0.2f,2f);
+
+            // Define the points for the trajectory in the player's root referential
+            Vector3[] path = new Vector3[] {
+                trajectoryPeak,
+                handTargetPositionRelativeToPlayer,
+                trajectoryPeakBack, 
+            };
+
+            return path;
+
+        }
+
+        /// <summary>
+        /// Compute the position in world space of the hand hold, such that the item hit point reach the target hit position.
+        /// </summary>
+        private Vector3 ComputeTargetHandPosition(Vector3 fromShoulderToHit, Vector3 targetHitPosition)
+        {
+            Vector3 handTargetPosition = targetHitPosition;
+
+            // We don't want our trajectory to be to streched, so we put the hit point closer if necessary, reachable by human
+            if (fromShoulderToHit.magnitude > 0.7f)
+            {
+                handTargetPosition = _hands.SelectedHand.UpperArm.position + (fromShoulderToHit.normalized * 0.7f);
+            }
+
+            return handTargetPosition;
         }
 
 
