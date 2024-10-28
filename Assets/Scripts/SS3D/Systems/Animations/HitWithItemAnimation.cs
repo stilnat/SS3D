@@ -155,10 +155,10 @@ public class HitWithItemAnimation : NetworkActor
             Vector3 right = Vector3.Cross(Vector3.up, fromHandToHit).normalized;
 
             // the first rotation is such that the item is a bit toward the exterior to simulate gaining momentum
-            Quaternion firstRotation = QuaternionExtension.AltForwardLookRotation(-right + (0.5f * fromHandToHit), hitPoint.forwardHit, hitPoint.upHit);
+            Quaternion firstRotation = QuaternionExtension.AltForwardLookRotation(-right + (0.5f * fromHandToHit), hitPoint.ForwardHit, hitPoint.UpHit);
 
             // the last rotation is such that the item went a bit over the target rotation to simulate the momentum and rotation of arm
-            Quaternion lastRotation = QuaternionExtension.AltForwardLookRotation(right + fromHandToHit, hitPoint.forwardHit,  hitPoint.upHit);
+            Quaternion lastRotation = QuaternionExtension.AltForwardLookRotation(right + fromHandToHit, hitPoint.ForwardHit,  hitPoint.UpHit);
 
             rotation.Join(temp.transform.DORotate(firstRotation.eulerAngles, duration/2));
             rotation.Append(temp.transform.DORotate(lastRotation.eulerAngles, duration/2));
@@ -286,7 +286,7 @@ public class HitWithItemAnimation : NetworkActor
 
             ItemHitPoint hitPoint = _hands.SelectedHand.ItemInHand.GetComponent<ItemHitPoint>();
 
-            item.rotation = QuaternionExtension.AltForwardLookRotation(item.GetComponent<ItemHitPoint>().HitPoint.forward, hitPoint.forwardHit, hitPoint.upHit);
+            item.rotation = QuaternionExtension.AltForwardLookRotation(item.GetComponent<ItemHitPoint>().HitPoint.forward, hitPoint.ForwardHit, hitPoint.UpHit);
 
             // Place item such that the item hit position match the target hit position 
             item.position = targetHitPosition - item.GetComponent<ItemHitPoint>().HitPoint.localPosition;

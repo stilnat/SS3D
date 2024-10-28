@@ -332,9 +332,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2106a18e55486ca4c9b0c7e41128f9b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HitPoint: {fileID: 3424821083880257427}
-  forwardHit: {x: 0, y: 1, z: 0}
-  upHit: {x: 0, y: 0, z: -1}
+  _forwardHit: {x: 0, y: 1, z: 0}
+  _upHit: {x: 0, y: -1, z: 0}
+  _hitPoint: {fileID: 3424821083880257427}
 --- !u!1 &7767416049704309750
 GameObject:
   m_ObjectHideFlags: 0
