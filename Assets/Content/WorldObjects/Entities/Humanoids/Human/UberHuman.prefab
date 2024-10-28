@@ -5322,9 +5322,9 @@ MonoBehaviour:
     m_Root: {fileID: 4153415939737701389}
     m_Tip: {fileID: 8420821262611087137}
     m_Target: {fileID: 4846808082985781182}
-    m_ChainRotationWeight: 0.802
+    m_ChainRotationWeight: 1
     m_TipRotationWeight: 1
-    m_MaxIterations: 15
+    m_MaxIterations: 50
     m_Tolerance: 0.0001
     m_MaintainTargetPositionOffset: 0
     m_MaintainTargetRotationOffset: 0
@@ -6956,6 +6956,7 @@ GameObject:
   - component: {fileID: 7601720951202063522}
   - component: {fileID: 8615535220686661918}
   - component: {fileID: 3054724180155005980}
+  - component: {fileID: 1949858558513743142}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -7080,11 +7081,11 @@ MonoBehaviour:
   - {fileID: 3265741626988572248}
   - {fileID: 5257508295790914349}
   - {fileID: 909431137198346835}
-  - {fileID: 0}
   - {fileID: 2768583506857238720}
   - {fileID: 7601720951202063522}
   - {fileID: 8615535220686661918}
   - {fileID: 3054724180155005980}
+  - {fileID: 1949858558513743142}
   - {fileID: 3624753817424616501}
   - {fileID: 4379150911436436683}
   - {fileID: 7933397141592770015}
@@ -7600,7 +7601,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c820c500b2966a940907fe7f9855c107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 16
+  _componentIndexCache: 15
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _armatureRoot: {fileID: 3362543718434004155}
@@ -7621,7 +7622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 524774ef343211042b18bd7442ba4ee5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 17
+  _componentIndexCache: 16
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
@@ -7638,7 +7639,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7caa3b96ae405e74d9512d65caf2385f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 18
+  _componentIndexCache: 17
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   <LookAtTargetLocker>k__BackingField: {fileID: 5358384094254398678}
@@ -7660,16 +7661,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd3cc10aaeffdd44682180f6eb9bea3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 19
+  _componentIndexCache: 18
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _hands: {fileID: 3222345056416986628}
   _movementController: {fileID: 313020066527916364}
   _bodyAimRig: {fileID: 4182499762659887119}
-  _holdController: {fileID: 5029722283718734781}
-  <AimTarget>k__BackingField: {fileID: 2856800849451305125}
   _isAimingToThrow: 0
   _isAimingToShoot: 0
+  <AimTarget>k__BackingField: {fileID: 2856800849451305125}
+--- !u!114 &1949858558513743142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f08a3260b736784db0ff14279854a34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 19
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 241836927429143711}
+  _hands: {fileID: 3222345056416986628}
+  _lookAtConstraint: {fileID: 2851688491558728783}
+  _lookAtTargetLocker: {fileID: 5358384094254398678}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
@@ -10144,7 +10162,7 @@ MonoBehaviour:
     m_Target: {fileID: 4607633442489985284}
     m_ChainRotationWeight: 1
     m_TipRotationWeight: 1
-    m_MaxIterations: 15
+    m_MaxIterations: 50
     m_Tolerance: 0.0001
     m_MaintainTargetPositionOffset: 0
     m_MaintainTargetRotationOffset: 0

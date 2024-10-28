@@ -186,10 +186,10 @@ namespace SS3D.Systems.Animations
             // compute the trajectory deviation point, using the cross product to get a vector orthogonal to the hit direction,
             // then, from the middle of the distance between hand and hit, step on the side from a given quantity.
             // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically 
-            Vector3 trajectoryPeak = middleFromHandToHit + (deviationRightOrLeft * (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory));
+            Vector3 trajectoryPeak = middleFromHandToHit + (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
             // Same as trajectoryPeak but for when the hand gets back in rest position
-            Vector3 trajectoryPeakBack = middleFromHandToHit - (deviationRightOrLeft * (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * deviationFromStraightTrajectory));
+            Vector3 trajectoryPeakBack = middleFromHandToHit - (Vector3.Cross(Vector3.up, fromHandToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
             // show the hit target position in the player referential
             DebugExtension.DebugPoint((transform.rotation * hitPositionRelativeToPlayer) + transform.position, Color.blue, 0.2f, 2f);
