@@ -15,7 +15,9 @@ namespace SS3D.Systems.Animations
     public class InteractAnimations : IProceduralAnimation
     {
 
-        private float _interactionMoveDuration;
+        private float _interactionTime;
+
+        private float _moveToolTime;
 
         private Coroutine _interactCoroutine;
 
@@ -92,21 +94,32 @@ namespace SS3D.Systems.Animations
                 _controller.AnimatorController.Crouch(true);
             }
 
+            if (_controller.PositionController.Position != PositionType.Sitting)
+            {
+                Vector3 interactionPointProjected = interactionPoint;
+                interactionPointProjected.y = _controller.transform.position.y;
+                _interactSequence.Join(_controller.transform.DORotate(Quaternion.LookRotation(interactionPointProjected - _controller.transform.position).eulerAngles, _moveToolTime));
+            }
+           
             // Start looking at item
-            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _interactionMoveDuration));
+            _interactSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
 
             // Move tool to the interaction position
-            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _interactionMoveDuration).OnComplete(() => tool.PlayAnimation(_interactionType)));
+            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(_interactionType)));
+
+            _interactSequence.AppendInterval(_interactionTime - _moveToolTime);
 
             // Stop looking at item
-            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _interactionMoveDuration));
+            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime));
 
             // Rotate tool back to its hold rotation
-            _interactSequence.Append(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, 2 * _interactionMoveDuration).OnStart(() => tool.StopAnimation()));
+            _interactSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
+            {
+                _controller.AnimatorController.Crouch(false);
+                tool.StopAnimation();
+            }));
 
-            _interactSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, 2 * _interactionMoveDuration));
-
-            _controller.AnimatorController.Crouch(false);
+            _interactSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
         }
 
         public event Action<IProceduralAnimation> OnCompletion;
@@ -117,7 +130,8 @@ namespace SS3D.Systems.Animations
             _mainHand = mainHand;
             _tool = target.GetComponent<IInteractiveTool>();
             _controller = proceduralAnimationController;
-            _interactionMoveDuration = time;
+            _interactionTime = time;
+            _moveToolTime = Mathf.Min(time, 0.5f);
 
             SetupInteract(mainHand, _tool);
             ReachInteractionPoint(targetPosition, mainHand, _tool);
