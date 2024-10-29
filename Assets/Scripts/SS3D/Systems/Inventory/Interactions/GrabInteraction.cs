@@ -88,6 +88,6 @@ public class GrabInteraction : DelayedInteraction
 
         // Grabbed thing is now owned by the hand's client, as we move thing based on client authority currently. 
         grabbable.GiveOwnership(hand.Owner);
-        hand.IsGrabbing = true;
+        //hand.Hold.IsGrabbing = true;
     }
 }

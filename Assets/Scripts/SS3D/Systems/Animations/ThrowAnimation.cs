@@ -26,16 +26,16 @@ namespace SS3D.Systems.Animations
             Item item = target as Item;
             IHoldProvider holdable = item.Holdable;
 
-            mainHand.ItemPositionConstraint.weight = 0f;
-            mainHand.HoldIkConstraint.weight = 0f;
-            mainHand.PickupIkConstraint.weight = 0f;
+            mainHand.Hold.ItemPositionConstraint.weight = 0f;
+            mainHand.Hold.HoldIkConstraint.weight = 0f;
+            mainHand.Hold.PickupIkConstraint.weight = 0f;
 
             // remove all IK constraint on second hand if needed
             if (holdable.CanHoldTwoHand && secondaryHand)
             {
-                secondaryHand.ItemPositionConstraint.weight = 0f;
-                secondaryHand.HoldIkConstraint.weight = 0f;
-                secondaryHand.PickupIkConstraint.weight = 0f;
+                secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
+                secondaryHand.Hold.HoldIkConstraint.weight = 0f;
+                secondaryHand.Hold.PickupIkConstraint.weight = 0f;
             }
 
             // Ignore collision between thrown item and player for a short while

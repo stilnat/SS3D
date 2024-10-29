@@ -32,14 +32,14 @@ namespace SS3D.Systems.Animations
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
         {
             // disable position constraint the time of the interaction
-            mainHand.ItemPositionConstraint.weight = 0f;
-            mainHand.PickupIkConstraint.weight = 1f;
+            mainHand.Hold.ItemPositionConstraint.weight = 0f;
+            mainHand.Hold.PickupIkConstraint.weight = 1f;
             _controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
         }
 
         private void AlignToolWithShoulder(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
         {
-            Vector3 fromShoulderToTarget = (interactionPoint - mainHand.UpperArm.transform.position).normalized;
+            Vector3 fromShoulderToTarget = (interactionPoint - mainHand.Hold.UpperArm.transform.position).normalized;
 
             // rotate the tool such that its interaction transform Z axis align with the fromShoulderToTarget vector.
             Quaternion rotation = Quaternion.FromToRotation(tool.InteractionPoint.TransformDirection(Vector3.forward), fromShoulderToTarget.normalized);

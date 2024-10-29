@@ -49,13 +49,13 @@ namespace SS3D.Systems.Animations
                 _controller.AnimatorController.Crouch(true);
             }
 
-            _interactSequence.Join(mainHand.PickupTargetLocker.DOMove(targetPosition, _interactionMoveDuration).OnStart(() =>  mainHand.PlayAnimation(interactionType)));
+            _interactSequence.Join(mainHand.Hold.PickupTargetLocker.DOMove(targetPosition, _interactionMoveDuration).OnStart(() =>  mainHand.Hold.PlayAnimation(interactionType)));
 
             // Stop looking at item
             _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, time));
 
             // Stop reaching for the position of interaction
-            _interactSequence.Append(DOTween.To(() => mainHand.PickupIkConstraint.weight, x => mainHand.PickupIkConstraint.weight = x, 0f, time).OnComplete(() => mainHand.StopAnimation()));
+            _interactSequence.Append(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, time).OnComplete(() => mainHand.Hold.StopAnimation()));
 
             _interactSequence.OnComplete(() =>
             {
@@ -72,17 +72,17 @@ namespace SS3D.Systems.Animations
         private void SetupInteract(Hand mainHand, Vector3 interactionPoint)
         {
             // disable position constraint the time of the interaction
-            mainHand.ItemPositionConstraint.weight = 0f;
-            mainHand.PickupIkConstraint.weight = 1f;
+            mainHand.Hold.ItemPositionConstraint.weight = 0f;
+            mainHand.Hold.PickupIkConstraint.weight = 1f;
             _controller.LookAtTargetLocker.position = interactionPoint;
         }
 
         private void AlignHandWithShoulder(Vector3 interactionPoint, Hand mainHand)
         {
-            Vector3 fromShoulderToTarget = (interactionPoint - mainHand.UpperArm.transform.position).normalized;
-            mainHand.PickupTargetLocker.rotation = Quaternion.LookRotation(fromShoulderToTarget);
-            mainHand.PickupTargetLocker.rotation *= Quaternion.Euler(90f, 0f,0);
-            mainHand.PickupTargetLocker.rotation *= Quaternion.Euler(0f, 180f,0);
+            Vector3 fromShoulderToTarget = (interactionPoint - mainHand.Hold.UpperArm.transform.position).normalized;
+            mainHand.Hold.PickupTargetLocker.rotation = Quaternion.LookRotation(fromShoulderToTarget);
+            mainHand.Hold.PickupTargetLocker.rotation *= Quaternion.Euler(90f, 0f,0);
+            mainHand.Hold.PickupTargetLocker.rotation *= Quaternion.Euler(0f, 180f,0);
         }
     }
 }

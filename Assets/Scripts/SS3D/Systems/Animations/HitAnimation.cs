@@ -92,13 +92,13 @@ namespace SS3D.Systems.Animations
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
 
-            mainHand.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
 
             Vector3 fromHandToHit = hitTargetPosition - mainHand.HandBone.position;
 
-            Quaternion newRotation = Quaternion.FromToRotation(mainHand.PickupTargetLocker.transform.up, fromHandToHit) * mainHand.PickupTargetLocker.transform.rotation;
+            Quaternion newRotation = Quaternion.FromToRotation(mainHand.Hold.PickupTargetLocker.transform.up, fromHandToHit) * mainHand.Hold.PickupTargetLocker.transform.rotation;
 
-            Tween tween = mainHand.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration);
+            Tween tween = mainHand.Hold.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration);
             tween.Pause();
 
             // restore the modified rotation
@@ -122,12 +122,12 @@ namespace SS3D.Systems.Animations
             rootTransform.rotation = finalRotation;
 
             // We start by setting the IK target on the hand bone with the same rotation for a smooth start into IK animation
-            mainHand.PickupIkConstraint.weight = 1;
-            mainHand.PickupTargetLocker.transform.position = mainHand.HandBone.transform.position;
-            mainHand.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.PickupIkConstraint.weight = 1;
+            mainHand.Hold.PickupTargetLocker.transform.position = mainHand.HandBone.transform.position;
+            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
 
             // direction vector from the hand to the hit in world space.
-            Vector3 fromShoulderToHit = hitTargetPosition - mainHand.UpperArm.position;
+            Vector3 fromShoulderToHit = hitTargetPosition - mainHand.Hold.UpperArm.position;
 
             Vector3 handTargetPosition = ComputeTargetHandPosition(fromShoulderToHit, hitTargetPosition, mainHand);
             Vector3[] path = ComputeHandPath(handTargetPosition, fromShoulderToHit, isRight, mainHand, rootTransform);
@@ -135,10 +135,10 @@ namespace SS3D.Systems.Animations
 
             // Set the IK target to be parented by human so that we can use local path to animate the IK target,
             // while keeping the trajectory relative to the player's root transform.
-            mainHand.PickupTargetLocker.transform.parent = rootTransform;
+            mainHand.Hold.PickupTargetLocker.transform.parent = rootTransform;
 
             // Play a trajectory that is local to the player's root, so will stay the same relatively to player's root if player moves
-            Tween tween = mainHand.PickupTargetLocker.transform.DOLocalPath(path, duration, PathType.CatmullRom);
+            Tween tween = mainHand.Hold.PickupTargetLocker.transform.DOLocalPath(path, duration, PathType.CatmullRom);
 
 
             // Upon reaching the hit position, we start slowly decreasing the IK 
@@ -146,7 +146,7 @@ namespace SS3D.Systems.Animations
             {
                 if (value == 2)
                 {
-                    DOTween.To(() => mainHand.PickupIkConstraint.weight, x => mainHand.PickupIkConstraint.weight = x, 0f, duration);
+                    DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, duration);
                     DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, duration);
 
                 }
@@ -155,7 +155,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(mainHand.PickupTargetLocker.position, 0.01f, 2f);
+                DebugExtension.DebugWireSphere(mainHand.Hold.PickupTargetLocker.position, 0.01f, 2f);
             };
 
             tween.Pause();
@@ -183,7 +183,7 @@ namespace SS3D.Systems.Animations
             Vector3 handTargetPositionRelativeToPlayer = rootTransform.InverseTransformPoint(handTargetPosition);
 
             // compute the hand position relative to player root
-            Vector3 shoulderPositionRelativeToPlayer = rootTransform.InverseTransformPoint(mainHand.UpperArm.position);
+            Vector3 shoulderPositionRelativeToPlayer = rootTransform.InverseTransformPoint(mainHand.Hold.UpperArm.position);
 
             // compute the middle between hand and hit position, still in player's root referential
             Vector3 middleFromShoulderToHit = (handTargetPositionRelativeToPlayer + shoulderPositionRelativeToPlayer) / 2;
@@ -210,7 +210,7 @@ namespace SS3D.Systems.Animations
             Debug.DrawRay((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
 
             // show the direction from shoulder to the hit target
-            Debug.DrawRay(mainHand.UpperArm.position, fromShoulderToHit, Color.red, 2f);
+            Debug.DrawRay(mainHand.Hold.UpperArm.position, fromShoulderToHit, Color.red, 2f);
 
             // show the trajectory point guiding the hand outside
             DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
@@ -236,7 +236,7 @@ namespace SS3D.Systems.Animations
             // We don't want our trajectory to be to streched, so we put the hit point closer if necessary, reachable by human
             if (fromShoulderToHit.magnitude > 0.7f)
             {
-                handTargetPosition = mainHand.UpperArm.position + (fromShoulderToHit.normalized * 0.7f);
+                handTargetPosition = mainHand.Hold.UpperArm.position + (fromShoulderToHit.normalized * 0.7f);
             }
 
             return handTargetPosition;

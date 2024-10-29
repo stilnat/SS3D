@@ -57,13 +57,13 @@ namespace SS3D.Systems.Animations
             Sequence sequence = DOTween.Sequence();
 
             // Those times are to keep the speed of movements pretty much the same as when it was reaching
-            float timeToCancelHold = (1 - _mainHand.HoldIkConstraint.weight) * _itemReachDuration;
+            float timeToCancelHold = (1 - _mainHand.Hold.HoldIkConstraint.weight) * _itemReachDuration;
             float timeToCancelLookAt = (1 - _controller.LookAtConstraint.weight) * _itemReachDuration;
-            float timeToCancelPickup = (1 - _mainHand.PickupIkConstraint.weight) * _itemReachDuration;
+            float timeToCancelPickup = (1 - _mainHand.Hold.PickupIkConstraint.weight) * _itemReachDuration;
 
-            sequence.Append(DOTween.To(() => _mainHand.HoldIkConstraint.weight, x => _mainHand.HoldIkConstraint.weight = x, 0f, timeToCancelHold));
+            sequence.Append(DOTween.To(() => _mainHand.Hold.HoldIkConstraint.weight, x => _mainHand.Hold.HoldIkConstraint.weight = x, 0f, timeToCancelHold));
             sequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, timeToCancelLookAt));
-            sequence.Join(DOTween.To(() => _mainHand.PickupIkConstraint.weight, x => _mainHand.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
+            sequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
             _controller.AnimatorController.Crouch(false);
         }
 
@@ -74,7 +74,7 @@ namespace SS3D.Systems.Animations
             holdController.SetItemConstraintPositionAndRotation(mainHand, item.Holdable);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
-            mainHand.ItemPositionConstraint.weight = 1f;
+            mainHand.Hold.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
             holdController.MovePickupAndHoldTargetLocker(mainHand, false, item.Holdable);
@@ -83,11 +83,11 @@ namespace SS3D.Systems.Animations
             OrientTargetForHandRotation(mainHand);
 
             // Needed if this has been changed elsewhere
-            mainHand.PickupIkConstraint.data.tipRotationWeight = 1f;
+            mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
 
             // Needed as the hand need to reach when picking up in an extended position, it looks unnatural
             // if it takes directly the rotation of the hold.
-            mainHand.HoldIkConstraint.data.targetRotationWeight = 0f;
+            mainHand.Hold.HoldIkConstraint.data.targetRotationWeight = 0f;
 
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
@@ -95,8 +95,8 @@ namespace SS3D.Systems.Animations
                 holdController.MovePickupAndHoldTargetLocker(
                     secondaryHand, true, item.Holdable);
                 OrientTargetForHandRotation(secondaryHand);
-                secondaryHand.PickupIkConstraint.data.tipRotationWeight = 1f;
-                secondaryHand.HoldIkConstraint.data.targetRotationWeight = 0f;
+                secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
+                secondaryHand.Hold.HoldIkConstraint.data.targetRotationWeight = 0f;
             }
 
             // Set up the look at target locker on the item to pick up.
@@ -126,17 +126,17 @@ namespace SS3D.Systems.Animations
             _pickUpSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change hold and pickup constraint weight of the main hand from 0 to 1
-            _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.weight, x =>  mainHand.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
+            _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.weight, x =>  mainHand.Hold.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
 
             // When reached for the item, parent it to the item position target locker
-            _pickUpSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
-                item.transform.parent = mainHand.ItemPositionTargetLocker));
+            _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+                item.transform.parent = mainHand.Hold.ItemPositionTargetLocker));
 
             // Reproduce changes on second hand if picking up with two hands
             if (withTwoHands)
             {
-                _pickUpSequence.Join(DOTween.To(() => secondaryHand.HoldIkConstraint.weight, x => secondaryHand.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
-                _pickUpSequence.Join(DOTween.To(() => secondaryHand.PickupIkConstraint.weight, x =>secondaryHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
+                _pickUpSequence.Join(DOTween.To(() => secondaryHand.Hold.HoldIkConstraint.weight, x => secondaryHand.Hold.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
+                _pickUpSequence.Join(DOTween.To(() => secondaryHand.Hold.PickupIkConstraint.weight, x =>secondaryHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
             }
 
             // Once reached, start moving and rotating item toward its constrained position.
@@ -148,16 +148,16 @@ namespace SS3D.Systems.Animations
                 OnStart(() => _controller.AnimatorController.Crouch(false)));
 
             // At the same time start getting the right rotation for the hand
-            _pickUpSequence.Join(DOTween.To(() => mainHand.HoldIkConstraint.data.targetRotationWeight, x => mainHand.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
+            _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight, x => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
 
             // At the same time, remove the pickup constraint, and if the second hand has an item, update its hold
-            _pickUpSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x => mainHand.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
+            _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
 
             // Reproduce changes on second hand if picking up with two hands
             if (withTwoHands)
             {
-                _pickUpSequence.Join(DOTween.To(() => secondaryHand.HoldIkConstraint.data.targetRotationWeight, x => secondaryHand.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
-                _pickUpSequence.Join(DOTween.To(() => secondaryHand.PickupIkConstraint.weight, x => secondaryHand.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
+                _pickUpSequence.Join(DOTween.To(() => secondaryHand.Hold.HoldIkConstraint.data.targetRotationWeight, x => secondaryHand.Hold.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));
+                _pickUpSequence.Join(DOTween.To(() => secondaryHand.Hold.PickupIkConstraint.weight, x => secondaryHand.Hold.PickupIkConstraint.weight = x, 0f, _itemMoveDuration));
             }
 
             _pickUpSequence.OnStart(() => IsPicking = true);
@@ -175,13 +175,13 @@ namespace SS3D.Systems.Animations
         [Client]
         private void OrientTargetForHandRotation(Hand hand)
         {
-            Vector3 armTargetDirection = hand.PickupTargetLocker.position - hand.UpperArm.position;
+            Vector3 armTargetDirection = hand.Hold.PickupTargetLocker.position - hand.Hold.UpperArm.position;
 
             Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
 
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
-            hand.PickupTargetLocker.rotation = targetRotation;
+            hand.Hold.PickupTargetLocker.rotation = targetRotation;
         }
     }
 }

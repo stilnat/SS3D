@@ -93,15 +93,15 @@ namespace SS3D.Systems.Animations
 
         private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
-            mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
+            mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
 
             // Needed if this has been changed elsewhere
-            mainHand.PickupIkConstraint.data.tipRotationWeight = 1f;
+            mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
 
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                secondaryHand.PickupIkConstraint.data.tipRotationWeight = 1f;
+                secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
             }
 
             // Set up the look at target locker on the item to pick up.
@@ -130,18 +130,18 @@ namespace SS3D.Systems.Animations
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change  pickup constraint weight of the main hand from 0 to 1
-            _grabSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
+            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
             // those two lines necessary to smooth pulling back
-            mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
-            mainHand.PickupTargetLocker.transform.position = item.transform.position;
+            mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
+            mainHand.Hold.PickupTargetLocker.transform.position = item.transform.position;
 
             _controller.AnimatorController.Crouch(false);
 
             // Since transforms are client autoritative, only the client owner should deal with the physics, in this case creating a fixed joint between grabbed part and client hand. 
             if (mainHand.IsOwner)
             {
-                item.transform.position = mainHand.HoldTransform.position;
+                item.transform.position = mainHand.Hold.HoldTransform.position;
                 _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
                 Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
                 _fixedJoint.connectedBody = grabbedRb;
@@ -154,7 +154,7 @@ namespace SS3D.Systems.Animations
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
-            _grabSequence.Join(DOTween.To(() => mainHand.PickupIkConstraint.weight, x =>  mainHand.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
+            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
 
 
             Debug.Log("Grabbed object is " + item.name);
@@ -166,13 +166,13 @@ namespace SS3D.Systems.Animations
         /// </summary>
         private void OrientTargetForHandRotation(Hand hand)
         {
-            Vector3 armTargetDirection = hand.PickupTargetLocker.position - hand.UpperArm.position;
+            Vector3 armTargetDirection = hand.Hold.PickupTargetLocker.position - hand.Hold.UpperArm.position;
 
             Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
 
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
-            hand.PickupTargetLocker.rotation = targetRotation;
+            hand.Hold.PickupTargetLocker.rotation = targetRotation;
         }
     }
 }

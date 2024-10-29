@@ -21,67 +21,20 @@ namespace SS3D.Systems.Inventory.Containers
     /// <summary>
     /// A hand is what an entity uses to grab and hold items, to interact with things in range.
     /// </summary>
-    public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider, IInteractiveTool
+    public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider
     {
-        [SerializeField]
-        private Transform _handHoldTargetLocker;
+        public delegate void HandEventHandler(Hand hand);
 
-        [SerializeField]
-        private Transform _pickupTargetLocker;
+        public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
 
-        [SerializeField]
-        private Transform _placeTarget;
+        public event HandEventHandler OnHandDisabled;
 
-        [SerializeField]
-        private Transform _itemPositionTargetLocker;
+        public event HandContentsHandler OnContentsChanged;
 
-        [SerializeField]
-        private Transform _shoulderWeaponPivot;
-
-        [SerializeField]
-        private TwoBoneIKConstraint _holdIkConstraint;
-
-        [SerializeField]
-        private ChainIKConstraint _pickupIkConstraint;
-
-        [SerializeField]
-        private MultiPositionConstraint _itemPositionConstraint;
-
-        [SerializeField]
-        private Transform _upperArm;
-
-        [SerializeField]
-        private Transform _handBone;
-
-        [SerializeField]
-        private Transform _holdTransform;
-
-        [SyncVar]
-        public bool IsGrabbing;
-
-        public Transform PickupTargetLocker => _pickupTargetLocker;
-
-        public Transform PlaceTarget => _placeTarget;
-
-        public Transform ItemPositionTargetLocker => _itemPositionTargetLocker;
-
-        public Transform ShoulderWeaponPivot => _shoulderWeaponPivot;
-
-        public TwoBoneIKConstraint HoldIkConstraint => _holdIkConstraint;
-
-        public ChainIKConstraint PickupIkConstraint => _pickupIkConstraint;
-
-        public MultiPositionConstraint ItemPositionConstraint => _itemPositionConstraint;
-
-        public Transform UpperArm => _upperArm;
-
-        public Transform HandBone => _handBone;
-
-        public Transform HoldTransform => _holdTransform;
-
-        public bool Empty => Container.Empty;
-
-        public bool Full => !Container.Empty;
+        /// <summary>
+        /// the hands script controlling this hand.
+        /// </summary>
+        public Hands HandsController;
 
         /// <summary>
         /// Container linked to this hand, necessary to hold stuff.
@@ -89,49 +42,40 @@ namespace SS3D.Systems.Inventory.Containers
         public AttachedContainer Container;
 
         /// <summary>
+        /// Point from where distances for interaction is computed.
+        /// </summary>
+        [SerializeField] 
+        private Transform _interactionOrigin;
+
+        [SerializeField]
+        private Transform _interactionPoint;
+
+        /// <summary>
         /// Horizontal and vertical max distance to interact with stuff.
         /// </summary>
-        [SerializeField] private RangeLimit _range = new(0.5f, 2);
+        [SerializeField] 
+        private RangeLimit _range = new(0.5f, 2);
 
-        // pickup icon that this hand uses when there's a pickup interaction
-        // TODO: When AssetData is on, we should update this to not use this
-        [SerializeField] private Sprite _pickupIcon;
+        public bool Empty => Container.Empty;
+
+        public bool Full => !Container.Empty;
 
         /// <summary>
         /// The item held in this hand, if it exists
         /// </summary>
         public Item ItemInHand => Container.Items.FirstOrDefault();
 
-        /// <summary>
-        /// Point from where distances for interaction is computed.
-        /// </summary>
-        [SerializeField] private Transform _interactionOrigin;
-
-        /// <summary>
-        /// the hands script controlling this hand.
-        /// </summary>
-        public Hands HandsController;
-
         public Vector3 InteractionOrigin => _interactionOrigin.position;
 
-        [SerializeField]
-        private HandType _handType;
 
-        [SerializeField]
-        private Transform _interactionPoint;
+        [field: SerializeField]
+        public HandType HandType { get; private set; }
 
-        public HandType HandType => _handType;
+        [field:SerializeField]
+        public Transform HandBone { get; private set; }
 
-        public delegate void HandEventHandler(Hand hand);
-
-        public event HandEventHandler OnHandDisabled;
-
-        public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
-
-        /// <summary>
-        /// Called when the contents of the container change
-        /// </summary>
-        public event HandContentsHandler OnContentsChanged;
+        [field:SerializeField]
+        public HandHoldIk Hold { get; private set; }
 
 
         public void Awake()
@@ -164,12 +108,6 @@ namespace SS3D.Systems.Inventory.Containers
             if (type == ContainerChangeType.Add && newitem.Holdable != null)
             {
                 GetComponentInParent<HumanoidAnimatorController>().AddHandHolding(this, newitem.Holdable);
-            }
-
-            if (type == ContainerChangeType.Remove)
-            {
-                
-                StopHolding(olditem);
             }
 
             OnContentsChanged?.Invoke(this, olditem, newitem, type);
@@ -227,14 +165,7 @@ namespace SS3D.Systems.Inventory.Containers
         private void StopHolding(Item item)
         {
             item.transform.parent = null;
-            _holdIkConstraint.weight = 0f;
-            HandsController.TryGetOppositeHand(this, out Hand oppositeHand);
-            bool withTwoHands = oppositeHand.Empty && item.Holdable.CanHoldTwoHand;
-
-            if (withTwoHands)
-            {
-                oppositeHand._holdIkConstraint.weight = 0f;
-            }
+            Hold.StopHolding(item);
         }
 
         /// <summary>
@@ -245,65 +176,6 @@ namespace SS3D.Systems.Inventory.Containers
         {
             return GetInteractionRange().IsInRange(InteractionOrigin, otherObject.transform.position);
         }
-
-        public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true, bool resetRotation = true)
-        {
-            Transform targetToSet = ChooseTargetLocker(type);
-            targetToSet.parent = parent;
-            if (resetPosition)
-            {
-                targetToSet.localPosition = Vector3.zero;
-            }
-
-            if (resetRotation)
-            {
-                targetToSet.localRotation = Quaternion.identity;
-            }
-        }
-
-        private Transform ChooseTargetLocker(TargetLockerType type)
-        {
-            Transform targetToSet = type switch
-            {
-                TargetLockerType.Pickup => _pickupTargetLocker,
-                TargetLockerType.Hold => _handHoldTargetLocker,
-                TargetLockerType.ItemPosition => _itemPositionTargetLocker,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-            };
-
-            return targetToSet;
-        }
-
-        public void PlayAnimation(InteractionType interactionType)
-        {
-            switch (interactionType)
-            {
-                case InteractionType.Open:
-                    PlayOpenAnimation();
-                    break;
-            }
-        }
-
-        public void StopAnimation()
-        {
-            
-        }
-
-        private void PlayOpenAnimation()
-        {
-            // Define the points for the parabola
-            Vector3[] path = new Vector3[] {
-                _handBone.position,                              // Starting position
-                _handBone.position + (_handBone.forward * 0.1f), // Peak (the highest point)
-                _handBone.position + (_handBone.up * 0.1f),        // Final position
-            };
-
-            // Animate the GameObject along the path in a smooth parabolic motion
-            _pickupTargetLocker.DOPath(path, 0.1f, PathType.CatmullRom)
-                .SetEase(Ease.Linear) // You can adjust the ease function as needed
-                .SetLoops(1, LoopType.Restart); // Play the animation once, no loops
-        }
-
         public Transform InteractionPoint => _interactionPoint;
     }
 }

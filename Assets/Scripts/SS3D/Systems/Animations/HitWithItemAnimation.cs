@@ -49,9 +49,9 @@ namespace SS3D.Systems.Animations
             holdable.transform.localPosition = -hold.localPosition;
 
             // We start by setting the pickup IK target back on the item hold
-            mainHand.PickupIkConstraint.weight = 1;
+            mainHand.Hold.PickupIkConstraint.weight = 1;
             Transform parent = holdable.GetHold(true, mainHand.HandType);
-            mainHand.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
+            mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
 
             // Compute the rotation of the player's root transform when looking at the hit position
             Vector3 directionFromTransformToTarget = hitTargetPosition - rootTransform.position;
@@ -94,10 +94,10 @@ namespace SS3D.Systems.Animations
                 _controller.AnimatorController.Crouch(false);
                 temp.Dispose(true);
                 _sequence = null;
-                holdable.transform.parent = mainHand.ItemPositionTargetLocker;
+                holdable.transform.parent = mainHand.Hold.ItemPositionTargetLocker;
                 holdable.transform.DOLocalRotate(Quaternion.identity.eulerAngles, 0.3f);
                 holdable.transform.DOLocalMove(Vector3.zero, 0.3f);
-                DOTween.To(() => mainHand.PickupIkConstraint.weight, x=> mainHand.PickupIkConstraint.weight = x, 0, 0.3f);
+                DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x=> mainHand.Hold.PickupIkConstraint.weight = x, 0, 0.3f);
                 DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, 0.3f);
             });
         }
@@ -111,7 +111,7 @@ namespace SS3D.Systems.Animations
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
 
-            mainHand.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
 
             Vector3 fromHandToHit = (hitTargetPosition - mainHand.HandBone.position).normalized;
 
@@ -153,7 +153,7 @@ namespace SS3D.Systems.Animations
             rootTransform.rotation = finalRotation;
 
             // direction vector from the shoulder to the hit in world space.
-            Vector3 fromShoulderToHit = hitTargetPosition - mainHand.UpperArm.position;
+            Vector3 fromShoulderToHit = hitTargetPosition - mainHand.Hold.UpperArm.position;
 
             Vector3 targetHandHoldPosition = ComputeTargetHandHoldPosition(mainHand.ItemInHand.Holdable, fromShoulderToHit, hitTargetPosition, mainHand);
 
@@ -165,7 +165,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(mainHand.PickupTargetLocker.position, 0.01f, 2f);
+                DebugExtension.DebugWireSphere(mainHand.Hold.PickupTargetLocker.position, 0.01f, 2f);
             };
 
             tween.Pause();
@@ -194,7 +194,7 @@ namespace SS3D.Systems.Animations
             Vector3 hitPositionRelativeToPlayer = rootTransform.InverseTransformPoint(targetHandHoldPosition);
 
             // compute the shoulder position relative to player root
-            Vector3 shoulderPositionRelativeToPlayer = rootTransform.InverseTransformPoint(mainHand.UpperArm.position);
+            Vector3 shoulderPositionRelativeToPlayer = rootTransform.InverseTransformPoint(mainHand.Hold.UpperArm.position);
 
             // compute the middle between hand and hit position, still in player's root referential
             Vector3 middleFromShoulderToHit = (hitPositionRelativeToPlayer + shoulderPositionRelativeToPlayer) / 2;

@@ -128,8 +128,8 @@ namespace SS3D.Systems.Animations
             // The position where the item should be, given its hold type
             Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
-            hand.ItemPositionConstraint.data.offset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-            hand.ItemPositionConstraint.data.constrainedObject.localRotation = hold.localRotation;
+            hand.Hold.ItemPositionConstraint.data.offset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+            hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation = hold.localRotation;
         }
 
         /// <summary>
@@ -158,18 +158,18 @@ namespace SS3D.Systems.Animations
             Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
             // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
-            Vector3 startingOffset = hand.ItemPositionConstraint.data.offset;
+            Vector3 startingOffset = hand.Hold.ItemPositionConstraint.data.offset;
             Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
             StartCoroutine(CoroutineHelper.ModifyVector3OverTime(
-                x => hand.ItemPositionConstraint.data.offset = x, startingOffset, finalOffset, duration));
+                x => hand.Hold.ItemPositionConstraint.data.offset = x, startingOffset, finalOffset, duration));
 
             // Do the same with interpolating rotation.
-            Quaternion startingRotation = hand.ItemPositionConstraint.data.constrainedObject.localRotation;
+            Quaternion startingRotation = hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation;
             Quaternion finalRotation = hold.localRotation;
 
             StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(
-                x => hand.ItemPositionConstraint.data.constrainedObject.localRotation = x, startingRotation, finalRotation, duration));
+                x => hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation = x, startingRotation, finalRotation, duration));
         }
 
         /// <summary>
@@ -182,8 +182,8 @@ namespace SS3D.Systems.Animations
         {
             Transform parent = holdProvider.GetHold(!secondary, hand.HandType);
 
-            hand.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
-            hand.SetParentTransformTargetLocker(TargetLockerType.Hold, parent);
+            hand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
+            hand.Hold.SetParentTransformTargetLocker(TargetLockerType.Hold, parent);
         }
 
         /// <summary>
@@ -199,6 +199,8 @@ namespace SS3D.Systems.Animations
 
             if (op == SyncListOperation.Add || op == SyncListOperation.Insert || op == SyncListOperation.Set)
             {
+                Debug.Log($"{newItem} is null ?");
+                Debug.Log($"add item {newItem.Holdable} to hand");
                 AddItem(newItem.Hand, newItem.Holdable);
             }
 
@@ -213,7 +215,7 @@ namespace SS3D.Systems.Animations
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemInHand.Holdable.CanHoldTwoHand)
             {
                 UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
-                hand.HoldIkConstraint.weight = 1f;
+                hand.Hold.HoldIkConstraint.weight = 1f;
                 MovePickupAndHoldTargetLocker(hand, true, oppositeHand.ItemInHand.Holdable);
             }
         }
@@ -221,13 +223,13 @@ namespace SS3D.Systems.Animations
         private void AddItem(Hand hand, AbstractHoldable holdable)
         {
             // Put the holdable on the hand item position target locker and constrain it
-            holdable.GameObject.transform.parent = hand.ItemPositionTargetLocker;
+            holdable.GameObject.transform.parent = hand.Hold.ItemPositionTargetLocker;
             holdable.GameObject.transform.localRotation = Quaternion.identity;
             holdable.GameObject.transform.localPosition = Vector3.zero;
-            hand.ItemPositionConstraint.weight = 1f;
+            hand.Hold.ItemPositionConstraint.weight = 1f;
 
             // enable the hold constraint as well
-            hand.HoldIkConstraint.weight = 1f;
+            hand.Hold.HoldIkConstraint.weight = 1f;
 
             MovePickupAndHoldTargetLocker(hand, false, holdable);
             UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
@@ -281,7 +283,7 @@ namespace SS3D.Systems.Animations
             // handle aiming with shoulder aim
             if (holdable.TryGetComponent(out Gun gun) && !toThrow && isAiming)
             {
-                gun.transform.parent = _hands.SelectedHand.ShoulderWeaponPivot;
+                gun.transform.parent = _hands.SelectedHand.Hold.ShoulderWeaponPivot;
 
                 // position correctly the gun on the shoulder, assuming the rifle butt transform is defined correctly
                 gun.transform.localPosition = -gun.RifleButt.localPosition;
@@ -290,7 +292,7 @@ namespace SS3D.Systems.Animations
             // Stop aiming with shoulder aim
             else if (gun && !isAiming)
             {
-                _hands.SelectedHand.ItemInHand.GameObject.transform.parent = _hands.SelectedHand.ItemPositionTargetLocker;
+                _hands.SelectedHand.ItemInHand.GameObject.transform.parent = _hands.SelectedHand.Hold.ItemPositionTargetLocker;
                 _hands.SelectedHand.ItemInHand.GameObject.transform.localPosition = Vector3.zero;
                 _hands.SelectedHand.ItemInHand.GameObject.transform.localRotation = Quaternion.identity;
                 UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);

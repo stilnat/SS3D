@@ -270,13 +270,13 @@ namespace SS3D.Systems.Inventory.Containers
                     throw new ArgumentOutOfRangeException(nameof(op), op, null);
             }
 
-            if (changeType == ContainerChangeType.Add && newItem.Item.TryGetComponent(out NetworkTransform networkTransform))
+            if (changeType == ContainerChangeType.Add && newItem.Item && newItem.Item.TryGetComponent(out NetworkTransform networkTransform))
             {
                  networkTransform.SetSynchronizePosition(false);
                  networkTransform.SetSynchronizeRotation(false);
             }
 
-            if (changeType == ContainerChangeType.Remove && oldItem.Item.TryGetComponent(out NetworkTransform networkTransform2))
+            if (changeType == ContainerChangeType.Remove && oldItem.Item && oldItem.Item.TryGetComponent(out NetworkTransform networkTransform2))
             {
                 networkTransform2.SetSynchronizePosition(true);
                 networkTransform2.SetSynchronizeRotation(true);
