@@ -15,13 +15,15 @@ namespace SS3D.Systems.Animations
     public class InteractWithHandAnimation : IProceduralAnimation
     { 
 
+        public event Action<IProceduralAnimation> OnCompletion;
+
         private float _interactionTime;
         private float _moveHandTime;
         private ProceduralAnimationController _controller;
 
-        private Sequence _interactSequence;
+        private Hand _hand;
 
-        public event Action<IProceduralAnimation> OnCompletion;
+        private Sequence _interactSequence;
         public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
 
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
@@ -29,6 +31,7 @@ namespace SS3D.Systems.Animations
             _controller = proceduralAnimationController;
             _interactionTime = time;
             _moveHandTime = Mathf.Min(time, 0.5f);
+            _hand = mainHand;
 
             _interactSequence = DOTween.Sequence();
 
@@ -38,7 +41,15 @@ namespace SS3D.Systems.Animations
 
         public void Cancel()
         {
+            _interactSequence.Kill();
 
+            // Stop looking at item
+            DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveHandTime);
+
+            // Stop reaching for the position of interaction
+            DOTween.To(() => _hand.Hold.PickupIkConstraint.weight, x => _hand.Hold.PickupIkConstraint.weight = x, 0f, _moveHandTime);
+
+            _hand.Hold.StopAnimation();
         }
 
         private void SetupInteract(Hand mainHand, Vector3 interactionPoint)
