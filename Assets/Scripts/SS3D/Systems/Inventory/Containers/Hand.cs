@@ -99,15 +99,15 @@ namespace SS3D.Systems.Inventory.Containers
 
         private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
         {
-            if (type == ContainerChangeType.Remove)
+            if (type == ContainerChangeType.Remove && olditem != null)
             {
-                GetComponentInParent<HumanoidAnimatorController>().RemoveHandHolding(this, olditem.Holdable);
+                GetComponentInParent<HumanoidAnimatorController>()?.RemoveHandHolding(this, olditem.Holdable);
                 StopHolding(olditem);
             }
 
             if (type == ContainerChangeType.Add && newitem.Holdable != null)
             {
-                GetComponentInParent<HumanoidAnimatorController>().AddHandHolding(this, newitem.Holdable);
+                GetComponentInParent<HumanoidAnimatorController>()?.AddHandHolding(this, newitem.Holdable);
             }
 
             OnContentsChanged?.Invoke(this, olditem, newitem, type);
@@ -165,7 +165,7 @@ namespace SS3D.Systems.Inventory.Containers
         private void StopHolding(Item item)
         {
             item.transform.parent = null;
-            Hold.StopHolding(item);
+            Hold?.StopHolding(item);
         }
 
         /// <summary>

@@ -123,6 +123,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             base.OnDestroyed();
             _movementControls.ToggleRun.performed -= HandleToggleRun;
+            InstanceFinder.TimeManager.OnTick -= HandleNetworkTick;
             _inputSystem.ToggleActionMap(_movementControls, false);
             _inputSystem.ToggleActionMap(_hotkeysControls, false);
         }

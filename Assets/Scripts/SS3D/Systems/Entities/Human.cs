@@ -46,12 +46,11 @@ namespace SS3D.Systems.Entities
 		{
             // Instead of destroying components it should deactivate them.
 			GameObject originEntityGameObject = originEntity.gameObject;
-			originEntityGameObject.GetComponent<Hands>()?.Dispose(true);
-			originEntityGameObject.GetComponent<HumanInventory>()?.Dispose(true);
-			originEntityGameObject.GetComponent<InteractionController>()?.Dispose(true);
-			originEntityGameObject.GetComponent<StaminaController>()?.Dispose(true);
-			originEntityGameObject.GetComponent<HumanoidController>()?.Dispose(true);
-            originEntityGameObject.GetComponent<HumanoidLivingController>()?.Dispose(true);
+			originEntityGameObject.GetComponent<Hands>().enabled = false;
+			originEntityGameObject.GetComponent<HumanInventory>().enabled = false;
+			originEntityGameObject.GetComponent<InteractionController>().enabled = false;
+			originEntityGameObject.GetComponent<StaminaController>().enabled = false;
+			originEntityGameObject.GetComponent<HumanoidController>().enabled = false;
             // TODO: Optimize these GetComponents, this is a temporary solution.
         }
 
