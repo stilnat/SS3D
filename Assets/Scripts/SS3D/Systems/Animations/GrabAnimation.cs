@@ -1,24 +1,17 @@
 using DG.Tweening;
 using FishNet.Connection;
 using FishNet.Object;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Utils;
 using System;
-using System.Collections;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.Serialization;
-using CoroutineHelper = SS3D.Utils.CoroutineHelper;
 
 namespace SS3D.Systems.Animations
 {
-
     // TODO : the ownership part should be handled into the interaction system, and the interaction should be a true continuous interaction, only cancelled by client asking or by constraint 
-    public class GrabAnimation : IProceduralAnimation
+    public class GrabAnimation : AbstractProceduralAnimation
     {
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private FixedJoint _fixedJoint;
 
@@ -38,13 +31,11 @@ namespace SS3D.Systems.Animations
 
         private Sequence _grabSequence;
 
-
         private void RpcReleaseGrab()
         {
             // TODO move into interaction cancel
             _grabbedObject.NetworkObject.GiveOwnership(_previousOwner);
         }
-
 
         private void Grab(GrabbableBodyPart bodyPart, NetworkConnection grabbingPlayer, float timeToMoveBackHand, float timeToReachGrabPlace)
         {
@@ -53,14 +44,7 @@ namespace SS3D.Systems.Animations
             bodyPart.NetworkObject.GiveOwnership(grabbingPlayer);
         }
 
-        public event Action<IProceduralAnimation> OnCompletion;
-
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        {
-
-        }
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             _grabbedObject = target.GetComponent<GrabbableBodyPart>();
@@ -68,9 +52,8 @@ namespace SS3D.Systems.Animations
             GrabReach(_grabbedObject, mainHand);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
-            throw new NotImplementedException();
         }
 
         private void ReleaseGrab()
@@ -116,10 +99,7 @@ namespace SS3D.Systems.Animations
         {
             _grabSequence = DOTween.Sequence();
 
-            if (_controller.PositionController.Position != PositionType.Sitting)
-            {
-                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
-            }
+            TryRotateTowardTargetPosition(_grabSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
 
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
             {
@@ -154,25 +134,9 @@ namespace SS3D.Systems.Animations
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
-            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
-
+            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
 
             Debug.Log("Grabbed object is " + item.name);
-        }
-
-        /// <summary>
-        /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
-        /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
-        /// </summary>
-        private void OrientTargetForHandRotation(Hand hand)
-        {
-            Vector3 armTargetDirection = hand.Hold.PickupTargetLocker.position - hand.Hold.UpperArm.position;
-
-            Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
-
-            targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
-
-            hand.Hold.PickupTargetLocker.rotation = targetRotation;
         }
     }
 }
