@@ -1,61 +1,43 @@
 using DebugDrawingExtension;
 using DG.Tweening;
 using FishNet.Object;
-using SS3D.Core.Behaviours;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Utils;
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.InputSystem;
 
 namespace SS3D.Systems.Animations
 {
-    public class HitAnimation : IProceduralAnimation
+    public class HitAnimation : AbstractProceduralAnimation
     {
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private ProceduralAnimationController _controller;
 
         private Sequence _sequence;
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        {
 
-        }
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             HitAnimate(targetPosition, mainHand, _controller.transform, time);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
-
         }
 
         [Client]
         private void HitAnimate(Vector3 hitTargetPosition, Hand mainHand, Transform rootTransform, float duration)
         {
-            Vector3 directionFromTransformToTarget = hitTargetPosition - rootTransform.position;
-            directionFromTransformToTarget.y = 0f;
-
-            Quaternion finalRotationPlayer = Quaternion.LookRotation(directionFromTransformToTarget);
-
-            float timeToRotate = (Quaternion.Angle(rootTransform.rotation, finalRotationPlayer) / 180f) * duration;
-
-            if (_sequence != null)
-            {
-                _sequence.Kill();
-            }
-
             _sequence = DOTween.Sequence();
 
+            Vector3 directionFromTransformToTarget = hitTargetPosition - rootTransform.position;
+            directionFromTransformToTarget.y = 0f;
+            Quaternion finalRotationPlayer = Quaternion.LookRotation(directionFromTransformToTarget);
+            float timeToRotate = (Quaternion.Angle(rootTransform.rotation, finalRotationPlayer) / 180f) * duration;
+
             // In sequence, we first rotate toward the target
-            _sequence.Append(rootTransform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
+            _sequence = TryRotateTowardTargetPosition(_sequence, _controller.transform, _controller, timeToRotate, hitTargetPosition);
 
             _sequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, timeToRotate));
 
@@ -87,7 +69,6 @@ namespace SS3D.Systems.Animations
 
         private Tween AnimateHandRotation(Vector3 hitTargetPosition, float duration, Quaternion finalRotation, Hand mainHand, Transform rootTransform)
         {
-
             // All computations have to be done like if the player was already facing the direction it's facing in the end of its rotation
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
@@ -116,7 +97,6 @@ namespace SS3D.Systems.Animations
         /// <returns></returns>
         private Tween AnimateHandPosition(Vector3 hitTargetPosition, float duration, Quaternion finalRotation, bool isRight, Hand mainHand, Transform rootTransform)
         {
-
             // All computations have to be done like if the player was already facing the direction it's facing in the end
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
@@ -131,7 +111,6 @@ namespace SS3D.Systems.Animations
 
             Vector3 handTargetPosition = ComputeTargetHandPosition(fromShoulderToHit, hitTargetPosition, mainHand);
             Vector3[] path = ComputeHandPath(handTargetPosition, fromShoulderToHit, isRight, mainHand, rootTransform);
-
 
             // Set the IK target to be parented by human so that we can use local path to animate the IK target,
             // while keeping the trajectory relative to the player's root transform.
@@ -148,7 +127,6 @@ namespace SS3D.Systems.Animations
                 {
                     DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, duration);
                     DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, duration);
-
                 }
             };
 
@@ -168,10 +146,6 @@ namespace SS3D.Systems.Animations
         /// <summary>
         /// Compute the path the hand will take for the hit animation.
         /// </summary>
-        /// <param name="targetHandHoldPosition"> The target hand hold position in world space.</param>
-        /// <param name="fromHandToHit"></param>
-        /// <param name="isRight"></param>
-        /// <returns></returns>
         private Vector3[] ComputeHandPath(Vector3 handTargetPosition, Vector3 fromShoulderToHit, bool isRight, Hand mainHand, Transform rootTransform)
         {
             float deviationFromStraightTrajectory = 0.2f;
@@ -216,14 +190,14 @@ namespace SS3D.Systems.Animations
             DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
 
             // Define the points for the trajectory in the player's root referential
-            Vector3[] path = new Vector3[] {
+            Vector3[] path =
+            {
                 trajectoryPeak,
                 handTargetPositionRelativeToPlayer,
                 trajectoryPeakBack, 
             };
 
             return path;
-
         }
 
         /// <summary>

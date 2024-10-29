@@ -12,8 +12,6 @@ namespace SS3D.Systems.Animations
 
         public event Action<IProceduralAnimation> OnCompletion;
 
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition,  ProceduralAnimationController proceduralAnimationController, float time, float delay);
-
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay);
 
         public void Cancel();

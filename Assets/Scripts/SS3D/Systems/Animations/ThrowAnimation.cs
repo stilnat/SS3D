@@ -10,13 +10,9 @@ namespace SS3D.Systems.Animations
 {
     public class ThrowAnimation : IProceduralAnimation
     {
-        private ProceduralAnimationController _controller;
-
         public event Action<IProceduralAnimation> OnCompletion;
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        {
-            
-        }
+
+        private ProceduralAnimationController _controller;
 
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
@@ -47,8 +43,6 @@ namespace SS3D.Systems.Animations
             _controller.AnimatorController.Throw(mainHand.HandType);
             
             WaitToRestoreCollision(item, _controller.transform);
-
-            //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, _aimTarget.transform, 0.18f, false, true));
         }
 
         private async Task WaitToRestoreCollision(Item item, Transform playerRoot)

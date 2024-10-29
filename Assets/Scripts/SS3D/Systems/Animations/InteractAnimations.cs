@@ -12,8 +12,9 @@ using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class InteractAnimations : IProceduralAnimation
+    public class InteractAnimations : AbstractProceduralAnimation
     {
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private float _interactionTime;
 
@@ -23,11 +24,33 @@ namespace SS3D.Systems.Animations
 
         private ProceduralAnimationController _controller;
 
-        private Hand _mainHand;
-
         private IInteractiveTool _tool;
 
-        private InteractionType _interactionType;
+        private InteractionType _interact;
+
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        {
+            _tool = target.GetComponent<IInteractiveTool>();
+            _controller = proceduralAnimationController;
+            _interactionTime = time;
+            _moveToolTime = Mathf.Min(time, 0.5f);
+
+            SetupInteract(mainHand, _tool);
+            ReachInteractionPoint(targetPosition, mainHand, _tool, interactionType);
+        }
+
+        public override void Cancel()
+        {
+            _interactSequence.Kill();
+
+            // Stop looking at item
+            DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
+
+            _controller.AnimatorController.Crouch(false);
+            _tool.StopAnimation();
+            _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
+            _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
+        }
 
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
         {
@@ -75,35 +98,25 @@ namespace SS3D.Systems.Animations
             return endPosition;
         }
 
-        private void ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
+        private void ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, InteractionType interactionType)
         {
             _interactSequence = DOTween.Sequence();
 
             Vector3 endPosition = ComputeToolEndPosition(interactionPoint, mainHand, tool);
 
             // Rotate player toward item
-            if (_controller.PositionController.Position != PositionType.Sitting)
-            {
-                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, interactionPoint, _interactionMoveDuration, false, true));
-            }
+            TryRotateTowardTargetPosition(_interactSequence, _controller.transform, _controller, _moveToolTime, interactionPoint);
 
             if (mainHand.HandBone.transform.position.y - interactionPoint.y > 0.3)
             {
                 _controller.AnimatorController.Crouch(true);
-            }
-
-            if (_controller.PositionController.Position != PositionType.Sitting)
-            {
-                Vector3 interactionPointProjected = interactionPoint;
-                interactionPointProjected.y = _controller.transform.position.y;
-                _interactSequence.Join(_controller.transform.DORotate(Quaternion.LookRotation(interactionPointProjected - _controller.transform.position).eulerAngles, _moveToolTime));
             }
            
             // Start looking at item
             _interactSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
 
             // Move tool to the interaction position
-            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(_interactionType)));
+            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(interactionType)));
 
             _interactSequence.AppendInterval(_interactionTime - _moveToolTime);
 
@@ -125,32 +138,5 @@ namespace SS3D.Systems.Animations
             });
         }
 
-        public event Action<IProceduralAnimation> OnCompletion;
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        {
-            _mainHand = mainHand;
-            _tool = target.GetComponent<IInteractiveTool>();
-            _controller = proceduralAnimationController;
-            _interactionTime = time;
-            _moveToolTime = Mathf.Min(time, 0.5f);
-
-            SetupInteract(mainHand, _tool);
-            ReachInteractionPoint(targetPosition, mainHand, _tool);
-        }
-
-        public void Cancel()
-        {
-           _interactSequence.Kill();
-
-           // Stop looking at item
-           DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
-
-           _controller.AnimatorController.Crouch(false);
-           _tool.StopAnimation();
-           _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
-           _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
-        }
     }
 }

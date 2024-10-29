@@ -14,9 +14,9 @@ using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class PickUpAnimation : IProceduralAnimation
+    public class PickUpAnimation : AbstractProceduralAnimation
     {
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private float _itemMoveDuration;
 
@@ -30,9 +30,7 @@ namespace SS3D.Systems.Animations
 
         public bool IsPicking { get; private set; }
 
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             _itemMoveDuration = time / 2;
@@ -45,10 +43,10 @@ namespace SS3D.Systems.Animations
 
             SetUpPickup(mainHand, secondaryHand, withTwoHands, item, proceduralAnimationController.HoldController, proceduralAnimationController.LookAtTargetLocker);
 
-            PickupReach(item, mainHand, secondaryHand, withTwoHands, delay);
+            PickupReach(item, mainHand, secondaryHand, withTwoHands);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
             Debug.Log("cancel pick up animation");
 
@@ -66,7 +64,6 @@ namespace SS3D.Systems.Animations
             sequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
             _controller.AnimatorController.Crouch(false);
         }
-
 
         [Client]
         private void SetUpPickup(Hand mainHand, Hand secondaryHand, bool withTwoHands, Item item, HoldController holdController, Transform lookAtTargetLocker)
@@ -106,13 +103,10 @@ namespace SS3D.Systems.Animations
         }
 
         [Client]
-        private void PickupReach(Item item, Hand mainHand, Hand secondaryHand, bool withTwoHands, float delay)
+        private void PickupReach(Item item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
             // Rotate player toward item
-            if (_controller.PositionController.Position != PositionType.Sitting)
-            {
-                //StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, item.transform, _itemReachDuration, false, true));
-            }
+            TryRotateTowardTargetPosition(_pickUpSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
 
             // If item is too low, crouch to reach
             if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
@@ -166,22 +160,6 @@ namespace SS3D.Systems.Animations
                 OnCompletion?.Invoke(this);
                 IsPicking = false;
             });
-        }
-
-        /// <summary>
-        /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
-        /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
-        /// </summary>
-        [Client]
-        private void OrientTargetForHandRotation(Hand hand)
-        {
-            Vector3 armTargetDirection = hand.Hold.PickupTargetLocker.position - hand.Hold.UpperArm.position;
-
-            Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
-
-            targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
-
-            hand.Hold.PickupTargetLocker.rotation = targetRotation;
         }
     }
 }

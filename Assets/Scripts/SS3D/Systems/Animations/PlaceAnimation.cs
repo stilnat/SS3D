@@ -1,21 +1,17 @@
 using DG.Tweening;
 using FishNet.Object;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
-    public class PlaceAnimation : IProceduralAnimation
+    public class PlaceAnimation : AbstractProceduralAnimation
     {
-
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private float _itemReachPlaceDuration;
 
@@ -29,27 +25,24 @@ namespace SS3D.Systems.Animations
 
         private Item _item;
 
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay) { }
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             Debug.Log("Start animate place item");
 
-            _itemReachPlaceDuration = time/2;
-            _handMoveBackDuration = time/2;
+            _itemReachPlaceDuration = time / 2;
+            _handMoveBackDuration = time / 2;
             _controller = proceduralAnimationController;
-            Debug.Log(mainHand);
             _mainHand = mainHand;
             _item = target.GetComponent<Item>();
 
-            bool withTwoHands = secondaryHand.Empty && target.GetComponent<Item>().Holdable.CanHoldTwoHand;
+            bool withTwoHands = secondaryHand.Empty && _item.Holdable.CanHoldTwoHand;
 
             SetupPlace(targetPosition, target.gameObject, mainHand, secondaryHand, withTwoHands);
 
-            Place(mainHand, secondaryHand, withTwoHands, targetPosition, target.GetComponent<Item>());
+            Place(mainHand, secondaryHand, withTwoHands, targetPosition, _item);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
             Debug.Log("Cancel place animation");
             _placeSequence.Kill();
@@ -111,10 +104,7 @@ namespace SS3D.Systems.Animations
         private void Place(Hand mainHand, Hand secondaryHand, bool withTwoHands, Vector3 placeTarget, Item item)
         {
             // Turn character toward the position to place the item.
-            if (_controller.PositionController.Position != PositionType.Sitting)
-            {
-                //_orientTowardTarget = StartCoroutine(TransformHelper.OrientTransformTowardTarget(transform, placeTarget, _itemReachPlaceDuration, false, true));
-            }
+            TryRotateTowardTargetPosition(_placeSequence, _controller.transform, _controller, _itemReachPlaceDuration, placeTarget);
 
             if (mainHand.HandBone.transform.position.y - placeTarget.y > 0.3)
             {
@@ -135,7 +125,6 @@ namespace SS3D.Systems.Animations
                 mainHand.Hold.PickupTargetLocker.parent = null;
             }));
 
-
             // Then, Slowly stop looking at item place position
             _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachPlaceDuration));
 
@@ -152,8 +141,5 @@ namespace SS3D.Systems.Animations
 
             _placeSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
-
-
-
     }
 }
