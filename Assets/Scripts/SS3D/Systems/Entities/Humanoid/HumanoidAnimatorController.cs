@@ -1,9 +1,8 @@
 ﻿using FishNet;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
-using SS3D.Systems.Entities.Data;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Systems.Inventory.Items;
+using System;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -100,19 +99,18 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _movementController.OnSpeedChangeEvent += UpdateMovement;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
+            GetComponent<AimController>().OnAim += HandleAimInAnimatorControler;
         }
 
-        private void HandleGunAim(object sender, bool isAiming)
+        private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)
         {
-            if (isAiming)
-            {
-                // Get the index of the layer named "UpperBody"
-                _animator.SetBool("Aim", true);
-            }
-            else
-            {
-                _animator.SetBool("Aim", false);
-            }
+
+            UnityEngine.Debug.Log("animator change aim");
+
+            _animator.SetBool("Aim", isAiming);
+            _animator.SetBool("TorsoGunAim", !toThrow);
+
+            _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
 
         private void UnsubscribeFromEvents()

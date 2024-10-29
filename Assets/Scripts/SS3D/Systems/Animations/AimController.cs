@@ -18,7 +18,7 @@ namespace SS3D.Systems.Animations
     public class AimController : NetworkActor
     {
 
-        public event EventHandler<Tuple<bool, bool, AbstractHoldable>> OnAim;
+        public event Action<bool, bool> OnAim;
 
         [SerializeField]
         private Hands _hands;
@@ -41,9 +41,6 @@ namespace SS3D.Systems.Animations
 
         public bool IsAimingToShoot => _isAimingToShoot;
 
-        [field: SerializeField]
-        public Transform AimTarget { get; private set; }
-
         public override void OnStartClient()
         {
             base.OnStartClient();
@@ -57,31 +54,50 @@ namespace SS3D.Systems.Animations
             Subsystems.Get<InputSystem>().Inputs.Interactions.AimGun.performed += AimGunOnPerformed;
         }
 
-        protected void Update()
+        public override void OnStartServer()
         {
-            if (IsAimingToThrow || IsAimingToShoot)
-            {
-                UpdateAimTargetPosition();
+            base.OnStartServer();
+            _hands.OnHandContentChanged += HandleHandContentChanged;
+        }
 
-                if (GetComponent<PositionController>().Position != PositionType.Sitting)
-                {
-                    _movementController.RotatePlayerTowardTarget();
-                }
+        [Server]
+        private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)
+        {
+            if (_isAimingToShoot && hand == _hands.SelectedHand && type == ContainerChangeType.Remove)
+            {
+                _isAimingToShoot = false;
+            }
+
+            if (_isAimingToThrow && hand == _hands.SelectedHand && type == ContainerChangeType.Remove)
+            {
+                _isAimingToThrow = false;
             }
         }
 
+        [ServerOrClient]
         private void SyncAimingToThrow(bool wasAiming, bool isAiming, bool asServer)
         {
             _bodyAimRig.weight = isAiming ? 0.3f : 0f;
-            OnAim?.Invoke(this, new(isAiming, true, _hands.SelectedHand.ItemInHand.Holdable as AbstractHoldable));
+            Debug.Log("invoke on aim to throw");
+            Item item = _hands.SelectedHand.ItemInHand;
+
+            foreach (var subscriber in OnAim.GetInvocationList())
+            {
+                Debug.Log("Subscriber method: " + subscriber.Method.Name);
+                Debug.Log("Subscriber target: " + subscriber.Target);
+            }
+
+            OnAim?.Invoke(isAiming, true);
         }
 
+        [ServerOrClient]
         private void SyncAimingToShoot(bool wasAiming, bool isAiming, bool asServer)
         {
             _bodyAimRig.weight = isAiming ? 0.3f : 0f;
-            OnAim?.Invoke(this, new(isAiming, false, _hands.SelectedHand.ItemInHand.Holdable as AbstractHoldable));
+            OnAim?.Invoke(isAiming, false);
         }
 
+        [Client]
         private void AimThrowOnPerformed(InputAction.CallbackContext obj)
         {
             if (!_hands.SelectedHand.Full)
@@ -92,6 +108,7 @@ namespace SS3D.Systems.Animations
             RpcAimToThrow(!IsAimingToThrow);
         }
 
+        [Client]
         private void AimGunOnPerformed(InputAction.CallbackContext obj)
         {
             bool canAim = _intentController.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemInHand.GameObject.HasComponent<Gun>();
@@ -112,18 +129,6 @@ namespace SS3D.Systems.Animations
         private void RpcAimToShoot(bool isAimingToShoot)
         {
             _isAimingToShoot = isAimingToShoot;
-        }
-
-        private void UpdateAimTargetPosition()
-        {
-            // Cast a ray from the mouse position into the scene
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            // Check if the ray hits any collider
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                AimTarget.position = hit.point;
-            }
         }
     }
 }

@@ -34,9 +34,6 @@ namespace SS3D.Systems.Entities.Humanoid
         private Rigidbody _rb;
 
         [SerializeField]
-        private Transform _aimTarget;
-
-        [SerializeField]
         private MovementType _movementType;
 
         [Header("Movement Settings")]
@@ -75,6 +72,8 @@ namespace SS3D.Systems.Entities.Humanoid
         [SerializeField]
         private float _aimRotationSpeed = 5f;
 
+        private bool _isAiming;
+
         public float InputAimAngle { get; private set; }
 
         public Vector2 InputVector => _input;
@@ -85,10 +84,13 @@ namespace SS3D.Systems.Entities.Humanoid
 
         public float MovementSpeed => _movementSpeed;
 
-        public void RotatePlayerTowardTarget()
+        [field: SerializeField]
+        public Transform AimTarget { get; private set; }
+
+        private void RotatePlayerTowardTarget()
         {
             // Get the direction to the target
-            Vector3 direction = _aimTarget.position - transform.position;
+            Vector3 direction = AimTarget.position - transform.position;
             direction.y = 0f; // Ignore Y-axis rotation
 
             // Rotate towards the target
@@ -150,6 +152,12 @@ namespace SS3D.Systems.Entities.Humanoid
                 MovePlayer();
                 MoveMovementTarget(Vector2.zero, 5);
             }
+
+            if (_movementType == MovementType.Aiming && GetComponent<PositionController>().Position != PositionType.Sitting)
+            {
+                RotatePlayerTowardTarget();
+            }
+
         }
 
         /// <summary>
@@ -214,12 +222,12 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <summary>
         /// Toggles your movement between run/walk.
         /// </summary>
-        protected void HandleToggleRun(InputAction.CallbackContext context)
+        private void HandleToggleRun(InputAction.CallbackContext context)
         {
             _isRunning = !_isRunning;
         }
 
-        protected void OnSpeedChanged(float speed)
+        private void OnSpeedChanged(float speed)
         {
             OnSpeedChangeEvent?.Invoke(speed);
         }
@@ -243,9 +251,9 @@ namespace SS3D.Systems.Entities.Humanoid
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
-        private void HandleAimChange(object sender, Tuple<bool, bool, AbstractHoldable> e)
+        private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            _movementType = e.Item1 ? MovementType.Aiming : MovementType.Normal;
+            _movementType = isAiming ? MovementType.Aiming : MovementType.Normal;
         }
 
         private void ComputeAngleBetweenAimAndInput()
@@ -270,7 +278,24 @@ namespace SS3D.Systems.Entities.Humanoid
             }
 
             ProcessCharacterMovement();
-            ComputeAngleBetweenAimAndInput();
+
+            if (_movementType == MovementType.Aiming)
+            {
+                ComputeAngleBetweenAimAndInput();
+                UpdateAimTargetPosition();
+            }
+        }
+
+        private void UpdateAimTargetPosition()
+        {
+            // Cast a ray from the mouse position into the scene
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            // Check if the ray hits any collider
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                AimTarget.position = hit.point;
+            }
         }
     }
 

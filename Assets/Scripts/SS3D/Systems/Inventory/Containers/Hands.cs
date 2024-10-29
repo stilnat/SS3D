@@ -27,6 +27,11 @@ namespace SS3D.Systems.Inventory.Containers
     [RequireComponent(typeof(HumanInventory))]
     public class Hands : NetworkActor, IHandsController
     {
+
+        public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
+
+        public event HandContentsHandler OnHandContentChanged;
+
         /// <summary>
         /// List of hands currently on the player, should be modified on server only.
         /// </summary>
@@ -84,10 +89,36 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 hand.HandsController = this;
                 hand.OnHandDisabled += HandleHandRemoved;
+                hand.OnContentsChanged += HandleHandContentChanged;
             }
             // Set the selected hand to be the first available one.
             _selectedHand = PlayerHands.FirstOrDefault();
         }
+
+        /// <summary>
+        /// TODO : currently only returns the next hand, but hands should work in pair
+        /// </summary>
+        public bool TryGetOppositeHand(Hand hand, out Hand oppositeHand)
+        {
+            oppositeHand = null;
+
+            if (PlayerHands.Count == 1)
+            {
+                return false;
+            }
+
+            int handIndex = PlayerHands.IndexOf(hand);
+
+            if (handIndex == -1)
+            {
+                return false;
+            }
+
+            oppositeHand = PlayerHands[(handIndex + 1) % PlayerHands.Count];
+
+            return true;
+        }
+
 
         /// <summary>
         /// Sync for clients, set highlight on slots properly.
@@ -246,6 +277,8 @@ namespace SS3D.Systems.Inventory.Containers
         [Server]
         public void HandleHandRemoved(Hand hand)
         {
+            hand.OnContentsChanged -= HandleHandContentChanged;
+
             if (!PlayerHands.Remove(hand))
             {
                 return;
@@ -267,6 +300,8 @@ namespace SS3D.Systems.Inventory.Containers
         [Server]
         public void AddHand(Hand hand)
         {
+            hand.OnContentsChanged += HandleHandContentChanged;
+
             PlayerHands.Add(hand);
             if(PlayerHands.Count == 1)
             {
@@ -274,28 +309,9 @@ namespace SS3D.Systems.Inventory.Containers
             }
         }
 
-        /// <summary>
-        /// TODO : currently only returns the next hand, but hands should work in pair
-        /// </summary>
-        public bool TryGetOppositeHand(Hand hand, out Hand oppositeHand)
+        private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)
         {
-            oppositeHand = null;
-
-            if (PlayerHands.Count == 1)
-            {
-                return false;
-            }
-
-            int handIndex = PlayerHands.IndexOf(hand);
-
-            if (handIndex == -1)
-            {
-                return false;
-            }
-
-            oppositeHand = PlayerHands[(handIndex + 1) % PlayerHands.Count];
-
-            return true;
+            OnHandContentChanged?.Invoke(hand, olditem, newitem, type);
         }
     }
 }

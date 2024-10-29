@@ -17,9 +17,57 @@ ModelImporter:
     removeConstantScaleCurves: 1
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: 
+    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
+      copied configuration does not match position in animation file:\n\t'thigh_l'
+      : position error = 5.879551 mm\n\t'thigh_r' : position error = 11.314147 mm\n\t'spine'
+      : position error = 13.809788 mm\n\t'chest' : position error = 9.770458 mm\n"
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'Idle' has import animation warnings that might
+      lower retargeting quality:\n\t'c_ring1_r' has translation animation that will
+      be discarded.\n\t'c_ring2_r' has translation animation that will be discarded.\n\t'c_ring3_r'
+      has translation animation that will be discarded.\n\t'c_middle1_r' has translation
+      animation that will be discarded.\n\t'c_middle3_r' has translation animation
+      that will be discarded.\n\t'c_index2_r' has translation animation that will
+      be discarded.\n\nClip 'Rifle' has import animation warnings that might lower
+      retargeting quality:\n\t'c_ring1_r' has translation animation that will be
+      discarded.\n\t'c_ring2_r' has translation animation that will be discarded.\n\t'c_ring3_r'
+      has translation animation that will be discarded.\n\t'c_middle1_r' has translation
+      animation that will be discarded.\n\t'c_middle3_r' has translation animation
+      that will be discarded.\n\t'c_index2_r' has translation animation that will
+      be discarded.\n\t'c_thumb1_l' has translation animation that will be discarded.\n\t'c_ring1_l'
+      has translation animation that will be discarded.\n\t'c_middle1_l' has translation
+      animation that will be discarded.\n\t'c_index1_l' has translation animation
+      that will be discarded.\n\nClip 'Melee' has import animation warnings that
+      might lower retargeting quality:\n\t'c_ring1_r' has translation animation that
+      will be discarded.\n\t'c_ring2_r' has translation animation that will be discarded.\n\t'c_ring3_r'
+      has translation animation that will be discarded.\n\t'c_middle1_r' has translation
+      animation that will be discarded.\n\t'c_middle3_r' has translation animation
+      that will be discarded.\n\t'c_index2_r' has translation animation that will
+      be discarded.\n\t'c_thumb1_l' has translation animation that will be discarded.\n\t'c_ring1_l'
+      has translation animation that will be discarded.\n\t'c_middle1_l' has translation
+      animation that will be discarded.\n\t'c_index1_l' has translation animation
+      that will be discarded.\n\nClip 'Crouched' has import animation warnings that
+      might lower retargeting quality:\n\t'c_thumb1_l' has translation animation
+      that will be discarded.\n\t'c_ring1_l' has translation animation that will
+      be discarded.\n\t'c_middle1_l' has translation animation that will be discarded.\n\t'c_index1_l'
+      has translation animation that will be discarded.\n\nClip 'Crawl' has import
+      animation warnings that might lower retargeting quality:\n\t'c_thumb1_l' has
+      translation animation that will be discarded.\n\t'c_ring1_l' has translation
+      animation that will be discarded.\n\t'c_middle1_l' has translation animation
+      that will be discarded.\n\t'c_index1_l' has translation animation that will
+      be discarded.\n\nClip 'Prone' has import animation warnings that might lower
+      retargeting quality:\n\t'c_ring1_r' has translation animation that will be
+      discarded.\n\t'c_ring2_r' has translation animation that will be discarded.\n\t'c_ring3_r'
+      has translation animation that will be discarded.\n\t'c_middle1_r' has translation
+      animation that will be discarded.\n\t'c_middle3_r' has translation animation
+      that will be discarded.\n\t'c_index2_r' has translation animation that will
+      be discarded.\n\nClip 'RifleUpperBody' has import animation warnings that might
+      lower retargeting quality:\n\t'c_ring1_r' has translation animation that will
+      be discarded.\n\t'c_ring2_r' has translation animation that will be discarded.\n\t'c_ring3_r'
+      has translation animation that will be discarded.\n\t'c_middle1_r' has translation
+      animation that will be discarded.\n\t'c_middle3_r' has translation animation
+      that will be discarded.\n\t'c_index2_r' has translation animation that will
+      be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -31,7 +79,239 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Idle
+      takeName: Idle
+      internalID: -3100369314251171874
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Rifle
+      takeName: Rifle
+      internalID: -4226087607753745546
+      firstFrame: 2
+      lastFrame: 3
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 2
+    - serializedVersion: 16
+      name: Melee
+      takeName: Melee
+      internalID: -2231655820661085090
+      firstFrame: 4
+      lastFrame: 5
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: SpineBend
+      takeName: SpineBend
+      internalID: -229012657187978008
+      firstFrame: 6
+      lastFrame: 7
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Crouched
+      takeName: Crouched
+      internalID: 3926005766609260388
+      firstFrame: 8
+      lastFrame: 9
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Crawl
+      takeName: Crawl
+      internalID: -3579208771848967941
+      firstFrame: 10
+      lastFrame: 11
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Prone
+      takeName: Prone
+      internalID: 2037608789245569710
+      firstFrame: 12
+      lastFrame: 13
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: RifleUpperBody
+      takeName: RifleUpperBody
+      internalID: 5496026446824629491
+      firstFrame: 14
+      lastFrame: 15
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -67,6 +347,7 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0

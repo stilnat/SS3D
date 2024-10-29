@@ -274,11 +274,9 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        private void HandleAimChange(object sender, Tuple<bool, bool, AbstractHoldable> aimParameters)
+        private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            bool isAiming = aimParameters.Item1;
-            bool toThrow = aimParameters.Item2;
-            AbstractHoldable holdable = aimParameters.Item3;
+            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand?.Holdable as AbstractHoldable;
 
             // handle aiming with shoulder aim
             if (holdable.TryGetComponent(out Gun gun) && !toThrow && isAiming)

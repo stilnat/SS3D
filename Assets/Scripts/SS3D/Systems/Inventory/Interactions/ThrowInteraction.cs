@@ -3,6 +3,7 @@ using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
@@ -90,10 +91,10 @@ namespace SS3D.Systems.Inventory.Interactions
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand; 
 
-            AimController aimController = source.GameObject.GetComponentInParent<AimController>();
+            HumanoidController movementController = source.GameObject.GetComponentInParent<HumanoidController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
 
-            ServerThrow(hand, hand.ItemInHand, aimController.transform, aimController.AimTarget, intentController.Intent);
+            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent);
 
             source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.3f);
 
@@ -109,12 +110,13 @@ namespace SS3D.Systems.Inventory.Interactions
 
             // wait roughly the time of animation on client before actually throwing
             await Task.Delay(180);
-
-            throwingHand.Container.RemoveItem(item);
+ 
             item.transform.parent = null;
             item.GetComponent<Rigidbody>().isKinematic = false;
             item.GetComponent<Collider>().enabled = true;
             AddForceToItem(item.GameObject, playerRoot, aimTarget, intent);
+
+            throwingHand.Container.RemoveItem(item);
 
             // after a short amount of time, stop ignoring collisions
             await Task.Delay(300);
