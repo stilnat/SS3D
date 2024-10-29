@@ -19,8 +19,6 @@ namespace SS3D.Systems.Animations
 
         private float _moveToolTime;
 
-        private Coroutine _interactCoroutine;
-
         private Sequence _interactSequence;
 
         private ProceduralAnimationController _controller;
@@ -144,7 +142,15 @@ namespace SS3D.Systems.Animations
 
         public void Cancel()
         {
-            
+           _interactSequence.Kill();
+
+           // Stop looking at item
+           DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
+
+           _controller.AnimatorController.Crouch(false);
+           _tool.StopAnimation();
+           _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
+           _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
         }
     }
 }
