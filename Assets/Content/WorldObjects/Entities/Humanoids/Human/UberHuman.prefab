@@ -3425,7 +3425,7 @@ MonoBehaviour:
   <HoldTransform>k__BackingField: {fileID: 5569489068996507518}
   <Hands>k__BackingField: {fileID: 3222345056416986628}
   <Hand>k__BackingField: {fileID: 3587815548084978834}
-  <InteractionPoint>k__BackingField: {fileID: 5569489068996507518}
+  <InteractionPoint>k__BackingField: {fileID: 4831511282220009542}
 --- !u!1 &2098284813491543158
 GameObject:
   m_ObjectHideFlags: 0
@@ -13596,7 +13596,7 @@ MonoBehaviour:
   <HoldTransform>k__BackingField: {fileID: 6456791731408993078}
   <Hands>k__BackingField: {fileID: 3222345056416986628}
   <Hand>k__BackingField: {fileID: 6031405573252463301}
-  <InteractionPoint>k__BackingField: {fileID: 6456791731408993078}
+  <InteractionPoint>k__BackingField: {fileID: 7333641033910239129}
 --- !u!1 &8770787413504353192
 GameObject:
   m_ObjectHideFlags: 0

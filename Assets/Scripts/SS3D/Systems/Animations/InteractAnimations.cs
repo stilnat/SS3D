@@ -120,6 +120,11 @@ namespace SS3D.Systems.Animations
             }));
 
             _interactSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
+
+            _interactSequence.OnComplete(() =>
+            {
+                OnCompletion?.Invoke(this);
+            });
         }
 
         public event Action<IProceduralAnimation> OnCompletion;
