@@ -85,6 +85,12 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Transform _smallItemLeft;
 
+        [SerializeField]
+        private Transform _underArmLeft;
+
+        [SerializeField]
+        private Transform _underArmRight;
+
 
 
         public override void OnStartServer()
@@ -115,6 +121,9 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.SmallItem, _smallItemRight, HandType.RightHand));
             _holdData.Add(new(HandHoldType.ThrowToolBox, _throwToolboxLeft, HandType.LeftHand));
             _holdData.Add(new(HandHoldType.ThrowToolBox, _throwToolboxRight, HandType.RightHand));
+            _holdData.Add(new(HandHoldType.UnderArm, _underArmLeft, HandType.LeftHand));
+            _holdData.Add(new(HandHoldType.UnderArm, _underArmRight, HandType.RightHand));
+
         }
 
         public void SetItemConstraintPositionAndRotation(Hand hand, IHoldProvider item)
@@ -302,6 +311,9 @@ namespace SS3D.Systems.Animations
             }
         }
 
+        /// <summary>
+        /// Return a target transform, given a left or right hand, and a type of hold
+        /// </summary>
         private Transform TargetFromHoldTypeAndHand(HandHoldType handHoldType, HandType selectedHand)
         {
             return _holdData.First(x => x.HandHoldType == handHoldType && x.PrimaryHand == selectedHand).HoldTarget;

@@ -58,8 +58,6 @@ MonoBehaviour:
       _value: {fileID: 8197868818743549203, guid: 1d2cf546d53e3fe4c9103007427aaec7, type: 3}
     - _key: FloorTile
       _value: {fileID: 7125681683583715523, guid: 404443f7c306fc8469698745624fa3bf, type: 3}
-    - _key: SteelReinforcedSheet
-      _value: {fileID: 7125681683583715523, guid: f88a398ad3d01454f955de9c337d9b99, type: 3}
     - _key: SteelSheet
       _value: {fileID: 7125681683583715523, guid: 4cb99cf2fee96f944abbacc51b0b701c, type: 3}
     - _key: Crowbar
@@ -156,10 +154,6 @@ MonoBehaviour:
       _value: {fileID: 8028539322119499722, guid: 3b33b5cf16a677a4e85a110679cde32a, type: 3}
     - _key: SteelGirderUnbolted
       _value: {fileID: 3591147544166670882, guid: 5dba4171f2124fb48b0e32c0e10841e0, type: 3}
-    - _key: GlassReinforcedSheet
-      _value: {fileID: 7125681683583715523, guid: a1a7407e08bb2914c97f431063bf83e2, type: 3}
-    - _key: GlassSheet
-      _value: {fileID: 7125681683583715523, guid: e2a06f02e6a7e0348bdc535344bfe1f3, type: 3}
     - _key: WoodLog
       _value: {fileID: 7125681683583715523, guid: 2767aeb6e6fd53b43a1cb305789834d4, type: 3}
     - _key: WoodPlank
@@ -212,4 +206,10 @@ MonoBehaviour:
       _value: {fileID: 3604567820273628250, guid: ff4004210dcb33749a7af3f49c474474, type: 3}
     - _key: ToolboxBlue
       _value: {fileID: 7256796119011547647, guid: 264ea51d92067c14ebc6633999afac78, type: 3}
+    - _key: GlassSheet
+      _value: {fileID: 9101038467695097231, guid: e2a06f02e6a7e0348bdc535344bfe1f3, type: 3}
+    - _key: GlassReinforcedSheet
+      _value: {fileID: 4003569673144195407, guid: 1233b131db219cd4bb2303de28d3d077, type: 3}
+    - _key: SteelReinforcedSheet
+      _value: {fileID: 5463110412177712424, guid: 38a26a63cd3ac284c8a55899c0e91731, type: 3}
     _new: 

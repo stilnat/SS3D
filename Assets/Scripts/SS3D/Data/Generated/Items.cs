@@ -26,7 +26,6 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset DonkPocket = new DatabaseAsset("DonkPocket", "Items");
         public static DatabaseAsset Boombox = new DatabaseAsset("Boombox", "Items");
         public static DatabaseAsset FloorTile = new DatabaseAsset("FloorTile", "Items");
-        public static DatabaseAsset SteelReinforcedSheet = new DatabaseAsset("SteelReinforcedSheet", "Items");
         public static DatabaseAsset SteelSheet = new DatabaseAsset("SteelSheet", "Items");
         public static DatabaseAsset Crowbar = new DatabaseAsset("Crowbar", "Items");
         public static DatabaseAsset ScrewdriverBlue = new DatabaseAsset("ScrewdriverBlue", "Items");
@@ -75,8 +74,6 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset SteelGirder = new DatabaseAsset("SteelGirder", "Items");
         public static DatabaseAsset Plenum = new DatabaseAsset("Plenum", "Items");
         public static DatabaseAsset SteelGirderUnbolted = new DatabaseAsset("SteelGirderUnbolted", "Items");
-        public static DatabaseAsset GlassReinforcedSheet = new DatabaseAsset("GlassReinforcedSheet", "Items");
-        public static DatabaseAsset GlassSheet = new DatabaseAsset("GlassSheet", "Items");
         public static DatabaseAsset WoodLog = new DatabaseAsset("WoodLog", "Items");
         public static DatabaseAsset WoodPlank = new DatabaseAsset("WoodPlank", "Items");
         public static DatabaseAsset SteelRod = new DatabaseAsset("SteelRod", "Items");
@@ -103,6 +100,9 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset HeadsetSecurityRight = new DatabaseAsset("HeadsetSecurityRight", "Items");
         public static DatabaseAsset M4 = new DatabaseAsset("M4", "Items");
         public static DatabaseAsset ToolboxBlue = new DatabaseAsset("ToolboxBlue", "Items");
+        public static DatabaseAsset GlassSheet = new DatabaseAsset("GlassSheet", "Items");
+        public static DatabaseAsset GlassReinforcedSheet = new DatabaseAsset("GlassReinforcedSheet", "Items");
+        public static DatabaseAsset SteelReinforcedSheet = new DatabaseAsset("SteelReinforcedSheet", "Items");
     }
 }
 

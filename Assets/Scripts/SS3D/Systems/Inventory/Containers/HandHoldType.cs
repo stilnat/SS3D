@@ -13,5 +13,6 @@ namespace SS3D.Systems.Inventory.Containers
         DoubleHandGunHarm = 4,
         SmallItem = 5,
         ThrowToolBox = 6,
+        UnderArm = 7,
     }
 }
