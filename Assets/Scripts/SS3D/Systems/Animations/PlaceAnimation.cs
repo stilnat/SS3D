@@ -23,16 +23,24 @@ namespace SS3D.Systems.Animations
 
         private Hand _mainHand;
 
+        private Hand _secondaryHand;
+
         private Item _item;
+
+        public PlaceAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand)
+        {
+            _placeSequence = DOTween.Sequence();
+            _itemReachPlaceDuration = time / 2;
+            _handMoveBackDuration = time / 2;
+            _controller = proceduralAnimationController;
+            _mainHand = mainHand;
+            _secondaryHand = secondaryHand;
+        }
 
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             Debug.Log("Start animate place item");
 
-            _itemReachPlaceDuration = time / 2;
-            _handMoveBackDuration = time / 2;
-            _controller = proceduralAnimationController;
-            _mainHand = mainHand;
             _item = target.GetComponent<Item>();
 
             bool withTwoHands = secondaryHand.Empty && _item.Holdable.CanHoldTwoHand;
@@ -110,8 +118,6 @@ namespace SS3D.Systems.Animations
             {
                 _controller.AnimatorController.Crouch(true);
             }
-
-            _placeSequence = DOTween.Sequence();
 
             // Slowly increase looking at place item position
             _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachPlaceDuration));

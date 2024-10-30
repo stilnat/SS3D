@@ -28,15 +28,23 @@ namespace SS3D.Systems.Animations
 
         private Hand _mainHand;
 
+        private Hand _secondaryHand;
+
         public bool IsPicking { get; private set; }
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public PickUpAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand)
         {
             _controller = proceduralAnimationController;
             _itemMoveDuration = time / 2;
             _itemReachDuration = time / 2;
             _mainHand = mainHand;
+            _secondaryHand = secondaryHand;
 
+            _pickUpSequence = DOTween.Sequence();
+        }
+
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        {
             Item item = target.GetComponent<Item>();
 
             bool withTwoHands = secondaryHand != null && secondaryHand.Empty && item.Holdable.CanHoldTwoHand;

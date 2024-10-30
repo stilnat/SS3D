@@ -54,10 +54,10 @@ namespace SS3D.Systems.Animations
             switch (interactionType)
             {
                   case InteractionType.Pickup:
-                      proceduralAnimation = new PickUpAnimation();
+                      proceduralAnimation = new PickUpAnimation(this, time, mainHand, secondaryHand);
                       break;
                   case InteractionType.Place:
-                      proceduralAnimation = new PlaceAnimation();
+                      proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand);
                       break;
                   case InteractionType.Screw:
                       proceduralAnimation = new InteractAnimations();
