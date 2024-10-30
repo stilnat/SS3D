@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Provide an abstract class for the IProceduralAnimation interface, giving access to  IProceduralAnimations to some common methods often used in procedural animations
+    /// </summary>
     public abstract class AbstractProceduralAnimation : IProceduralAnimation
     {
         public abstract event Action<IProceduralAnimation> OnCompletion;
@@ -16,6 +19,9 @@ namespace SS3D.Systems.Animations
 
         public abstract void Cancel();
 
+        /// <summary>
+        ///  Try to rotate on the flat plane the player toward a given position, often useful for procedural animations.
+        /// </summary>
         protected Sequence TryRotateTowardTargetPosition(Sequence sequence, Transform rootTransform, ProceduralAnimationController controller, float rotateTime, Vector3 position)
         {
             if (controller.PositionController.Position != PositionType.Sitting)

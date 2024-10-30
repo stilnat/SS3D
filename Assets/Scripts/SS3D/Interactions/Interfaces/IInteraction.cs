@@ -28,6 +28,9 @@ namespace SS3D.Interactions.Interfaces
         /// <returns></returns>
         string GetGenericName();
 
+        /// <summary>
+        /// Type of the interaction, can be used to play specific animations, used in the crafting system too
+        /// </summary>
         InteractionType InteractionType { get; }
 
         /// <summary>

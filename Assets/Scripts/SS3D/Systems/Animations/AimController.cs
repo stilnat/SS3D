@@ -15,6 +15,9 @@ using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Controller handling the logic to decide when a player should be aiming or not, also sync the aiming between clients.
+    /// </summary>
     public class AimController : NetworkActor
     {
 
@@ -37,8 +40,14 @@ namespace SS3D.Systems.Animations
         [SyncVar(OnChange = nameof(SyncAimingToShoot))]
         private bool _isAimingToShoot;
 
+        /// <summary>
+        /// Is the player aiming to throw ?
+        /// </summary>
         public bool IsAimingToThrow => _isAimingToThrow;
 
+        /// <summary>
+        /// Is the player aiming to shoot with a gun ?
+        /// </summary>
         public bool IsAimingToShoot => _isAimingToShoot;
 
         public override void OnStartClient()
@@ -63,6 +72,7 @@ namespace SS3D.Systems.Animations
         [Server]
         private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)
         {
+            // Stop aiming if the item in hand is removed.
             if (_isAimingToShoot && hand == _hands.SelectedHand && type == ContainerChangeType.Remove)
             {
                 _isAimingToShoot = false;
@@ -78,15 +88,6 @@ namespace SS3D.Systems.Animations
         private void SyncAimingToThrow(bool wasAiming, bool isAiming, bool asServer)
         {
             _bodyAimRig.weight = isAiming ? 0.3f : 0f;
-            Debug.Log("invoke on aim to throw");
-            Item item = _hands.SelectedHand.ItemInHand;
-
-            foreach (var subscriber in OnAim.GetInvocationList())
-            {
-                Debug.Log("Subscriber method: " + subscriber.Method.Name);
-                Debug.Log("Subscriber target: " + subscriber.Target);
-            }
-
             OnAim?.Invoke(isAiming, true);
         }
 
@@ -111,6 +112,7 @@ namespace SS3D.Systems.Animations
         [Client]
         private void AimGunOnPerformed(InputAction.CallbackContext obj)
         {
+            // To aim, the intent must be harmful, and a gun must be in hand.
             bool canAim = _intentController.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemInHand.GameObject.HasComponent<Gun>();
 
             if (canAim)
