@@ -14,6 +14,8 @@ namespace SS3D.Systems.Entities.Humanoid
         [SerializeField] private Animator _animator;
         [SerializeField] private float _lerpMultiplier;
 
+        [SerializeField] private AimController _aimController;
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -99,7 +101,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _movementController.OnSpeedChangeEvent += UpdateMovement;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-            GetComponent<AimController>().OnAim += HandleAimInAnimatorControler;
+            _aimController.OnAim += HandleAimInAnimatorControler;
         }
 
         private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)

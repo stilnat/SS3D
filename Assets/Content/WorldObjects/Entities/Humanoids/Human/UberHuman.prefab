@@ -7130,12 +7130,7 @@ Animator:
   m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'upper_arm_r'\n\tTransform 'forearm_r'\n\tTransform
-    'head'\n\tTransform 'hand_r'\n\tTransform 'shoulder_l'\n\tTransform 'hand_l'\n\tTransform
-    'spine'\n\tTransform 'hips'\n\tTransform 'upper_arm_l'\n\tTransform 'neck'\n\tand
-    more ..."
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -7417,6 +7412,7 @@ MonoBehaviour:
   _movementController: {fileID: 313020066527916364}
   _animator: {fileID: 7307990926274805850}
   _lerpMultiplier: 5
+  _aimController: {fileID: 3054724180155005980}
 --- !u!114 &313020066527916364
 MonoBehaviour:
   m_ObjectHideFlags: 0
