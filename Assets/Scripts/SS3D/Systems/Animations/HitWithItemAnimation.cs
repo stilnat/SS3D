@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Procedural animation to hit with an item in hand
+    /// </summary>
     public class HitWithItemAnimation : IProceduralAnimation
     {
         public event Action<IProceduralAnimation> OnCompletion;
@@ -19,11 +22,6 @@ namespace SS3D.Systems.Animations
         private Sequence _sequence;
 
         private float _armReach = 0.5f;
-
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        {
-            throw new NotImplementedException();
-        }
 
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
@@ -39,12 +37,16 @@ namespace SS3D.Systems.Animations
         [Client]
         private void HitAnimate(Vector3 hitTargetPosition, Hand mainHand, AbstractHoldable holdable, Transform rootTransform, float duration)
         {
-            // set the item to be on a temp object which will help with rotation on a pivot
+            // Set the item to be on a temp object which will help with rotation on a pivot
             GameObject temp = new();
+
+            // Put the temp object on the root transform so it moves with the player, and put it at the same place as the hold
             temp.transform.parent = rootTransform;
             Transform hold = holdable.GetHold(true, mainHand.HandType);
             temp.transform.position = hold.position;
             temp.transform.rotation = holdable.transform.rotation;
+
+            // Parent the holdable on the temp object, such that the hold on the holdable is at the same place as the temp object
             holdable.transform.parent = temp.transform;
             holdable.transform.localPosition = -hold.localPosition;
 
@@ -115,8 +117,6 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = (hitTargetPosition - mainHand.HandBone.position).normalized;
 
-            // todo : change rotation based on tool hit point
-
             ItemHitPoint hitPoint = mainHand.ItemInHand.GetComponent<ItemHitPoint>();
 
             Vector3 right = Vector3.Cross(Vector3.up, fromHandToHit).normalized;
@@ -140,12 +140,11 @@ namespace SS3D.Systems.Animations
 
 
         /// <summary>
-        /// 
+        ///  Animate the trajectory of the hand while hitting with item
         /// </summary>
         /// <param name="hitTargetPosition"> hit target position in world space</param>
         /// <param name="duration"> The duration of the whole animation hit </param>
         /// <param name="finalRotation"> The rotation of the player after it's facing the </param>
-        /// <returns></returns>
         private Tween AnimateHandPosition(Vector3 hitTargetPosition, float duration, Quaternion finalRotation, bool isRight, Transform temp, Transform rootTransform, Hand mainHand)
         {
             // All computations have to be done like if the player was already facing the direction it's facing in the end

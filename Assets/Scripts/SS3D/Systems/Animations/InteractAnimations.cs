@@ -12,6 +12,9 @@ using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Procedural animation for interacting with tools, such as using a wrench or a screwdriver.
+    /// </summary>
     public class InteractAnimations : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;

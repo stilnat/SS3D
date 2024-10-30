@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Procedural animation for interaction done with hand holding nothing.
+    /// </summary>
     public class InteractWithHandAnimation : AbstractProceduralAnimation
     { 
         public override event Action<IProceduralAnimation> OnCompletion;

@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Procedural animation for punching stuff
+    /// </summary>
     public class HitAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
@@ -77,6 +80,7 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = hitTargetPosition - mainHand.HandBone.position;
 
+            // the target rotation is for the hand local up vector to face the hit position (might want to redo this one, looks okay but not always)
             Quaternion newRotation = Quaternion.FromToRotation(mainHand.Hold.PickupTargetLocker.transform.up, fromHandToHit) * mainHand.Hold.PickupTargetLocker.transform.rotation;
 
             Tween tween = mainHand.Hold.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration);
@@ -87,14 +91,6 @@ namespace SS3D.Systems.Animations
             return tween;
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="hitTargetPosition"> hit target position in world space</param>
-        /// <param name="duration"> The duration of the whole animation hit </param>
-        /// <param name="finalRotation"> The rotation of the player after it's facing the </param>
-        /// <returns></returns>
         private Tween AnimateHandPosition(Vector3 hitTargetPosition, float duration, Quaternion finalRotation, bool isRight, Hand mainHand, Transform rootTransform)
         {
             // All computations have to be done like if the player was already facing the direction it's facing in the end
@@ -118,7 +114,6 @@ namespace SS3D.Systems.Animations
 
             // Play a trajectory that is local to the player's root, so will stay the same relatively to player's root if player moves
             Tween tween = mainHand.Hold.PickupTargetLocker.transform.DOLocalPath(path, duration, PathType.CatmullRom);
-
 
             // Upon reaching the hit position, we start slowly decreasing the IK 
             tween.onWaypointChange += value =>
@@ -172,23 +167,6 @@ namespace SS3D.Systems.Animations
             // Same as trajectoryPeak but for when the hand gets back in rest position
             Vector3 trajectoryPeakBack = middleFromShoulderToHit - (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
-            // show the hit target position in the player referential
-            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
-
-            // show the beginning of the animation
-            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
-
-            // show the middle of the two precedent points
-            DebugExtension.DebugPoint((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Color.green, 1f, 2f);
-
-            Debug.DrawRay((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
-
-            // show the direction from shoulder to the hit target
-            Debug.DrawRay(mainHand.Hold.UpperArm.position, fromShoulderToHit, Color.red, 2f);
-
-            // show the trajectory point guiding the hand outside
-            DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
-
             // Define the points for the trajectory in the player's root referential
             Vector3[] path =
             {
@@ -196,6 +174,8 @@ namespace SS3D.Systems.Animations
                 handTargetPositionRelativeToPlayer,
                 trajectoryPeakBack, 
             };
+
+            VisualDebug(rootTransform, handTargetPositionRelativeToPlayer, middleFromShoulderToHit, fromShoulderToHit, trajectoryPeak, mainHand);
 
             return path;
         }
@@ -214,6 +194,27 @@ namespace SS3D.Systems.Animations
             }
 
             return handTargetPosition;
+        }
+
+        private void VisualDebug(Transform rootTransform, Vector3 handTargetPositionRelativeToPlayer,
+            Vector3 middleFromShoulderToHit, Vector3 fromShoulderToHit, Vector3 trajectoryPeak, Hand mainHand)
+        {
+            // show the hit target position in the player referential
+            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
+
+            // show the beginning of the animation
+            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
+
+            // show the middle of the two precedent points
+            DebugExtension.DebugPoint((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Color.green, 1f, 2f);
+
+            Debug.DrawRay((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
+
+            // show the direction from shoulder to the hit target
+            Debug.DrawRay(mainHand.Hold.UpperArm.position, fromShoulderToHit, Color.red, 2f);
+
+            // show the trajectory point guiding the hand outside
+            DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
         }
     }
 }

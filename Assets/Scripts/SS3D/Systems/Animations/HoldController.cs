@@ -1,3 +1,4 @@
+using DG.Tweening;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Serializing;
@@ -19,6 +20,9 @@ namespace SS3D.Systems.Animations
     /// </summary>
     public class HoldController : NetworkActor
     {
+        /// <summary>
+        /// Simple struct for syncing purpose
+        /// </summary>
         private struct HandItem
         {
             public AbstractHoldable Holdable;
@@ -31,12 +35,21 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        private sealed record HoldAndOffset(HandHoldType HandHoldType, Transform HoldTarget, HandType PrimaryHand);
+        /// <summary>
+        /// Record holding the hold target for each HoldType/HandType
+        /// </summary>
+        private sealed record HoldData(HandHoldType HandHoldType, Transform HoldTarget, HandType PrimaryHand);
 
+        /// <summary>
+        /// Keeps track of items held in each hand
+        /// </summary>
         [SyncObject]
         private readonly SyncList<HandItem> _itemsInHands = new();
 
-        private readonly List<HoldAndOffset> _holdData = new();
+        /// <summary>
+        /// List of all hold transform, for each HoldType/HandType, those transform are used to determine item position when held.
+        /// </summary>
+        private readonly List<HoldData> _holdData = new();
 
         [SerializeField]
         private IntentController _intents;
@@ -48,7 +61,9 @@ namespace SS3D.Systems.Animations
         private AimController _aimController;
 
 
-        // Hold transforms, the transforms where items are going to position themselves when held in hand
+        // Hold transforms, the transforms where items are going to position themselves when held in hand.
+        // Left transform are parented under the left shoulder, and Right transforms under the right one.
+
         [SerializeField]
         private Transform _gunHoldRight;
 
@@ -167,18 +182,12 @@ namespace SS3D.Systems.Animations
             Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
             // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
-            Vector3 startingOffset = hand.Hold.ItemPositionConstraint.data.offset;
             Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
-            StartCoroutine(CoroutineHelper.ModifyVector3OverTime(
-                x => hand.Hold.ItemPositionConstraint.data.offset = x, startingOffset, finalOffset, duration));
+            DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
 
             // Do the same with interpolating rotation.
-            Quaternion startingRotation = hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation;
-            Quaternion finalRotation = hold.localRotation;
-
-            StartCoroutine(CoroutineHelper.ModifyQuaternionOverTime(
-                x => hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation = x, startingRotation, finalRotation, duration));
+            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
         }
 
         /// <summary>
