@@ -60,7 +60,7 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
-        public void RemoveHandHolding(Hand hand, IHoldProvider holdable)
+        public void RemoveHandHolding(Hand hand, AbstractHoldable holdable)
         {
             _animator.SetTrigger(hand.HandType == HandType.LeftHand ? "FingerRelaxedLeft" : "FingerRelaxedRight");
 
@@ -70,7 +70,7 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
-        public void AddHandHolding(Hand hand, IHoldProvider holdable)
+        public void AddHandHolding(Hand hand, AbstractHoldable holdable)
         {
             switch (holdable.PrimaryHandPoseType)
             {

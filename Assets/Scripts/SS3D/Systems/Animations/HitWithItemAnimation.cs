@@ -28,7 +28,7 @@ namespace SS3D.Systems.Animations
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
-            HitAnimate(targetPosition, mainHand, mainHand.ItemInHand.Holdable as AbstractHoldable, _controller.transform, time);
+            HitAnimate(targetPosition, mainHand, mainHand.ItemInHand.Holdable, _controller.transform, time);
         }
 
         public void Cancel()
@@ -245,7 +245,7 @@ namespace SS3D.Systems.Animations
         /// <param name="fromHandToHit"> The direction in world space, from the hand to the hit position. </param>
         /// <param name="targetHitPosition"> The hit position the player is trying to reach.</param>
         /// <returns></returns>
-        private Vector3 ComputeTargetHandHoldPosition(IHoldProvider holdable, Vector3 fromShoulderToHit, Vector3 targetHitPosition, Hand mainHand)
+        private Vector3 ComputeTargetHandHoldPosition(AbstractHoldable holdable, Vector3 fromShoulderToHit, Vector3 targetHitPosition, Hand mainHand)
         {
             Transform item = holdable.GameObject.transform;
             Quaternion savedRotation = item.rotation;

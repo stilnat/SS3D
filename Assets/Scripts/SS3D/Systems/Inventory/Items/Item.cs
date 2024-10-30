@@ -70,7 +70,7 @@ namespace SS3D.Systems.Inventory.Items
 
         public string Name => _name;
 
-        public IHoldProvider Holdable { get; private set; }
+        public AbstractHoldable Holdable { get; private set; }
 
         public ReadOnlyCollection<Trait> Traits => ((List<Trait>) _traits.Collection).AsReadOnly();
 
@@ -147,7 +147,7 @@ namespace SS3D.Systems.Inventory.Items
         {
             base.OnStart();
 
-            Holdable = GetComponent<IHoldProvider>();
+            Holdable = GetComponent<AbstractHoldable>();
 
             foreach (Animator animator in GetComponents<Animator>())
             {

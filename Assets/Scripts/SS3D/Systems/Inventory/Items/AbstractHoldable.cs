@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public abstract class AbstractHoldable : NetworkActor, IHoldProvider
+public abstract class AbstractHoldable : NetworkActor
 {
     [SerializeField]
     protected Transform _primaryRightHandHold;

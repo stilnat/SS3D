@@ -20,7 +20,7 @@ namespace SS3D.Systems.Animations
 
             // remove all IK constraint
             Item item = target as Item;
-            IHoldProvider holdable = item.Holdable;
+            AbstractHoldable holdable = item.Holdable;
 
             mainHand.Hold.ItemPositionConstraint.weight = 0f;
             mainHand.Hold.HoldIkConstraint.weight = 0f;

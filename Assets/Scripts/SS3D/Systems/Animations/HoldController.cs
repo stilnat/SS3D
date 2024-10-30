@@ -126,7 +126,7 @@ namespace SS3D.Systems.Animations
 
         }
 
-        public void SetItemConstraintPositionAndRotation(Hand hand, IHoldProvider item)
+        public void SetItemConstraintPositionAndRotation(Hand hand, AbstractHoldable item)
         {
             bool toThrow = _aimController.IsAimingToThrow;
             bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
@@ -150,7 +150,7 @@ namespace SS3D.Systems.Animations
         /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
         /// <param name="toThrow"> True the item should be in a ready to throw position</param>
         private void UpdateItemPositionConstraintAndRotation(
-            Hand hand, IHoldProvider item, float duration)
+            Hand hand, AbstractHoldable item, float duration)
         {
             if (item == null)
             {
@@ -187,7 +187,7 @@ namespace SS3D.Systems.Animations
         /// <param name="hand"> The hand for which we want to set picking and holding </param>
         /// <param name="secondary"> Is it the hand with the primary hold on the item, or is it just there in support of the first one ? </param>
         /// <param name="holdProvider"> The item we want to hold, and onto which we're going to move the targets.</param>
-        public void MovePickupAndHoldTargetLocker(Hand hand, bool secondary, IHoldProvider holdProvider)
+        public void MovePickupAndHoldTargetLocker(Hand hand, bool secondary, AbstractHoldable holdProvider)
         {
             Transform parent = holdProvider.GetHold(!secondary, hand.HandType);
 
@@ -205,11 +205,8 @@ namespace SS3D.Systems.Animations
                 return;
             }
 
-
             if (op == SyncListOperation.Add || op == SyncListOperation.Insert || op == SyncListOperation.Set)
             {
-                Debug.Log($"{newItem} is null ?");
-                Debug.Log($"add item {newItem.Holdable} to hand");
                 AddItem(newItem.Hand, newItem.Holdable);
             }
 
@@ -257,11 +254,11 @@ namespace SS3D.Systems.Animations
             {
                 if (handIndex == -1)
                 {
-                    _itemsInHands.Add(new HandItem(hand, newitem.Holdable as AbstractHoldable));
+                    _itemsInHands.Add(new HandItem(hand, newitem.Holdable));
                 }
                 else
                 {
-                    _itemsInHands[handIndex] = new HandItem(hand, newitem.Holdable as AbstractHoldable);
+                    _itemsInHands[handIndex] = new HandItem(hand, newitem.Holdable);
                 }
             }
 
@@ -285,7 +282,7 @@ namespace SS3D.Systems.Animations
 
         private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand?.Holdable as AbstractHoldable;
+            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand?.Holdable;
 
             // handle aiming with shoulder aim
             if (holdable.TryGetComponent(out Gun gun) && !toThrow && isAiming)
