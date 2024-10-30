@@ -103,6 +103,9 @@ namespace SS3D.Systems.Inventory.Interactions
 
         private async Task ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent)
         {
+            // remove client ownership so that server can take full control of item trajectory
+            item.RemoveOwnership();
+
             item.transform.parent = throwingHand.HandBone.transform;
 
             // ignore collisions while in hand, the time the item gets a bit out of the player collider.
