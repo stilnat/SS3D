@@ -13,6 +13,10 @@ using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Simple animation allowing to place correctly the human before playing the sit animation.
+    /// I'm not sure the sitting stuff really has its place here, maybe more in humanoid movement controller
+    /// </summary>
     public class Sit : IProceduralAnimation
     {
         public event Action<IProceduralAnimation> OnCompletion;
@@ -21,20 +25,23 @@ namespace SS3D.Systems.Animations
 
         private Sequence _sitSequence;
 
-        public void ServerPerform(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
-        { 
-            
-        }
-
         public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
-            AnimateSit(target.transform);
+
+            if (_controller.PositionController.Position == PositionType.Sitting)
+            {
+                StopSitting();
+            }
+            else
+            {
+                AnimateSit(target.transform);
+            }
         }
 
         public void Cancel()
         {
-
+             StopSitting();
         }
 
         private void AnimateSit(Transform sit)

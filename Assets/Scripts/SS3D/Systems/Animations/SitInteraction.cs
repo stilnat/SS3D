@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
+    /// <summary>
+    /// Interaction to allow sitting
+    /// </summary>
     public class SitInteraction : Interaction
     {
 
@@ -76,13 +79,7 @@ namespace SS3D.Systems.Animations
         {
             Debug.Log("attempting to cancel animation");
 
-            // We don't want to cancel the interaction if the item is already dropped
-            /*if (_hasDroppedItem)
-            {
-                return;
-            } */
-
-            if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand != null)
+            if (interactionEvent.Source.GetRootSource() is Hand hand)
             {
                 hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
