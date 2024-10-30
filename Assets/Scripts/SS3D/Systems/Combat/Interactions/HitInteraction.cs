@@ -7,6 +7,7 @@ using SS3D.Systems.Entities;
 using SS3D.Systems.Health;
 using SS3D.Data.Generated;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 
 namespace SS3D.Systems.Combat.Interactions
@@ -65,10 +66,11 @@ namespace SS3D.Systems.Combat.Interactions
                 if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null )
                 {
                     Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
-                    BodyPart bodyPart = entity.GetComponentInChildren<BodyPart>();
+                    entity.GetComponent<Ragdoll>().KnockdownTimeless();
+                    //BodyPart bodyPart = entity.GetComponentInChildren<BodyPart>();
 
                     // Inflict a fix amount and type of damages for now. Long term, should be passed in parameter and depends on weapon type, velocity ...
-                    bodyPart.InflictDamageToAllLayer(new DamageTypeQuantity(DamageType.Slash, 50));
+                    //bodyPart.InflictDamageToAllLayer(new DamageTypeQuantity(DamageType.Slash, 50));
                 }
             }
 

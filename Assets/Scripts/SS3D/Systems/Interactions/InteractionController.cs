@@ -103,6 +103,9 @@ namespace SS3D.Systems.Interactions
             CmdRunInteraction(ray, interactionName);
         }
 
+        /// <summary>
+        /// Among the viable interaction, choose the most important one (powered by spaghetti logic)
+        /// </summary>
         private InteractionEntry ChooseMostImportantInteraction(List<InteractionEntry> viableInteractions)
         {
             InteractionEntry throwInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Throw");
