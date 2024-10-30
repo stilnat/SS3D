@@ -38,6 +38,11 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetBool("Crouch", crouchState);
         }
 
+        public void Grab(bool grabState)
+        {
+            _animator.SetBool("Grab", grabState);
+        }
+
         public void MakeFist(bool makeFist, bool isRight)
         {
             if (makeFist)

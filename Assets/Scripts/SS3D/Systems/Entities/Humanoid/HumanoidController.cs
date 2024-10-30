@@ -265,7 +265,8 @@ namespace SS3D.Systems.Entities.Humanoid
             InputAimAngle = Vector2.SignedAngle(targetMove, forward);
         }
 
-        private void HandleGrabChange(object sender, bool grab)
+        // todo : Implement a grab controller instead with a event call to change grab
+        public void ChangeGrab(bool grab)
         {
             _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }

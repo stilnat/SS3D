@@ -1,3 +1,4 @@
+using FishNet.Connection;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
@@ -9,9 +10,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrabInteraction : DelayedInteraction
+public class GrabInteraction : ContinuousInteraction
 {
-    private bool _hasGrabbedItem;
+    private GrabbableBodyPart _grabbedBodyPart;
+
+    private NetworkConnection _previousOwner;
 
     public float TimeToMoveBackHand { get; private set; }
 
@@ -55,8 +58,6 @@ public class GrabInteraction : DelayedInteraction
             return false;
         }
 
-        //bool isInRange = InteractionExtensions.RangeCheck(interactionEvent);
-
         return true;
     }
 
@@ -72,22 +73,30 @@ public class GrabInteraction : DelayedInteraction
         return true;
     }
 
+    protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+    {
+        Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+        _grabbedBodyPart = interactionEvent.Target as GrabbableBodyPart;
+        _previousOwner = _grabbedBodyPart.Owner;
+        _grabbedBodyPart.NetworkObject.GiveOwnership(hand.Owner);
+
+    }
+    
+
     public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
     {
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
+
+        if (_grabbedBodyPart != null)
+        {
+            _grabbedBodyPart.GiveOwnership(_previousOwner);
+        }
     }
 
-    protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+    protected override bool CanKeepInteracting(InteractionEvent interactionEvent, InteractionReference reference)
     {
-        // After time to grab has passed, tell the hand that it grabbed something
-        _hasGrabbedItem = true;
-
-        Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-        GrabbableBodyPart grabbable = interactionEvent.Target as GrabbableBodyPart;
-
-        // Grabbed thing is now owned by the hand's client, as we move thing based on client authority currently. 
-        grabbable.GiveOwnership(hand.Owner);
-        //hand.Hold.IsGrabbing = true;
+        return true;
     }
 }

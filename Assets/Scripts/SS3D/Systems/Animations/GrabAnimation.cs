@@ -25,35 +25,27 @@ namespace SS3D.Systems.Animations
 
         private GrabbableBodyPart _grabbedObject;
 
-        private NetworkConnection _previousOwner;
-
         private ProceduralAnimationController _controller;
 
         private Sequence _grabSequence;
 
-        private void RpcReleaseGrab()
-        {
-            // TODO move into interaction cancel
-            _grabbedObject.NetworkObject.GiveOwnership(_previousOwner);
-        }
-
-        private void Grab(GrabbableBodyPart bodyPart, NetworkConnection grabbingPlayer, float timeToMoveBackHand, float timeToReachGrabPlace)
-        {
-            // TODO move into interaction start
-            _previousOwner = bodyPart.Owner;
-            bodyPart.NetworkObject.GiveOwnership(grabbingPlayer);
-        }
+        private Hand _mainHand;
 
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             _grabbedObject = target.GetComponent<GrabbableBodyPart>();
+            _mainHand = mainHand;
+            _itemReachDuration = time / 2;
+            _itemMoveDuration = time / 2;
+
             SetUpGrab(_grabbedObject, mainHand, secondaryHand, false);
             GrabReach(_grabbedObject, mainHand);
         }
 
         public override void Cancel()
         {
+            ReleaseGrab();
         }
 
         private void ReleaseGrab()
@@ -69,9 +61,18 @@ namespace SS3D.Systems.Animations
                     { 
                        MonoBehaviour.Destroy(_fixedJoint);
                     }
-
-                    _grabbedObject = null;
             }
+
+            Sequence stopSequence = DOTween.Sequence();
+
+            // Stop looking
+            stopSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
+
+            // Stop picking
+            stopSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
+
+            _controller.MovementController.ChangeGrab(false);
+            _controller.AnimatorController.Grab(false);
         }
 
         private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -99,24 +100,21 @@ namespace SS3D.Systems.Animations
         {
             _grabSequence = DOTween.Sequence();
 
-            TryRotateTowardTargetPosition(_grabSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
+            _grabSequence = TryRotateTowardTargetPosition(_grabSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
 
-            if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
-            {
-                _controller.AnimatorController.Crouch(true);
-            }
+            _controller.MovementController.ChangeGrab(true);
+
+            _controller.AnimatorController.Grab(true);
 
             // Start looking at grabbed part
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
-            // At the same time change  pickup constraint weight of the main hand from 0 to 1
+            // At the same time change pickup constraint weight of the main hand from 0 to 1
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
             // those two lines necessary to smooth pulling back
             mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
             mainHand.Hold.PickupTargetLocker.transform.position = item.transform.position;
-
-            _controller.AnimatorController.Crouch(false);
 
             // Since transforms are client autoritative, only the client owner should deal with the physics, in this case creating a fixed joint between grabbed part and client hand. 
             if (mainHand.IsOwner)
