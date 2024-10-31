@@ -94,9 +94,9 @@ namespace SS3D.Systems.Inventory.Interactions
             HumanoidController movementController = source.GameObject.GetComponentInParent<HumanoidController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
 
-            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.7f);
+            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.5f);
 
-            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.7f);
+            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.5f);
 
             return false;
         }

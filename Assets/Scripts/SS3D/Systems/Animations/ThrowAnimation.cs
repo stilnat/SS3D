@@ -24,25 +24,26 @@ namespace SS3D.Systems.Animations
             AbstractHoldable holdable = item.Holdable;
 
             Sequence throwAnimation = DOTween.Sequence();
-            Quaternion holdRotation = mainHand.Hold.HandHoldTargetLocker.transform.rotation;
             mainHand.Hold.ItemPositionConstraint.weight = 0f;
-           // item.transform.parent = mainHand.Hold.HoldTransform;
-           // mainHand.Hold.HandHoldTargetLocker.transform.rotation = holdRotation;
 
-            Transform hold = holdable.GetHold(true, mainHand.HandType);
+           bool isRight = mainHand.HandType == HandType.RightHand;
+           int deviationRightOrLeft = isRight ? 1 : -1;
+
             Vector3 initialPosition = mainHand.Hold.ItemPositionTargetLocker.transform.position;
-            Vector3 middle = initialPosition + 0.15f * Vector3.up - 0.15f * _controller.Forward;
-            Vector3 end = initialPosition - 0.3f * _controller.Forward;
+            Vector3 initialPositionInRoot = _controller.transform.InverseTransformPoint(initialPosition);
+            Vector3 middle = initialPositionInRoot + 0.15f * Vector3.up - 0.15f * Vector3.forward + deviationRightOrLeft * 0.1f * Vector3.right;
+            Vector3 end = initialPositionInRoot - 0.3f * Vector3.forward;
+
 
             Vector3[] path =
             {
-                initialPosition,
+                initialPositionInRoot,
                 middle,
                 end
             };
 
-        // do a little back and forth rotation
-            throwAnimation.Join(mainHand.Hold.ItemPositionTargetLocker.transform.DOPath(path, time/2)
+            // do a little back and forth path
+            throwAnimation.Join(mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, time/2)
                 .SetLoops(2, LoopType.Yoyo));  
 
             throwAnimation.OnComplete(() => { 
@@ -62,13 +63,9 @@ namespace SS3D.Systems.Animations
 
             });
 
-
-            
-
             // Ignore collision between thrown item and player for a short while
             Physics.IgnoreCollision(item.GetComponent<Collider>(), _controller.GetComponent<Collider>(), true);
 
-            
             WaitToRestoreCollision(item, _controller.transform);
         }
 
