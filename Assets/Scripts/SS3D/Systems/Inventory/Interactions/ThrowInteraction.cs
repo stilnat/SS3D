@@ -94,25 +94,23 @@ namespace SS3D.Systems.Inventory.Interactions
             HumanoidController movementController = source.GameObject.GetComponentInParent<HumanoidController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
 
-            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent);
+            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.7f);
 
-            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.3f);
+            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.7f);
 
             return false;
         }
 
-        private async Task ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent)
+        private async Task ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)
         {
             // remove client ownership so that server can take full control of item trajectory
             item.RemoveOwnership();
-
-            item.transform.parent = throwingHand.HandBone.transform;
 
             // ignore collisions while in hand, the time the item gets a bit out of the player collider.
             Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), true);
 
             // wait roughly the time of animation on client before actually throwing
-            await Task.Delay(180);
+            await Task.Delay((int)(time*1000));
  
             item.transform.parent = null;
             item.GetComponent<Rigidbody>().isKinematic = false;
