@@ -68,7 +68,7 @@ public class GrabInteraction : ContinuousInteraction
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         GrabbableBodyPart grabbable = interactionEvent.Target as GrabbableBodyPart;
         
-        hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, Delay);
+        hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, 3*Delay);
                 
         return true;
     }
