@@ -7712,7 +7712,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
-  _timeRagdolled: 60
+  _timeRagdolled: 10
 --- !u!114 &8615535220686661918
 MonoBehaviour:
   m_ObjectHideFlags: 0

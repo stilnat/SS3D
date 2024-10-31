@@ -89,6 +89,7 @@ public class GrabInteraction : ContinuousInteraction
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
 
+        // previous owner regain authority when not grabbed anymore
         if (_grabbedBodyPart != null)
         {
             _grabbedBodyPart.GiveOwnership(_previousOwner);

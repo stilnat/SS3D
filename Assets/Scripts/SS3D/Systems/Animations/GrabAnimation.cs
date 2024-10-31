@@ -50,17 +50,14 @@ namespace SS3D.Systems.Animations
 
         private void ReleaseGrab()
         {
-            if (_grabbedObject is not null)
+            if (_grabbedObject is not null && _grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
             {
-                    if (_grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
-                    {
-                        grabbedRb.detectCollisions = true; // Enable collisions again
-                    }
+                grabbedRb.detectCollisions = true;
+            }
 
-                    if (_fixedJoint is not null)
-                    { 
-                       MonoBehaviour.Destroy(_fixedJoint);
-                    }
+            if (_fixedJoint is not null)
+            { 
+                MonoBehaviour.Destroy(_fixedJoint);
             }
 
             Sequence stopSequence = DOTween.Sequence();
@@ -113,6 +110,13 @@ namespace SS3D.Systems.Animations
             // At the same time change pickup constraint weight of the main hand from 0 to 1
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
             {
+                
+                mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
+                item.GetComponent<Collider>().enabled = false;
+                
+                // Only the owner handle physics since transform are client authoritative for now
+                if(!mainHand.IsOwner) return;
+
                 Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
                 item.transform.position = mainHand.Hold.HoldTransform.position; 
                 grabbedRb.velocity = Vector3.zero;
@@ -123,7 +127,8 @@ namespace SS3D.Systems.Animations
                 _fixedJoint.connectedBody = grabbedRb;
                 _fixedJoint.breakForce = _jointBreakForce;
                 // increasing connected mass scale somehow allow the grabbed part to better appear in hand
-                _fixedJoint.connectedMassScale = 10f;
+                _fixedJoint.connectedMassScale = 20f;
+
             }));
 
             // Stop looking
@@ -131,14 +136,6 @@ namespace SS3D.Systems.Animations
 
             // Stop picking
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
-
-            _grabSequence.OnComplete(() =>
-            {
-                
-                
-            });
-
-            Debug.Log("Grabbed object is " + item.name);
         }
     }
 }
