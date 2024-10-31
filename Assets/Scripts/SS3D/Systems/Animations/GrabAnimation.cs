@@ -122,11 +122,9 @@ namespace SS3D.Systems.Animations
                 _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
                 _fixedJoint.connectedBody = grabbedRb;
                 _fixedJoint.breakForce = _jointBreakForce;
+                // increasing connected mass scale somehow allow the grabbed part to better appear in hand
+                _fixedJoint.connectedMassScale = 10f;
             }));
-
-            // those two lines necessary to smooth pulling back
-           // mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
-            //mainHand.Hold.PickupTargetLocker.transform.position = item.transform.position;
 
             // Stop looking
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
