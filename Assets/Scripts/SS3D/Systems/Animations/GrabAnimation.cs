@@ -85,6 +85,7 @@ namespace SS3D.Systems.Animations
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
+                secondaryHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
                 secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
             }
 
@@ -110,29 +111,34 @@ namespace SS3D.Systems.Animations
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
-            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
+            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+            {
+                Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
+                item.transform.position = mainHand.Hold.HoldTransform.position; 
+                grabbedRb.velocity = Vector3.zero;
+                grabbedRb.position = mainHand.Hold.HoldTransform.position;
+                grabbedRb.detectCollisions = false;
+
+                _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
+                _fixedJoint.connectedBody = grabbedRb;
+                _fixedJoint.breakForce = _jointBreakForce;
+            }));
 
             // those two lines necessary to smooth pulling back
-            mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
-            mainHand.Hold.PickupTargetLocker.transform.position = item.transform.position;
-
-            // Since transforms are client autoritative, only the client owner should deal with the physics, in this case creating a fixed joint between grabbed part and client hand. 
-            if (mainHand.IsOwner)
-            {
-                item.transform.position = mainHand.Hold.HoldTransform.position;
-                _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
-                Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
-                _fixedJoint.connectedBody = grabbedRb;
-                grabbedRb.velocity = Vector3.zero;
-                _fixedJoint.breakForce = _jointBreakForce;
-                grabbedRb.detectCollisions = false; // Disable collisions between the two characters
-            }
+           // mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, null, false, false);
+            //mainHand.Hold.PickupTargetLocker.transform.position = item.transform.position;
 
             // Stop looking
             _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
-            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));;
+            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
+
+            _grabSequence.OnComplete(() =>
+            {
+                
+                
+            });
 
             Debug.Log("Grabbed object is " + item.name);
         }
