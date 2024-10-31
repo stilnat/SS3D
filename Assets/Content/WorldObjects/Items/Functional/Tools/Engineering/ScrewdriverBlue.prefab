@@ -249,6 +249,8 @@ MonoBehaviour:
   _networkBehaviours:
   - {fileID: 4363965162719999430}
   - {fileID: 6800495836141411361}
+  - {fileID: 5559689214874696556}
+  - {fileID: 8907230820372212465}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
@@ -323,6 +325,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99df7ac2c21c2d944818b5da5be3dd53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 1602098408367427586}
+  _networkObjectCache: {fileID: 1602098408367427586}
   _primaryRightHandHold: {fileID: 7991373112210367801}
   _primaryLeftHandHold: {fileID: 7994989484289601227}
   _secondaryRightHandHold: {fileID: 0}
@@ -340,9 +345,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a83a58131f57334299afd7fb4b29ee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 1602098408367427586}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 1602098408367427586}
   _interactionPoint: {fileID: 7184925500366350300}
 --- !u!1 &6219081307512385233
 GameObject:

@@ -66,13 +66,13 @@ public abstract class AbstractHoldable : NetworkActor
         switch (primary, handType)
         {
             case (true, HandType.LeftHand):
-                return _primaryLeftHandHold;
+                return _primaryLeftHandHold != null ? _primaryLeftHandHold : transform;
             case (false, HandType.LeftHand):
-                return _secondaryLeftHandHold;
+                return _secondaryLeftHandHold != null ? _secondaryLeftHandHold : transform;
             case (true, HandType.RightHand):
-                return _primaryRightHandHold;
+                return _primaryRightHandHold != null ? _primaryRightHandHold : transform;
             case (false, HandType.RightHand):
-                return _secondaryRightHandHold;
+                return _secondaryRightHandHold != null ? _secondaryRightHandHold : transform;
             default:
                 throw new ArgumentException();
         }

@@ -101,6 +101,12 @@ namespace SS3D.Systems.Animations
         private Transform _smallItemLeft;
 
         [SerializeField]
+        private Transform _smallItemRightThrow;
+
+        [SerializeField]
+        private Transform _smallItemLeftThrow;
+
+        [SerializeField]
         private Transform _underArmLeft;
 
         [SerializeField]
@@ -138,6 +144,8 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.ThrowToolBox, _throwToolboxRight, HandType.RightHand));
             _holdData.Add(new(HandHoldType.UnderArm, _underArmLeft, HandType.LeftHand));
             _holdData.Add(new(HandHoldType.UnderArm, _underArmRight, HandType.RightHand));
+            _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemLeftThrow, HandType.LeftHand));
+            _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
 
         }
 

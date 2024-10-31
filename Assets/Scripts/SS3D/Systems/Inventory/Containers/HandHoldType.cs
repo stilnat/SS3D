@@ -14,5 +14,6 @@ namespace SS3D.Systems.Inventory.Containers
         SmallItem = 5,
         ThrowToolBox = 6,
         UnderArm = 7,
+        ThrowSmallItem = 8,
     }
 }

@@ -17,7 +17,7 @@ MonoBehaviour:
   _twoHandHold: 0
   _singleHandHoldHarm: 5
   _twoHandHoldHarm: 0
-  _singleHandHoldThrow: 5
+  _singleHandHoldThrow: 8
   _twoHandHoldThrow: 0
   _primaryHandPoseType: 0
   _secondaryHandPoseType: 0

@@ -149,6 +149,11 @@ namespace SS3D.Systems.Inventory.Items
 
             Holdable = GetComponent<AbstractHoldable>();
 
+            if (Holdable == null)
+            {
+                Holdable = gameObject.AddComponent<DefaultHoldable>();
+            }
+
             foreach (Animator animator in GetComponents<Animator>())
             {
                 animator.keepAnimatorStateOnDisable = true;
