@@ -1,4 +1,5 @@
-﻿using FishNet.Object;
+﻿using Coimbra.Services.Events;
+using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using SS3D.Core.Behaviours;
 using System;
@@ -8,7 +9,6 @@ using UnityEngine.UI;
 namespace SS3D.Interactions
 {
     /// <summary>
-    /// Basically a copy of HumanoidBodyPartTargetSelector.cs
     /// This manages intent and it's done to easily support other intents
     /// </summary>
     public class IntentController : NetworkActor
@@ -19,24 +19,6 @@ namespace SS3D.Interactions
         private IntentType _intent = IntentType.Help;
 
         public IntentType Intent => _intent;
-
-        private Image _intentImage;
-
-        private Sprite _spriteHelp;
-        private Sprite _spriteHarm;
-
-        private Color _colorHarm;
-        private Color _colorHelp;
-
-        private Button _intentButton;
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-           // _intentButton = GetComponent<Button>();
-           // _intentButton.onClick.AddListener(HandleIntentButtonPressed);
-        }
 
         public override void OnStartServer()
         {
@@ -52,6 +34,12 @@ namespace SS3D.Interactions
             {
                 enabled = false;
             }
+            AddHandle(IntentChanged.AddListener(HandleRoundStateUpdated));
+        }
+
+        private void HandleRoundStateUpdated(ref EventContext context, in IntentChanged e)
+        {
+            UpdateIntent();
         }
 
         // Update is called once per frame
@@ -63,7 +51,6 @@ namespace SS3D.Interactions
             }
 
             UpdateIntent();
-            //UpdateIntentUI();
         }
 
         [ServerRpc]
@@ -88,16 +75,6 @@ namespace SS3D.Interactions
         public void HandleIntentButtonPressed()
         {
             UpdateIntent();
-            //UpdateIntentUI();
-        }
-
-        /// <summary>
-        /// Switches between Help and Harm intent
-        /// </summary>
-        public void UpdateIntentUI()
-        {
-            _intentImage.sprite = _intent == IntentType.Help ? _spriteHelp : _spriteHarm;
-            _intentImage.color = _intent == IntentType.Help ? _colorHelp : _colorHarm;
         }
     }
 }
