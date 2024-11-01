@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    // TODO : the ownership part should be handled into the interaction system, and the interaction should be a true continuous interaction, only cancelled by client asking or by constraint 
     public class GrabAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
@@ -20,8 +19,6 @@ namespace SS3D.Systems.Animations
         private float _jointBreakForce = 25000f;
 
         private float _itemReachDuration;
-
-        private float _itemMoveDuration;
 
         private Draggable _grabbedObject;
 
@@ -37,7 +34,6 @@ namespace SS3D.Systems.Animations
             _grabbedObject = target.GetComponent<Draggable>();
             _mainHand = mainHand;
             _itemReachDuration = time / 2;
-            _itemMoveDuration = time / 2;
 
             SetUpGrab(_grabbedObject, mainHand, secondaryHand, false);
             GrabReach(_grabbedObject, mainHand);
@@ -110,9 +106,7 @@ namespace SS3D.Systems.Animations
             // At the same time change pickup constraint weight of the main hand from 0 to 1
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
             {
-                
                 HandleGrabbing(item, mainHand);
-
             }));
 
             // Stop looking
@@ -128,7 +122,10 @@ namespace SS3D.Systems.Animations
             mainHand.HandBone.GetComponent<Collider>().enabled = false;
                 
             // Only the owner handle physics since transform are client authoritative for now
-            if(!mainHand.IsOwner) return;
+            if (!mainHand.IsOwner)
+            {
+                return;
+            }
 
             Rigidbody grabbedRb = draggable.GetComponent<Rigidbody>();
 
@@ -144,6 +141,7 @@ namespace SS3D.Systems.Animations
             _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;
             _fixedJoint.breakForce = _jointBreakForce;
+
             // increasing connected mass scale somehow allow the grabbed part to better appear in hand
             _fixedJoint.connectedMassScale = 20f;
         }

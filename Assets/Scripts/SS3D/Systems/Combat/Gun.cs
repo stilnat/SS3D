@@ -25,6 +25,7 @@ public class Gun : NetworkBehaviour
     [SerializeField]
     private bool _readyToFire = true;
 
+    // Shit code, just to get the guns going a bit, to change
     public void Fire()
     {
         if (!_readyToFire)
