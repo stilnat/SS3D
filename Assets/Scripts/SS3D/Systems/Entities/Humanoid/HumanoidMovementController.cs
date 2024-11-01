@@ -2,6 +2,7 @@ using Coimbra.Services.Events;
 using Coimbra.Services.PlayerLoopEvents;
 using FishNet;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using System;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
@@ -33,6 +34,11 @@ namespace SS3D.Systems.Entities.Humanoid
         private const float CrouchFactor = 0.6f;
         private const float AimFactor = 0.6f;
         private const float CrawlFactor = 0.4f;
+
+        private const float MinFeetHealthFactorToStand = 0.5f;
+
+        [SyncVar]
+        private bool _standingAbility;
 
         [SerializeField]
         private Rigidbody _rb;
@@ -92,6 +98,13 @@ namespace SS3D.Systems.Entities.Humanoid
             Setup();
         }
 
+        public override void OnStartServer()
+        {
+             base.OnStartServer();
+             GetComponent<FeetController>().FeetHealthChanged += OnFeetHealthChanged;
+        }
+
+        [Client]
         private void HandleNetworkTick()
         {
             if (!enabled)
@@ -108,14 +121,28 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
+        [Server]
+        private void OnFeetHealthChanged(float feetHealth)
+        {
+            _standingAbility = feetHealth >= MinFeetHealthFactorToStand;
+
+            if (_standingAbility == false)
+            {
+                GetComponent<Ragdoll>().KnockdownTimeless();
+            }
+        }
+
+        [Client]
         public void ChangeGrab(bool grab)
         {
             _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
+        
         /// <summary>
         /// Executes the movement code and updates the IK targets.
         /// </summary>
+        [Client]
         private void ProcessCharacterMovement()
         {
             ProcessPlayerInput();
@@ -132,7 +159,6 @@ namespace SS3D.Systems.Entities.Humanoid
             {
                 RotatePlayerTowardTarget();
             }
-
         }
 
 
@@ -140,6 +166,7 @@ namespace SS3D.Systems.Entities.Humanoid
         /// Moves the movement targets with the given input.
         /// </summary>
         /// <param name="movementInput"></param>
+        [Client]
         private void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
         {
             Vector3 newTargetMovement = (movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized)
@@ -157,6 +184,7 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <summary>
         /// Rotates the player to the target movement.
         /// </summary>
+        [Client]
         private void RotatePlayerToMovement(bool lookOpposite)
         {
             Quaternion lookRotation = Quaternion.LookRotation(lookOpposite ? -TargetMovement : TargetMovement);
@@ -167,6 +195,7 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <summary>
         /// Process the player movement input, smoothing it.
         /// </summary>
+        [Client]
         private void ProcessPlayerInput()
         {
             float x = _movementControls.Movement.ReadValue<Vector2>().x;
@@ -181,6 +210,7 @@ namespace SS3D.Systems.Entities.Humanoid
             OnSpeedChangeEvent?.Invoke(_input.magnitude != 0 ? inputFilteredSpeed : 0);
         }
 
+        [Client]
         private float ComputeSpeed()
         {
              float speed = DefaultSpeed;
@@ -196,11 +226,13 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <summary>
         /// Toggles your movement between run/walk.
         /// </summary>
+        [Client]
         private void HandleToggleRun(InputAction.CallbackContext context)
         {
             IsRunning = !IsRunning;
         }
 
+        [Client]
         private void Setup()
         {
             _camera = Subsystems.Get<CameraSystem>().PlayerCamera;
@@ -218,11 +250,13 @@ namespace SS3D.Systems.Entities.Humanoid
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
         }
 
+        [Client]
         private void HandleAimChange(bool isAiming, bool toThrow)
         {
             _movementType = isAiming ? MovementType.Aiming : MovementType.Normal;
         }
 
+        [Client]
         private void ComputeAngleBetweenAimAndInput()
         {
             // Convert the target's position to 2D (XZ plane)
@@ -232,6 +266,7 @@ namespace SS3D.Systems.Entities.Humanoid
             InputAimAngle = Vector2.SignedAngle(targetMove, forward);
         }
 
+        [Client]
         private void UpdateAimTargetPosition()
         {
             // Cast a ray from the mouse position into the scene
@@ -244,6 +279,7 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
+        [Client]
         private void RotatePlayerTowardTarget()
         {
             // Get the direction to the target

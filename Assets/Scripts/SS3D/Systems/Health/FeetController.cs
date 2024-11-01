@@ -11,6 +11,8 @@ using UnityEngine;
 public class FeetController : NetworkActor
 {
 
+    public Action<float> FeetHealthChanged;
+
 	/// <summary>
 	/// List of feet used by the player
 	/// </summary>
@@ -25,6 +27,8 @@ public class FeetController : NetworkActor
 	/// Factor influencing the speed of a player, based upon state of feets. Should be between 0 and 1 in value.
 	/// </summary>
 	[SyncVar] private float _feetHealthFactor;
+
+    private float _minFeetHealthFactorToStand = 0.5f;
 
 	public float FeetHealthFactor => _feetHealthFactor;
 
@@ -71,5 +75,8 @@ public class FeetController : NetworkActor
     private void UpdateFeetHealthFactor()
 	{
 		_feetHealthFactor = feet.Sum(x => x.GetSpeedContribution()) / _optimalFeetNumber;
+
+        
+        FeetHealthChanged?.Invoke(_feetHealthFactor);
 	}
 }
