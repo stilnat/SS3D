@@ -64,7 +64,7 @@ namespace SS3D.Systems.Animations
             // Stop picking
             stopSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
-            _controller.MovementController.ChangeGrab(false);
+            //_controller.MovementController.ChangeGrab(false);
             _controller.AnimatorController.Grab(false);
         }
 

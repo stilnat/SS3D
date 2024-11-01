@@ -27,7 +27,7 @@ namespace SS3D.Systems.Animations
         private Hands _hands;
 
         [SerializeField]
-        private HumanoidLivingController _movementController;
+        private HumanoidMovementController _movementController;
 
         [SerializeField]
         private Rig _bodyAimRig;

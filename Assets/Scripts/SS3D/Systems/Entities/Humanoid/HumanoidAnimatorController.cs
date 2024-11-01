@@ -9,7 +9,7 @@ namespace SS3D.Systems.Entities.Humanoid
 {
     public class HumanoidAnimatorController : Actor
     {
-        [SerializeField] private HumanoidController _movementController;
+        [SerializeField] private HumanoidMovementController _movementController;
 
         [SerializeField] private Animator _animator;
         [SerializeField] private float _lerpMultiplier;

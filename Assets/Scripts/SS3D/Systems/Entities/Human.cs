@@ -50,7 +50,7 @@ namespace SS3D.Systems.Entities
 			originEntityGameObject.GetComponent<HumanInventory>().enabled = false;
 			originEntityGameObject.GetComponent<InteractionController>().enabled = false;
 			originEntityGameObject.GetComponent<StaminaController>().enabled = false;
-			originEntityGameObject.GetComponent<HumanoidController>().enabled = false;
+			originEntityGameObject.GetComponent<HumanoidMovementController>().enabled = false;
             // TODO: Optimize these GetComponents, this is a temporary solution.
         }
 

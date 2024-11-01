@@ -32,7 +32,7 @@ namespace SS3D.Systems.Animations
         public HumanoidAnimatorController AnimatorController { get; private set; }
 
         [field: SerializeField]
-        public HumanoidLivingController MovementController { get; private set; }
+        public HumanoidMovementController MovementController { get; private set; }
 
         [field: SerializeField]
         public Hands Hands { get; private set; }

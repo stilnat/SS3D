@@ -650,7 +650,7 @@ namespace SS3D.Systems.Crafting
             foreach (TaggedEdge<RecipeStep, RecipeStepLink> recipeLink in availableRecipes)
             {
                 CraftingInteraction interaction = new(recipeLink.Tag.ExecutionTime,
-                    interactionEvent.Source.GameObject.GetComponentInParent<HumanoidController>().transform, craftingInteractionType, recipeLink);
+                    interactionEvent.Source.GameObject.GetComponentInParent<HumanoidMovementController>().transform, craftingInteractionType, recipeLink);
                 
                 craftingInteractions.Add(interaction);
             }

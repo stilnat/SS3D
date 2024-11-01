@@ -91,7 +91,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand; 
 
-            HumanoidController movementController = source.GameObject.GetComponentInParent<HumanoidController>();
+            HumanoidMovementController movementController = source.GameObject.GetComponentInParent<HumanoidMovementController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
 
             ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.5f);

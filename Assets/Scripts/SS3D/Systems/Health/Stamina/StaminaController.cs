@@ -24,7 +24,7 @@ namespace SS3D.Systems.Health
         /// <summary>
         /// The controller for this entity.
         /// </summary>
-        [SerializeField] private HumanoidController _player;
+        [SerializeField] private HumanoidMovementController _player;
 
         /// <summary>
         /// The PlayerControllable component for this entity.

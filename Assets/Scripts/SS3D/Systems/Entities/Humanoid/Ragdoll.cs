@@ -27,7 +27,7 @@ namespace SS3D.Systems.Entities.Humanoid
         private Transform _character;
         private Animator _animator; 
         private NetworkAnimator _networkAnimator; 
-        private HumanoidLivingController _humanoidLivingController; 
+        private HumanoidMovementController _humanoidLivingController; 
         private Transform[] _ragdollParts;
         /// <summary>
         /// If knockdown is supposed to expire
@@ -96,7 +96,7 @@ namespace SS3D.Systems.Entities.Humanoid
 			base.OnStartNetwork();
 
 			_animator = GetComponent<Animator>();
-			_humanoidLivingController = GetComponent<HumanoidLivingController>();
+			_humanoidLivingController = GetComponent<HumanoidMovementController>();
 			_networkAnimator = GetComponent<NetworkAnimator>();
             _knockdownTimer = 0;
             _hips = _armatureRoot.GetChild(0);

@@ -53,7 +53,7 @@ namespace SS3D.Tests
 
         public Mouse Mouse => mouse;
 
-        protected HumanoidController HumanoidController;
+        protected HumanoidMovementController HumanoidController;
         protected InteractionController InteractionController;
 
         protected abstract bool UseMockUpInputs();
@@ -105,7 +105,7 @@ namespace SS3D.Tests
             while (HumanoidController == null)
             {
                 yield return null;
-                HumanoidController = GameObject.FindWithTag("Player")?.GetComponent<HumanoidController>();
+                HumanoidController = GameObject.FindWithTag("Player")?.GetComponent<HumanoidMovementController>();
                 if (Time.time - startTime > timeout)
                 {
                     throw new Exception($"Humanoid controller not found within timeout of {timeout} seconds.");
