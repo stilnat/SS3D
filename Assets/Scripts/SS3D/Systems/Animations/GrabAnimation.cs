@@ -23,7 +23,7 @@ namespace SS3D.Systems.Animations
 
         private float _itemMoveDuration;
 
-        private GrabbableBodyPart _grabbedObject;
+        private Draggable _grabbedObject;
 
         private ProceduralAnimationController _controller;
 
@@ -34,7 +34,7 @@ namespace SS3D.Systems.Animations
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
-            _grabbedObject = target.GetComponent<GrabbableBodyPart>();
+            _grabbedObject = target.GetComponent<Draggable>();
             _mainHand = mainHand;
             _itemReachDuration = time / 2;
             _itemMoveDuration = time / 2;
@@ -72,7 +72,7 @@ namespace SS3D.Systems.Animations
             _controller.AnimatorController.Grab(false);
         }
 
-        private void SetUpGrab(GrabbableBodyPart item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
+        private void SetUpGrab(Draggable item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
             mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
 
@@ -94,7 +94,7 @@ namespace SS3D.Systems.Animations
             OrientTargetForHandRotation(mainHand);
         }
 
-        private void GrabReach(GrabbableBodyPart item, Hand mainHand)
+        private void GrabReach(Draggable item, Hand mainHand)
         {
             _grabSequence = DOTween.Sequence();
 
@@ -111,23 +111,7 @@ namespace SS3D.Systems.Animations
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
             {
                 
-                mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
-                item.GetComponent<Collider>().enabled = false;
-                
-                // Only the owner handle physics since transform are client authoritative for now
-                if(!mainHand.IsOwner) return;
-
-                Rigidbody grabbedRb = item.GetComponent<Rigidbody>();
-                item.transform.position = mainHand.Hold.HoldTransform.position; 
-                grabbedRb.velocity = Vector3.zero;
-                grabbedRb.position = mainHand.Hold.HoldTransform.position;
-                grabbedRb.detectCollisions = false;
-
-                _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
-                _fixedJoint.connectedBody = grabbedRb;
-                _fixedJoint.breakForce = _jointBreakForce;
-                // increasing connected mass scale somehow allow the grabbed part to better appear in hand
-                _fixedJoint.connectedMassScale = 20f;
+                HandleGrabbing(item, mainHand);
 
             }));
 
@@ -136,6 +120,32 @@ namespace SS3D.Systems.Animations
 
             // Stop picking
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
+        }
+
+        private void HandleGrabbing(Draggable draggable, Hand mainHand)
+        {
+            mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
+            mainHand.HandBone.GetComponent<Collider>().enabled = false;
+                
+            // Only the owner handle physics since transform are client authoritative for now
+            if(!mainHand.IsOwner) return;
+
+            Rigidbody grabbedRb = draggable.GetComponent<Rigidbody>();
+
+            if (draggable.MoveToGrabber)
+            {
+                draggable.transform.position = mainHand.Hold.HoldTransform.position; 
+                grabbedRb.velocity = Vector3.zero;
+                grabbedRb.position = mainHand.Hold.HoldTransform.position;
+            }
+
+            grabbedRb.detectCollisions = false;
+
+            _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
+            _fixedJoint.connectedBody = grabbedRb;
+            _fixedJoint.breakForce = _jointBreakForce;
+            // increasing connected mass scale somehow allow the grabbed part to better appear in hand
+            _fixedJoint.connectedMassScale = 20f;
         }
     }
 }

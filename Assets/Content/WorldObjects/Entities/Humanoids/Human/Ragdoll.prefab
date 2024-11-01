@@ -1084,6 +1084,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 0}
   _networkObjectCache: {fileID: 0}
+  _dragged: 0
 --- !u!1 &2904887481490565087
 GameObject:
   m_ObjectHideFlags: 0
@@ -3777,6 +3778,7 @@ MonoBehaviour:
   _componentIndexCache: 1
   _addedNetworkObject: {fileID: 0}
   _networkObjectCache: {fileID: 0}
+  _dragged: 0
 --- !u!1 &7486882481432117789
 GameObject:
   m_ObjectHideFlags: 0

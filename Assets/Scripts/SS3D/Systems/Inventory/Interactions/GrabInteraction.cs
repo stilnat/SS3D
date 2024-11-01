@@ -12,7 +12,7 @@ using UnityEngine;
 
 public class GrabInteraction : ContinuousInteraction
 {
-    private GrabbableBodyPart _grabbedBodyPart;
+    private Draggable _grabbedBodyPart;
 
     private NetworkConnection _previousOwner;
 
@@ -41,7 +41,7 @@ public class GrabInteraction : ContinuousInteraction
             return false;
         }
 
-        if (interactionEvent.Target is not GrabbableBodyPart grabbable)
+        if (interactionEvent.Target is not Draggable grabbable)
         {
             return false;
         }
@@ -66,7 +66,7 @@ public class GrabInteraction : ContinuousInteraction
         base.Start(interactionEvent, reference);
 
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-        GrabbableBodyPart grabbable = interactionEvent.Target as GrabbableBodyPart;
+        Draggable grabbable = interactionEvent.Target as Draggable;
         
         hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, 3*Delay);
                 
@@ -77,7 +77,7 @@ public class GrabInteraction : ContinuousInteraction
     {
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
-        _grabbedBodyPart = interactionEvent.Target as GrabbableBodyPart;
+        _grabbedBodyPart = interactionEvent.Target as Draggable;
         _previousOwner = _grabbedBodyPart.Owner;
         _grabbedBodyPart.NetworkObject.GiveOwnership(hand.Owner);
 

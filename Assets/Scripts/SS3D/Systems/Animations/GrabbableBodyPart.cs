@@ -6,19 +6,20 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    public class GrabbableBodyPart : NetworkBehaviour, IInteractionTarget
+    public class GrabbableBodyPart : Draggable, IInteractionTarget
     {
-
-        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+        public override bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point)
         {
-            return new IInteraction[]
+            point = gameObject.transform.position;
+
+            if (gameObject.TryGetComponent(out Rigidbody rigibody))
             {
-                new GrabInteraction(Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime),
-            };
+                point = rigibody.centerOfMass;
+            }
+
+            return true;
         }
 
-        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
-
-        public GameObject GameObject => gameObject;
+        public override bool MoveToGrabber => true;
     }
 }
