@@ -29,6 +29,8 @@ namespace SS3D.Systems.Animations
 
         private IInteractiveTool _tool;
 
+        private Hand _mainHand;
+
         private InteractionType _interact;
 
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
@@ -37,6 +39,7 @@ namespace SS3D.Systems.Animations
             _controller = proceduralAnimationController;
             _interactionTime = time;
             _moveToolTime = Mathf.Min(time, 0.5f);
+            _mainHand = mainHand;
 
             SetupInteract(mainHand, _tool);
             ReachInteractionPoint(targetPosition, mainHand, _tool, interactionType);
@@ -53,6 +56,8 @@ namespace SS3D.Systems.Animations
             _tool.StopAnimation();
             _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
             _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
+            _mainHand.Hold.ItemPositionConstraint.weight = 1f;
+            _mainHand.Hold.PickupIkConstraint.weight = 0f;
         }
 
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
@@ -134,6 +139,8 @@ namespace SS3D.Systems.Animations
 
             _interactSequence.OnComplete(() =>
             {
+                _mainHand.Hold.PickupIkConstraint.weight = 0f;
+                _mainHand.Hold.ItemPositionConstraint.weight = 1f;
                 OnCompletion?.Invoke(this);
             });
         }
