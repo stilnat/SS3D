@@ -27,6 +27,7 @@ namespace SS3D.Systems.Entities.Humanoid
     public class HumanoidMovementController : NetworkActor
     {
        public event Action<float> OnSpeedChangeEvent;
+       public event Action<MovementType> OnMovementTypeChanged;
 
         private const float DefaultSpeed = 1f;
         private const float RunFactor = 2f;
@@ -37,9 +38,6 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField]
         private Rigidbody _rb;
-
-        [SerializeField]
-        private MovementType _movementType;
 
         [Header("Movement Settings")]
         [SerializeField]
@@ -69,7 +67,8 @@ namespace SS3D.Systems.Entities.Humanoid
         [SerializeField]
         private float _aimRotationSpeed = 5f;
 
-        private bool _isAiming;
+        [SerializeField]
+        private PositionController _positionController;
 
         public float InputAimAngle { get; private set; }
 
@@ -110,17 +109,11 @@ namespace SS3D.Systems.Entities.Humanoid
 
             ProcessCharacterMovement();
 
-            if (_movementType == MovementType.Aiming)
+            if (_positionController.Movement == MovementType.Aiming)
             {
                 ComputeAngleBetweenAimAndInput();
                 UpdateAimTargetPosition();
             }
-        }
-
-        [Client]
-        public void ChangeGrab(bool grab)
-        {
-            _movementType = grab ? MovementType.Dragging : MovementType.Normal;
         }
 
         
@@ -135,12 +128,12 @@ namespace SS3D.Systems.Entities.Humanoid
             
             _rb.velocity = TargetMovement * (float)(_movementSpeed * TimeManager.TickDelta);
 
-            if (_movementType != MovementType.Aiming && _input.magnitude != 0)
+            if (_positionController.Movement != MovementType.Aiming && _input.magnitude != 0)
             {
-                RotatePlayerToMovement(_movementType == MovementType.Dragging);
+                RotatePlayerToMovement(_positionController.Movement == MovementType.Dragging);
             }
 
-            if (_movementType == MovementType.Aiming && GetComponent<PositionController>().Position != PositionType.Sitting)
+            if (_positionController.Movement == MovementType.Aiming && GetComponent<PositionController>().Position != PositionType.Sitting)
             {
                 RotatePlayerTowardTarget();
             }
@@ -200,8 +193,8 @@ namespace SS3D.Systems.Entities.Humanoid
         {
              float speed = DefaultSpeed;
              speed *= IsRunning ? RunFactor : 1;
-             speed *= _movementType == MovementType.Aiming ? AimFactor : 1;
-             speed *= _movementType == MovementType.Dragging ? DragFactor : 1;
+             speed *= _positionController.Movement == MovementType.Aiming ? AimFactor : 1;
+             speed *= _positionController.Movement == MovementType.Dragging ? DragFactor : 1;
              speed *= GetComponent<PositionController>().Position == PositionType.Proning ? CrawlFactor : 1;
              speed *= GetComponent<PositionController>().Position == PositionType.Crouching ? CrouchFactor : 1;
 
@@ -231,14 +224,7 @@ namespace SS3D.Systems.Entities.Humanoid
 
             _inputSystem.ToggleActionMap(_movementControls, true);
             _inputSystem.ToggleActionMap(_hotkeysControls, true);
-            GetComponent<AimController>().OnAim += HandleAimChange;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-        }
-
-        [Client]
-        private void HandleAimChange(bool isAiming, bool toThrow)
-        {
-            _movementType = isAiming ? MovementType.Aiming : MovementType.Normal;
         }
 
         [Client]

@@ -7588,7 +7588,6 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _feetController: {fileID: 2081771184023489930}
-  _position: 0
   _standingAbility: 0
 --- !u!114 &2744598832793855224
 MonoBehaviour:
@@ -7882,12 +7881,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
-  _movementType: 0
   _movementSpeed: 40
   _lerpMultiplier: 3
   _rotationLerpMultiplier: 3
   _movementTarget: {fileID: 5029736816765645950}
   _aimRotationSpeed: 5
+  _positionController: {fileID: 7568747683536695618}
   <TargetMovement>k__BackingField: {x: 0, y: 0, z: 0}
   <AimTarget>k__BackingField: {fileID: 2856800849451305125}
 --- !u!1 &4092542307493577921

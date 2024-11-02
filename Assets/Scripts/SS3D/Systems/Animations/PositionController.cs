@@ -13,7 +13,7 @@ namespace SS3D.Systems.Animations
     public class PositionController : NetworkActor
     {
 
-        public Action<PositionType> ChangedPosition;
+        public Action<PositionType, MovementType> ChangedPositionMovement;
 
         [SerializeField]
         private FeetController _feetController;
@@ -21,7 +21,13 @@ namespace SS3D.Systems.Animations
 
         private PositionType _position = PositionType.Standing;
 
+        private MovementType _movement = MovementType.Normal;
+
+        private MovementType _previousMovement = MovementType.Normal;
+
         private PositionType _previousPosition = PositionType.Standing;
+
+        
 
         [SyncVar]
         private bool _standingAbility = true;
@@ -29,6 +35,8 @@ namespace SS3D.Systems.Animations
         private const float MinFeetHealthFactorToStand = 0.5f;
 
         public PositionType Position => _position;
+
+        public MovementType Movement => _movement;
 
 
         public override void OnStartServer()
@@ -43,40 +51,41 @@ namespace SS3D.Systems.Animations
         {
             base.OnStartClient();
             Subsystems.Get<InputSystem>().Inputs.Movement.ChangePosition.performed += HandleChangePosition;
+            GetComponent<AimController>().OnAim += HandleAimChange;
         }
 
 
         public bool TrySit()
         {
-            return ChangePosition(PositionType.Sitting);
+            return ChangeMovementTypeAndPosition(PositionType.Sitting, _movement);
         }
 
         public bool Prone()
         {
-            return ChangePosition(PositionType.Proning);
+            return ChangeMovementTypeAndPosition(PositionType.Proning, _movement);
         }
 
         public bool TryCrouch()
         {
-            return ChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
+            return ChangeMovementTypeAndPosition(_standingAbility ? PositionType.Crouching : PositionType.Proning, _movement);
         }
 
         [Client]
         public bool TryToStandUp()
         {
-            return ChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
+            return ChangeMovementTypeAndPosition(_standingAbility ? PositionType.Standing : PositionType.Proning, _movement);
         }
 
         public bool TryToGetToPreviousPosition()
         {
             //todo make checks for change
-            return ChangePosition(_previousPosition);
+            return ChangeMovementTypeAndPosition(_previousPosition, _movement);
         }
 
         /// <summary>
         /// Change the position by the position passed in parameter, return true if position has changed.
         /// </summary>
-        private bool ChangePosition(PositionType position)
+        /*private bool ChangePosition(PositionType position)
         {
             _previousPosition = _position;
             _position = position;
@@ -87,6 +96,23 @@ namespace SS3D.Systems.Animations
             }
 
             return _position != _previousPosition;
+        } */
+
+        private bool ChangeMovementTypeAndPosition(PositionType position, MovementType movement)
+        {
+            _previousPosition = _position;
+            _previousMovement = _movement;
+            _position = position;
+            _movement = movement;
+
+            bool changeOccured = _position != _previousPosition || _previousMovement != _movement;
+
+            if (changeOccured)
+            {
+                ChangedPositionMovement?.Invoke(_position, _movement);
+            }
+
+            return changeOccured;
         }
 
         /// <summary>
@@ -112,6 +138,18 @@ namespace SS3D.Systems.Animations
                     Prone();
                     break;
             }
+        }
+
+        [Client]
+        public bool ChangeGrab(bool grab)
+        {
+            return ChangeMovementTypeAndPosition(_position ,grab ? MovementType.Dragging : MovementType.Normal);
+        }
+
+        [Client]
+        private void HandleAimChange(bool isAiming, bool toThrow)
+        {
+            ChangeMovementTypeAndPosition(_position ,isAiming ? MovementType.Aiming: MovementType.Normal);
         }
 
         [Server]

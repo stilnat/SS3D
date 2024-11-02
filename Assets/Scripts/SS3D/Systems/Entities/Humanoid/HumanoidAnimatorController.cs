@@ -110,10 +110,10 @@ namespace SS3D.Systems.Entities.Humanoid
             _movementController.OnSpeedChangeEvent += UpdateMovement;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
             _aimController.OnAim += HandleAimInAnimatorControler;
-            _positionController.ChangedPosition += HandlePositionChanged;
+            _positionController.ChangedPositionMovement += HandlePositionChanged;
         }
 
-        private void HandlePositionChanged(PositionType position)
+        private void HandlePositionChanged(PositionType position, MovementType movementType)
         {
             switch (position)
             {
@@ -127,7 +127,16 @@ namespace SS3D.Systems.Entities.Humanoid
                       StandUp();
                       break;
             }
+
+            switch (movementType)
+            {
+                  case MovementType.Dragging:
+                      Grab();
+                      break;
+            }
         }
+
+
 
         private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)
         {
