@@ -7882,8 +7882,8 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
   _movementSpeed: 40
-  _lerpMultiplier: 3
-  _rotationLerpMultiplier: 3
+  _lerpMultiplier: 4
+  _rotationLerpMultiplier: 8
   _movementTarget: {fileID: 5029736816765645950}
   _aimRotationSpeed: 5
   _positionController: {fileID: 7568747683536695618}
