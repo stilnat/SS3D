@@ -65,7 +65,7 @@ namespace SS3D.Systems.Animations
             stopSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
             //_controller.MovementController.ChangeGrab(false);
-            _controller.AnimatorController.Grab(false);
+            _controller.PositionController.TryToStandUp();
         }
 
         private void SetUpGrab(Draggable item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -98,10 +98,10 @@ namespace SS3D.Systems.Animations
 
             _controller.MovementController.ChangeGrab(true);
 
-            _controller.AnimatorController.Grab(true);
+            _controller.AnimatorController.Grab();
 
             // Start looking at grabbed part
-            _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
+            _grabSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
             _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>

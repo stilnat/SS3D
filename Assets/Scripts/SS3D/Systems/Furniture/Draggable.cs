@@ -31,7 +31,7 @@ public abstract class Draggable : NetworkActor, IInteractionTarget
     {
         return new IInteraction[]
         {
-            new GrabInteraction(0.5f, 0.5f),
+            new GrabInteraction(1f),
         };
     }
 

@@ -16,15 +16,12 @@ public class GrabInteraction : ContinuousInteraction
 
     private NetworkConnection _previousOwner;
 
-    public float TimeToMoveBackHand { get; private set; }
-
     public float TimeToReachGrabPlace { get; private set; }
 
-    public GrabInteraction(float timeToMoveBackHand, float timeToReachGrabPlace)
+    public GrabInteraction(float timeToReachGrabPlace)
     {
-        TimeToMoveBackHand = timeToMoveBackHand;
         TimeToReachGrabPlace = timeToReachGrabPlace;
-        Delay = TimeToMoveBackHand + TimeToReachGrabPlace;
+        Delay = TimeToReachGrabPlace;
     }
 
     public override string GetName(InteractionEvent interactionEvent) => "Grab";
@@ -68,7 +65,7 @@ public class GrabInteraction : ContinuousInteraction
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         Draggable grabbable = interactionEvent.Target as Draggable;
         
-        hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, 3*Delay);
+        hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable, grabbable.GameObject.transform.position, Delay);
                 
         return true;
     }

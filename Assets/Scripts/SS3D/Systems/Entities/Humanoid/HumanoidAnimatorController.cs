@@ -52,9 +52,9 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.CrossFade("Move", transitionDuration);
         }
 
-        public void Grab(bool grabState)
+        public void Grab(float transitionDuration = 0.15f)
         {
-            _animator.SetBool("Grab", grabState);
+            _animator.CrossFade("Drag", transitionDuration);
         }
 
 
