@@ -133,7 +133,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 RotatePlayerToMovement(_positionController.Movement == MovementType.Dragging);
             }
 
-            if (_positionController.Movement == MovementType.Aiming && GetComponent<PositionController>().Position != PositionType.Sitting)
+            if (_positionController.Movement == MovementType.Aiming && _positionController.Position != PositionType.Sitting && _positionController.Position != PositionType.Proning)
             {
                 RotatePlayerTowardTarget();
             }

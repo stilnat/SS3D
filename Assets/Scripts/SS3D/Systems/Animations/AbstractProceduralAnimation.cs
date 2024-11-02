@@ -57,7 +57,8 @@ namespace SS3D.Systems.Animations
         {
             if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
             {
-                PositionHasChanged = positionController.TryCrouch();
+                PositionHasChanged = positionController.Position != PositionType.Crouching;
+                positionController.TryCrouch();
             }
         }
 

@@ -5238,7 +5238,6 @@ GameObject:
   - component: {fileID: 7188171850056831037}
   - component: {fileID: 6744859723091695925}
   - component: {fileID: 6127327338461065190}
-  - component: {fileID: 3932621088017181528}
   m_Layer: 0
   m_Name: lower_leg_r
   m_TagString: Untagged
@@ -5395,22 +5394,6 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &3932621088017181528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3517261860088055723}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 73
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _dragged: 0
 --- !u!1 &3549033138117458215
 GameObject:
   m_ObjectHideFlags: 0
@@ -7227,9 +7210,9 @@ MonoBehaviour:
   - {fileID: 5482738034181427131}
   - {fileID: 8269793876665771011}
   - {fileID: 5329398922953147913}
-  - {fileID: 5567835359190148059}
+  - {fileID: 0}
   - {fileID: 6127327338461065190}
-  - {fileID: 3932621088017181528}
+  - {fileID: 0}
   - {fileID: 1456827871127104825}
   - {fileID: 3429023508407904866}
   - {fileID: 2107809895618774636}
@@ -7588,6 +7571,11 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _feetController: {fileID: 2081771184023489930}
+  _position: 0
+  _movement: 0
+  _previousMovement: 0
+  _previousPosition: 0
+  _isDancing: 0
   _standingAbility: 0
 --- !u!114 &2744598832793855224
 MonoBehaviour:
@@ -11515,7 +11503,6 @@ GameObject:
   - component: {fileID: 5454389412675585529}
   - component: {fileID: 4386241387404311896}
   - component: {fileID: 5329398922953147913}
-  - component: {fileID: 5567835359190148059}
   m_Layer: 0
   m_Name: lower_leg_l
   m_TagString: Untagged
@@ -11672,22 +11659,6 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &5567835359190148059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7342014919758599328}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 71
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _dragged: 0
 --- !u!1 &7409137361464878030
 GameObject:
   m_ObjectHideFlags: 0

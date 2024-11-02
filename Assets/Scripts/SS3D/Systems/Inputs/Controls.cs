@@ -326,6 +326,15 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Dance"",
+                    ""type"": ""Button"",
+                    ""id"": ""e784ae72-baca-45b4-8421-36ccdd7f4cdf"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -403,6 +412,17 @@ namespace SS3D.Systems.Inputs
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""ChangePosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f71f2f3d-b764-48d2-9940-d79146937dd7"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dance"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1128,6 +1148,7 @@ namespace SS3D.Systems.Inputs
             m_Movement_Movement = m_Movement.FindAction("Movement", throwIfNotFound: true);
             m_Movement_ToggleRun = m_Movement.FindAction("Toggle Run", throwIfNotFound: true);
             m_Movement_ChangePosition = m_Movement.FindAction("ChangePosition", throwIfNotFound: true);
+            m_Movement_Dance = m_Movement.FindAction("Dance", throwIfNotFound: true);
             // Console
             m_Console = asset.FindActionMap("Console", throwIfNotFound: true);
             m_Console_Open = m_Console.FindAction("Open", throwIfNotFound: true);
@@ -1319,6 +1340,7 @@ namespace SS3D.Systems.Inputs
         private readonly InputAction m_Movement_Movement;
         private readonly InputAction m_Movement_ToggleRun;
         private readonly InputAction m_Movement_ChangePosition;
+        private readonly InputAction m_Movement_Dance;
         public struct MovementActions
         {
             private @Controls m_Wrapper;
@@ -1326,6 +1348,7 @@ namespace SS3D.Systems.Inputs
             public InputAction @Movement => m_Wrapper.m_Movement_Movement;
             public InputAction @ToggleRun => m_Wrapper.m_Movement_ToggleRun;
             public InputAction @ChangePosition => m_Wrapper.m_Movement_ChangePosition;
+            public InputAction @Dance => m_Wrapper.m_Movement_Dance;
             public InputActionMap Get() { return m_Wrapper.m_Movement; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1344,6 +1367,9 @@ namespace SS3D.Systems.Inputs
                 @ChangePosition.started += instance.OnChangePosition;
                 @ChangePosition.performed += instance.OnChangePosition;
                 @ChangePosition.canceled += instance.OnChangePosition;
+                @Dance.started += instance.OnDance;
+                @Dance.performed += instance.OnDance;
+                @Dance.canceled += instance.OnDance;
             }
 
             private void UnregisterCallbacks(IMovementActions instance)
@@ -1357,6 +1383,9 @@ namespace SS3D.Systems.Inputs
                 @ChangePosition.started -= instance.OnChangePosition;
                 @ChangePosition.performed -= instance.OnChangePosition;
                 @ChangePosition.canceled -= instance.OnChangePosition;
+                @Dance.started -= instance.OnDance;
+                @Dance.performed -= instance.OnDance;
+                @Dance.canceled -= instance.OnDance;
             }
 
             public void RemoveCallbacks(IMovementActions instance)
@@ -1826,6 +1855,7 @@ namespace SS3D.Systems.Inputs
             void OnMovement(InputAction.CallbackContext context);
             void OnToggleRun(InputAction.CallbackContext context);
             void OnChangePosition(InputAction.CallbackContext context);
+            void OnDance(InputAction.CallbackContext context);
         }
         public interface IConsoleActions
         {

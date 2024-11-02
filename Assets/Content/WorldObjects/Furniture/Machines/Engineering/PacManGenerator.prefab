@@ -180,7 +180,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: -5414623717715724467}
   _networkObjectCache: {fileID: -5414623717715724467}
-  _powerProduction: 10
+  _powerProduction: 80
   _skinnedMeshRenderer: {fileID: 1698900335226549537}
   _enabled: 0
   _toggleOn: {fileID: 6129818498246833444}

@@ -30,6 +30,11 @@ namespace SS3D.Systems.Entities.Humanoid
             UnsubscribeFromEvents();
         }
 
+        public void Dance(bool dance, float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade(dance ? "Dance" : "Move", transitionDuration);
+        }
+
 
         public void MakeFist(bool makeFist, bool isRight)
         {
@@ -83,10 +88,28 @@ namespace SS3D.Systems.Entities.Humanoid
             _movementController.OnSpeedChangeEvent += UpdateSpeedParamater;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
             _aimController.OnAim += HandleAimInAnimatorControler;
-            _positionController.ChangedPositionMovement += HandlePositionChanged;
+            _positionController.ChangedPosition += HandlePositionChanged;
+            _positionController.ChangedMovement += HandleMovementChanged;
+            _positionController.Dance += HandleDance;
+
         }
 
-        private void HandlePositionChanged(PositionType position, MovementType movementType)
+        private void HandleDance(bool isDancing)
+        {
+            Dance(isDancing);
+        }
+
+        private void HandleMovementChanged(MovementType movementType)
+        {
+            switch (movementType)
+            {
+                case MovementType.Dragging:
+                    Grab();
+                    break;
+            }
+        }
+
+        private void HandlePositionChanged(PositionType position)
         {
             switch (position)
             {
@@ -101,13 +124,6 @@ namespace SS3D.Systems.Entities.Humanoid
                       break;
                   case PositionType.Sitting:
                       Sit();
-                      break;
-            }
-
-            switch (movementType)
-            {
-                  case MovementType.Dragging:
-                      Grab();
                       break;
             }
         }
@@ -127,7 +143,7 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.CrossFade("Prone", transitionDuration);
         }
 
-        private void StandUp(float transitionDuration = 0.15f)
+        private void StandUp(float transitionDuration = 0.25f)
         {
             _animator.CrossFade("Move", transitionDuration);
         }
@@ -136,8 +152,6 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _animator.CrossFade("Drag", transitionDuration);
         }
-
-
 
         private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)
         {
