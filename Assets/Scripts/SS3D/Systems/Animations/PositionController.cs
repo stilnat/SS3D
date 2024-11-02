@@ -13,21 +13,30 @@ namespace SS3D.Systems.Animations
     public class PositionController : NetworkActor
     {
 
-        public Action<PositionType, MovementType> ChangedPositionMovement;
+        public Action<PositionType> ChangedPosition;
+
+        public Action<MovementType> ChangedMovement;
+
+        public Action<bool> Dance;
 
         [SerializeField]
         private FeetController _feetController;
 
 
-        private PositionType _position = PositionType.Standing;
+        [SyncVar(OnChange = nameof(SyncPosition))]
+        private PositionType _position;
 
-        private MovementType _movement = MovementType.Normal;
+        [SyncVar(OnChange = nameof(SyncMovement))]
+        private MovementType _movement;
 
-        private MovementType _previousMovement = MovementType.Normal;
+        [SyncVar]
+        private MovementType _previousMovement;
 
-        private PositionType _previousPosition = PositionType.Standing;
+        [SyncVar]
+        private PositionType _previousPosition;
 
-        
+        [SyncVar(OnChange = nameof(SyncDance))]
+        private bool _isDancing;
 
         [SyncVar]
         private bool _standingAbility = true;
@@ -38,65 +47,108 @@ namespace SS3D.Systems.Animations
 
         public MovementType Movement => _movement;
 
+        public bool CanGrab => _standingAbility && _movement == MovementType.Normal && _position != PositionType.Sitting;
+
+        public bool CanSit => _standingAbility;
+
 
         public override void OnStartServer()
         {
             base.OnStartServer();
             _feetController.FeetHealthChanged += OnFeetHealthChanged;
             _standingAbility = true;
+            _position = PositionType.Standing;
+            _movement = MovementType.Normal;
+            _previousPosition = PositionType.Standing;
+            _previousMovement = MovementType.Normal;
         }
 
 
         public override void OnStartClient()
         {
             base.OnStartClient();
+            if(!IsOwner)
+            {
+                return;
+            }
+
             Subsystems.Get<InputSystem>().Inputs.Movement.ChangePosition.performed += HandleChangePosition;
+            Subsystems.Get<InputSystem>().Inputs.Movement.Dance.performed += HandleDance;
             GetComponent<AimController>().OnAim += HandleAimChange;
         }
 
-
-        public bool TrySit()
+        private void HandleDance(InputAction.CallbackContext obj)
         {
-            return ChangeMovementTypeAndPosition(PositionType.Sitting, _movement);
+            RpcDance();
         }
 
-        public bool Prone()
+        [ServerRpc]
+        private void RpcDance()
         {
-            return ChangeMovementTypeAndPosition(PositionType.Proning, _movement);
+            if (_standingAbility && _position == PositionType.Standing)
+            {
+                _isDancing = !_isDancing;
+            }
         }
 
-        public bool TryCrouch()
+        private void SyncPosition(PositionType oldPosition, PositionType newPosition, bool asServer)
         {
-            return ChangeMovementTypeAndPosition(_standingAbility ? PositionType.Crouching : PositionType.Proning, _movement);
+            ChangedPosition?.Invoke(newPosition);
+        }
+
+        private void SyncMovement(MovementType oldPosition, MovementType newPosition, bool asServer)
+        {
+            ChangedMovement?.Invoke(newPosition);
+        }
+
+        private void SyncDance(bool wasDancing, bool isDancing, bool asServer)
+        {
+            Dance?.Invoke(isDancing);
         }
 
         [Client]
-        public bool TryToStandUp()
+        public void TrySit()
         {
-            return ChangeMovementTypeAndPosition(_standingAbility ? PositionType.Standing : PositionType.Proning, _movement);
+            RpcChangePosition(PositionType.Sitting);
         }
 
-        public bool TryToGetToPreviousPosition()
+        [Client]
+        public void Prone()
+        {
+            RpcChangePosition(PositionType.Proning);
+        }
+
+        [Client]
+        public void TryCrouch()
+        { 
+            RpcChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
+        }
+
+        [Client]
+        public void TryToStandUp()
+        {
+            RpcChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
+        }
+
+        [Client]
+        public void TryToGetToPreviousPosition()
         {
             //todo make checks for change
-            return ChangeMovementTypeAndPosition(_previousPosition, _movement);
+             RpcChangePosition(_previousPosition);
         }
 
-        private bool ChangeMovementTypeAndPosition(PositionType position, MovementType movement)
+        [ServerRpc]
+        private void RpcChangeMovement(MovementType movement)
+        {
+            _previousMovement = _movement;
+            _movement = movement;
+        }
+
+        [ServerRpc]
+        private void RpcChangePosition(PositionType position)
         {
             _previousPosition = _position;
-            _previousMovement = _movement;
             _position = position;
-            _movement = movement;
-
-            bool changeOccured = _position != _previousPosition || _previousMovement != _movement;
-
-            if (changeOccured)
-            {
-                ChangedPositionMovement?.Invoke(_position, _movement);
-            }
-
-            return changeOccured;
         }
 
         /// <summary>
@@ -105,7 +157,6 @@ namespace SS3D.Systems.Animations
         [Client]
         private void HandleChangePosition(InputAction.CallbackContext obj)
         {
-            _previousPosition = _position;
 
             switch (_position)
             {
@@ -125,15 +176,15 @@ namespace SS3D.Systems.Animations
         }
 
         [Client]
-        public bool ChangeGrab(bool grab)
+        public void ChangeGrab(bool grab)
         {
-            return ChangeMovementTypeAndPosition(_position ,grab ? MovementType.Dragging : MovementType.Normal);
+            RpcChangeMovement(grab ? MovementType.Dragging : MovementType.Normal);
         }
 
         [Client]
         private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            ChangeMovementTypeAndPosition(_position ,isAiming ? MovementType.Aiming: MovementType.Normal);
+            RpcChangeMovement(isAiming ? MovementType.Aiming: MovementType.Normal);
         }
 
         [Server]
