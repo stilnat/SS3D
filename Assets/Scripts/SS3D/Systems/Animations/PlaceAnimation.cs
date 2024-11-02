@@ -124,7 +124,7 @@ namespace SS3D.Systems.Animations
 
             _placeSequence.Append(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachPlaceDuration).OnComplete(() =>
             {
-                _controller.PositionController.TryToGetToPreviousPosition();
+                RestorePosition(_controller.PositionController);
                 mainHand.Hold.PickupTargetLocker.parent = null;
             }));
 

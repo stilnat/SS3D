@@ -126,7 +126,7 @@ namespace SS3D.Systems.Animations
             // Rotate tool back to its hold rotation
             _interactSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
             {
-                _controller.PositionController.TryToGetToPreviousPosition();
+                RestorePosition(_controller.PositionController);
                 tool.StopAnimation();
             }));
 

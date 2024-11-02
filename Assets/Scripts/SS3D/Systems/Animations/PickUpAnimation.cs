@@ -143,7 +143,7 @@ namespace SS3D.Systems.Animations
 
             // At the same time stop looking at the item and uncrouch
             _pickUpSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemMoveDuration).
-                OnStart(() => _controller.PositionController.TryToGetToPreviousPosition()));
+                OnStart(() => RestorePosition(_controller.PositionController)));
 
             // At the same time start getting the right rotation for the hand
             _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight, x => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));

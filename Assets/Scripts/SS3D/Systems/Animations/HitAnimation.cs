@@ -61,7 +61,7 @@ namespace SS3D.Systems.Animations
             }); 
             _sequence.OnComplete(() =>
             {
-                _controller.PositionController.TryToGetToPreviousPosition();
+                RestorePosition(_controller.PositionController);
                 _controller.AnimatorController.MakeFist(false, mainHand.HandType == HandType.RightHand);
                 _sequence = null;
             });

@@ -19,6 +19,8 @@ namespace SS3D.Systems.Animations
 
         public abstract void Cancel();
 
+        protected bool PositionHasChanged { get; private set; }
+
         /// <summary>
         ///  Try to rotate on the flat plane the player toward a given position, often useful for procedural animations.
         /// </summary>
@@ -55,7 +57,15 @@ namespace SS3D.Systems.Animations
         {
             if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
             {
-                positionController.TryCrouch();
+                PositionHasChanged = positionController.TryCrouch();
+            }
+        }
+
+        protected void RestorePosition(PositionController positionController)
+        {
+            if (PositionHasChanged)
+            {
+                positionController.TryToGetToPreviousPosition();
             }
         }
 

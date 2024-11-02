@@ -79,7 +79,7 @@ namespace SS3D.Systems.Animations
             _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveHandTime).OnStart(() =>
             {
                 mainHand.Hold.StopAnimation();
-                _controller.PositionController.TryToGetToPreviousPosition();
+                RestorePosition(_controller.PositionController);
             }));
 
             // Stop reaching for the position of interaction

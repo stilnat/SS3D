@@ -92,7 +92,7 @@ namespace SS3D.Systems.Animations
             }); 
             _sequence.OnComplete(() =>
             {
-                _controller.PositionController.TryToGetToPreviousPosition();
+                RestorePosition(_controller.PositionController);
                 temp.Dispose(true);
                 _sequence = null;
                 holdable.transform.parent = mainHand.Hold.ItemPositionTargetLocker;

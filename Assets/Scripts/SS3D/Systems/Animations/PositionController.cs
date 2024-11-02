@@ -46,33 +46,37 @@ namespace SS3D.Systems.Animations
         }
 
 
-        public void TrySit()
+        public bool TrySit()
         {
-            ChangePosition(PositionType.Sitting);
+            return ChangePosition(PositionType.Sitting);
         }
 
-        public void Prone()
+        public bool Prone()
         {
-            ChangePosition(PositionType.Proning);
+            return ChangePosition(PositionType.Proning);
         }
 
-        public void TryCrouch()
+        public bool TryCrouch()
         {
-            ChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
+            return ChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
         }
 
         [Client]
-        public void TryToStandUp()
+        public bool TryToStandUp()
         {
-            ChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
+            return ChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
         }
 
-        public void TryToGetToPreviousPosition()
+        public bool TryToGetToPreviousPosition()
         {
-             ChangePosition(_previousPosition);
+            //todo make checks for change
+            return ChangePosition(_previousPosition);
         }
 
-        private void ChangePosition(PositionType position)
+        /// <summary>
+        /// Change the position by the position passed in parameter, return true if position has changed.
+        /// </summary>
+        private bool ChangePosition(PositionType position)
         {
             _previousPosition = _position;
             _position = position;
@@ -81,6 +85,8 @@ namespace SS3D.Systems.Animations
             {
                 ChangedPosition?.Invoke(_position);
             }
+
+            return _position != _previousPosition;
         }
 
         /// <summary>
