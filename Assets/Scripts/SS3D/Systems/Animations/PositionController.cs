@@ -82,22 +82,6 @@ namespace SS3D.Systems.Animations
             return ChangeMovementTypeAndPosition(_previousPosition, _movement);
         }
 
-        /// <summary>
-        /// Change the position by the position passed in parameter, return true if position has changed.
-        /// </summary>
-        /*private bool ChangePosition(PositionType position)
-        {
-            _previousPosition = _position;
-            _position = position;
-
-            if (_position != _previousPosition)
-            {
-                ChangedPosition?.Invoke(_position);
-            }
-
-            return _position != _previousPosition;
-        } */
-
         private bool ChangeMovementTypeAndPosition(PositionType position, MovementType movement)
         {
             _previousPosition = _position;

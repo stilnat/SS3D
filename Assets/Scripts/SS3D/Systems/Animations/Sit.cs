@@ -48,14 +48,12 @@ namespace SS3D.Systems.Animations
         {
             _controller.MovementController.enabled = false;
 
-            _controller.AnimatorController.Sit(true);
+            _controller.PositionController.TrySit();
 
             _sitSequence = DOTween.Sequence();
 
             _sitSequence.Join(_controller.transform.DOMove(sit.position, 0.5f));
             _sitSequence.Join(_controller.transform.DORotate(sit.rotation.eulerAngles, 0.5f));
-
-            _controller.PositionController.TrySit();
 
             _sitSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
@@ -63,7 +61,7 @@ namespace SS3D.Systems.Animations
         private void StopSitting()
         {
             _controller.MovementController.enabled = true;
-            _controller.AnimatorController.Sit(false);
+            _controller.PositionController.TryToGetToPreviousPosition();
             _controller.PositionController.TryToStandUp();
         }
     }

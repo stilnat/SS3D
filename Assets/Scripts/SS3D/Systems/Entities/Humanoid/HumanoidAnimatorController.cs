@@ -18,8 +18,6 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField] private PositionController _positionController;
 
-        private float _currentSpeed;
-
         protected override void OnStart()
         {
             base.OnStart();
@@ -30,31 +28,6 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             base.OnDestroyed();
             UnsubscribeFromEvents();
-        }
-
-        public void Sit(bool sitState)
-        {
-            _animator.SetBool("Sit", sitState);
-        }
-
-        private void Crouch(float transitionDuration = 0.15f)
-        {
-            _animator.CrossFade("Crouch", transitionDuration);
-        }
-
-        private void Prone(float transitionDuration = 0.15f)
-        {
-            _animator.CrossFade("Prone", transitionDuration);
-        }
-
-        private void StandUp(float transitionDuration = 0.15f)
-        {
-            _animator.CrossFade("Move", transitionDuration);
-        }
-
-        public void Grab(float transitionDuration = 0.15f)
-        {
-            _animator.CrossFade("Drag", transitionDuration);
         }
 
 
@@ -107,7 +80,7 @@ namespace SS3D.Systems.Entities.Humanoid
 
         private void SubscribeToEvents()
         {
-            _movementController.OnSpeedChangeEvent += UpdateMovement;
+            _movementController.OnSpeedChangeEvent += UpdateSpeedParamater;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
             _aimController.OnAim += HandleAimInAnimatorControler;
             _positionController.ChangedPositionMovement += HandlePositionChanged;
@@ -126,6 +99,9 @@ namespace SS3D.Systems.Entities.Humanoid
                   case PositionType.Standing:
                       StandUp();
                       break;
+                  case PositionType.Sitting:
+                      Sit();
+                      break;
             }
 
             switch (movementType)
@@ -134,6 +110,31 @@ namespace SS3D.Systems.Entities.Humanoid
                       Grab();
                       break;
             }
+        }
+
+        private void Sit(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Sit", transitionDuration);
+        }
+
+        private void Crouch(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Crouch", transitionDuration);
+        }
+
+        private void Prone(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Prone", transitionDuration);
+        }
+
+        private void StandUp(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Move", transitionDuration);
+        }
+
+        private void Grab(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Drag", transitionDuration);
         }
 
 
@@ -149,7 +150,7 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
 
-        private void UpdateMovement(float speed)
+        private void UpdateSpeedParamater(float speed)
         {
            
             bool isMoving = speed != 0;
@@ -157,23 +158,16 @@ namespace SS3D.Systems.Entities.Humanoid
             // divide by max speed to get a parameter between 0 and 1
             speed /= _movementController.MaxSpeed; 
 
-            float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
+            float currentSpeed = _animator.GetFloat(Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
             
-            _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
-
-            if (_currentSpeed == 0 && isMoving)
-            {
-                _animator.SetTrigger("StartMoving");
-            }
-
-            _currentSpeed = speed;
+            _animator.SetFloat(Data.Animations.Humanoid.MovementSpeed, speed);
         }
 
         private void UnsubscribeFromEvents()
         {
-            _movementController.OnSpeedChangeEvent -= UpdateMovement;
+            _movementController.OnSpeedChangeEvent -= UpdateSpeedParamater;
         }
 
     }
