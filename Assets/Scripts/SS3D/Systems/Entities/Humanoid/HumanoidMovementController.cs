@@ -29,7 +29,7 @@ namespace SS3D.Systems.Entities.Humanoid
        public event Action<float> OnSpeedChangeEvent;
 
         private const float DefaultSpeed = 1f;
-        private const float RunFactor = 3f;
+        private const float RunFactor = 2f;
         private const float DragFactor = 0.5f;
         private const float CrouchFactor = 0.6f;
         private const float AimFactor = 0.6f;
@@ -80,6 +80,13 @@ namespace SS3D.Systems.Entities.Humanoid
         public Transform AimTarget { get; private set; }
 
         public bool IsRunning { get; private set; }
+
+        /// <summary>
+        /// Return the max speed taking in count the movement type and the position
+        /// </summary>
+        /// <returns></returns>
+        public float MaxSpeed => ComputeSpeed() / DefaultSpeed * (IsRunning ? DefaultSpeed : RunFactor);
+
 
         public override void OnStartClient()
         {

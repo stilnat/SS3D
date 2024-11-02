@@ -144,6 +144,10 @@ namespace SS3D.Systems.Entities.Humanoid
         {
            
             bool isMoving = speed != 0;
+
+            // divide by max speed to get a parameter between 0 and 1
+            speed /= _movementController.MaxSpeed; 
+
             float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
