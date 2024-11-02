@@ -185,9 +185,9 @@ namespace SS3D.Systems.Animations
             Vector3 handTargetPosition = targetHitPosition;
 
             // We don't want our trajectory to be to streched, so we put the hit point closer if necessary, reachable by human
-            if (fromShoulderToHit.magnitude > 0.7f)
+            if (fromShoulderToHit.magnitude > 1.2f)
             {
-                handTargetPosition = mainHand.Hold.UpperArm.position + (fromShoulderToHit.normalized * 0.7f);
+                handTargetPosition = mainHand.Hold.UpperArm.position + (fromShoulderToHit.normalized * 1.2f);
             }
 
             return handTargetPosition;
