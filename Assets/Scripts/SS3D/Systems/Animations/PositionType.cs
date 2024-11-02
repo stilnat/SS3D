@@ -7,7 +7,7 @@ namespace SS3D.Systems.Animations
     {
         Standing = 0,
         Sitting = 1,
-        Crawling = 2,
+        Proning = 2,
         Crouching = 3,
     }
 }

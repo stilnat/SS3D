@@ -55,7 +55,7 @@ namespace SS3D.Systems.Animations
             _sitSequence.Join(_controller.transform.DOMove(sit.position, 0.5f));
             _sitSequence.Join(_controller.transform.DORotate(sit.rotation.eulerAngles, 0.5f));
 
-            _controller.PositionController.Position = PositionType.Sitting;
+            _controller.PositionController.TrySit();
 
             _sitSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
@@ -64,7 +64,7 @@ namespace SS3D.Systems.Animations
         {
             _controller.MovementController.enabled = true;
             _controller.AnimatorController.Sit(false);
-            _controller.PositionController.Position = PositionType.Standing;
+            _controller.PositionController.TryToStandUp();
         }
     }
 }

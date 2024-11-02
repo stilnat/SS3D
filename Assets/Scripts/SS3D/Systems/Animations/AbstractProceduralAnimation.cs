@@ -48,5 +48,16 @@ namespace SS3D.Systems.Animations
             hand.Hold.PickupTargetLocker.rotation = targetRotation;
         }
 
+        /// <summary>
+        /// Adapt the position of the player interacting to make the animation look more natural, such as crouching when the interaction is too low.
+        /// </summary>
+        protected void AdaptPosition(PositionController positionController, Hand mainHand, Vector3 targetPosition)
+        {
+            if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
+            {
+                positionController.TryCrouch();
+            }
+        }
+
     }
 }

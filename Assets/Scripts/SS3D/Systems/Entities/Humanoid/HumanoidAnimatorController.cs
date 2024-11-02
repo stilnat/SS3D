@@ -16,6 +16,10 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField] private AimController _aimController;
 
+        [SerializeField] private PositionController _positionController;
+
+        private float _currentSpeed;
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -33,15 +37,26 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetBool("Sit", sitState);
         }
 
-        public void Crouch(bool crouchState)
+        private void Crouch(float transitionDuration = 0.15f)
         {
-            _animator.SetBool("Crouch", crouchState);
+            _animator.CrossFade("Crouch", transitionDuration);
+        }
+
+        private void Prone(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Prone", transitionDuration);
+        }
+
+        private void StandUp(float transitionDuration = 0.15f)
+        {
+            _animator.CrossFade("Move", transitionDuration);
         }
 
         public void Grab(bool grabState)
         {
             _animator.SetBool("Grab", grabState);
         }
+
 
         public void MakeFist(bool makeFist, bool isRight)
         {
@@ -52,18 +67,6 @@ namespace SS3D.Systems.Entities.Humanoid
             else
             {
                 _animator.SetTrigger(isRight ? "FingerRelaxedRight" : "FingerRelaxedLeft");
-            }
-        }
-
-        public void Throw(HandType handtype)
-        {
-            if (handtype == HandType.RightHand)
-            {
-                _animator.SetTrigger("ThrowRight");
-            }
-            else
-            {
-                _animator.SetTrigger("ThrowLeft");
             }
         }
 
@@ -107,6 +110,23 @@ namespace SS3D.Systems.Entities.Humanoid
             _movementController.OnSpeedChangeEvent += UpdateMovement;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
             _aimController.OnAim += HandleAimInAnimatorControler;
+            _positionController.ChangedPosition += HandlePositionChanged;
+        }
+
+        private void HandlePositionChanged(PositionType position)
+        {
+            switch (position)
+            {
+                  case PositionType.Proning:
+                      Prone();
+                      break;
+                  case PositionType.Crouching:
+                      Crouch();
+                      break;
+                  case PositionType.Standing:
+                      StandUp();
+                      break;
+            }
         }
 
         private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)
@@ -120,19 +140,28 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
 
-        private void UnsubscribeFromEvents()
-        {
-            _movementController.OnSpeedChangeEvent -= UpdateMovement;
-        }
-
         private void UpdateMovement(float speed)
         {
+           
             bool isMoving = speed != 0;
             float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
             
             _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
+
+            if (_currentSpeed == 0 && isMoving)
+            {
+                _animator.SetTrigger("StartMoving");
+            }
+
+            _currentSpeed = speed;
         }
+
+        private void UnsubscribeFromEvents()
+        {
+            _movementController.OnSpeedChangeEvent -= UpdateMovement;
+        }
+
     }
 }

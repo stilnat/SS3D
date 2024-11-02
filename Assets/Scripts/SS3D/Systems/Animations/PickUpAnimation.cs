@@ -70,7 +70,7 @@ namespace SS3D.Systems.Animations
             sequence.Append(DOTween.To(() => _mainHand.Hold.HoldIkConstraint.weight, x => _mainHand.Hold.HoldIkConstraint.weight = x, 0f, timeToCancelHold));
             sequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, timeToCancelLookAt));
             sequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0f, timeToCancelPickup));
-            _controller.AnimatorController.Crouch(false);
+            _controller.PositionController.TryToStandUp();
         }
 
         [Client]
@@ -116,11 +116,7 @@ namespace SS3D.Systems.Animations
             // Rotate player toward item
             TryRotateTowardTargetPosition(_pickUpSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
 
-            // If item is too low, crouch to reach
-            if (mainHand.HandBone.transform.position.y - item.transform.position.y > 0.3)
-            {
-                _controller.AnimatorController.Crouch(true);
-            }
+            AdaptPosition(_controller.PositionController, mainHand, item.transform.position);
 
             _pickUpSequence = DOTween.Sequence();
 
@@ -147,7 +143,7 @@ namespace SS3D.Systems.Animations
 
             // At the same time stop looking at the item and uncrouch
             _pickUpSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemMoveDuration).
-                OnStart(() => _controller.AnimatorController.Crouch(false)));
+                OnStart(() => _controller.PositionController.TryToGetToPreviousPosition()));
 
             // At the same time start getting the right rotation for the hand
             _pickUpSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight, x => mainHand.Hold.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemMoveDuration));

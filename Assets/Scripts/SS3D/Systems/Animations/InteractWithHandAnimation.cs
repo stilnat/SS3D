@@ -62,10 +62,7 @@ namespace SS3D.Systems.Animations
 
             AlignHandWithShoulder(targetPosition, mainHand);
 
-            if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
-            {
-                _controller.AnimatorController.Crouch(true);
-            }
+            AdaptPosition(_controller.PositionController, mainHand, targetPosition);
 
             // Rotate player toward item
             _interactSequence = TryRotateTowardTargetPosition(_interactSequence, _controller.transform, _controller, _interactionTime, targetPosition);
@@ -82,7 +79,7 @@ namespace SS3D.Systems.Animations
             _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveHandTime).OnStart(() =>
             {
                 mainHand.Hold.StopAnimation();
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToGetToPreviousPosition();
             }));
 
             // Stop reaching for the position of interaction

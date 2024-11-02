@@ -49,7 +49,7 @@ namespace SS3D.Systems.Animations
             // Stop looking at item
             DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
 
-            _controller.AnimatorController.Crouch(false);
+            _controller.PositionController.TryToStandUp();
             _tool.StopAnimation();
             _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
             _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
@@ -110,10 +110,7 @@ namespace SS3D.Systems.Animations
             // Rotate player toward item
             TryRotateTowardTargetPosition(_interactSequence, _controller.transform, _controller, _moveToolTime, interactionPoint);
 
-            if (mainHand.HandBone.transform.position.y - interactionPoint.y > 0.3)
-            {
-                _controller.AnimatorController.Crouch(true);
-            }
+            AdaptPosition(_controller.PositionController, mainHand, interactionPoint);
            
             // Start looking at item
             _interactSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
@@ -129,7 +126,7 @@ namespace SS3D.Systems.Animations
             // Rotate tool back to its hold rotation
             _interactSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
             {
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToGetToPreviousPosition();
                 tool.StopAnimation();
             }));
 

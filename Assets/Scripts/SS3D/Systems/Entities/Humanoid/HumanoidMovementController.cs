@@ -35,11 +35,6 @@ namespace SS3D.Systems.Entities.Humanoid
         private const float AimFactor = 0.6f;
         private const float CrawlFactor = 0.4f;
 
-        private const float MinFeetHealthFactorToStand = 0.5f;
-
-        [SyncVar]
-        private bool _standingAbility;
-
         [SerializeField]
         private Rigidbody _rb;
 
@@ -98,12 +93,6 @@ namespace SS3D.Systems.Entities.Humanoid
             Setup();
         }
 
-        public override void OnStartServer()
-        {
-             base.OnStartServer();
-             GetComponent<FeetController>().FeetHealthChanged += OnFeetHealthChanged;
-        }
-
         [Client]
         private void HandleNetworkTick()
         {
@@ -118,17 +107,6 @@ namespace SS3D.Systems.Entities.Humanoid
             {
                 ComputeAngleBetweenAimAndInput();
                 UpdateAimTargetPosition();
-            }
-        }
-
-        [Server]
-        private void OnFeetHealthChanged(float feetHealth)
-        {
-            _standingAbility = feetHealth >= MinFeetHealthFactorToStand;
-
-            if (_standingAbility == false)
-            {
-                GetComponent<Ragdoll>().KnockdownTimeless();
             }
         }
 
@@ -217,7 +195,7 @@ namespace SS3D.Systems.Entities.Humanoid
              speed *= IsRunning ? RunFactor : 1;
              speed *= _movementType == MovementType.Aiming ? AimFactor : 1;
              speed *= _movementType == MovementType.Dragging ? DragFactor : 1;
-             speed *= GetComponent<PositionController>().Position == PositionType.Crawling ? CrawlFactor : 1;
+             speed *= GetComponent<PositionController>().Position == PositionType.Proning ? CrawlFactor : 1;
              speed *= GetComponent<PositionController>().Position == PositionType.Crouching ? CrouchFactor : 1;
 
              return speed;

@@ -81,7 +81,7 @@ namespace SS3D.Systems.Animations
 
             cancelSequence.OnStart(() =>
             {
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToStandUp();
             });
         }
 
@@ -114,10 +114,7 @@ namespace SS3D.Systems.Animations
             // Turn character toward the position to place the item.
             TryRotateTowardTargetPosition(_placeSequence, _controller.transform, _controller, _itemReachPlaceDuration, placeTarget);
 
-            if (mainHand.HandBone.transform.position.y - placeTarget.y > 0.3)
-            {
-                _controller.AnimatorController.Crouch(true);
-            }
+            AdaptPosition(_controller.PositionController, mainHand, placeTarget);
 
             // Slowly increase looking at place item position
             _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachPlaceDuration));
@@ -127,7 +124,7 @@ namespace SS3D.Systems.Animations
 
             _placeSequence.Append(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachPlaceDuration).OnComplete(() =>
             {
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToGetToPreviousPosition();
                 mainHand.Hold.PickupTargetLocker.parent = null;
             }));
 

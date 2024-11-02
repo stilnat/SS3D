@@ -13,9 +13,9 @@ namespace SS3D.Systems.Animations
     /// <summary>
     /// Procedural animation to hit with an item in hand
     /// </summary>
-    public class HitWithItemAnimation : IProceduralAnimation
+    public class HitWithItemAnimation : AbstractProceduralAnimation
     {
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
         private ProceduralAnimationController _controller;
 
@@ -23,13 +23,13 @@ namespace SS3D.Systems.Animations
 
         private float _armReach = 0.5f;
 
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
             _controller = proceduralAnimationController;
             HitAnimate(targetPosition, mainHand, mainHand.ItemInHand.Holdable, _controller.transform, time);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
             throw new NotImplementedException();
         }
@@ -67,6 +67,8 @@ namespace SS3D.Systems.Animations
                 _sequence.Kill();
             }
 
+            
+
             _sequence = DOTween.Sequence();
 
             // In sequence, we first rotate toward the target
@@ -83,17 +85,14 @@ namespace SS3D.Systems.Animations
 
             _sequence.OnStart(() =>
             {
+                AdaptPosition(_controller.PositionController, mainHand, hitTargetPosition);
                 _controller.LookAtTargetLocker.position = hitTargetPosition;
                 _controller.LookAtTargetLocker.transform.parent = null;
                 _controller.LookAtConstraint.weight = 1;
-                if (mainHand.HandBone.transform.position.y - hitTargetPosition.y > 0.3)
-                {
-                    _controller.AnimatorController.Crouch(true);
-                }
             }); 
             _sequence.OnComplete(() =>
             {
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToGetToPreviousPosition();
                 temp.Dispose(true);
                 _sequence = null;
                 holdable.transform.parent = mainHand.Hold.ItemPositionTargetLocker;

@@ -56,15 +56,12 @@ namespace SS3D.Systems.Animations
             _sequence.OnStart(() =>
             {
                 _controller.LookAtTargetLocker.position = hitTargetPosition;
-                if (mainHand.HandBone.transform.position.y - hitTargetPosition.y > 0.3)
-                {
-                    _controller.AnimatorController.Crouch(true);
-                }
+                AdaptPosition(_controller.PositionController, mainHand, hitTargetPosition);
                 _controller.AnimatorController.MakeFist(true, mainHand.HandType == HandType.RightHand);
             }); 
             _sequence.OnComplete(() =>
             {
-                _controller.AnimatorController.Crouch(false);
+                _controller.PositionController.TryToGetToPreviousPosition();
                 _controller.AnimatorController.MakeFist(false, mainHand.HandType == HandType.RightHand);
                 _sequence = null;
             });

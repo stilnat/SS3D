@@ -7537,6 +7537,7 @@ MonoBehaviour:
   _animator: {fileID: 7307990926274805850}
   _lerpMultiplier: 5
   _aimController: {fileID: 3054724180155005980}
+  _positionController: {fileID: 7568747683536695618}
 --- !u!114 &8922211754620765195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7586,7 +7587,9 @@ MonoBehaviour:
   _componentIndexCache: 8
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
+  _feetController: {fileID: 2081771184023489930}
   _position: 0
+  _standingAbility: 0
 --- !u!114 &2744598832793855224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7786,7 +7789,6 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _feetHealthFactor: 1
-  _standingAbility: 1
 --- !u!114 &3906578193331490438
 MonoBehaviour:
   m_ObjectHideFlags: 0
