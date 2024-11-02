@@ -1082,8 +1082,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 0}
-  _networkObjectCache: {fileID: 0}
+  _addedNetworkObject: {fileID: 1398417341146899860}
+  _networkObjectCache: {fileID: 1398417341146899860}
   _dragged: 0
 --- !u!1 &2904887481490565087
 GameObject:
@@ -2154,7 +2154,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4031280654638808584}
-  - component: {fileID: 5597842269261872939}
+  - component: {fileID: 1398417341146899860}
   m_Layer: 0
   m_Name: Ragdoll
   m_TagString: Untagged
@@ -2179,7 +2179,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5597842269261872939
+--- !u!114 &1398417341146899860
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2188,9 +2188,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 4375859229929907378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 799a90a5690fd624f9fc06dd6dd83c34, type: 3}
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <IsNested>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  _networkBehaviours:
+  - {fileID: 4427389421676706491}
+  - {fileID: 3301645803780583367}
+  <ParentNetworkObject>k__BackingField: {fileID: 0}
+  <ChildNetworkObjects>k__BackingField: []
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: -0, y: -0, z: -0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
+  _isNetworked: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _defaultDespawnType: 0
+  NetworkObserver: {fileID: 0}
+  <PrefabId>k__BackingField: 0
+  <SpawnableCollectionId>k__BackingField: 0
+  _scenePathHash: 0
+  <SceneId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 8953652754690214721
 --- !u!1 &4660694746504516154
 GameObject:
   m_ObjectHideFlags: 0
@@ -3776,8 +3798,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 1
-  _addedNetworkObject: {fileID: 0}
-  _networkObjectCache: {fileID: 0}
+  _addedNetworkObject: {fileID: 1398417341146899860}
+  _networkObjectCache: {fileID: 1398417341146899860}
   _dragged: 0
 --- !u!1 &7486882481432117789
 GameObject:

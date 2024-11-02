@@ -64,8 +64,7 @@ namespace SS3D.Systems.Animations
             // Stop picking
             stopSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
-            //_controller.MovementController.ChangeGrab(false);
-            _controller.PositionController.TryToStandUp();
+            _controller.PositionController.ChangeGrab(false);
         }
 
         private void SetUpGrab(Draggable item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -96,9 +95,7 @@ namespace SS3D.Systems.Animations
 
             _grabSequence = TryRotateTowardTargetPosition(_grabSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
 
-            _controller.MovementController.ChangeGrab(true);
-
-            _controller.AnimatorController.Grab();
+            _controller.PositionController.ChangeGrab(true);
 
             // Start looking at grabbed part
             _grabSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
@@ -141,9 +138,6 @@ namespace SS3D.Systems.Animations
             _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;
             _fixedJoint.breakForce = _jointBreakForce;
-
-            // increasing connected mass scale somehow allow the grabbed part to better appear in hand
-            _fixedJoint.connectedMassScale = 20f;
         }
     }
 }
