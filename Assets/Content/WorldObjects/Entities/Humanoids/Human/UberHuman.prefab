@@ -1098,7 +1098,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 23
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3624753817424616501
 MonoBehaviour:
@@ -1440,7 +1440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 86
+  _componentIndexCache: 84
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -3373,7 +3373,6 @@ MonoBehaviour:
   <UpperArm>k__BackingField: {fileID: 7446386329022654784}
   <HandHoldTargetLocker>k__BackingField: {fileID: 5441267867618792388}
   <PickupTargetLocker>k__BackingField: {fileID: 4846808082985781182}
-  <PlaceTarget>k__BackingField: {fileID: 2264229762793431148}
   <ItemPositionTargetLocker>k__BackingField: {fileID: 3720527799557840007}
   <ShoulderWeaponPivot>k__BackingField: {fileID: 4647776898251892701}
   <HoldIkConstraint>k__BackingField: {fileID: 3450567292757048057}
@@ -3827,7 +3826,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 76
+  _componentIndexCache: 74
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _dragged: 0
@@ -3918,7 +3917,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 77
+  _componentIndexCache: 75
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 0
@@ -5361,7 +5360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 72
+  _componentIndexCache: 71
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 0
@@ -5449,37 +5448,6 @@ MonoBehaviour:
     m_Tolerance: 0.0001
     m_MaintainTargetPositionOffset: 0
     m_MaintainTargetRotationOffset: 0
---- !u!1 &3592586951141678613
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 925888607827410678}
-  m_Layer: 0
-  m_Name: RightPlaceTarget
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &925888607827410678
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3592586951141678613}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.64220095, y: 1.0035064, z: -0.23033077}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 20
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3597736487556705421
 GameObject:
   m_ObjectHideFlags: 0
@@ -5640,7 +5608,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 85
+  _componentIndexCache: 83
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -6220,7 +6188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 75
+  _componentIndexCache: 73
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -6391,7 +6359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 74
+  _componentIndexCache: 72
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -7069,8 +7037,6 @@ Transform:
   - {fileID: 4846808082985781182}
   - {fileID: 5441267867618792388}
   - {fileID: 2712046360455809814}
-  - {fileID: 925888607827410678}
-  - {fileID: 2264229762793431148}
   - {fileID: 5358384094254398678}
   - {fileID: 2856800849451305125}
   - {fileID: 7561060189642700650}
@@ -7210,9 +7176,7 @@ MonoBehaviour:
   - {fileID: 5482738034181427131}
   - {fileID: 8269793876665771011}
   - {fileID: 5329398922953147913}
-  - {fileID: 0}
   - {fileID: 6127327338461065190}
-  - {fileID: 0}
   - {fileID: 1456827871127104825}
   - {fileID: 3429023508407904866}
   - {fileID: 2107809895618774636}
@@ -7851,8 +7815,8 @@ MonoBehaviour:
   _rightHoldTargetLocker: {fileID: 2712046360455809814}
   _leftHoldTargetLocker: {fileID: 5441267867618792388}
   _lookAtTargetLocker: {fileID: 5358384094254398678}
-  _leftPlaceTarget: {fileID: 2264229762793431148}
-  _rightPlaceTarget: {fileID: 925888607827410678}
+  _leftPlaceTarget: {fileID: 0}
+  _rightPlaceTarget: {fileID: 0}
 --- !u!114 &1215874948772008144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9101,7 +9065,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 22
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5269329783519768355
 GameObject:
@@ -9297,7 +9261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 83
+  _componentIndexCache: 81
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -10041,7 +10005,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 84
+  _componentIndexCache: 82
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -11132,7 +11096,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 78
+  _componentIndexCache: 76
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _dragged: 0
@@ -11148,7 +11112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 79
+  _componentIndexCache: 77
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 0
@@ -11456,7 +11420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 82
+  _componentIndexCache: 80
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -11900,37 +11864,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8592597023951814015}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7630660522020738575
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2264229762793431148}
-  m_Layer: 0
-  m_Name: LeftPlaceTarget
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2264229762793431148
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7630660522020738575}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.64220095, y: 1.0035064, z: -0.23033077}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7670284129286597219
 GameObject:
@@ -13077,7 +13010,7 @@ Transform:
   - {fileID: 5448547047747287270}
   - {fileID: 6268089940630100831}
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 25
+  m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8403779744428458306
 GameObject:
@@ -13108,7 +13041,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 24
+  m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8574025489756800496
 GameObject:
@@ -13643,7 +13576,6 @@ MonoBehaviour:
   <UpperArm>k__BackingField: {fileID: 802911981376609306}
   <HandHoldTargetLocker>k__BackingField: {fileID: 2712046360455809814}
   <PickupTargetLocker>k__BackingField: {fileID: 4607633442489985284}
-  <PlaceTarget>k__BackingField: {fileID: 925888607827410678}
   <ItemPositionTargetLocker>k__BackingField: {fileID: 4363011775381521912}
   <ShoulderWeaponPivot>k__BackingField: {fileID: 4855327836977815790}
   <HoldIkConstraint>k__BackingField: {fileID: 2142891004495607562}
@@ -13950,7 +13882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 81
+  _componentIndexCache: 79
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2
@@ -14331,7 +14263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 80
+  _componentIndexCache: 78
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _componentConfiguration: 2

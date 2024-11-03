@@ -88,12 +88,6 @@ namespace SS3D.Systems.Animations
         [Client]
         private void SetupPlace(Vector3 placePosition, GameObject item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
         {
-            // Set up the position the item should be placed on 
-            mainHand.Hold.PlaceTarget.position = placePosition + (0.2f * Vector3.up);
-
-            // Unparent item so its not constrained by the multi-position constrain anymore.
-            //item.transform.parent = null;
-
             // set pickup constraint to 1 so that the player can bend to reach at its feet or further in front.
             mainHand.Hold.PickupIkConstraint.weight = 1f;
 
@@ -120,9 +114,7 @@ namespace SS3D.Systems.Animations
             _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachPlaceDuration));
 
             // At the same time, Slowly move item toward the position it should be placed.
-            _placeSequence.Join(item.transform.DOMove(placeTarget, _handMoveBackDuration));
-
-            _placeSequence.Append(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachPlaceDuration).OnComplete(() =>
+            _placeSequence.Join(item.transform.DOMove(placeTarget, _handMoveBackDuration).OnComplete(() =>
             {
                 RestorePosition(_controller.PositionController);
                 mainHand.Hold.PickupTargetLocker.parent = null;

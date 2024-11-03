@@ -33,12 +33,6 @@ namespace SS3D.Systems.Animations
         public Transform PickupTargetLocker { get; private set; }
 
         /// <summary>
-        /// The IK target for the placing animation (might get rid of that one and use the pickup target instead ?)
-        /// </summary>
-        [field: SerializeField]
-        public Transform PlaceTarget { get; private set; }
-
-        /// <summary>
         /// The IK target for the item position when held by player, items are going to be parented on it.
         /// </summary>
         [field: SerializeField]
