@@ -40,7 +40,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 276026901119349159}
-  m_Mesh: {fileID: -5377519465554558207, guid: 55bfb87dbe7c9a649a038d4302dd1ee4, type: 3}
+  m_Mesh: {fileID: -5377519465554558207, guid: 8815a6f85b047814aaf93131ceb23fdf, type: 3}
 --- !u!23 &7282756956086439355
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -61,7 +61,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -8532224439395276194, guid: 55bfb87dbe7c9a649a038d4302dd1ee4, type: 3}
+  - {fileID: 2100000, guid: 695c4de41b9578049a93f19b1eef7213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -169,7 +169,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3604567820273628250}
-  m_Mesh: {fileID: -8401218714792031518, guid: 55bfb87dbe7c9a649a038d4302dd1ee4, type: 3}
+  m_Mesh: {fileID: -8401218714792031518, guid: 8815a6f85b047814aaf93131ceb23fdf, type: 3}
 --- !u!23 &2955772190145451407
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -190,7 +190,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -8532224439395276194, guid: 55bfb87dbe7c9a649a038d4302dd1ee4, type: 3}
+  - {fileID: 2100000, guid: 695c4de41b9578049a93f19b1eef7213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -292,6 +292,7 @@ MonoBehaviour:
   - {fileID: 1072406932805509454}
   - {fileID: 1072406932805509443}
   - {fileID: 4728102775488090591}
+  - {fileID: 8825873306210435106}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
@@ -354,7 +355,7 @@ MeshCollider:
   serializedVersion: 4
   m_Convex: 1
   m_CookingOptions: 30
-  m_Mesh: {fileID: -8401218714792031518, guid: 55bfb87dbe7c9a649a038d4302dd1ee4, type: 3}
+  m_Mesh: {fileID: -8401218714792031518, guid: 8815a6f85b047814aaf93131ceb23fdf, type: 3}
 --- !u!114 &4728102775488090591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -388,6 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99df7ac2c21c2d944818b5da5be3dd53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 1072406932805509441}
+  _networkObjectCache: {fileID: 1072406932805509441}
   _primaryRightHandHold: {fileID: 8906533835412345616}
   _primaryLeftHandHold: {fileID: 8906533836334754445}
   _secondaryRightHandHold: {fileID: 8906533836425649104}
