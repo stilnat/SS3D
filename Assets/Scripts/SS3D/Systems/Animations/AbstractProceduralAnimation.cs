@@ -19,20 +19,31 @@ namespace SS3D.Systems.Animations
 
         public abstract void Cancel();
 
-        protected bool PositionHasChanged { get; private set; }
+        private bool _positionHasChanged; 
+
+        protected float InteractionTime { get; private set; }
+
+        protected Sequence InteractionSequence { get; private set; }
+
+        protected ProceduralAnimationController Controller { get; private set; }
+
+        protected AbstractProceduralAnimation(float interactionTime, ProceduralAnimationController controller)
+        {
+            Controller = controller;
+            InteractionTime = interactionTime;
+            InteractionSequence = DOTween.Sequence();
+        }
 
         /// <summary>
         ///  Try to rotate on the flat plane the player toward a given position, often useful for procedural animations.
         /// </summary>
-        protected Sequence TryRotateTowardTargetPosition(Sequence sequence, Transform rootTransform, ProceduralAnimationController controller, float rotateTime, Vector3 position)
+        protected void TryRotateTowardTargetPosition(Transform rootTransform, float rotateTime, Vector3 position)
         {
-            if (controller.PositionController.Position != PositionType.Sitting)
+            if (Controller.PositionController.Position != PositionType.Sitting)
             {
-                sequence.Join(controller.transform.DORotate(
+                InteractionSequence.Join(Controller.transform.DORotate(
                     QuaternionExtension.SameHeightPlaneLookRotation(position - rootTransform.position, Vector3.up).eulerAngles, rotateTime));
             }
-
-            return sequence;
         }
 
         /// <summary>
@@ -57,14 +68,14 @@ namespace SS3D.Systems.Animations
         {
             if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
             {
-                PositionHasChanged = positionController.Position != PositionType.Crouching;
+                _positionHasChanged = positionController.Position != PositionType.Crouching;
                 positionController.TryCrouch();
             }
         }
 
         protected void RestorePosition(PositionController positionController)
         {
-            if (PositionHasChanged)
+            if (_positionHasChanged)
             {
                 positionController.TryToGetToPreviousPosition();
             }

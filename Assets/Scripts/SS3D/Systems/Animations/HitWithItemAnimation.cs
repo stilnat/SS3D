@@ -17,16 +17,15 @@ namespace SS3D.Systems.Animations
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
-        private ProceduralAnimationController _controller;
+        public HitWithItemAnimation(ProceduralAnimationController controller, float interactionTime)
+            : base(interactionTime, controller)
+        {
 
-        private Sequence _sequence;
-
-        private float _armReach = 0.5f;
+        }
 
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            _controller = proceduralAnimationController;
-            HitAnimate(targetPosition, mainHand, mainHand.ItemInHand.Holdable, _controller.transform, time);
+            HitAnimate(targetPosition, mainHand, mainHand.ItemInHand.Holdable, Controller.transform, time);
         }
 
         public override void Cancel()
@@ -62,44 +61,34 @@ namespace SS3D.Systems.Animations
 
             float timeToRotate = (Quaternion.Angle(rootTransform.rotation, finalRotationPlayer) / 180f) * duration;
 
-            if (_sequence != null)
-            {
-                _sequence.Kill();
-            }
-
-            
-
-            _sequence = DOTween.Sequence();
-
             // In sequence, we first rotate toward the target
-            _sequence.Append(rootTransform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
+            InteractionSequence.Append(rootTransform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
 
             // A bit later but still while rotating, we start changing the temporary game object position 
-            _sequence.Insert(
+            InteractionSequence.Insert(
                 timeToRotate * 0.4f, 
                 AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer, mainHand.HandType == HandType.RightHand, temp.transform, rootTransform, mainHand));
 
             // At the same time we move the temporary game object, we start rotating it as well.
             // We have only half the duration here so that temporary game object is pointing in the right direction approximately when reaching the hit target
-            _sequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer, temp.transform, rootTransform, mainHand));
+            InteractionSequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer, temp.transform, rootTransform, mainHand));
 
-            _sequence.OnStart(() =>
+            InteractionSequence.OnStart(() =>
             {
-                AdaptPosition(_controller.PositionController, mainHand, hitTargetPosition);
-                _controller.LookAtTargetLocker.position = hitTargetPosition;
-                _controller.LookAtTargetLocker.transform.parent = null;
-                _controller.LookAtConstraint.weight = 1;
+                AdaptPosition(Controller.PositionController, mainHand, hitTargetPosition);
+                Controller.LookAtTargetLocker.position = hitTargetPosition;
+                Controller.LookAtTargetLocker.transform.parent = null;
+                Controller.LookAtConstraint.weight = 1;
             }); 
-            _sequence.OnComplete(() =>
+            InteractionSequence.OnComplete(() =>
             {
-                RestorePosition(_controller.PositionController);
+                RestorePosition(Controller.PositionController);
                 temp.Dispose(true);
-                _sequence = null;
                 holdable.transform.parent = mainHand.Hold.ItemPositionTargetLocker;
                 holdable.transform.DOLocalRotate(Quaternion.identity.eulerAngles, 0.3f);
                 holdable.transform.DOLocalMove(Vector3.zero, 0.3f);
                 DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x=> mainHand.Hold.PickupIkConstraint.weight = x, 0, 0.3f);
-                DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, 0.3f);
+                DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, 0.3f);
             });
         }
 
@@ -268,9 +257,9 @@ namespace SS3D.Systems.Animations
             float distanceHoldToHit = Vector3.Distance(hold.position, item.GetComponent<ItemHitPoint>().HitPoint.position);
 
             // We don't want our trajectory to be too streched, so we put the hit point closer if necessary, reachable by human hitting with item
-            if (fromShoulderToHit.magnitude > _armReach + distanceHoldToHit)
+            if (fromShoulderToHit.magnitude > InteractionTime + distanceHoldToHit)
             {
-                targetHandHoldPosition = mainHand.ItemInHand.transform.position + (fromShoulderToHit.normalized * _armReach);
+                targetHandHoldPosition = mainHand.ItemInHand.transform.position + (fromShoulderToHit.normalized * InteractionTime);
             }
 
             return targetHandHoldPosition;

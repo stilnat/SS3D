@@ -26,12 +26,6 @@ using UnityEngine.Animations.Rigging;
         [SerializeField]
         private Transform _lookAtTargetLocker;
 
-        [SerializeField]
-        private Transform _leftPlaceTarget;
-
-        [SerializeField]
-        private Transform _rightPlaceTarget;
-
         // Start is called before the first frame update
         protected void Start()
         {
@@ -40,8 +34,6 @@ using UnityEngine.Animations.Rigging;
             _rightHoldTargetLocker.transform.parent = null;
             _leftHoldTargetLocker.transform.parent = null;
             _lookAtTargetLocker.transform.parent = null;
-            _leftPlaceTarget.transform.parent = null;
-            _rightPlaceTarget.transform.parent = null;
 
             Animator animator = GetComponent<Animator>();
             RigBuilder rigBuilder = GetComponent<RigBuilder>();

@@ -15,14 +15,12 @@ namespace SS3D.Systems.Animations
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
-        private ProceduralAnimationController _controller;
-
-        private Sequence _sequence;
+        public HitAnimation(ProceduralAnimationController controller, float interactionTime)
+            : base(interactionTime, controller) { }
 
         public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
         {
-            _controller = proceduralAnimationController;
-            HitAnimate(targetPosition, mainHand, _controller.transform, time);
+            HitAnimate(targetPosition, mainHand, Controller.transform, time);
         }
 
         public override void Cancel()
@@ -32,38 +30,35 @@ namespace SS3D.Systems.Animations
         [Client]
         private void HitAnimate(Vector3 hitTargetPosition, Hand mainHand, Transform rootTransform, float duration)
         {
-            _sequence = DOTween.Sequence();
-
             Vector3 directionFromTransformToTarget = hitTargetPosition - rootTransform.position;
             directionFromTransformToTarget.y = 0f;
             Quaternion finalRotationPlayer = Quaternion.LookRotation(directionFromTransformToTarget);
             float timeToRotate = (Quaternion.Angle(rootTransform.rotation, finalRotationPlayer) / 180f) * duration;
 
             // In sequence, we first rotate toward the target
-            _sequence = TryRotateTowardTargetPosition(_sequence, _controller.transform, _controller, timeToRotate, hitTargetPosition);
+            TryRotateTowardTargetPosition(Controller.transform, timeToRotate, hitTargetPosition);
 
-            _sequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, timeToRotate));
+            InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, timeToRotate));
 
             // A bit later but still while rotating, we start changing the hand position 
-            _sequence.Insert(
+            InteractionSequence.Insert(
                 timeToRotate * 0.4f, 
                 AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer, mainHand.HandType == HandType.RightHand, mainHand, rootTransform));
 
             // At the same time we move the hand, we start rotating it as well.
             // We have only half the duration here so that hand is pointing in the right direction approximately when reaching the hit target
-            _sequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer, mainHand, rootTransform));
+            InteractionSequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer, mainHand, rootTransform));
 
-            _sequence.OnStart(() =>
+            InteractionSequence.OnStart(() =>
             {
-                _controller.LookAtTargetLocker.position = hitTargetPosition;
-                AdaptPosition(_controller.PositionController, mainHand, hitTargetPosition);
-                _controller.AnimatorController.MakeFist(true, mainHand.HandType == HandType.RightHand);
+                Controller.LookAtTargetLocker.position = hitTargetPosition;
+                AdaptPosition(Controller.PositionController, mainHand, hitTargetPosition);
+                Controller.AnimatorController.MakeFist(true, mainHand.HandType == HandType.RightHand);
             }); 
-            _sequence.OnComplete(() =>
+            InteractionSequence.OnComplete(() =>
             {
-                RestorePosition(_controller.PositionController);
-                _controller.AnimatorController.MakeFist(false, mainHand.HandType == HandType.RightHand);
-                _sequence = null;
+                RestorePosition(Controller.PositionController);
+                Controller.AnimatorController.MakeFist(false, mainHand.HandType == HandType.RightHand);
             });
         }
 
@@ -118,7 +113,7 @@ namespace SS3D.Systems.Animations
                 if (value == 2)
                 {
                     DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, duration);
-                    DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, duration);
+                    DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, duration);
                 }
             };
 

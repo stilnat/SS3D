@@ -60,13 +60,13 @@ namespace SS3D.Systems.Animations
                       proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand);
                       break;
                   case InteractionType.Screw:
-                      proceduralAnimation = new InteractAnimations();
+                      proceduralAnimation = new InteractAnimations(this, time, mainHand, target, interactionType);
                       break;
                   case InteractionType.Press:
-                      proceduralAnimation = new InteractWithHandAnimation();
+                      proceduralAnimation = new InteractWithHandAnimation(this, time, mainHand, secondaryHand, target);
                       break;
                   case InteractionType.Grab:
-                      proceduralAnimation = new GrabAnimation();
+                      proceduralAnimation = new GrabAnimation(this, time, mainHand, secondaryHand, target);
                       break;
                   case InteractionType.Sit:
                       proceduralAnimation = new Sit();
@@ -75,7 +75,7 @@ namespace SS3D.Systems.Animations
                       proceduralAnimation = new ThrowAnimation();
                       break;
                   case InteractionType.Hit:
-                      proceduralAnimation = mainHand.Full ? new HitWithItemAnimation() : new HitAnimation();
+                      proceduralAnimation = mainHand.Full ? new HitWithItemAnimation(this, time) : new HitAnimation(this, time);
                       break;
                   default:
                       return;

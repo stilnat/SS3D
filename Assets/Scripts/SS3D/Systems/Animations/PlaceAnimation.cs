@@ -17,10 +17,6 @@ namespace SS3D.Systems.Animations
 
         private float _handMoveBackDuration;
 
-        private Sequence _placeSequence;
-
-        private ProceduralAnimationController _controller;
-
         private Hand _mainHand;
 
         private Hand _secondaryHand;
@@ -28,11 +24,9 @@ namespace SS3D.Systems.Animations
         private Item _item;
 
         public PlaceAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand)
+            : base(time, proceduralAnimationController)
         {
-            _placeSequence = DOTween.Sequence();
             _itemReachPlaceDuration = time / 2;
-            _handMoveBackDuration = time / 2;
-            _controller = proceduralAnimationController;
             _mainHand = mainHand;
             _secondaryHand = secondaryHand;
         }
@@ -53,17 +47,17 @@ namespace SS3D.Systems.Animations
         public override void Cancel()
         {
             Debug.Log("Cancel place animation");
-            _placeSequence.Kill();
+            InteractionSequence.Kill();
 
             Sequence cancelSequence = DOTween.Sequence();
 
-            float timeToCancelPlace = _controller.LookAtConstraint.weight * _handMoveBackDuration;
+            float timeToCancelPlace = Controller.LookAtConstraint.weight * _handMoveBackDuration;
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             _mainHand.Hold.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            _controller.HoldController.MovePickupAndHoldTargetLocker(_mainHand, false, _item.Holdable);
+            Controller.HoldController.MovePickupAndHoldTargetLocker(_mainHand, false, _item.Holdable);
 
             // Move and rotate item toward its constrained position.
             _item.transform.parent = _mainHand.Hold.ItemPositionTargetLocker;
@@ -71,7 +65,7 @@ namespace SS3D.Systems.Animations
             cancelSequence.Join(_item.transform.DOLocalRotate(Quaternion.identity.eulerAngles, timeToCancelPlace));
 
             // Stop looking at item
-            cancelSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, timeToCancelPlace));
+            cancelSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, timeToCancelPlace));
 
             // At the same time, remove the pickup constraint
             cancelSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0f, timeToCancelPlace));
@@ -81,7 +75,7 @@ namespace SS3D.Systems.Animations
 
             cancelSequence.OnStart(() =>
             {
-                _controller.PositionController.TryToStandUp();
+                Controller.PositionController.TryToStandUp();
             });
         }
 
@@ -98,43 +92,43 @@ namespace SS3D.Systems.Animations
             }
 
             // Place look at target at place item position
-            _controller.LookAtTargetLocker.transform.parent = null;
-            _controller.LookAtTargetLocker.position = placePosition;
+            Controller.LookAtTargetLocker.transform.parent = null;
+            Controller.LookAtTargetLocker.position = placePosition;
         }
 
         [Client]
         private void Place(Hand mainHand, Hand secondaryHand, bool withTwoHands, Vector3 placeTarget, Item item)
         {
             // Turn character toward the position to place the item.
-            TryRotateTowardTargetPosition(_placeSequence, _controller.transform, _controller, _itemReachPlaceDuration, placeTarget);
+            TryRotateTowardTargetPosition(Controller.transform, _itemReachPlaceDuration, placeTarget);
 
-            AdaptPosition(_controller.PositionController, mainHand, placeTarget);
+            AdaptPosition(Controller.PositionController, mainHand, placeTarget);
 
             // Slowly increase looking at place item position
-            _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachPlaceDuration));
+            InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachPlaceDuration));
 
             // At the same time, Slowly move item toward the position it should be placed.
-            _placeSequence.Join(item.transform.DOMove(placeTarget, _handMoveBackDuration).OnComplete(() =>
+            InteractionSequence.Join(item.transform.DOMove(placeTarget, _handMoveBackDuration).OnComplete(() =>
             {
-                RestorePosition(_controller.PositionController);
+                RestorePosition(Controller.PositionController);
                 mainHand.Hold.PickupTargetLocker.parent = null;
             }));
 
             // Then, Slowly stop looking at item place position
-            _placeSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachPlaceDuration));
+            InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _itemReachPlaceDuration));
 
             // Slowly decrease main hand pick up constraint so player stop reaching for pickup target
-            _placeSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
-            _placeSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.weight, x => mainHand.Hold.HoldIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
+            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
+            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.HoldIkConstraint.weight, x => mainHand.Hold.HoldIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
 
             // reproduce changes on second hand
             if (withTwoHands)
             {
-                _placeSequence.Join(DOTween.To(() => secondaryHand.Hold.PickupIkConstraint.weight, x => secondaryHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
-                _placeSequence.Join(DOTween.To(() => secondaryHand.Hold.HoldIkConstraint.weight, x => secondaryHand.Hold.HoldIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
+                InteractionSequence.Join(DOTween.To(() => secondaryHand.Hold.PickupIkConstraint.weight, x => secondaryHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
+                InteractionSequence.Join(DOTween.To(() => secondaryHand.Hold.HoldIkConstraint.weight, x => secondaryHand.Hold.HoldIkConstraint.weight = x, 0f, _itemReachPlaceDuration));
             }
 
-            _placeSequence.OnComplete(() => OnCompletion?.Invoke(this));
+            InteractionSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
     }
 }

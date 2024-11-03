@@ -19,13 +19,7 @@ namespace SS3D.Systems.Animations
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
-        private float _interactionTime;
-
         private float _moveToolTime;
-
-        private Sequence _interactSequence;
-
-        private ProceduralAnimationController _controller;
 
         private IInteractiveTool _tool;
 
@@ -33,26 +27,29 @@ namespace SS3D.Systems.Animations
 
         private InteractionType _interact;
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkBehaviour target, InteractionType interactionType)
+            : base(time, proceduralAnimationController) 
         {
             _tool = target.GetComponent<IInteractiveTool>();
-            _controller = proceduralAnimationController;
-            _interactionTime = time;
             _moveToolTime = Mathf.Min(time, 0.5f);
             _mainHand = mainHand;
-
+            _interact = interactionType;
             SetupInteract(mainHand, _tool);
+        }
+
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        {
             ReachInteractionPoint(targetPosition, mainHand, _tool, interactionType);
         }
 
         public override void Cancel()
         {
-            _interactSequence.Kill();
+            InteractionSequence.Kill();
 
             // Stop looking at item
-            DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
+            DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
 
-            _controller.PositionController.TryToStandUp();
+            Controller.PositionController.TryToStandUp();
             _tool.StopAnimation();
             _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
             _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
@@ -65,7 +62,7 @@ namespace SS3D.Systems.Animations
             // disable position constraint the time of the interaction
             mainHand.Hold.ItemPositionConstraint.weight = 0f;
             mainHand.Hold.PickupIkConstraint.weight = 1f;
-            _controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
+            Controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
         }
 
         private void AlignToolWithShoulder(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
@@ -108,36 +105,34 @@ namespace SS3D.Systems.Animations
 
         private void ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, InteractionType interactionType)
         {
-            _interactSequence = DOTween.Sequence();
-
             Vector3 endPosition = ComputeToolEndPosition(interactionPoint, mainHand, tool);
 
             // Rotate player toward item
-            TryRotateTowardTargetPosition(_interactSequence, _controller.transform, _controller, _moveToolTime, interactionPoint);
+            TryRotateTowardTargetPosition(Controller.transform, _moveToolTime, interactionPoint);
 
-            AdaptPosition(_controller.PositionController, mainHand, interactionPoint);
+            AdaptPosition(Controller.PositionController, mainHand, interactionPoint);
            
             // Start looking at item
-            _interactSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
+            InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
 
             // Move tool to the interaction position
-            _interactSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(interactionType)));
+            InteractionSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(interactionType)));
 
-            _interactSequence.AppendInterval(_interactionTime - _moveToolTime);
+            InteractionSequence.AppendInterval(InteractionTime - _moveToolTime);
 
             // Stop looking at item
-            _interactSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _moveToolTime));
+            InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime));
 
             // Rotate tool back to its hold rotation
-            _interactSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
+            InteractionSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
             {
-                RestorePosition(_controller.PositionController);
+                RestorePosition(Controller.PositionController);
                 tool.StopAnimation();
             }));
 
-            _interactSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
+            InteractionSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
 
-            _interactSequence.OnComplete(() =>
+            InteractionSequence.OnComplete(() =>
             {
                 _mainHand.Hold.PickupIkConstraint.weight = 0f;
                 _mainHand.Hold.ItemPositionConstraint.weight = 1f;

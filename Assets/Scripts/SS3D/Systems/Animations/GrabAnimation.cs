@@ -16,26 +16,25 @@ namespace SS3D.Systems.Animations
 
         private LayerMask _grabbableLayer;
 
-        private float _jointBreakForce = 25000f;
+        private readonly float _jointBreakForce = 25000f;
 
-        private float _itemReachDuration;
+        private readonly float _itemReachDuration;
 
-        private Draggable _grabbedObject;
+        private readonly Draggable _grabbedObject;
 
-        private ProceduralAnimationController _controller;
+        private readonly Hand _mainHand;
 
-        private Sequence _grabSequence;
-
-        private Hand _mainHand;
-
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public GrabAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, NetworkBehaviour target)
+            : base(time, proceduralAnimationController)
         {
-            _controller = proceduralAnimationController;
             _grabbedObject = target.GetComponent<Draggable>();
             _mainHand = mainHand;
             _itemReachDuration = time / 2;
-
             SetUpGrab(_grabbedObject, mainHand, secondaryHand, false);
+        }
+
+        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        {
             GrabReach(_grabbedObject, mainHand);
         }
 
@@ -59,12 +58,12 @@ namespace SS3D.Systems.Animations
             Sequence stopSequence = DOTween.Sequence();
 
             // Stop looking
-            stopSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
+            stopSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
             stopSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
 
-            _controller.PositionController.ChangeGrab(false);
+            Controller.PositionController.ChangeGrab(false);
         }
 
         private void SetUpGrab(Draggable item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
@@ -82,35 +81,33 @@ namespace SS3D.Systems.Animations
             }
 
             // Set up the look at target locker on the item to pick up.
-            _controller.LookAtTargetLocker.parent = item.transform;
-            _controller.LookAtTargetLocker.localPosition = Vector3.zero;
-            _controller.LookAtTargetLocker.localRotation = Quaternion.identity;
+            Controller.LookAtTargetLocker.parent = item.transform;
+            Controller.LookAtTargetLocker.localPosition = Vector3.zero;
+            Controller.LookAtTargetLocker.localRotation = Quaternion.identity;
 
             OrientTargetForHandRotation(mainHand);
         }
 
         private void GrabReach(Draggable item, Hand mainHand)
         {
-            _grabSequence = DOTween.Sequence();
+            TryRotateTowardTargetPosition(Controller.transform, _itemReachDuration, item.transform.position);
 
-            _grabSequence = TryRotateTowardTargetPosition(_grabSequence, _controller.transform, _controller, _itemReachDuration, item.transform.position);
-
-            _controller.PositionController.ChangeGrab(true);
+            Controller.PositionController.ChangeGrab(true);
 
             // Start looking at grabbed part
-            _grabSequence.Join(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
+            InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
-            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
             {
                 HandleGrabbing(item, mainHand);
             }));
 
             // Stop looking
-            _grabSequence.Append(DOTween.To(() => _controller.LookAtConstraint.weight, x => _controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
+            InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
-            _grabSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
+            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
         }
 
         private void HandleGrabbing(Draggable draggable, Hand mainHand)
