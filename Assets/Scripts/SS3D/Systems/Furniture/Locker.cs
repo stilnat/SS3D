@@ -117,5 +117,7 @@ namespace SS3D.Systems.Furniture
 
             return targetInteractions;
         }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => TryGetInteractionPoint(source, out point);
     }
 }
