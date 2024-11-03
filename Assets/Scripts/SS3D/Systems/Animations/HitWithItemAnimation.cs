@@ -101,7 +101,7 @@ namespace SS3D.Systems.Animations
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
 
-            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.HandIkTarget.transform.rotation = mainHand.HandBone.transform.rotation;
 
             Vector3 fromHandToHit = (hitTargetPosition - mainHand.HandBone.position).normalized;
 
@@ -152,7 +152,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(mainHand.Hold.PickupTargetLocker.position, 0.01f, 2f);
+                DebugExtension.DebugWireSphere(mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
             };
 
             tween.Pause();

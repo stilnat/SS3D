@@ -19,18 +19,12 @@ namespace SS3D.Systems.Animations
         // The upper arm connecting this hand to the torso.
         [field: SerializeField]
         public Transform UpperArm { get; private set; }
-         
-        /// <summary>
-        /// The IK target for the two bone IK constraint, allowing the IK hold poses.
-        /// </summary>
-        [field: SerializeField]
-        public Transform HandHoldTargetLocker { get; private set; }
 
         /// <summary>
         /// The IK target for the chain IK constraint, allowing the player to bend to reach things.
         /// </summary>
         [field: SerializeField]
-        public Transform PickupTargetLocker { get; private set; }
+        public Transform HandIkTarget { get; private set; }
 
         /// <summary>
         /// The IK target for the item position when held by player, items are going to be parented on it.
@@ -94,8 +88,7 @@ namespace SS3D.Systems.Animations
         {
             Transform targetToSet = type switch
             {
-                TargetLockerType.Pickup => PickupTargetLocker,
-                TargetLockerType.Hold => HandHoldTargetLocker,
+                TargetLockerType.Pickup => HandIkTarget,
                 TargetLockerType.ItemPosition => ItemPositionTargetLocker,
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
             };
@@ -170,7 +163,7 @@ namespace SS3D.Systems.Animations
             };
 
             // Animate the GameObject along the path in a smooth parabolic motion
-            PickupTargetLocker.DOPath(path, 0.1f, PathType.CatmullRom)
+            HandIkTarget.DOPath(path, 0.1f, PathType.CatmullRom)
                 .SetEase(Ease.Linear)           // You can adjust the ease function as needed
                 .SetLoops(1, LoopType.Restart); // Play the animation once, no loops
         }

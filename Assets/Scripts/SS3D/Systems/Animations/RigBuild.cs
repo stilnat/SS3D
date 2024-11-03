@@ -18,12 +18,6 @@ using UnityEngine.Animations.Rigging;
         private Transform _leftPickupTargetLocker;
 
         [SerializeField]
-        private Transform _rightHoldTargetLocker;
-
-        [SerializeField]
-        private Transform _leftHoldTargetLocker;
-
-        [SerializeField]
         private Transform _lookAtTargetLocker;
 
         // Start is called before the first frame update
@@ -31,8 +25,6 @@ using UnityEngine.Animations.Rigging;
         {
             _rightPickupTargetLocker.transform.parent = null;
             _leftPickupTargetLocker.transform.parent = null;
-            _rightHoldTargetLocker.transform.parent = null;
-            _leftHoldTargetLocker.transform.parent = null;
             _lookAtTargetLocker.transform.parent = null;
 
             Animator animator = GetComponent<Animator>();

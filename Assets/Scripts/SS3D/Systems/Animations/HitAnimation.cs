@@ -68,14 +68,14 @@ namespace SS3D.Systems.Animations
             Quaternion currentRotation = rootTransform.rotation;
             rootTransform.rotation = finalRotation;
 
-            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.HandIkTarget.transform.rotation = mainHand.HandBone.transform.rotation;
 
             Vector3 fromHandToHit = hitTargetPosition - mainHand.HandBone.position;
 
             // the target rotation is for the hand local up vector to face the hit position (might want to redo this one, looks okay but not always)
-            Quaternion newRotation = Quaternion.FromToRotation(mainHand.Hold.PickupTargetLocker.transform.up, fromHandToHit) * mainHand.Hold.PickupTargetLocker.transform.rotation;
+            Quaternion newRotation = Quaternion.FromToRotation(mainHand.Hold.HandIkTarget.transform.up, fromHandToHit) * mainHand.Hold.HandIkTarget.transform.rotation;
 
-            Tween tween = mainHand.Hold.PickupTargetLocker.transform.DORotate(newRotation.eulerAngles, duration);
+            Tween tween = mainHand.Hold.HandIkTarget.transform.DORotate(newRotation.eulerAngles, duration);
             tween.Pause();
 
             // restore the modified rotation
@@ -91,8 +91,8 @@ namespace SS3D.Systems.Animations
 
             // We start by setting the IK target on the hand bone with the same rotation for a smooth start into IK animation
             mainHand.Hold.PickupIkConstraint.weight = 1;
-            mainHand.Hold.PickupTargetLocker.transform.position = mainHand.HandBone.transform.position;
-            mainHand.Hold.PickupTargetLocker.transform.rotation = mainHand.HandBone.transform.rotation;
+            mainHand.Hold.HandIkTarget.transform.position = mainHand.HandBone.transform.position;
+            mainHand.Hold.HandIkTarget.transform.rotation = mainHand.HandBone.transform.rotation;
 
             // direction vector from the hand to the hit in world space.
             Vector3 fromShoulderToHit = hitTargetPosition - mainHand.Hold.UpperArm.position;
@@ -102,10 +102,10 @@ namespace SS3D.Systems.Animations
 
             // Set the IK target to be parented by human so that we can use local path to animate the IK target,
             // while keeping the trajectory relative to the player's root transform.
-            mainHand.Hold.PickupTargetLocker.transform.parent = rootTransform;
+            mainHand.Hold.HandIkTarget.transform.parent = rootTransform;
 
             // Play a trajectory that is local to the player's root, so will stay the same relatively to player's root if player moves
-            Tween tween = mainHand.Hold.PickupTargetLocker.transform.DOLocalPath(path, duration, PathType.CatmullRom);
+            Tween tween = mainHand.Hold.HandIkTarget.transform.DOLocalPath(path, duration, PathType.CatmullRom);
 
             // Upon reaching the hit position, we start slowly decreasing the IK 
             tween.onWaypointChange += value =>
@@ -120,7 +120,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(mainHand.Hold.PickupTargetLocker.position, 0.01f, 2f);
+                DebugExtension.DebugWireSphere(mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
             };
 
             tween.Pause();

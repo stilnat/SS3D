@@ -111,7 +111,7 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(item.transform.DOMove(placeTarget, _handMoveBackDuration).OnComplete(() =>
             {
                 RestorePosition(Controller.PositionController);
-                mainHand.Hold.PickupTargetLocker.parent = null;
+                mainHand.Hold.HandIkTarget.parent = null;
             }));
 
             // Then, Slowly stop looking at item place position

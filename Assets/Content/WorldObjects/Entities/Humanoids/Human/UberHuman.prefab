@@ -1098,7 +1098,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 21
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3624753817424616501
 MonoBehaviour:
@@ -3371,8 +3371,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   <UpperArm>k__BackingField: {fileID: 7446386329022654784}
-  <HandHoldTargetLocker>k__BackingField: {fileID: 5441267867618792388}
-  <PickupTargetLocker>k__BackingField: {fileID: 4846808082985781182}
+  <HandIkTarget>k__BackingField: {fileID: 4846808082985781182}
   <ItemPositionTargetLocker>k__BackingField: {fileID: 3720527799557840007}
   <ShoulderWeaponPivot>k__BackingField: {fileID: 4647776898251892701}
   <HoldIkConstraint>k__BackingField: {fileID: 3450567292757048057}
@@ -3972,7 +3971,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4607633442489985284}
   m_Layer: 0
-  m_Name: RightPickupTargetLocker
+  m_Name: RightHandIkTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7035,8 +7034,6 @@ Transform:
   - {fileID: 9099685994337818100}
   - {fileID: 4607633442489985284}
   - {fileID: 4846808082985781182}
-  - {fileID: 5441267867618792388}
-  - {fileID: 2712046360455809814}
   - {fileID: 5358384094254398678}
   - {fileID: 2856800849451305125}
   - {fileID: 7561060189642700650}
@@ -7627,6 +7624,11 @@ MonoBehaviour:
   _armatureRoot: {fileID: 3362543718434004155}
   _characterCollider: {fileID: 7772018303242298867}
   _characterRigidBody: {fileID: 8635375509376998503}
+  _hips: {fileID: 0}
+  _character: {fileID: 0}
+  _animator: {fileID: 0}
+  _networkAnimator: {fileID: 0}
+  _humanoidLivingController: {fileID: 0}
   _standUpFaceUpClip: {fileID: -203655887218126122, guid: 83207c9bf0069534487201e6d71c0de1, type: 3}
   _standUpFaceDownClip: {fileID: -203655887218126122, guid: b45b348d9bf3bcd4f9c45e322acd2a50, type: 3}
   _ragdollPartSyncInterval: 1
@@ -7812,11 +7814,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rightPickupTargetLocker: {fileID: 4607633442489985284}
   _leftPickupTargetLocker: {fileID: 4846808082985781182}
-  _rightHoldTargetLocker: {fileID: 2712046360455809814}
-  _leftHoldTargetLocker: {fileID: 5441267867618792388}
   _lookAtTargetLocker: {fileID: 5358384094254398678}
-  _leftPlaceTarget: {fileID: 0}
-  _rightPlaceTarget: {fileID: 0}
 --- !u!114 &1215874948772008144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9065,7 +9063,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 20
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5269329783519768355
 GameObject:
@@ -9116,7 +9114,7 @@ MonoBehaviour:
     m_Root: {fileID: 802911981376609306}
     m_Mid: {fileID: 56314186812711448}
     m_Tip: {fileID: 6356800398579286298}
-    m_Target: {fileID: 2712046360455809814}
+    m_Target: {fileID: 4607633442489985284}
     m_Hint: {fileID: 2570101578385771908}
     m_TargetPositionWeight: 1
     m_TargetRotationWeight: 1
@@ -10214,37 +10212,6 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 1411179409928790918}
   isBleeding: 0
---- !u!1 &6293738979694041885
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5441267867618792388}
-  m_Layer: 0
-  m_Name: LeftHoldTargetLocker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5441267867618792388
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6293738979694041885}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.0819998, y: 1.5379999, z: -0.0040000007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 18
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6303622268853229359
 GameObject:
   m_ObjectHideFlags: 0
@@ -11194,7 +11161,7 @@ MonoBehaviour:
     m_Root: {fileID: 7446386329022654784}
     m_Mid: {fileID: 8425781932946354035}
     m_Tip: {fileID: 8420821262611087137}
-    m_Target: {fileID: 5441267867618792388}
+    m_Target: {fileID: 4846808082985781182}
     m_Hint: {fileID: 9099685994337818100}
     m_TargetPositionWeight: 1
     m_TargetRotationWeight: 1
@@ -11664,7 +11631,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4846808082985781182}
   m_Layer: 0
-  m_Name: LeftPickupTargetLocker
+  m_Name: LeftHandIkTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12881,37 +12848,6 @@ Transform:
   m_Father: {fileID: 8425781932946354035}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8198292735570073793
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2712046360455809814}
-  m_Layer: 0
-  m_Name: RightHoldTargetLocker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2712046360455809814
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8198292735570073793}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.2589998, y: 1.5509999, z: -0.0040000007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 19
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8281519668894945223
 GameObject:
   m_ObjectHideFlags: 0
@@ -13010,7 +12946,7 @@ Transform:
   - {fileID: 5448547047747287270}
   - {fileID: 6268089940630100831}
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 23
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8403779744428458306
 GameObject:
@@ -13041,7 +12977,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 22
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8574025489756800496
 GameObject:
@@ -13574,8 +13510,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   <UpperArm>k__BackingField: {fileID: 802911981376609306}
-  <HandHoldTargetLocker>k__BackingField: {fileID: 2712046360455809814}
-  <PickupTargetLocker>k__BackingField: {fileID: 4607633442489985284}
+  <HandIkTarget>k__BackingField: {fileID: 4607633442489985284}
   <ItemPositionTargetLocker>k__BackingField: {fileID: 4363011775381521912}
   <ShoulderWeaponPivot>k__BackingField: {fileID: 4855327836977815790}
   <HoldIkConstraint>k__BackingField: {fileID: 2142891004495607562}

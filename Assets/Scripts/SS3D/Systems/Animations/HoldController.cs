@@ -209,7 +209,6 @@ namespace SS3D.Systems.Animations
             Transform parent = holdProvider.GetHold(!secondary, hand.HandType);
 
             hand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
-            hand.Hold.SetParentTransformTargetLocker(TargetLockerType.Hold, parent);
         }
 
         /// <summary>

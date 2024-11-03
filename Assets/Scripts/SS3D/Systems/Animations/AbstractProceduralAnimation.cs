@@ -52,13 +52,13 @@ namespace SS3D.Systems.Animations
         /// </summary>
         protected void OrientTargetForHandRotation(Hand hand)
         {
-            Vector3 armTargetDirection = hand.Hold.PickupTargetLocker.position - hand.Hold.UpperArm.position;
+            Vector3 armTargetDirection = hand.Hold.HandIkTarget.position - hand.Hold.UpperArm.position;
 
             Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
 
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
-            hand.Hold.PickupTargetLocker.rotation = targetRotation;
+            hand.Hold.HandIkTarget.rotation = targetRotation;
         }
 
         /// <summary>
