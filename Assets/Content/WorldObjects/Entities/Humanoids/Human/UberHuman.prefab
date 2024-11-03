@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 2509952611526515299}
   - component: {fileID: 3209808476875596154}
   m_Layer: 0
-  m_Name: ItemLeftHandPosition
+  m_Name: LeftHandItemPositionConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -348,7 +348,7 @@ GameObject:
   - component: {fileID: 3901422935290294017}
   - component: {fileID: 6020047469190799339}
   m_Layer: 0
-  m_Name: HeadAim
+  m_Name: HeadAimConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1098,7 +1098,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 19
+  m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3624753817424616501
 MonoBehaviour:
@@ -1220,7 +1220,7 @@ GameObject:
   - component: {fileID: 6095407646413577592}
   - component: {fileID: 2870043123095489278}
   m_Layer: 0
-  m_Name: RightItemPositionTargetLocker
+  m_Name: RightHandItemPositionTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1343,7 +1343,7 @@ Transform:
   - {fileID: 5918345712567053705}
   - {fileID: 5602031732854952620}
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 11
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &593798233980870999
 GameObject:
@@ -2230,37 +2230,6 @@ Transform:
   - {fileID: 6193120627795459111}
   m_Father: {fileID: 2029258993097243920}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1295404480867581367
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 615235108549599740}
-  m_Layer: 0
-  m_Name: Holds
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &615235108549599740
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295404480867581367}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1318445454048212063
 GameObject:
@@ -3573,7 +3542,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2570101578385771908}
   m_Layer: 0
-  m_Name: RightHintIk
+  m_Name: RightElbowTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3592,7 +3561,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 14
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2446203414276414682
 GameObject:
@@ -3971,7 +3940,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4607633442489985284}
   m_Layer: 0
-  m_Name: RightHandIkTarget
+  m_Name: RightHandTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3990,7 +3959,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 16
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!1 &2829612845544247239
 GameObject:
@@ -5403,7 +5372,7 @@ GameObject:
   - component: {fileID: 7344439903334976350}
   - component: {fileID: 2592208313181239853}
   m_Layer: 0
-  m_Name: LeftHandPickupIk
+  m_Name: LeftHandChainConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7026,8 +6995,6 @@ Transform:
   - {fileID: 5029736816765645950}
   - {fileID: 4363011775381521912}
   - {fileID: 3720527799557840007}
-  - {fileID: 615235108549599740}
-  - {fileID: 5814723828307042743}
   - {fileID: 4855327836977815790}
   - {fileID: 4647776898251892701}
   - {fileID: 2570101578385771908}
@@ -7037,6 +7004,7 @@ Transform:
   - {fileID: 5358384094254398678}
   - {fileID: 2856800849451305125}
   - {fileID: 7561060189642700650}
+  - {fileID: 5814723828307042743}
   - {fileID: 2401231647282444894}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -9044,7 +9012,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5358384094254398678}
   m_Layer: 0
-  m_Name: LookAtTargetLocker
+  m_Name: LookAtTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9063,7 +9031,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 18
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5269329783519768355
 GameObject:
@@ -9076,7 +9044,7 @@ GameObject:
   - component: {fileID: 6305849888995174770}
   - component: {fileID: 2142891004495607562}
   m_Layer: 0
-  m_Name: RightHandHoldIk
+  m_Name: RightHandTwoBonesConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9477,7 +9445,7 @@ GameObject:
   - component: {fileID: 8396430004512254001}
   - component: {fileID: 6263492953658661066}
   m_Layer: 0
-  m_Name: ItemRightHandPosition
+  m_Name: RightHandItemPositionConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9813,7 +9781,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9099685994337818100}
   m_Layer: 0
-  m_Name: LeftHintIk
+  m_Name: LeftElbowTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9832,7 +9800,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 15
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6105222684414742159
 GameObject:
@@ -10326,7 +10294,7 @@ GameObject:
   - component: {fileID: 4052998212241349914}
   - component: {fileID: 2532537050071209971}
   m_Layer: 0
-  m_Name: RightHandPickUpIk
+  m_Name: RightHandChainConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11123,7 +11091,7 @@ GameObject:
   - component: {fileID: 7988154616977013968}
   - component: {fileID: 3450567292757048057}
   m_Layer: 0
-  m_Name: LeftHandHoldIk
+  m_Name: LeftHandTwoBonesConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11631,7 +11599,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4846808082985781182}
   m_Layer: 0
-  m_Name: LeftHandIkTarget
+  m_Name: LeftHandTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11650,7 +11618,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 17
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7556854409677953280
 GameObject:
@@ -11663,7 +11631,7 @@ GameObject:
   - component: {fileID: 6800177951590678486}
   - component: {fileID: 72233157994822584}
   m_Layer: 0
-  m_Name: SpineAim
+  m_Name: SpineAimConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12277,7 +12245,7 @@ GameObject:
   - component: {fileID: 8900560248658806380}
   - component: {fileID: 2851688491558728783}
   m_Layer: 0
-  m_Name: LookAtPickupIk
+  m_Name: LookAtAimConstraint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12815,7 +12783,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 12
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8137418141300779827
 GameObject:
@@ -12946,7 +12914,7 @@ Transform:
   - {fileID: 5448547047747287270}
   - {fileID: 6268089940630100831}
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 21
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8403779744428458306
 GameObject:
@@ -12977,7 +12945,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 20
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8574025489756800496
 GameObject:
@@ -13597,7 +13565,7 @@ GameObject:
   - component: {fileID: 7785071309136467704}
   - component: {fileID: 5240443347303950148}
   m_Layer: 0
-  m_Name: LeftItemPositionTargetLocker
+  m_Name: LeftHandItemPositionTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14060,7 +14028,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3714097311666575904}
-  m_RootOrder: 13
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8966162540359811168
 GameObject:
