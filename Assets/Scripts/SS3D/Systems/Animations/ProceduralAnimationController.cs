@@ -3,6 +3,7 @@ using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
@@ -54,28 +55,29 @@ namespace SS3D.Systems.Animations
             switch (interactionType)
             {
                   case InteractionType.Pickup:
-                      proceduralAnimation = new PickUpAnimation(this, time, mainHand, secondaryHand);
+                      proceduralAnimation = new PickUpAnimation(this, time, mainHand, secondaryHand, target as AbstractHoldable);
                       break;
                   case InteractionType.Place:
-                      proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand);
+                      proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand, target as AbstractHoldable, targetPosition);
                       break;
                   case InteractionType.Screw:
-                      proceduralAnimation = new InteractAnimations(this, time, mainHand, target, interactionType);
+                      proceduralAnimation = new InteractAnimations(this, time, mainHand, target, interactionType, targetPosition);
                       break;
                   case InteractionType.Press:
-                      proceduralAnimation = new InteractWithHandAnimation(this, time, mainHand, secondaryHand, target);
+                      proceduralAnimation = new InteractWithHandAnimation(this, time, mainHand, targetPosition, interactionType);
                       break;
                   case InteractionType.Grab:
                       proceduralAnimation = new GrabAnimation(this, time, mainHand, secondaryHand, target);
                       break;
                   case InteractionType.Sit:
-                      proceduralAnimation = new Sit();
+                      proceduralAnimation = new Sit(time, this, target as Sittable);
                       break;
                   case InteractionType.Throw:
-                      proceduralAnimation = new ThrowAnimation();
+                      proceduralAnimation = new ThrowAnimation(time, this, target as AbstractHoldable, mainHand, secondaryHand);
                       break;
                   case InteractionType.Hit:
-                      proceduralAnimation = mainHand.Full ? new HitWithItemAnimation(this, time) : new HitAnimation(this, time);
+                      proceduralAnimation = mainHand.Full ? 
+                          new HitWithItemAnimation(this, time, targetPosition, mainHand, target as AbstractHoldable) : new HitAnimation(this, time, targetPosition, mainHand);
                       break;
                   default:
                       return;
@@ -84,7 +86,7 @@ namespace SS3D.Systems.Animations
             
             _animations.Add(new(mainHand, proceduralAnimation));
 
-            proceduralAnimation.ClientPlay(interactionType, mainHand, secondaryHand, target, targetPosition, this, time, delay);
+            proceduralAnimation.ClientPlay();
             proceduralAnimation.OnCompletion += RemoveAnimation;
         }
 

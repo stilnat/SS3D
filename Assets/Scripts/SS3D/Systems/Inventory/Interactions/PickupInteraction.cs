@@ -93,7 +93,7 @@ namespace SS3D.Systems.Inventory.Interactions
             {
 
                 target.GiveOwnership(hand.Owner);
-                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Pickup, hand, target, Vector3.zero, TimeToMoveBackItem + TimeToReachItem);
+                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Pickup, hand, target.Holdable, Vector3.zero, TimeToMoveBackItem + TimeToReachItem);
 
                 try {
                     string ckey = hand.HandsController.Inventory.Body.Mind.player.Ckey;

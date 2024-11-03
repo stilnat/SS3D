@@ -13,21 +13,25 @@ namespace SS3D.Systems.Animations
     public class InteractWithHandAnimation : AbstractProceduralAnimation
     { 
         public override event Action<IProceduralAnimation> OnCompletion;
-        private float _moveHandTime;
-        private Hand _hand;
 
+        private readonly float _moveHandTime;
+        private readonly Hand _hand;
+        private readonly Vector3 _targetPosition;
+        private readonly InteractionType _interactionType;
 
-        public InteractWithHandAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, NetworkBehaviour target)
+        public InteractWithHandAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Vector3 targetPosition, InteractionType interactionType)
             : base(time, proceduralAnimationController)
         {
             _hand = mainHand;
             _moveHandTime = time / 2;
+            _targetPosition = targetPosition;
+            _interactionType = interactionType;
         }
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay()
         {
-            SetupInteract(mainHand, targetPosition);
-            InteractWithHand(mainHand, targetPosition, interactionType);
+            SetupInteract();
+            InteractWithHand();
         }
 
         public override void Cancel()
@@ -43,42 +47,42 @@ namespace SS3D.Systems.Animations
             _hand.Hold.StopAnimation();
         }
 
-        private void SetupInteract(Hand mainHand, Vector3 interactionPoint)
+        private void SetupInteract()
         {
             // disable position constraint the time of the interaction
-            mainHand.Hold.ItemPositionConstraint.weight = 0f;
-            mainHand.Hold.PickupIkConstraint.weight = 1f;
-            mainHand.Hold.HandIkTarget.position = mainHand.HandBone.position;
-            Controller.LookAtTargetLocker.position = interactionPoint;
+            _hand.Hold.ItemPositionConstraint.weight = 0f;
+            _hand.Hold.PickupIkConstraint.weight = 1f;
+            _hand.Hold.HandIkTarget.position = _hand.HandBone.position;
+            Controller.LookAtTargetLocker.position = _targetPosition;
         }
 
-        private void InteractWithHand(Hand mainHand, Vector3 targetPosition, InteractionType interactionType)
+        private void InteractWithHand()
         {
 
-            AlignHandWithShoulder(targetPosition, mainHand);
+            AlignHandWithShoulder(_targetPosition, _hand);
 
-            AdaptPosition(Controller.PositionController, mainHand, targetPosition);
+            AdaptPosition(Controller.PositionController, _hand, _targetPosition);
 
             // Rotate player toward item
-            TryRotateTowardTargetPosition(Controller.transform, _moveHandTime, targetPosition);
+            TryRotateTowardTargetPosition(Controller.transform, _moveHandTime, _targetPosition);
 
             // Start looking at item
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _moveHandTime));
 
             // Move hand toward target
-            InteractionSequence.Join(mainHand.Hold.HandIkTarget.DOMove(targetPosition, _moveHandTime).OnComplete(() =>  mainHand.Hold.PlayAnimation(interactionType)));
+            InteractionSequence.Join(_hand.Hold.HandIkTarget.DOMove(_targetPosition, _moveHandTime).OnComplete(() =>  _hand.Hold.PlayAnimation(_interactionType)));
 
             InteractionSequence.AppendInterval(InteractionTime - _moveHandTime);
 
             // Stop looking at item
             InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveHandTime).OnStart(() =>
             {
-                mainHand.Hold.StopAnimation();
+                _hand.Hold.StopAnimation();
                 RestorePosition(Controller.PositionController);
             }));
 
             // Stop reaching for the position of interaction
-            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _moveHandTime));
+            InteractionSequence.Join(DOTween.To(() => _hand.Hold.PickupIkConstraint.weight, x => _hand.Hold.PickupIkConstraint.weight = x, 0f, _moveHandTime));
 
             InteractionSequence.OnComplete(() =>
             {

@@ -19,27 +19,30 @@ namespace SS3D.Systems.Animations
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
-        private float _moveToolTime;
+        private readonly float _moveToolTime;
 
-        private IInteractiveTool _tool;
+        private readonly IInteractiveTool _tool;
 
-        private Hand _mainHand;
+        private readonly Hand _mainHand;
 
-        private InteractionType _interact;
+        private readonly InteractionType _interact;
 
-        public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkBehaviour target, InteractionType interactionType)
+        private readonly Vector3 _targetPosition;
+
+        public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkBehaviour target, InteractionType interactionType, Vector3 targetPosition)
             : base(time, proceduralAnimationController) 
         {
             _tool = target.GetComponent<IInteractiveTool>();
             _moveToolTime = Mathf.Min(time, 0.5f);
             _mainHand = mainHand;
             _interact = interactionType;
+            _targetPosition = targetPosition;
             SetupInteract(mainHand, _tool);
         }
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay()
         {
-            ReachInteractionPoint(targetPosition, mainHand, _tool, interactionType);
+            ReachInteractionPoint();
         }
 
         public override void Cancel()
@@ -103,20 +106,20 @@ namespace SS3D.Systems.Animations
             return endPosition;
         }
 
-        private void ReachInteractionPoint(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool, InteractionType interactionType)
+        private void ReachInteractionPoint()
         {
-            Vector3 endPosition = ComputeToolEndPosition(interactionPoint, mainHand, tool);
+            Vector3 endPosition = ComputeToolEndPosition(_targetPosition, _mainHand, _tool);
 
             // Rotate player toward item
-            TryRotateTowardTargetPosition(Controller.transform, _moveToolTime, interactionPoint);
+            TryRotateTowardTargetPosition(Controller.transform, _moveToolTime, _targetPosition);
 
-            AdaptPosition(Controller.PositionController, mainHand, interactionPoint);
+            AdaptPosition(Controller.PositionController, _mainHand, _targetPosition);
            
             // Start looking at item
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
 
             // Move tool to the interaction position
-            InteractionSequence.Join(tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => tool.PlayAnimation(interactionType)));
+            InteractionSequence.Join(_tool.GameObject.transform.DOMove(endPosition, _moveToolTime).OnComplete(() => _tool.PlayAnimation(_interact)));
 
             InteractionSequence.AppendInterval(InteractionTime - _moveToolTime);
 
@@ -124,13 +127,13 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime));
 
             // Rotate tool back to its hold rotation
-            InteractionSequence.Join(tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
+            InteractionSequence.Join(_tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
             {
                 RestorePosition(Controller.PositionController);
-                tool.StopAnimation();
+                _tool.StopAnimation();
             }));
 
-            InteractionSequence.Join(tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
+            InteractionSequence.Join(_tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
 
             InteractionSequence.OnComplete(() =>
             {

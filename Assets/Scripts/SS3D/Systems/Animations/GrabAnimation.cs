@@ -24,18 +24,21 @@ namespace SS3D.Systems.Animations
 
         private readonly Hand _mainHand;
 
+        private readonly Hand _secondaryHand;
+
         public GrabAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, NetworkBehaviour target)
             : base(time, proceduralAnimationController)
         {
             _grabbedObject = target.GetComponent<Draggable>();
             _mainHand = mainHand;
             _itemReachDuration = time / 2;
-            SetUpGrab(_grabbedObject, mainHand, secondaryHand, false);
+            _secondaryHand = secondaryHand;
+            SetUpGrab(false);
         }
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public override void ClientPlay()
         {
-            GrabReach(_grabbedObject, mainHand);
+            GrabReach();
         }
 
         public override void Cancel()
@@ -66,31 +69,31 @@ namespace SS3D.Systems.Animations
             Controller.PositionController.ChangeGrab(false);
         }
 
-        private void SetUpGrab(Draggable item, Hand mainHand, Hand secondaryHand, bool withTwoHands)
+        private void SetUpGrab(bool withTwoHands)
         {
-            mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
+            _mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, _grabbedObject.transform);
 
             // Needed if this has been changed elsewhere
-            mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
+            _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
 
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                secondaryHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, item.transform);
-                secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
+                _secondaryHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, _grabbedObject.transform);
+                _secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
             }
 
             // Set up the look at target locker on the item to pick up.
-            Controller.LookAtTargetLocker.parent = item.transform;
+            Controller.LookAtTargetLocker.parent = _grabbedObject.transform;
             Controller.LookAtTargetLocker.localPosition = Vector3.zero;
             Controller.LookAtTargetLocker.localRotation = Quaternion.identity;
 
-            OrientTargetForHandRotation(mainHand);
+            OrientTargetForHandRotation(_mainHand);
         }
 
-        private void GrabReach(Draggable item, Hand mainHand)
+        private void GrabReach()
         {
-            TryRotateTowardTargetPosition(Controller.transform, _itemReachDuration, item.transform.position);
+            TryRotateTowardTargetPosition(Controller.transform, _itemReachDuration, _grabbedObject.transform.position);
 
             Controller.PositionController.ChangeGrab(true);
 
@@ -98,41 +101,41 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
-            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x =>  mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x =>  _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
             {
-                HandleGrabbing(item, mainHand);
+                HandleGrabbing();
             }));
 
             // Stop looking
             InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
 
             // Stop picking
-            InteractionSequence.Join(DOTween.To(() => mainHand.Hold.PickupIkConstraint.weight, x => mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
         }
 
-        private void HandleGrabbing(Draggable draggable, Hand mainHand)
+        private void HandleGrabbing()
         {
-            mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
-            mainHand.HandBone.GetComponent<Collider>().enabled = false;
+            _mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
+            _mainHand.HandBone.GetComponent<Collider>().enabled = false;
                 
             // Only the owner handle physics since transform are client authoritative for now
-            if (!mainHand.IsOwner)
+            if (!_mainHand.IsOwner)
             {
                 return;
             }
 
-            Rigidbody grabbedRb = draggable.GetComponent<Rigidbody>();
+            Rigidbody grabbedRb = _grabbedObject.GetComponent<Rigidbody>();
 
-            if (draggable.MoveToGrabber)
+            if (_grabbedObject.MoveToGrabber)
             {
-                draggable.transform.position = mainHand.Hold.HoldTransform.position; 
+                _grabbedObject.transform.position = _mainHand.Hold.HoldTransform.position; 
                 grabbedRb.velocity = Vector3.zero;
-                grabbedRb.position = mainHand.Hold.HoldTransform.position;
+                grabbedRb.position = _mainHand.Hold.HoldTransform.position;
             }
 
             grabbedRb.detectCollisions = false;
 
-            _fixedJoint = mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
+            _fixedJoint = _mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;
             _fixedJoint.breakForce = _jointBreakForce;
         }

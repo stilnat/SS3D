@@ -96,7 +96,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.5f);
 
-            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand, Vector3.zero, 0.5f);
+            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand.Holdable, Vector3.zero, 0.5f);
 
             return false;
         }

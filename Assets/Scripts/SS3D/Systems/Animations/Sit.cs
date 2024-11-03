@@ -17,52 +17,52 @@ namespace SS3D.Systems.Animations
     /// Simple animation allowing to place correctly the human before playing the sit animation.
     /// I'm not sure the sitting stuff really has its place here, maybe more in humanoid movement controller
     /// </summary>
-    public class Sit : IProceduralAnimation
+    public class Sit : AbstractProceduralAnimation
     {
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
-        private ProceduralAnimationController _controller;
+        private readonly Sittable _sit;
 
-        private Sequence _sitSequence;
-
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public Sit(float interactionTime, ProceduralAnimationController controller, Sittable sit)
+            : base(interactionTime, controller)
         {
-            _controller = proceduralAnimationController;
+            _sit = sit;
+        }
 
-            if (_controller.PositionController.Position == PositionType.Sitting)
+        public override void ClientPlay()
+        {
+            if (Controller.PositionController.Position == PositionType.Sitting)
             {
                 StopSitting();
             }
             else
             {
-                AnimateSit(target.transform);
+                AnimateSit(_sit.transform);
             }
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
              StopSitting();
         }
 
         private void AnimateSit(Transform sit)
         {
-            _controller.MovementController.enabled = false;
+            Controller.MovementController.enabled = false;
 
-            _controller.PositionController.TrySit();
+            Controller.PositionController.TrySit();
 
-            _sitSequence = DOTween.Sequence();
+            InteractionSequence.Join(Controller.transform.DOMove(sit.position, 0.5f));
+            InteractionSequence.Join(Controller.transform.DORotate(sit.rotation.eulerAngles, 0.5f));
 
-            _sitSequence.Join(_controller.transform.DOMove(sit.position, 0.5f));
-            _sitSequence.Join(_controller.transform.DORotate(sit.rotation.eulerAngles, 0.5f));
-
-            _sitSequence.OnComplete(() => OnCompletion?.Invoke(this));
+            InteractionSequence.OnComplete(() => OnCompletion?.Invoke(this));
         }
 
         private void StopSitting()
         {
-            _controller.MovementController.enabled = true;
-            _controller.PositionController.TryToGetToPreviousPosition();
-            _controller.PositionController.TryToStandUp();
+            Controller.MovementController.enabled = true;
+            Controller.PositionController.TryToGetToPreviousPosition();
+            Controller.PositionController.TryToStandUp();
         }
     }
 }

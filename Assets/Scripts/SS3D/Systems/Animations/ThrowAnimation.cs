@@ -9,28 +9,34 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    public class ThrowAnimation : IProceduralAnimation
+    public class ThrowAnimation : AbstractProceduralAnimation
     {
-        public event Action<IProceduralAnimation> OnCompletion;
+        public override event Action<IProceduralAnimation> OnCompletion;
 
-        private ProceduralAnimationController _controller;
+        private readonly AbstractHoldable _holdable;
+        private  readonly Hand _mainHand;
+        private  readonly Hand _secondaryHand;
+        private readonly Transform _rootTransform;
 
-        public void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public ThrowAnimation(float interactionTime, ProceduralAnimationController controller, AbstractHoldable holdable, Hand mainHand, Hand secondaryHand)
+            : base(interactionTime, controller)
         {
-            _controller = proceduralAnimationController;
+            _holdable = holdable;
+            _mainHand = mainHand;
+            _secondaryHand = secondaryHand;
+            _rootTransform = controller.transform;
+        }
 
-            // remove all IK constraint
-            Item item = target as Item;
-            AbstractHoldable holdable = item.Holdable;
+        public override void ClientPlay()
+        {
 
-            Sequence throwAnimation = DOTween.Sequence();
-            mainHand.Hold.ItemPositionConstraint.weight = 0f;
+            _mainHand.Hold.ItemPositionConstraint.weight = 0f;
 
-           bool isRight = mainHand.HandType == HandType.RightHand;
+           bool isRight = _mainHand.HandType == HandType.RightHand;
            int deviationRightOrLeft = isRight ? 1 : -1;
 
-            Vector3 initialPosition = mainHand.Hold.ItemPositionTargetLocker.transform.position;
-            Vector3 initialPositionInRoot = _controller.transform.InverseTransformPoint(initialPosition);
+            Vector3 initialPosition = _mainHand.Hold.ItemPositionTargetLocker.transform.position;
+            Vector3 initialPositionInRoot = _rootTransform.InverseTransformPoint(initialPosition);
             Vector3 middle = initialPositionInRoot + 0.15f * Vector3.up - 0.15f * Vector3.forward + deviationRightOrLeft * 0.1f * Vector3.right;
             Vector3 end = initialPositionInRoot - 0.3f * Vector3.forward;
 
@@ -43,42 +49,42 @@ namespace SS3D.Systems.Animations
             };
 
             // do a little back and forth path
-            throwAnimation.Join(mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, time/2)
+            InteractionSequence.Join(_mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, InteractionTime/2)
                 .SetLoops(2, LoopType.Yoyo));  
 
-            throwAnimation.OnComplete(() => { 
+            InteractionSequence.OnComplete(() => { 
                 
-                mainHand.Hold.HoldIkConstraint.weight = 0f;
-                mainHand.Hold.PickupIkConstraint.weight = 0f;
+                _mainHand.Hold.HoldIkConstraint.weight = 0f;
+                _mainHand.Hold.PickupIkConstraint.weight = 0f;
 
                 // remove all IK constraint on second hand if needed
-                if (holdable.CanHoldTwoHand && secondaryHand)
+                if (_holdable.CanHoldTwoHand && _secondaryHand)
                 {
-                    secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
-                    secondaryHand.Hold.HoldIkConstraint.weight = 0f;
-                    secondaryHand.Hold.PickupIkConstraint.weight = 0f;
+                    _secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
+                    _secondaryHand.Hold.HoldIkConstraint.weight = 0f;
+                    _secondaryHand.Hold.PickupIkConstraint.weight = 0f;
                 }
 
-                item.GameObject.transform.parent = null;
+                _holdable.GameObject.transform.parent = null;
 
             });
 
             // Ignore collision between thrown item and player for a short while
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), _controller.GetComponent<Collider>(), true);
+            Physics.IgnoreCollision(_holdable.GetComponent<Collider>(), _rootTransform.GetComponent<Collider>(), true);
 
-            WaitToRestoreCollision(item, _controller.transform);
+            WaitToRestoreCollision();
         }
 
 
 
-        private async Task WaitToRestoreCollision(Item item, Transform playerRoot)
+        private async Task WaitToRestoreCollision()
         {
             await Task.Delay(300);
             // Allow back collision between thrown item and player
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.GetComponent<Collider>(), false);
+            Physics.IgnoreCollision(_holdable.GetComponent<Collider>(), _rootTransform.GetComponent<Collider>(), false);
         }
 
-        public void Cancel()
+        public override void Cancel()
         {
             
         }

@@ -15,12 +15,21 @@ namespace SS3D.Systems.Animations
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
-        public HitAnimation(ProceduralAnimationController controller, float interactionTime)
-            : base(interactionTime, controller) { }
+        private readonly Vector3 _targetHitPosition;
+        private readonly Hand _mainHand;
+        private readonly Transform _rootTransform;
 
-        public override void ClientPlay(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, ProceduralAnimationController proceduralAnimationController, float time, float delay)
+        public HitAnimation(ProceduralAnimationController controller, float interactionTime, Vector3 targetHit, Hand mainHand)
+            : base(interactionTime, controller)
         {
-            HitAnimate(targetPosition, mainHand, Controller.transform, time);
+            _targetHitPosition = targetHit;
+            _mainHand = mainHand;
+            _rootTransform = controller.transform;
+        }
+
+        public override void ClientPlay()
+        {
+            HitAnimate();
         }
 
         public override void Cancel()
@@ -28,37 +37,37 @@ namespace SS3D.Systems.Animations
         }
 
         [Client]
-        private void HitAnimate(Vector3 hitTargetPosition, Hand mainHand, Transform rootTransform, float duration)
+        private void HitAnimate()
         {
-            Vector3 directionFromTransformToTarget = hitTargetPosition - rootTransform.position;
+            Vector3 directionFromTransformToTarget = _targetHitPosition - _rootTransform.position;
             directionFromTransformToTarget.y = 0f;
             Quaternion finalRotationPlayer = Quaternion.LookRotation(directionFromTransformToTarget);
-            float timeToRotate = (Quaternion.Angle(rootTransform.rotation, finalRotationPlayer) / 180f) * duration;
+            float timeToRotate = (Quaternion.Angle(_rootTransform.rotation, finalRotationPlayer) / 180f) * InteractionTime;
 
             // In sequence, we first rotate toward the target
-            TryRotateTowardTargetPosition(Controller.transform, timeToRotate, hitTargetPosition);
+            TryRotateTowardTargetPosition(Controller.transform, timeToRotate, _targetHitPosition);
 
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, timeToRotate));
 
             // A bit later but still while rotating, we start changing the hand position 
             InteractionSequence.Insert(
                 timeToRotate * 0.4f, 
-                AnimateHandPosition(hitTargetPosition, duration, finalRotationPlayer, mainHand.HandType == HandType.RightHand, mainHand, rootTransform));
+                AnimateHandPosition(_targetHitPosition, InteractionTime, finalRotationPlayer, _mainHand.HandType == HandType.RightHand, _mainHand, _rootTransform));
 
             // At the same time we move the hand, we start rotating it as well.
             // We have only half the duration here so that hand is pointing in the right direction approximately when reaching the hit target
-            InteractionSequence.Join(AnimateHandRotation(hitTargetPosition, duration * 0.5f, finalRotationPlayer, mainHand, rootTransform));
+            InteractionSequence.Join(AnimateHandRotation(_targetHitPosition, InteractionTime * 0.5f, finalRotationPlayer, _mainHand, _rootTransform));
 
             InteractionSequence.OnStart(() =>
             {
-                Controller.LookAtTargetLocker.position = hitTargetPosition;
-                AdaptPosition(Controller.PositionController, mainHand, hitTargetPosition);
-                Controller.AnimatorController.MakeFist(true, mainHand.HandType == HandType.RightHand);
+                Controller.LookAtTargetLocker.position = _targetHitPosition;
+                AdaptPosition(Controller.PositionController, _mainHand, _targetHitPosition);
+                Controller.AnimatorController.MakeFist(true, _mainHand.HandType == HandType.RightHand);
             }); 
             InteractionSequence.OnComplete(() =>
             {
                 RestorePosition(Controller.PositionController);
-                Controller.AnimatorController.MakeFist(false, mainHand.HandType == HandType.RightHand);
+                Controller.AnimatorController.MakeFist(false, _mainHand.HandType == HandType.RightHand);
             });
         }
 
