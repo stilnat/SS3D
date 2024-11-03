@@ -31,7 +31,7 @@ namespace SS3D.Systems.Animations
 
         public override void ClientPlay()
         {
-            bool withTwoHands = _secondaryHand is null && _secondaryHand.Empty && _holdable.CanHoldTwoHand;
+            bool withTwoHands = _secondaryHand is not null && _secondaryHand.Empty && _holdable.CanHoldTwoHand;
 
             SetUpPickup(withTwoHands);
 
@@ -65,11 +65,12 @@ namespace SS3D.Systems.Animations
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             _mainHand.Hold.ItemPositionConstraint.weight = 1f;
 
-            // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            Controller.HoldController.MovePickupAndHoldTargetLocker(_mainHand, false, _holdable);
 
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(_mainHand);
+
+            // Place pickup and hold target lockers on the item, at their respective position and rotation.
+            Controller.HoldController.MovePickupAndHoldTargetLocker(_mainHand, false, _holdable);
 
             // Needed if this has been changed elsewhere
             _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
@@ -81,8 +82,8 @@ namespace SS3D.Systems.Animations
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                Controller.HoldController.MovePickupAndHoldTargetLocker(_secondaryHand, true, _holdable);
                 OrientTargetForHandRotation(_secondaryHand);
+                Controller.HoldController.MovePickupAndHoldTargetLocker(_secondaryHand, true, _holdable);
                 _secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
                 _secondaryHand.Hold.HoldIkConstraint.data.targetRotationWeight = 0f;
             }
