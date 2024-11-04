@@ -13,7 +13,7 @@ namespace SS3D.Systems.Animations
     public class PositionController : NetworkActor
     {
 
-        public Action<PositionType> ChangedPosition;
+        public Action<PositionType, float> ChangedPosition;
 
         public Action<MovementType> ChangedMovement;
 
@@ -21,6 +21,12 @@ namespace SS3D.Systems.Animations
 
         [SerializeField]
         private FeetController _feetController;
+
+        [SerializeField]
+        private AnimationClip _getUpFromFront;
+
+        [SerializeField]
+        private AnimationClip _getUpFromBack;
 
 
         [SyncVar(OnChange = nameof(SyncPosition))]
@@ -43,7 +49,15 @@ namespace SS3D.Systems.Animations
         
         private const float MinFeetHealthFactorToStand = 0.5f;
 
+        private const float RagdollRecoverTime = 1f;
+
+        private const float RagdollBoneResetTime = 0.7f;
+
+        private const float DefaultTransitionDuration = 0.2f;
+
         public PositionType Position => _position;
+
+        public PositionType PreviousPosition => _position;
 
         public MovementType Movement => _movement;
 
@@ -51,6 +65,12 @@ namespace SS3D.Systems.Animations
 
         public bool CanSit => _standingAbility;
 
+        public bool CanRotateWhileAiming => Movement == MovementType.Aiming && Position != PositionType.Sitting && Position != PositionType.Proning;
+
+        public AnimationClip GetRecoverFromRagdollClip()
+        {
+            return GetComponent<Ragdoll>().IsFacingDown ? _getUpFromFront : _getUpFromBack;
+        }
 
         public override void OnStartServer()
         {
@@ -93,7 +113,18 @@ namespace SS3D.Systems.Animations
 
         private void SyncPosition(PositionType oldPosition, PositionType newPosition, bool asServer)
         {
-            ChangedPosition?.Invoke(newPosition);
+            float duration = DefaultTransitionDuration;
+
+            if (newPosition == PositionType.ResetBones)
+            {
+                duration = RagdollBoneResetTime;
+            }
+            else if(newPosition == PositionType.RagdollRecover)
+            {
+                duration = RagdollRecoverTime;
+            }
+
+            ChangedPosition?.Invoke(newPosition, duration);
         }
 
         private void SyncMovement(MovementType oldPosition, MovementType newPosition, bool asServer)
@@ -109,25 +140,48 @@ namespace SS3D.Systems.Animations
         [Client]
         public void TrySit()
         {
+            if(_position == PositionType.Ragdoll) return;
             RpcChangePosition(PositionType.Sitting);
         }
 
         [Client]
         public void Prone()
         {
+            if(_position == PositionType.Ragdoll) return;
             RpcChangePosition(PositionType.Proning);
         }
 
         [Client]
         public void TryCrouch()
         { 
+            if(_position == PositionType.Ragdoll) return;
             RpcChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
         }
 
         [Client]
         public void TryToStandUp()
         {
+            if(_position == PositionType.Ragdoll) return;
             RpcChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
+        }
+
+        [Client]
+        public void KnockDown()
+        {
+            RpcChangePosition(PositionType.Ragdoll);
+        }
+
+        [Client]
+        public void StopRagdoll()
+        {
+            RpcChangePosition(PositionType.ResetBones);
+            Invoke(nameof(RagdollRecover), RagdollBoneResetTime);
+            Invoke(nameof(TryToStandUp), RagdollRecoverTime + RagdollBoneResetTime);
+        }
+
+        private void RagdollRecover()
+        {
+            RpcChangePosition(PositionType.RagdollRecover);
         }
 
         [Client]
@@ -194,7 +248,7 @@ namespace SS3D.Systems.Animations
 
             if (_standingAbility == false)
             {
-                GetComponent<Ragdoll>().Knockdown(5f);
+                KnockDown();
             }
         }
     }

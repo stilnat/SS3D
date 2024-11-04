@@ -1,5 +1,6 @@
 ﻿using SS3D.Core;
 using SS3D.Core.Behaviours;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inputs;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace SS3D.Hacks
     public class RagdollWhenPressingButton : NetworkActor
     {
         [SerializeField]
-        private Ragdoll _ragdoll;
+        private PositionController _positionController;
 
         [SerializeField]
         private float _timeRagdolled;
@@ -33,8 +34,14 @@ namespace SS3D.Hacks
 
         private void HandleKnockdown(InputAction.CallbackContext context)
         {
-            _ragdoll.Knockdown(_timeRagdolled);
+            if (_positionController.Position != PositionType.Ragdoll)
+            {
+                _positionController.KnockDown();
+            }
+            else
+            {
+                _positionController.StopRagdoll(); 
+            }
         }
     }
 }
-

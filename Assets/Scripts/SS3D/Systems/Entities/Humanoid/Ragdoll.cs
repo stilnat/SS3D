@@ -4,6 +4,7 @@ using FishNet.Component.Transforming;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using SS3D.Systems.Animations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,6 @@ namespace SS3D.Systems.Entities.Humanoid
     /// </summary>
 	public class Ragdoll : NetworkBehaviour
 	{
-        private enum RagdollState
-        {
-            Walking,
-            Ragdoll,
-            BonesReset,
-            StandingUp
-        }
 
         [SerializeField]
 		private Transform _armatureRoot;
@@ -40,22 +34,10 @@ namespace SS3D.Systems.Entities.Humanoid
         private Transform _character;
 
         [SerializeField]
-        private Animator _animator;
-        
-        [SerializeField]
-        private NetworkAnimator _networkAnimator; 
-
-        [SerializeField]
-        private HumanoidMovementController _humanoidLivingController; 
-
-        [SerializeField]
-        private AnimationClip _standUpFaceUpClip;
-
-        [SerializeField]
-        private AnimationClip _standUpFaceDownClip;
-
-        [SerializeField]
         private byte _ragdollPartSyncInterval;
+
+        [SerializeField]
+        private PositionController _positionController;
 
         private Transform[] _ragdollParts;
         /// <summary>
@@ -69,7 +51,6 @@ namespace SS3D.Systems.Entities.Humanoid
         /// </summary>
         private const float AlignmentYDelta = 0.0051f;
 
-        private RagdollState _currentState = RagdollState.Walking;
         private class BoneTransform
         {
             public Vector3 Position;
@@ -85,14 +66,12 @@ namespace SS3D.Systems.Entities.Humanoid
         /// </summary>
         private BoneTransform[] _ragdollBones;
 
-        public bool IsKnockedDown;
-        private bool IsFacingDown { get; [ServerRpc] set; }
+        public bool IsFacingDown { get; private set; }
 
 
         public override void OnStartNetwork()
 		{
 			base.OnStartNetwork();
-            _currentState = RagdollState.Walking;
             _ragdollParts = (from part in GetComponentsInChildren<RagdollPart>() select part.transform.GetComponent<Transform>()).ToArray();
             _standUpBones = new BoneTransform[_ragdollParts.Length];
             _ragdollBones = new BoneTransform[_ragdollParts.Length];
@@ -106,78 +85,40 @@ namespace SS3D.Systems.Entities.Humanoid
             // All rigid bodies are kinematic at start, only the owner should be able to change that afterwards.
 			SetRagdollPhysic(false);
             ToggleSyncRagdoll(false);
+            _positionController.ChangedPosition += HandleChangedPosition;
+        }
+
+        private void HandleChangedPosition(PositionType position, float recoverTime)
+        {
+            if (position == PositionType.ResetBones)
+            {
+                AnimationClip recoverAnimation = _positionController.GetRecoverFromRagdollClip();
+                BonesReset(recoverAnimation, recoverTime);
+            }
+            else if (position == PositionType.Ragdoll)
+            {
+                StartRagdoll();
+            }
         }
 
         public override void OnOwnershipClient(NetworkConnection prevOwner)
         {
             base.OnOwnershipClient(prevOwner);
-
-            if (_currentState == RagdollState.Ragdoll)
-            {
-                SetRagdollPhysic(IsOwner);
-            }
+            //SetRagdollPhysic(IsOwner);
         }
         
-
-        public void KnockdownTimeless()
-        {
-            if (!enabled) return;
-            
-            _isKnockdownTimed = false;
-            IsKnockedDown = true;
-        }
-
-
-        public void Knockdown(float seconds)
-        {
-            if (!enabled) return;
-            KnockdownSequence(seconds);
-        }
-        
-        private void KnockdownSequence(float seconds)
-        {
-            Sequence sequence = DOTween.Sequence();
-
-            sequence.OnStart(StartRagdoll);
-
-            sequence.Insert(0, DOTween.To(() => 0f, x => { }, 1f, seconds).OnUpdate(AlignToHips));
-
-            sequence.AppendInterval(seconds);
-
-            sequence.AppendCallback(BonesReset);
-
-            sequence.AppendInterval(_timeToResetBones);
-
-            // wait till bones reached the first frame animation position and then play the animation
-            sequence.AppendCallback(StandUpAnimation);
-
-            sequence.OnComplete(() =>
-            {
-                ToggleController(true);
-            });
-        }
-
-        private void StandUpAnimation()
-        {
-            ToggleAnimator(true);
-            _animator.Play(IsFacingDown ? _standUpFaceDownClip.name : _standUpFaceUpClip.name, 0, 0);
-        }
 
         private void StartRagdoll()
         {
-            Vector3 movement = _humanoidLivingController.TargetMovement * 3;
-
-            ToggleController(false);
-            ToggleAnimator(false);
-
             if (!IsOwner && Owner.ClientId != -1)
                 return;
             
             SetRagdollPhysic(true);
-            foreach (Transform part in _ragdollParts)
+            // put that in its own method
+            /*foreach (Transform part in _ragdollParts)
             {
                 part.GetComponent<Rigidbody>().AddForce(movement, ForceMode.VelocityChange);
-            }
+            }  */
         }
 
         /// <summary>
@@ -208,17 +149,18 @@ namespace SS3D.Systems.Entities.Humanoid
             transform.rotation *= Quaternion.Euler(rotationDifference);
             _hips.rotation = originalHipsRotation;
         }
+
         /// <summary>
         /// Switch to BonesReset state and prepare for BonesResetBehavior
         /// </summary>
-        private void BonesReset()
+        private void BonesReset(AnimationClip clip, float timeToResetBones)
         {
             SetRagdollPhysic(false);
-            PopulateStandUpPartsTransforms(IsFacingDown ? _standUpFaceDownClip : _standUpFaceUpClip);
+            PopulateStandUpPartsTransforms(clip);
             for (int partIndex = 0; partIndex < _ragdollParts.Length; partIndex++)
             {
-                _ragdollParts[partIndex].DOLocalMove(_standUpBones[partIndex].Position, _timeToResetBones);
-                _ragdollParts[partIndex].DOLocalRotate(_standUpBones[partIndex].Rotation.eulerAngles, _timeToResetBones);
+                _ragdollParts[partIndex].DOLocalMove(_standUpBones[partIndex].Position, timeToResetBones);
+                _ragdollParts[partIndex].DOLocalRotate(_standUpBones[partIndex].Rotation.eulerAngles, timeToResetBones);
             }
         }
 
@@ -280,27 +222,6 @@ namespace SS3D.Systems.Entities.Humanoid
                 _ragdollParts[partIndex].localPosition = _ragdollBones[partIndex].Position;
                 _ragdollParts[partIndex].localRotation = _ragdollBones[partIndex].Rotation;
             }
-        }
-
-
-        public void Recover()
-        {
-
-        }
-
-        private void ToggleController(bool enable)
-        {
-            _humanoidLivingController.enabled = enable;
-        }
-
-        private void ToggleAnimator(bool enable)
-        {
-            // Speed=0 prevents animator from choosing Walking animations after enabling it
-            if (!enable)
-                _animator.SetFloat("Speed", 0);
-
-            _animator.enabled = enable;
-            _networkAnimator.enabled = enable;
         }
 
         /// <summary>

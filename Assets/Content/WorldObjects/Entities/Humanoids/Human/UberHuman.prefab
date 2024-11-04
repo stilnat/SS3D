@@ -7382,6 +7382,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _movementController: {fileID: 1215874948772008144}
   _animator: {fileID: 7307990926274805850}
+  _networkAnimator: {fileID: 5337792808514694743}
   _lerpMultiplier: 5
   _aimController: {fileID: 3054724180155005980}
   _positionController: {fileID: 7568747683536695618}
@@ -7435,6 +7436,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _feetController: {fileID: 2081771184023489930}
+  _getUpFromFront: {fileID: -203655887218126122, guid: b45b348d9bf3bcd4f9c45e322acd2a50, type: 3}
+  _getUpFromBack: {fileID: -203655887218126122, guid: 83207c9bf0069534487201e6d71c0de1, type: 3}
   _position: 0
   _movement: 0
   _previousMovement: 0
@@ -7529,13 +7532,8 @@ MonoBehaviour:
   _characterRigidBody: {fileID: 8635375509376998503}
   _hips: {fileID: 5433592588855148907}
   _character: {fileID: 3714097311666575904}
-  _animator: {fileID: 7307990926274805850}
-  _networkAnimator: {fileID: 5337792808514694743}
-  _humanoidLivingController: {fileID: 1215874948772008144}
-  _standUpFaceUpClip: {fileID: -203655887218126122, guid: 83207c9bf0069534487201e6d71c0de1, type: 3}
-  _standUpFaceDownClip: {fileID: -203655887218126122, guid: b45b348d9bf3bcd4f9c45e322acd2a50, type: 3}
   _ragdollPartSyncInterval: 1
-  IsKnockedDown: 0
+  _positionController: {fileID: 7568747683536695618}
 --- !u!114 &7601720951202063522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7551,7 +7549,7 @@ MonoBehaviour:
   _componentIndexCache: 14
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  _ragdoll: {fileID: 2768583506857238720}
+  _positionController: {fileID: 7568747683536695618}
   _timeRagdolled: 3
 --- !u!114 &8615535220686661918
 MonoBehaviour:

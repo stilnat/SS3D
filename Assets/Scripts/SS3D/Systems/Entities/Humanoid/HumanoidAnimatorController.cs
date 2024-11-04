@@ -1,4 +1,5 @@
 ﻿using FishNet;
+using FishNet.Component.Animating;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Inventory.Containers;
@@ -12,11 +13,16 @@ namespace SS3D.Systems.Entities.Humanoid
         [SerializeField] private HumanoidMovementController _movementController;
 
         [SerializeField] private Animator _animator;
+
+        [SerializeField] private NetworkAnimator _networkAnimator;
+
         [SerializeField] private float _lerpMultiplier;
 
         [SerializeField] private AimController _aimController;
 
         [SerializeField] private PositionController _positionController;
+
+        private bool _isRagdolled;
 
         protected override void OnStart()
         {
@@ -91,7 +97,6 @@ namespace SS3D.Systems.Entities.Humanoid
             _positionController.ChangedPosition += HandlePositionChanged;
             _positionController.ChangedMovement += HandleMovementChanged;
             _positionController.Dance += HandleDance;
-
         }
 
         private void HandleDance(bool isDancing)
@@ -112,8 +117,13 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
-        private void HandlePositionChanged(PositionType position)
+        private void HandlePositionChanged(PositionType position, float transitionDuration = 0.15f)
         {
+            if (position != PositionType.Ragdoll && position != PositionType.ResetBones)
+            {
+                ToggleAnimator(true);
+            }
+
             switch (position)
             {
                   case PositionType.Proning:
@@ -128,7 +138,27 @@ namespace SS3D.Systems.Entities.Humanoid
                   case PositionType.Sitting:
                       Sit();
                       break;
+                  case PositionType.RagdollRecover:
+                      RagdollRecover(transitionDuration);
+                      break;
+                  case PositionType.Ragdoll:
+                      ToggleAnimator(false);
+                      break;
             }
+        }
+
+        private void RagdollRecover(float transitionDuration)
+        {
+            AnimationClip clipToPlay = _positionController.GetRecoverFromRagdollClip();
+            float playbackSpeed = clipToPlay.length / transitionDuration;
+            _animator.speed = playbackSpeed;
+            _animator.Play(clipToPlay.name);
+            Invoke(nameof(RestoreAnimatorSpeed), transitionDuration);
+        }
+
+        private void RestoreAnimatorSpeed()
+        {
+            _animator.speed = 1;
         }
 
         private void Sit(float transitionDuration = 0.15f)
@@ -160,7 +190,6 @@ namespace SS3D.Systems.Entities.Humanoid
         {
 
             UnityEngine.Debug.Log("animator change aim");
-
             _animator.SetBool("Aim", isAiming);
             _animator.SetBool("TorsoGunAim", !toThrow);
 
@@ -185,6 +214,12 @@ namespace SS3D.Systems.Entities.Humanoid
         private void UnsubscribeFromEvents()
         {
             _movementController.OnSpeedChangeEvent -= UpdateSpeedParamater;
+        }
+
+        private void ToggleAnimator(bool enabled)
+        {
+            _animator.enabled = enabled;
+            _networkAnimator.enabled = enabled;
         }
 
     }

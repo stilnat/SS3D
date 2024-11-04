@@ -9,5 +9,8 @@ namespace SS3D.Systems.Animations
         Sitting = 1,
         Proning = 2,
         Crouching = 3,
+        Ragdoll = 4,
+        RagdollRecover = 5,
+        ResetBones = 6,
     }
 }

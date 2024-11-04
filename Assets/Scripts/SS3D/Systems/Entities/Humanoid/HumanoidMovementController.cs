@@ -27,7 +27,6 @@ namespace SS3D.Systems.Entities.Humanoid
     public class HumanoidMovementController : NetworkActor
     {
        public event Action<float> OnSpeedChangeEvent;
-       public event Action<MovementType> OnMovementTypeChanged;
 
         private const float DefaultSpeed = 1f;
         private const float RunFactor = 2f;
@@ -133,7 +132,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 RotatePlayerToMovement(_positionController.Movement == MovementType.Dragging);
             }
 
-            if (_positionController.Movement == MovementType.Aiming && _positionController.Position != PositionType.Sitting && _positionController.Position != PositionType.Proning)
+            if (_positionController.CanRotateWhileAiming)
             {
                 RotatePlayerTowardTarget();
             }
@@ -225,6 +224,12 @@ namespace SS3D.Systems.Entities.Humanoid
             _inputSystem.ToggleActionMap(_movementControls, true);
             _inputSystem.ToggleActionMap(_hotkeysControls, true);
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
+            _positionController.ChangedPosition += HandleChangedPosition;
+        }
+
+        private void HandleChangedPosition(PositionType position, float durationTransition)
+        {
+            enabled = position != PositionType.RagdollRecover && position != PositionType.Ragdoll && position != PositionType.ResetBones;
         }
 
         [Client]

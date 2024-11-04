@@ -6,6 +6,7 @@ using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 using Coimbra;
 using SS3D.Core;
+using SS3D.Systems.Animations;
 
 namespace SS3D.Systems.Entities
 {
@@ -31,9 +32,9 @@ namespace SS3D.Systems.Entities
             mindSystem.SwapMinds(originEntity, ghostEntity);
 
             RpcUpdateGhostPosition(originEntity, ghostEntity);
-            if (TryGetComponent(out Ragdoll ragdoll))
+            if (TryGetComponent(out PositionController positionController))
             {
-                ragdoll.KnockdownTimeless();
+                positionController.KnockDown();
             }
             RpcDestroyComponents(originEntity);
         }

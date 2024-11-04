@@ -66,7 +66,7 @@ namespace SS3D.Systems.Combat.Interactions
                 if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null )
                 {
                     Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
-                    entity.GetComponent<Ragdoll>().Knockdown(120f);
+                    entity.GetComponent<PositionController>().KnockDown();
                     //BodyPart bodyPart = entity.GetComponentInChildren<BodyPart>();
 
                     // Inflict a fix amount and type of damages for now. Long term, should be passed in parameter and depends on weapon type, velocity ...
