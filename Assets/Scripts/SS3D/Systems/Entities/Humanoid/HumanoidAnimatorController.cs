@@ -106,6 +106,9 @@ namespace SS3D.Systems.Entities.Humanoid
                 case MovementType.Dragging:
                     Grab();
                     break;
+                case MovementType.Normal:
+                    HandlePositionChanged(_positionController.Position);
+                    break;
             }
         }
 
