@@ -7527,14 +7527,15 @@ MonoBehaviour:
   _armatureRoot: {fileID: 3362543718434004155}
   _characterCollider: {fileID: 7772018303242298867}
   _characterRigidBody: {fileID: 8635375509376998503}
-  _hips: {fileID: 0}
-  _character: {fileID: 0}
-  _animator: {fileID: 0}
-  _networkAnimator: {fileID: 0}
-  _humanoidLivingController: {fileID: 0}
+  _hips: {fileID: 5433592588855148907}
+  _character: {fileID: 3714097311666575904}
+  _animator: {fileID: 7307990926274805850}
+  _networkAnimator: {fileID: 5337792808514694743}
+  _humanoidLivingController: {fileID: 1215874948772008144}
   _standUpFaceUpClip: {fileID: -203655887218126122, guid: 83207c9bf0069534487201e6d71c0de1, type: 3}
   _standUpFaceDownClip: {fileID: -203655887218126122, guid: b45b348d9bf3bcd4f9c45e322acd2a50, type: 3}
   _ragdollPartSyncInterval: 1
+  IsKnockedDown: 0
 --- !u!114 &7601720951202063522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7551,7 +7552,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _ragdoll: {fileID: 2768583506857238720}
-  _timeRagdolled: 10
+  _timeRagdolled: 3
 --- !u!114 &8615535220686661918
 MonoBehaviour:
   m_ObjectHideFlags: 0
