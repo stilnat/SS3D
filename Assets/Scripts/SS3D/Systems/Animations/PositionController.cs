@@ -165,7 +165,7 @@ namespace SS3D.Systems.Animations
             RpcChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
         }
 
-        [Client]
+        [Server]
         public void KnockDown()
         {
             RpcChangePosition(PositionType.Ragdoll);
@@ -198,7 +198,7 @@ namespace SS3D.Systems.Animations
             _movement = movement;
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void RpcChangePosition(PositionType position)
         {
             _previousPosition = _position;

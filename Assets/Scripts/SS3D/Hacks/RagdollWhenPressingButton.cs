@@ -1,4 +1,5 @@
-﻿using SS3D.Core;
+﻿using FishNet.Object;
+using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Humanoid;
@@ -20,6 +21,9 @@ namespace SS3D.Hacks
         [SerializeField]
         private float _timeRagdolled;
 
+        [SerializeField]
+        private float _randomForce;
+
         private Controls.OtherActions _controls;
 
         public override void OnStartClient()
@@ -31,17 +35,25 @@ namespace SS3D.Hacks
             _controls.Ragdoll.performed += HandleKnockdown;
         }
 
-
         private void HandleKnockdown(InputAction.CallbackContext context)
         {
             if (_positionController.Position != PositionType.Ragdoll)
             {
-                _positionController.KnockDown();
+                RpcKnockDown();
             }
             else
             {
                 _positionController.StopRagdoll(); 
             }
         }
+
+        [ServerRpc]
+        private void RpcKnockDown()
+        {
+            GetComponent<Ragdoll>().KnockDown();
+            GetComponent<Ragdoll>().AddForceToAllParts(Random.insideUnitCircle * _randomForce);
+        }
+
+
     }
 }

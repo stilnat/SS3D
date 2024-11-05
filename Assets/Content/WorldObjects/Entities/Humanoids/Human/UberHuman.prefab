@@ -1343,8 +1343,8 @@ Rigidbody:
   m_GameObject: {fileID: 593798233980870999}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -1402,8 +1402,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -3755,8 +3755,8 @@ Rigidbody:
   m_GameObject: {fileID: 2612561786074311509}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -3847,8 +3847,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -5199,8 +5199,8 @@ Rigidbody:
   m_GameObject: {fileID: 3517261860088055723}
   serializedVersion: 2
   m_Mass: 7.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -5290,8 +5290,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -5479,8 +5479,8 @@ Rigidbody:
   m_GameObject: {fileID: 3662688532868555398}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -5538,8 +5538,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -6027,8 +6027,8 @@ Rigidbody:
   m_GameObject: {fileID: 3814904831518035601}
   serializedVersion: 2
   m_Mass: 5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -6118,8 +6118,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -6198,8 +6198,8 @@ Rigidbody:
   m_GameObject: {fileID: 3862990575774196887}
   serializedVersion: 2
   m_Mass: 5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -6289,8 +6289,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -6914,6 +6914,7 @@ GameObject:
   - component: {fileID: 1954948213532107113}
   - component: {fileID: 7000234689394846347}
   - component: {fileID: 1215874948772008144}
+  - component: {fileID: 3128408696448578395}
   m_Layer: 0
   m_Name: UberHuman
   m_TagString: Untagged
@@ -6971,7 +6972,7 @@ MonoBehaviour:
   _teleportThreshold: 1
   _scaleThreshold: 1
   _clientAuthoritative: 1
-  _sendToOwner: 1
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -7527,7 +7528,6 @@ MonoBehaviour:
   _componentIndexCache: 13
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  _armatureRoot: {fileID: 3362543718434004155}
   _characterCollider: {fileID: 7772018303242298867}
   _characterRigidBody: {fileID: 8635375509376998503}
   _hips: {fileID: 5433592588855148907}
@@ -7551,6 +7551,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _positionController: {fileID: 7568747683536695618}
   _timeRagdolled: 3
+  _randomForce: 3
 --- !u!114 &8615535220686661918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7741,6 +7742,25 @@ MonoBehaviour:
   _positionController: {fileID: 7568747683536695618}
   <TargetMovement>k__BackingField: {x: 0, y: 0, z: 0}
   <AimTarget>k__BackingField: {fileID: 2856800849451305125}
+--- !u!114 &3128408696448578395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4089496606853742746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58b3b3c3948fc4445997581f3ebd8f5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 241836927429143711}
+  _networkObjectCache: {fileID: 0}
+  _positionController: {fileID: 7568747683536695618}
+  _armatureRoot: {fileID: 3362543718434004155}
+  _character: {fileID: 3714097311666575904}
+  _hips: {fileID: 5433592588855148907}
 --- !u!1 &4092542307493577921
 GameObject:
   m_ObjectHideFlags: 0
@@ -8288,8 +8308,8 @@ Rigidbody:
   m_GameObject: {fileID: 4559021053838536536}
   serializedVersion: 2
   m_Mass: 12.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -8333,8 +8353,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -9087,8 +9107,8 @@ Rigidbody:
   m_GameObject: {fileID: 5359021026460437030}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -9178,8 +9198,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -9835,8 +9855,8 @@ Rigidbody:
   m_GameObject: {fileID: 6177773197948981747}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -9926,8 +9946,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -10919,8 +10939,8 @@ Rigidbody:
   m_GameObject: {fileID: 7178378187929536671}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -11039,8 +11059,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -11256,8 +11276,8 @@ Rigidbody:
   m_GameObject: {fileID: 7246030806788597142}
   serializedVersion: 2
   m_Mass: 5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -11347,8 +11367,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -11426,8 +11446,8 @@ Rigidbody:
   m_GameObject: {fileID: 7342014919758599328}
   serializedVersion: 2
   m_Mass: 7.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -11517,8 +11537,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -12390,8 +12410,8 @@ Rigidbody:
   m_GameObject: {fileID: 8000724491074061805}
   serializedVersion: 2
   m_Mass: 7.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -12481,8 +12501,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -12590,8 +12610,8 @@ Rigidbody:
   m_GameObject: {fileID: 8067904849068615099}
   serializedVersion: 2
   m_Mass: 12.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -12681,8 +12701,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -12756,7 +12776,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8105151679370853076}
   m_LocalRotation: {x: 0.70356977, y: 0.006053881, z: 2.910383e-11, w: 0.7106004}
-  m_LocalPosition: {x: 2.0061848, y: -1.0835686, z: -1.8300675}
+  m_LocalPosition: {x: 2.0061848, y: -1.0835687, z: -1.8300675}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13603,8 +13623,8 @@ Rigidbody:
   m_GameObject: {fileID: 8880209918821347235}
   serializedVersion: 2
   m_Mass: 5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -13694,8 +13714,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -13918,7 +13938,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8937338257042491703}
   m_LocalRotation: {x: 0.7035764, y: 0.006096695, z: -2.910383e-10, w: 0.7105935}
-  m_LocalPosition: {x: 1.8461, y: -1.0835686, z: -1.7800674}
+  m_LocalPosition: {x: 1.8461, y: -1.0835686, z: -1.7800676}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13984,8 +14004,8 @@ Rigidbody:
   m_GameObject: {fileID: 8966162540359811168}
   serializedVersion: 2
   m_Mass: 5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -14075,8 +14095,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
@@ -14873,8 +14893,8 @@ Rigidbody:
   m_GameObject: {fileID: 9200825884340260337}
   serializedVersion: 2
   m_Mass: 7.5
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 0.2
+  m_AngularDrag: 0.2
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -14964,8 +14984,8 @@ MonoBehaviour:
   _enableTeleport: 0
   _teleportThreshold: 1
   _scaleThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
+  _clientAuthoritative: 0
+  _sendToOwner: 0
   _enableNetworkLod: 1
   _interval: 1
   _synchronizePosition: 1
