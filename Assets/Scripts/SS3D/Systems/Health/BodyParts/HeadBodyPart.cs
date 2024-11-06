@@ -55,7 +55,7 @@ namespace SS3D.Systems.Health
 
         protected override void AfterSpawningCopiedBodyPart()
         {
-            GetComponentInParent<PositionController>().KnockDown();
+            GetComponentInParent<Ragdoll>().KnockDown();
             GetComponentInParent<Human>()?.DeactivateComponents();
 
             // When detached, spawn a head and set player's mind to be in the head,

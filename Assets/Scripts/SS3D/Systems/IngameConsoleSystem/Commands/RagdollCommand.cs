@@ -23,21 +23,22 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands
 		public override string Perform(string[] args, NetworkConnection conn = null)
 		{
             if (!ReceiveCheckResponse(args, out CheckArgsResponse response, out CalculatedValues values)) return response.InvalidArgs;
-            PositionController positionController = values.Entity.GetComponent<PositionController>();
+            Ragdoll ragdoll = values.Entity.GetComponent<Ragdoll>();
+            PositionController positionController  = values.Entity.GetComponent<PositionController>(); 
 
 			if (args.Length > 1)
 			{
-                positionController.KnockDown();
+                ragdoll.KnockDown();
 			}
 			else
 			{
 				if (positionController.Position == PositionType.Ragdoll)
 				{
-                    positionController.StopRagdoll();
+                    ragdoll.Recover();
 				}
 				else
 				{
-                    positionController.KnockDown();
+                    ragdoll.KnockDown();
 				}
 			}
 			return "Player ragdolled";

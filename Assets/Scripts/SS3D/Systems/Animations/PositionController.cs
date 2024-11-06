@@ -28,6 +28,9 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private AnimationClip _getUpFromBack;
 
+        [SerializeField]
+        private Ragdoll _ragdoll;
+
 
         [SyncVar(OnChange = nameof(SyncPosition))]
         private PositionType _position;
@@ -76,6 +79,7 @@ namespace SS3D.Systems.Animations
         {
             base.OnStartServer();
             _feetController.FeetHealthChanged += OnFeetHealthChanged;
+            _ragdoll.OnRagdoll += HandleRagdoll;
             _standingAbility = true;
             _position = PositionType.Standing;
             _movement = MovementType.Normal;
@@ -166,17 +170,18 @@ namespace SS3D.Systems.Animations
         }
 
         [Server]
-        public void KnockDown()
+        private void HandleRagdoll(bool isOn)
         {
-            RpcChangePosition(PositionType.Ragdoll);
-        }
-
-        [Client]
-        public void StopRagdoll()
-        {
-            RpcChangePosition(PositionType.ResetBones);
-            Invoke(nameof(RagdollRecover), RagdollBoneResetTime);
-            Invoke(nameof(TryToStandUp), RagdollRecoverTime + RagdollBoneResetTime);
+            if (isOn)
+            {
+                ChangePosition(PositionType.Ragdoll);
+            }
+            else if(_position == PositionType.Ragdoll)
+            {
+                RpcChangePosition(PositionType.ResetBones);
+                Invoke(nameof(RagdollRecover), RagdollBoneResetTime);
+                Invoke(nameof(TryToStandUp), RagdollRecoverTime + RagdollBoneResetTime);
+            }
         }
 
         private void RagdollRecover()
@@ -200,6 +205,12 @@ namespace SS3D.Systems.Animations
 
         [ServerRpc(RequireOwnership = false)]
         private void RpcChangePosition(PositionType position)
+        {
+            ChangePosition(position);
+        }
+
+        [Server]
+        private void ChangePosition(PositionType position)
         {
             _previousPosition = _position;
             _position = position;
@@ -248,7 +259,7 @@ namespace SS3D.Systems.Animations
 
             if (_standingAbility == false)
             {
-                KnockDown();
+                _ragdoll.KnockDown(2f);
             }
         }
     }

@@ -43,15 +43,21 @@ namespace SS3D.Hacks
             }
             else
             {
-                _positionController.StopRagdoll(); 
+                RpcRecover();
             }
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void RpcKnockDown()
         {
             GetComponent<Ragdoll>().KnockDown();
             GetComponent<Ragdoll>().AddForceToAllParts(Random.insideUnitCircle * _randomForce);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RpcRecover()
+        {
+            GetComponent<Ragdoll>().Recover();
         }
 
 

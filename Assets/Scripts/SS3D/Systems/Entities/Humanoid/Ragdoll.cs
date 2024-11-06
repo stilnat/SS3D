@@ -17,7 +17,10 @@ namespace SS3D.Systems.Entities.Humanoid
     /// Component for character's gameobject, that controlls ragdoll
     /// </summary>
 	public class Ragdoll : NetworkBehaviour
-	{
+    {
+
+        public event Action<bool> OnRagdoll;
+
         [SerializeField]
         private Collider _characterCollider;
 
@@ -67,11 +70,23 @@ namespace SS3D.Systems.Entities.Humanoid
         }
 
         [Server]
+        public void KnockDown(float time)
+        {
+            KnockDown();
+            Invoke(nameof(Recover), time);
+        }
+
+        [Server]
         public void KnockDown()
         {
             SetRagdollPhysic(true);
             StartCoroutine(AlignToHips());
-            _positionController.KnockDown();
+        }
+
+        [Server]
+        public void Recover()
+        {
+            SetRagdollPhysic(false);
         }
 
         [Server]
@@ -152,6 +167,8 @@ namespace SS3D.Systems.Entities.Humanoid
                 part.GetComponent<NetworkTransform>().SetSynchronizePosition(isOn);
                 part.GetComponent<NetworkTransform>().SetSynchronizeRotation(isOn);
             }
+
+            OnRagdoll?.Invoke(isOn);
         }
     }
 }

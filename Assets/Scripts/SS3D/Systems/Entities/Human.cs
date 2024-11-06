@@ -32,9 +32,9 @@ namespace SS3D.Systems.Entities
             mindSystem.SwapMinds(originEntity, ghostEntity);
 
             RpcUpdateGhostPosition(originEntity, ghostEntity);
-            if (TryGetComponent(out PositionController positionController))
+            if (TryGetComponent(out Ragdoll ragdoll))
             {
-                positionController.KnockDown();
+                ragdoll.KnockDown();
             }
             RpcDestroyComponents(originEntity);
         }
