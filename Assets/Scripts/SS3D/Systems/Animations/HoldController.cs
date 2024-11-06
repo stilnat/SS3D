@@ -4,6 +4,7 @@ using FishNet.Object.Synchronizing;
 using FishNet.Serializing;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
+using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
@@ -122,6 +123,8 @@ namespace SS3D.Systems.Animations
             {
                 hand.OnContentsChanged += HandleHandContentChanged;
             }
+
+            GetComponent<Ragdoll>().OnRagdoll += HandleRagdoll;
         }
 
         protected override void OnAwake()
@@ -146,7 +149,6 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.UnderArm, _underArmRight, HandType.RightHand));
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemLeftThrow, HandType.LeftHand));
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
-
         }
 
         public void SetItemConstraintPositionAndRotation(Hand hand, AbstractHoldable item)
@@ -337,6 +339,17 @@ namespace SS3D.Systems.Animations
             Transform selected = TargetFromHoldTypeAndHand(handHoldType, selectedHand);
 
             return selected.localPosition;
+        }
+
+        private void HandleRagdoll(bool isRagdolled)
+        {
+            if (isRagdolled)
+            {
+                foreach (Hand hand in GetComponentsInChildren<Hand>())
+                {
+                    hand.DropHeldItem();
+                }
+            }
         }
     }
 }

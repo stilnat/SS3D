@@ -159,8 +159,14 @@ namespace SS3D.Systems.Inventory.Containers
         [ServerRpc]
         public void CmdDropHeldItem()
         {
+            DropHeldItem();
+        }
+
+        [Server]
+        public void DropHeldItem()
+        {
             Container.Dump();
-		}
+        }
 
         private void StopHolding(Item item)
         {
