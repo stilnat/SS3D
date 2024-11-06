@@ -80,7 +80,7 @@ namespace SS3D.Systems.Entities.Humanoid
         public void KnockDown()
         {
             SetRagdollPhysic(true);
-            StartCoroutine(AlignToHips());
+            //StartCoroutine(AlignToHips());
         }
 
         [Server]
@@ -99,6 +99,7 @@ namespace SS3D.Systems.Entities.Humanoid
         }
 
         /// <summary>
+        /// TODO : this method mess up with something on client, need to figure that out. Creates lots of jitter.
         /// Adjust player's position and rotation. Character's x and z coords equals hips coords, y is at lowest positon.
         /// Character's y rotation is aligned with hips forwards direction.
         /// </summary>
