@@ -80,7 +80,7 @@ namespace SS3D.Systems.Entities.Humanoid
         public void KnockDown()
         {
             SetRagdollPhysic(true);
-            //StartCoroutine(AlignToHips());
+            StartCoroutine(AlignToHips());
         }
 
         [Server]
@@ -99,8 +99,7 @@ namespace SS3D.Systems.Entities.Humanoid
         }
 
         /// <summary>
-        /// TODO : this method mess up with something on client, need to figure that out. Creates lots of jitter.
-        /// Adjust player's position and rotation. Character's x and z coords equals hips coords, y is at lowest positon.
+        /// Adjust player's position and rotation. Character's x and z coords equals hips coords, y is at lowest position.
         /// Character's y rotation is aligned with hips forwards direction.
         /// </summary>
         
@@ -122,7 +121,9 @@ namespace SS3D.Systems.Entities.Humanoid
                 _character.position = newPosition;
                 _hips.position = originalHipsPosition;
 
-                Vector3 desiredDirection = _hips.up * (IsFacingDown ? 1 : -1);
+                /// TODO : this part mess up with something on client, need to figure that out. Creates lots of jitter.
+
+               /* Vector3 desiredDirection = _hips.up * (IsFacingDown ? 1 : -1);
                 desiredDirection.y = 0;
                 desiredDirection.Normalize();
                 Quaternion originalHipsRotation = _hips.rotation;
@@ -132,7 +133,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 rotationDifference.x = 0;
                 rotationDifference.z = 0;
                 transform.rotation *= Quaternion.Euler(rotationDifference);
-                _hips.rotation = originalHipsRotation;
+                _hips.rotation = originalHipsRotation; */
 
                 yield return null;
             }
