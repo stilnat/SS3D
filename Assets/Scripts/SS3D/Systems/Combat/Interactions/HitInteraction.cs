@@ -15,8 +15,12 @@ namespace SS3D.Systems.Combat.Interactions
     /// <summary>
     /// Interaction to hit another player.
     /// </summary>
-    public class HitInteraction : Interaction
+    public class HitInteraction : DelayedInteraction
     {
+        public HitInteraction(float time)
+        {
+            Delay = time;
+        }
 
         public override string GetName(InteractionEvent interactionEvent)
         {
@@ -53,6 +57,8 @@ namespace SS3D.Systems.Combat.Interactions
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
+            base.Start(interactionEvent, reference);
+
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
 
@@ -61,20 +67,26 @@ namespace SS3D.Systems.Combat.Interactions
             // Also should be able to hit with other things than just hands.
             if (source.GetRootSource() is Hand hand)
             {
-                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Hit, hand, null, interactionEvent.Point, 0.5f);
-
-                if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null )
-                {
-                    Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
-                    entity.GetComponent<Ragdoll>().KnockDown(2f);
-                    //BodyPart bodyPart = entity.GetComponentInChildren<BodyPart>();
-
-                    // Inflict a fix amount and type of damages for now. Long term, should be passed in parameter and depends on weapon type, velocity ...
-                    //bodyPart.InflictDamageToAllLayer(new DamageTypeQuantity(DamageType.Slash, 50));
-                }
+                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Hit, hand, null, interactionEvent.Point, Delay);
             }
 
-            return false;
+            return true;
+        }
+
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            IInteractionTarget target = interactionEvent.Target;
+
+            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null )
+            {
+                Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
+                entity.GetComponent<Ragdoll>().KnockDown(1f);
+            }
         }
     }
 }
