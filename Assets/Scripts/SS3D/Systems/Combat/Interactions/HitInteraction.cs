@@ -81,11 +81,13 @@ namespace SS3D.Systems.Combat.Interactions
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
 
-            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null )
+            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null && source.GetRootSource() is Hand hand)
             {
                 Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
                 entity.GetComponent<Ragdoll>().KnockDown(1f);
+                entity.GetComponent<Ragdoll>().AddForceToAllParts(-hand.Up);
             }
         }
     }
