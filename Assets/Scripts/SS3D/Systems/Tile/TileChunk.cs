@@ -35,6 +35,10 @@ namespace SS3D.Systems.Tile
         private Vector3 _originPosition;
         private List<TileGrid> _tileGridList;
 
+        public Vector2Int Key => _chunkKey;
+
+        public Vector3 Origin => _originPosition;
+
         public static TileChunk Create(Vector2Int chunkKey, Vector3 originPosition)
         {
             GameObject chunkObject = new GameObject($"Chunk [{originPosition.x},{originPosition.z}]" );

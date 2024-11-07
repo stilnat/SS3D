@@ -364,5 +364,27 @@ namespace SS3D.Systems.Tile
                     return null;
             }
         }
+
+        public static int GetCardinalDirectionIndex(Direction direction)
+        {
+            switch(direction)
+            {
+                case Direction.North:
+                    return 0;
+
+                case Direction.East:
+                    return 1;
+
+                case Direction.South:
+                    return 2;
+
+                case Direction.West:
+                    return 3;
+
+                default:
+                    Debug.LogError("direction not handled, returning 0");
+                    return 0;
+            }
+        }
     }
 }

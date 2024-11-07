@@ -17,6 +17,8 @@ namespace SS3D.Systems.Tile
     /// </summary>
     public class TileSystem : NetworkSystem
     {
+        public Action TileSystemLoaded;
+
 	    public const string savePath = "/Tilemaps";
 
 	    public const string unnamedMapName = "UnnamedMap";
@@ -60,6 +62,8 @@ namespace SS3D.Systems.Tile
 	        await WaitForResourcesLoad();
 
             Log.Information(this, "All tiles loaded successfully");
+
+            TileSystemLoaded?.Invoke();
         }
 
         [ServerOrClient]

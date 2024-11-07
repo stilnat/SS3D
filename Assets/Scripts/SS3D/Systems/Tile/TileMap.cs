@@ -23,7 +23,11 @@ namespace SS3D.Systems.Tile
         private List<PlacedItemObject> _items;
         private string _mapName;
 
+        public List<TileChunk> Chunks => _chunks.Values.ToList();
+
         public int ChunkCount => _chunks.Count;
+
+        public string Name => _mapName;
 
         public event EventHandler OnMapLoaded;
 
