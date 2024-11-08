@@ -36,14 +36,14 @@ public class TestAtmos : MonoBehaviour
     {
         AtmosObject newAtmosObject1 = new AtmosObject();
         newAtmosObject1.Setup();
-        newAtmosObject1.atmosObject.container.MakeRandom();
+        newAtmosObject1.atmosObject.Container.MakeRandom();
         // newAtmosObject1.atmosObject.container.AddCoreGas(CoreAtmosGasses.Oxygen, 300f);
         // newAtmosObject1.atmosObject.container.AddCoreGas(CoreAtmosGasses.Nitrogen, 10f);
         // newAtmosObject1.atmosObject.container.SetTemperature(500);
 
         AtmosObject newAtmosObject2 = new AtmosObject();
         newAtmosObject2.Setup();
-        newAtmosObject2.atmosObject.container.MakeRandom();
+        newAtmosObject2.atmosObject.Container.MakeRandom();
         // newAtmosObject2.atmosObject.container.AddCoreGas(CoreAtmosGasses.Nitrogen, 100f);
 
         newAtmosObject1.SetNeighbour(newAtmosObject2.atmosObject, 0);
@@ -107,8 +107,8 @@ public class TestAtmos : MonoBehaviour
         {
             AtmosObjectInfo info1 = new AtmosObjectInfo()
             {
-                state = atmosObjects[1].atmosObject.state,
-                container = atmosObjects[1].atmosObject.container,
+                State = atmosObjects[1].atmosObject.State,
+                Container = atmosObjects[1].atmosObject.Container,
             };
 
             AtmosObject writeObject = atmosObjects[0];
@@ -120,8 +120,8 @@ public class TestAtmos : MonoBehaviour
         {
             AtmosObjectInfo info2 = new AtmosObjectInfo()
             {
-                state = atmosObjects[0].atmosObject.state,
-                container = atmosObjects[0].atmosObject.container,
+                State = atmosObjects[0].atmosObject.State,
+                Container = atmosObjects[0].atmosObject.Container,
             };
 
             AtmosObject writeObject = atmosObjects[1];
@@ -171,7 +171,7 @@ public class TestAtmos : MonoBehaviour
         for (int i = 0; i < atmosObjects.Count; i++)
         {
             Color state;
-            switch (atmosObjects[i].atmosObject.state)
+            switch (atmosObjects[i].atmosObject.State)
             {
                 case AtmosState.Active: state = new Color(0, 0, 0, 0); break;
                 case AtmosState.Semiactive: state = new Color(0, 0, 0, 0.4f); break;
@@ -180,7 +180,7 @@ public class TestAtmos : MonoBehaviour
             }
 
             Vector3 position = new Vector3(i, 0, 0);
-            float pressure = atmosObjects[i].atmosObject.container.GetPressure() / 160f;
+            float pressure = atmosObjects[i].atmosObject.Container.GetPressure() / 160f;
 
             if (pressure > 0f)
             {

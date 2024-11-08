@@ -40,7 +40,7 @@ public class AtmosBenchmark : MonoBehaviour
             {
                 AtmosObject atmos = new AtmosObject();
                 atmos.Setup();
-                atmos.atmosObject.container.MakeRandom();
+                atmos.atmosObject.Container.MakeRandom();
 
                 atmosObjects[y * gridSize + x] = atmos;
             }
@@ -131,7 +131,7 @@ public class AtmosBenchmark : MonoBehaviour
         for (int i = 0; i < atmosObjects.Length; i++)
         {
             Color state;
-            switch (atmosObjects[i].atmosObject.state)
+            switch (atmosObjects[i].atmosObject.State)
             {
                 case AtmosState.Active: state = new Color(0, 0, 0, 0); break;
                 case AtmosState.Semiactive: state = new Color(0, 0, 0, 0.4f); break;
@@ -139,7 +139,7 @@ public class AtmosBenchmark : MonoBehaviour
                 default: state = new Color(0, 0, 0, 1); break;
             }
             Vector3 position = GetPositionFromIndex(i);
-            float pressure =  atmosObjects[i].atmosObject.container.GetPressure() / 160f;;
+            float pressure =  atmosObjects[i].atmosObject.Container.GetPressure() / 160f;;
 
             if (pressure > 0f)
             {
@@ -164,9 +164,9 @@ public class AtmosBenchmark : MonoBehaviour
         {
             AtmosObjectInfo info = new AtmosObjectInfo()
             {
-                state = buffer[neighbourIndex].atmosObject.state,
-                container = buffer[neighbourIndex].atmosObject.container,
-                bufferIndex = neighbourIndex,
+                State = buffer[neighbourIndex].atmosObject.State,
+                Container = buffer[neighbourIndex].atmosObject.Container,
+                BufferIndex = neighbourIndex,
             };
 
             AtmosObject writeObject = buffer[ownIndex];

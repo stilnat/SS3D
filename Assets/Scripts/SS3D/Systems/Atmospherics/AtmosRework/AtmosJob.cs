@@ -39,8 +39,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
             foreach (var atmosObject in nativeAtmosTiles)
             {
-                if (atmosObject.atmosObject.state == AtmosState.Active ||
-                    atmosObject.atmosObject.state == AtmosState.Semiactive)
+                if (atmosObject.atmosObject.State == AtmosState.Active ||
+                    atmosObject.atmosObject.State == AtmosState.Semiactive)
                     counter++;
             }
 
@@ -151,13 +151,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <param name="index"></param>
         private void LoadNeighbour(int ownIndex, int neighbourIndex, int neighbourOffset)
         {
-            AtmosObjectInfo info = new AtmosObjectInfo()
-            {
-                state = buffer[neighbourIndex].atmosObject.state,
-                container = buffer[neighbourIndex].atmosObject.container,
-                bufferIndex = neighbourIndex,
-                velocity = buffer[neighbourIndex].atmosObject.velocity,
-            };
+            AtmosObjectInfo info = new (buffer[neighbourIndex].atmosObject.State, buffer[neighbourIndex].atmosObject.Container, buffer[neighbourIndex].atmosObject.Velocity, neighbourIndex);
 
             AtmosObject writeObject = buffer[ownIndex];
             writeObject.SetNeighbour(info, neighbourOffset);
@@ -179,7 +173,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             for (int index = 0; index < buffer.Length; index++)
             {
-                if (buffer[index].atmosObject.state == AtmosState.Active || buffer[index].atmosObject.state == AtmosState.Semiactive)
+                if (buffer[index].atmosObject.State == AtmosState.Active || buffer[index].atmosObject.State == AtmosState.Semiactive)
                 {
                     // Load neighbour
                     for (int i = 0; i < 4; i++)

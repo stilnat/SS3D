@@ -6,27 +6,17 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public struct AtmosObjectInfo
-    {
-        public AtmosState state;
-        public AtmosContainer container;
-        public float2 velocity;
-        public int bufferIndex;
-    }
-
-   
-
     public static class AtmosCalculator
     {
         public static AtmosObject SimulateFlux(AtmosObject atmos, float dt)
         {
-            if (atmos.atmosObject.state == AtmosState.Active)
+            if (atmos.atmosObject.State == AtmosState.Active)
             {
                 atmos = SimulateFluxActive(atmos, dt);
             }
 
-            if (atmos.atmosObject.state == AtmosState.Semiactive ||
-                atmos.atmosObject.state == AtmosState.Active)
+            if (atmos.atmosObject.State == AtmosState.Semiactive ||
+                atmos.atmosObject.State == AtmosState.Active)
             {
                 atmos = SimulateMixing(atmos, dt);
                 atmos = SimulateTemperature(atmos, dt);
@@ -37,22 +27,22 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private static AtmosObject SimulateFluxActive(AtmosObject atmos, float dt)
         {
-            float pressure = atmos.atmosObject.container.GetPressure();
+            float pressure = atmos.atmosObject.Container.GetPressure();
 
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
 
             for (int i = 0; i < 4; i++)
             {
-                if (atmos.GetNeighbour(i).state == AtmosState.Blocked)
+                if (atmos.GetNeighbour(i).State == AtmosState.Blocked)
                     continue;
 
-                float neighbourPressure = atmos.GetNeighbour(i).container.GetPressure();
+                float neighbourPressure = atmos.GetNeighbour(i).Container.GetPressure();
 
                 if (pressure - neighbourPressure <= GasConstants.pressureEpsilon)
                 {
                     if (!atmos.temperatureSetting)
-                        atmos.atmosObject.state = AtmosState.Semiactive;
+                        atmos.atmosObject.State = AtmosState.Semiactive;
                     else
                         atmos.temperatureSetting = false;
                     continue;
@@ -61,17 +51,17 @@ namespace SS3D.Engine.AtmosphericsRework
                 atmos.activeDirection[i] = true;
 
                 // Use partial pressures to determine how much of each gas to move.
-                float4 partialPressureDifference =  atmos.atmosObject.container.GetAllPartialPressures() - atmos.GetNeighbour(i).container.GetAllPartialPressures();
+                float4 partialPressureDifference =  atmos.atmosObject.Container.GetAllPartialPressures() - atmos.GetNeighbour(i).Container.GetAllPartialPressures();
 
                 // Determine the amount of moles by applying the ideal gas law.
-                float4 molesToTransfer = partialPressureDifference * 1000f * atmos.atmosObject.container.GetVolume() /
-                    (atmos.atmosObject.container.GetTemperature() * GasConstants.gasConstant);
+                float4 molesToTransfer = partialPressureDifference * 1000f * atmos.atmosObject.Container.GetVolume() /
+                    (atmos.atmosObject.Container.GetTemperature() * GasConstants.gasConstant);
 
                 // Cannot transfer all moles at once
                 molesToTransfer *= GasConstants.simSpeed * dt;
 
                 // Cannot transfer more gasses then there are and no one below zero.
-                molesToTransfer = math.clamp(molesToTransfer, 0, atmos.atmosObject.container.GetCoreGasses());
+                molesToTransfer = math.clamp(molesToTransfer, 0, atmos.atmosObject.Container.GetCoreGasses());
 
                 // Calculate wind velocity
                 neighbourFlux[i] = math.csum(molesToTransfer * GasConstants.coreGasDensity);
@@ -83,11 +73,11 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (pressure - neighbourPressure <= GasConstants.pressureEpsilon || math.all(molesToTransfer <= 0f))
                     continue;
 
-                if (atmos.GetNeighbour(i).state != AtmosState.Vacuum)
+                if (atmos.GetNeighbour(i).State != AtmosState.Vacuum)
                 {
                     AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                    neighbour.container.AddCoreGasses(molesToTransfer);
-                    neighbour.state = AtmosState.Active;
+                    neighbour.Container.AddCoreGasses(molesToTransfer);
+                    neighbour.State = AtmosState.Active;
                     atmos.SetNeighbour(neighbour, i);
                 }
                 else
@@ -95,14 +85,14 @@ namespace SS3D.Engine.AtmosphericsRework
                     atmos.activeDirection[i] = false;
                 }
 
-                atmos.atmosObject.container.RemoveCoreGasses(molesToTransfer);
+                atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer);
             }
 
             // Finally, calculate the 2d wind vector based on neighbour flux.
             float velHorizontal = neighbourFlux[3] - neighbourFlux[2];
             float velVertical = neighbourFlux[0] - neighbourFlux[1];
-            atmos.atmosObject.velocity.x = velHorizontal;
-            atmos.atmosObject.velocity.y = velVertical;
+            atmos.atmosObject.Velocity.x = velHorizontal;
+            atmos.atmosObject.Velocity.y = velVertical;
 
 
             return atmos;
@@ -112,20 +102,20 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             bool mixed = false;
 
-            if (math.all(atmos.atmosObject.container.GetCoreGasses() <= 0f))
+            if (math.all(atmos.atmosObject.Container.GetCoreGasses() <= 0f))
             {
                 return atmos;
             }
 
             for (int i = 0; i < 4; i++)
             {
-                if (atmos.GetNeighbour(i).state == AtmosState.Blocked || atmos.GetNeighbour(i).state == AtmosState.Vacuum)
+                if (atmos.GetNeighbour(i).State == AtmosState.Blocked || atmos.GetNeighbour(i).State == AtmosState.Vacuum)
                 {
                     continue;
                 }
 
                 AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                float4 molesToTransfer = (atmos.atmosObject.container.GetCoreGasses() - atmos.GetNeighbour(i).container.GetCoreGasses())
+                float4 molesToTransfer = (atmos.atmosObject.Container.GetCoreGasses() - atmos.GetNeighbour(i).Container.GetCoreGasses())
                     * GasConstants.gasDiffusionRate;
 
                 molesToTransfer *= GasConstants.simSpeed * dt;
@@ -133,24 +123,24 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (math.any(molesToTransfer > (GasConstants.fluxEpsilon * GasConstants.simSpeed * dt)))
                 {
                     molesToTransfer = math.max(molesToTransfer, 0);
-                    neighbour.container.AddCoreGasses(molesToTransfer);
-                    atmos.atmosObject.container.RemoveCoreGasses(molesToTransfer);
+                    neighbour.Container.AddCoreGasses(molesToTransfer);
+                    atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer);
                     mixed = true;
                 }
 
                 // Remain active if there is still a pressure difference
-                if (math.abs(neighbour.container.GetPressure() - atmos.atmosObject.container.GetPressure()) > GasConstants.pressureEpsilon)
+                if (math.abs(neighbour.Container.GetPressure() - atmos.atmosObject.Container.GetPressure()) > GasConstants.pressureEpsilon)
                 {
-                    neighbour.state = AtmosState.Active;
+                    neighbour.State = AtmosState.Active;
                 }
 
                 atmos.SetNeighbour(neighbour, i);
             }
 
 
-            if (!mixed && atmos.atmosObject.state == AtmosState.Semiactive)
+            if (!mixed && atmos.atmosObject.State == AtmosState.Semiactive)
             {
-                atmos.atmosObject.state = AtmosState.Inactive;
+                atmos.atmosObject.State = AtmosState.Inactive;
             }
 
             return atmos;
@@ -166,23 +156,23 @@ namespace SS3D.Engine.AtmosphericsRework
                     continue;
                 }
 
-                float difference = atmos.atmosObject.container.GetTemperature() - atmos.GetNeighbour(i).container.GetTemperature();
+                float difference = atmos.atmosObject.Container.GetTemperature() - atmos.GetNeighbour(i).Container.GetTemperature();
 
                 if (difference <= GasConstants.thermalEpsilon)
                 {
                     continue;
                 }
 
-                temperatureFlux[i] = (atmos.atmosObject.container.GetTemperature() - atmos.GetNeighbour(i).container.GetTemperature()) *
-                    GasConstants.thermalBase * atmos.atmosObject.container.GetVolume();
+                temperatureFlux[i] = (atmos.atmosObject.Container.GetTemperature() - atmos.GetNeighbour(i).Container.GetTemperature()) *
+                    GasConstants.thermalBase * atmos.atmosObject.Container.GetVolume();
 
                 // Set neighbour
                 AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                neighbour.container.SetTemperature(neighbour.container.GetTemperature() + temperatureFlux[i]);
+                neighbour.Container.SetTemperature(neighbour.Container.GetTemperature() + temperatureFlux[i]);
                 atmos.SetNeighbour(neighbour, i);
 
                 // Set self
-                atmos.atmosObject.container.SetTemperature(atmos.atmosObject.container.GetTemperature() - temperatureFlux[i]);
+                atmos.atmosObject.Container.SetTemperature(atmos.atmosObject.Container.GetTemperature() - temperatureFlux[i]);
                 atmos.temperatureSetting = true;
             }   
             

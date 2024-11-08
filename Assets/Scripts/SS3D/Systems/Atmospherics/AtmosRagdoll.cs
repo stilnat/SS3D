@@ -46,9 +46,9 @@ namespace SS3D.Engine.Atmospherics
                 Vector3 position = transform.position;
                 AtmosObject atmosObject = atmosSystem.GetAtmosTile(position).GetAtmosObject();
 
-                Debug.Log($"atmos object {atmosObject.atmosObject.velocity}");
+                Debug.Log($"atmos object {atmosObject.atmosObject.Velocity}");
 
-                ApplyVelocity(atmosObject.atmosObject.velocity);
+                ApplyVelocity(atmosObject.atmosObject.Velocity);
             }
         }
 

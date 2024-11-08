@@ -18,19 +18,19 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Setup()
         {
-            atmosObject.container = new();
-            atmosObject.container.Setup();
+            atmosObject.Container = new();
+            atmosObject.Container.Setup();
 
             for (int i = 0; i < 4; i++)
             {
                 AtmosObjectInfo info = new()
                 {
-                    bufferIndex = -1,
-                    container = new(),
-                    state = AtmosState.Blocked
+                    BufferIndex = -1,
+                    Container = new(),
+                    State = AtmosState.Blocked
                 };
 
-                info.container.Setup();
+                info.Container.Setup();
                 SetNeighbour(info, i);
             }
         }
@@ -39,11 +39,11 @@ namespace SS3D.Engine.AtmosphericsRework
         public float GetTotalGasInNeighbours()
         {
             float gasAmount = 0f;
-            gasAmount += math.csum(atmosObject.container.GetCoreGasses());
-            gasAmount += math.csum(neighbour1.container.GetCoreGasses());
-            gasAmount += math.csum(neighbour2.container.GetCoreGasses());
-            gasAmount += math.csum(neighbour3.container.GetCoreGasses());
-            gasAmount += math.csum(neighbour4.container.GetCoreGasses());
+            gasAmount += math.csum(atmosObject.Container.GetCoreGasses());
+            gasAmount += math.csum(neighbour1.Container.GetCoreGasses());
+            gasAmount += math.csum(neighbour2.Container.GetCoreGasses());
+            gasAmount += math.csum(neighbour3.Container.GetCoreGasses());
+            gasAmount += math.csum(neighbour4.Container.GetCoreGasses());
 
             return gasAmount;
         }
@@ -70,13 +70,13 @@ namespace SS3D.Engine.AtmosphericsRework
             switch (index)
             {
                 case 0:
-                    return neighbour1.bufferIndex;
+                    return neighbour1.BufferIndex;
                 case 1:
-                    return neighbour2.bufferIndex;
+                    return neighbour2.BufferIndex;
                 case 2:
-                    return neighbour3.bufferIndex;
+                    return neighbour3.BufferIndex;
                 case 3:
-                    return neighbour4.bufferIndex;
+                    return neighbour4.BufferIndex;
             }
 
             return default;
@@ -87,16 +87,16 @@ namespace SS3D.Engine.AtmosphericsRework
             switch (index)
             {
                 case 0:
-                    neighbour1.bufferIndex = bufferIndex;
+                    neighbour1.BufferIndex = bufferIndex;
                     break;
                 case 1:
-                    neighbour2.bufferIndex = bufferIndex;
+                    neighbour2.BufferIndex = bufferIndex;
                     break;
                 case 2:
-                    neighbour3.bufferIndex = bufferIndex;
+                    neighbour3.BufferIndex = bufferIndex;
                     break;
                 case 3:
-                    neighbour4.bufferIndex = bufferIndex;
+                    neighbour4.BufferIndex = bufferIndex;
                     break;
             }
         }
@@ -122,47 +122,47 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void AddGas(CoreAtmosGasses gas, float amount)
         {
-            atmosObject.container.AddCoreGas(gas, amount);
-            atmosObject.state = AtmosState.Active;
+            atmosObject.Container.AddCoreGas(gas, amount);
+            atmosObject.State = AtmosState.Active;
         }
 
         public void RemoveGas(CoreAtmosGasses gas, float amount)
         {
-            atmosObject.container.RemoveCoreGas(gas, amount);
-            atmosObject.state = AtmosState.Active;
+            atmosObject.Container.RemoveCoreGas(gas, amount);
+            atmosObject.State = AtmosState.Active;
         }
 
         public void AddHeat(float amount)
         {
-            atmosObject.container.SetTemperature(amount); // TODO change back to heat when a proper setting is found.
-            atmosObject.state = AtmosState.Active;
+            atmosObject.Container.SetTemperature(amount); // TODO change back to heat when a proper setting is found.
+            atmosObject.State = AtmosState.Active;
         }
 
         public void RemoveHeat(float amount)
         {
-            atmosObject.container.RemoveHeat(amount);
-            atmosObject.state = AtmosState.Active;
+            atmosObject.Container.RemoveHeat(amount);
+            atmosObject.State = AtmosState.Active;
         }
 
 
         public bool IsEmpty()
         {
-            return atmosObject.container.IsEmpty();
+            return atmosObject.Container.IsEmpty();
         }
 
         public bool IsAir()
         {
-            return atmosObject.container.IsAir();
+            return atmosObject.Container.IsAir();
         }
 
         public override string ToString()
         {
-            string text = $"State: {atmosObject.state}, Pressure: {atmosObject.container.GetPressure()}, Gasses: {atmosObject.container.GetCoreGasses()}\n";
-            text += $"Temperature: {atmosObject.container.GetTemperature()} Kelvin, Compressibility factor: {atmosObject.container.GetCompressionFactor()}\n";
+            string text = $"State: {atmosObject.State}, Pressure: {atmosObject.Container.GetPressure()}, Gasses: {atmosObject.Container.GetCoreGasses()}\n";
+            text += $"Temperature: {atmosObject.Container.GetTemperature()} Kelvin, Compressibility factor: {atmosObject.Container.GetCompressionFactor()}\n";
             for (int i = 0; i < 8; i++)
             {
                 AtmosObjectInfo info = GetNeighbour(i);
-                text += $"neighbour{i}: State: {info.state}, Pressure: {info.container.GetPressure()}, Temperature: {info.container.GetTemperature()}\n";
+                text += $"neighbour{i}: State: {info.State}, Pressure: {info.Container.GetPressure()}, Temperature: {info.Container.GetTemperature()}\n";
             }
 
             return text;
