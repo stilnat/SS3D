@@ -247,16 +247,16 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 if (_usesParallelComputation)
                 {
-                    JobHandle simulateTilesHandle = simulateTilesJob.Schedule();
-                    JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule();
+                    JobHandle simulateTilesHandle = simulateTilesJob.Schedule(atmosJob.AtmosTiles.Count, 100);
+                    JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule(atmosJob.AtmosDevices.Count, 100);
 
                     jobHandlesList.Add(simulateTilesHandle);
                     jobHandlesList.Add(simulateDevicesHandle);
                 }
                 else
                 {
-                    simulateTilesJob.Run();
-                    simulateDevicesJob.Run();
+                    simulateTilesJob.Run(atmosJob.AtmosTiles.Count);
+                    simulateDevicesJob.Run(atmosJob.AtmosDevices.Count);
                 }
             }
 

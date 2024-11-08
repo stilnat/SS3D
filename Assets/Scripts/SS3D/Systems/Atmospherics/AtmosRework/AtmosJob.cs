@@ -133,11 +133,16 @@ namespace SS3D.Engine.AtmosphericsRework
             */
         }
     }
-
-    //[BurstCompile(CompileSynchronously = true)]
-    struct SimulateFluxJob : IJob
+    
+    [BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    struct SimulateFluxJob : IJobParallelFor
     {
 
+        // todo : using NativeDisableParallelForRestriction is a dirty trick to avoid doing proper code. This might lead to race conditions.
+        // The issue is that each jobs need to access atmos tile outside its set of indexes
+        // Unity recommends using a so called double buffering methods.
+        // https://github.com/korzen/Unity3D-JobsSystemAndBurstSamples/blob/master/Assets/JobsAndBurst/Scripts/DoubleBufferingBasics.cs
+        [NativeDisableParallelForRestriction]
         public NativeArray<AtmosObject> Buffer;
 
         public float DeltaTime;
@@ -164,41 +169,37 @@ namespace SS3D.Engine.AtmosphericsRework
             Buffer[neighbourIndex] = writeObject;
         }
 
-        public void Execute()
+        public void Execute(int index)
         {
-            for (int index = 0; index < Buffer.Length; index++)
+            // todo : We might need to set velocity of inactive atmosObject to 0 here ?
+            if (Buffer[index].atmosObject.State != AtmosState.Active && Buffer[index].atmosObject.State != AtmosState.Semiactive)
             {
-                // todo : We might need to set velocity of inactive atmosObject to 0 here ?
-                if (Buffer[index].atmosObject.State != AtmosState.Active && Buffer[index].atmosObject.State != AtmosState.Semiactive)
+                return;
+            }
+
+            // Load neighbour
+            for (int i = 0; i < 4; i++)
+            {
+                int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
+
+                if (neighbourIndex != -1)
                 {
-                    continue;
+                    LoadNeighbour(index, neighbourIndex, i);
                 }
+            }
 
-                // Load neighbour
-                for (int i = 0; i < 4; i++)
+            // Do actual work
+            Buffer[index] = AtmosCalculator.SimulateFlux(Buffer[index], DeltaTime);
+
+            // Set neighbour
+            for (int i = 0; i < 4; i++)
+            {
+                int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
+
+                if (neighbourIndex != -1)
                 {
-                    int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
-
-                    if (neighbourIndex != -1)
-                    {
-                        LoadNeighbour(index, neighbourIndex, i);
-                    }
+                    SetNeighbour(index, neighbourIndex, i);
                 }
-
-                // Do actual work
-                Buffer[index] = AtmosCalculator.SimulateFlux(Buffer[index], DeltaTime);
-
-                // Set neighbour
-                for (int i = 0; i < 4; i++)
-                {
-                    int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
-
-                    if (neighbourIndex != -1)
-                    {
-                        SetNeighbour(index, neighbourIndex, i);
-                    }
-                }
-
             }
         }
     }
