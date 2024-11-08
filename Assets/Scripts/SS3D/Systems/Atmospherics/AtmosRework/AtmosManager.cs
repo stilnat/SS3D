@@ -29,6 +29,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void Start()
         {
+            tileManager = Subsystems.Get<TileSystem>();
             // Initialization is invoked by the tile manager
             tileManager.TileSystemLoaded += Initialize;
         }
@@ -100,7 +101,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void Initialize()
         {
-            tileManager = Subsystems.Get<TileSystem>();
             atmosMaps = new();
             atmosJobs = new();
 
@@ -249,6 +249,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             jobHandles = new(jobHandlesList.ToArray(), Allocator.TempJob);
             JobHandle.CompleteAll(jobHandles);
+            jobHandles.Dispose();
 
 
             // Step 4: Write back the results
