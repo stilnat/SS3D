@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS3D.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace SS3D.Engine.AtmosphericsRework
         public AtmosMap(TileMap tileMap, string name)
         {
             atmosChunks = new Dictionary<Vector2Int, AtmosChunk>();
-            atmosManager = AtmosManager.Instance;
+            atmosManager = Subsystems.Get<AtmosManager>();
             mapName = name;
             this.tileMap = tileMap;
         }

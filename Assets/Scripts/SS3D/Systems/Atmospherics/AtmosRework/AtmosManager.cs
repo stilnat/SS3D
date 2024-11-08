@@ -27,12 +27,6 @@ namespace SS3D.Engine.AtmosphericsRework
         static ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("Atmospherics.Initialize");
         static ProfilerMarker s_StepPerfMarker = new ProfilerMarker("Atmospherics.Step");
 
-        /// <summary>
-        /// Singleton instance
-        /// </summary>
-        private static AtmosManager _instance;
-        public static AtmosManager Instance { get { return _instance; } }
-
         private void Start()
         {
             tileManager = Subsystems.Get<TileSystem>();
@@ -47,16 +41,6 @@ namespace SS3D.Engine.AtmosphericsRework
         private void Awake()
         {
             initCompleted = false;
-
-            if (_instance != null && _instance != this)
-            {
-                Debug.LogWarning("Duplicate AtmosManager found. Deleting the last instance");
-                //EditorAndRuntime.Destroy(gameObject);
-            }
-            else
-            {
-                _instance = this;
-            }
         }
 
         private void OnDestroy()
@@ -245,9 +229,6 @@ namespace SS3D.Engine.AtmosphericsRework
             jobHandles.Clear();
             foreach (AtmosJob atmosJob in atmosJobs)
             {
-                // atmosJob.AddGasTest();
-
-
                 // Step 1: Simulate tiles
                 SimulateFluxJob simulateTilesJob = new SimulateFluxJob()
                 {

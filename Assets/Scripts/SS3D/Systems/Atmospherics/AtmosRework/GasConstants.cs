@@ -31,7 +31,7 @@ namespace SS3D.Engine.AtmosphericsRework
         public const bool useRealisticGasLaw = true;
 
         // Gas constants
-        public const float simSpeed = 0.2f;         // Simulation speed
+        public const float simSpeed = 5f;         // Simulation speed
         public const float gasConstant = 8.314f;    // Universal gas constant
         // public const float drag = 0.95f;         // Fluid drag, slows down flux so that gases don't infinitely slosh
         public const float thermalBase = 0.024f;    // * volume | Rate of temperature equalization

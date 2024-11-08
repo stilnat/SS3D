@@ -296,7 +296,7 @@ public class AtmosEditor : EditorWindow
 
     private void DrawWindGizmo(AtmosObject atmosObject, Vector3 position)
     {
-        Vector2 velocity = atmosObject.atmosObject.velocity.normalized;
+        Vector2 velocity = atmosObject.atmosObject.velocity / 30;
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(position, Vector3.up, gizmoSize / 4f);
