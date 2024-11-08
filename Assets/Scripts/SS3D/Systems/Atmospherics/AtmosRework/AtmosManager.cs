@@ -231,15 +231,15 @@ namespace SS3D.Engine.AtmosphericsRework
                 // Step 1: Simulate tiles
                 SimulateFluxJob simulateTilesJob = new SimulateFluxJob()
                 {
-                    buffer = atmosJob.nativeAtmosTiles,
-                    dt = deltaTime
+                    Buffer = atmosJob.NativeAtmosTiles,
+                    DeltaTime = deltaTime
                 };
 
                 // Step 2: Simulate atmos devices and pipes
                 SimulateFluxJob simulateDevicesJob = new SimulateFluxJob()
                 {
-                    buffer = atmosJob.nativeAtmosDevices,
-                    dt = deltaTime
+                    Buffer = atmosJob.NativeAtmosDevices,
+                    DeltaTime = deltaTime
                 };
 
                 counter += atmosJob.CountActive();

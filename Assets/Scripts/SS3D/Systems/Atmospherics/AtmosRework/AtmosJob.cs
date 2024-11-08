@@ -1,27 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
     public struct AtmosJob
     {
-        public AtmosMap map;
-        public List<TileAtmosObject> atmosTiles;
-        public List<IAtmosLoop> atmosDevices;
-        public NativeArray<AtmosObject> nativeAtmosTiles;
-        public NativeArray<AtmosObject> nativeAtmosDevices;
+        public AtmosMap Map;
+
+        public List<TileAtmosObject> AtmosTiles;
+
+        public List<IAtmosLoop> AtmosDevices;
+
+        public NativeArray<AtmosObject> NativeAtmosTiles;
+
+        public NativeArray<AtmosObject> NativeAtmosDevices;
 
         public AtmosJob(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
         {
-            this.map = map;
-            this.atmosTiles = atmosTiles;
-            this.atmosDevices = atmosDevices;
+            Map = map;
+            AtmosTiles = atmosTiles;
+            AtmosDevices = atmosDevices;
 
-            nativeAtmosTiles = new NativeArray<AtmosObject>(atmosTiles.Count, Allocator.Persistent);
-            nativeAtmosDevices = new NativeArray<AtmosObject>(atmosDevices.Count, Allocator.Persistent);
+            NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
+            NativeAtmosDevices = new(atmosDevices.Count, Allocator.Persistent);
 
             LoadNativeArrays();
             LoadNeighboursToArray();
@@ -29,22 +33,13 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Destroy()
         {
-            nativeAtmosTiles.Dispose();
-            nativeAtmosDevices.Dispose();
+            NativeAtmosTiles.Dispose();
+            NativeAtmosDevices.Dispose();
         }
 
         public int CountActive()
         {
-            int counter = 0;
-
-            foreach (var atmosObject in nativeAtmosTiles)
-            {
-                if (atmosObject.atmosObject.State == AtmosState.Active ||
-                    atmosObject.atmosObject.State == AtmosState.Semiactive)
-                    counter++;
-            }
-
-            return counter;
+            return NativeAtmosTiles.Count(atmosObject => atmosObject.atmosObject.State == AtmosState.Active || atmosObject.atmosObject.State == AtmosState.Semiactive);
         }
 
         /// <summary>
@@ -61,22 +56,22 @@ namespace SS3D.Engine.AtmosphericsRework
         public void WriteResultsToList()
         {
 
-            for (int i = 0; i < nativeAtmosTiles.Length; i++)
+            for (int i = 0; i < NativeAtmosTiles.Length; i++)
             {
-                atmosTiles[i].SetAtmosObject(nativeAtmosTiles[i]);
+                AtmosTiles[i].SetAtmosObject(NativeAtmosTiles[i]);
             }
 
-            for (int i = 0; i < nativeAtmosDevices.Length; i++)
+            for (int i = 0; i < NativeAtmosDevices.Length; i++)
             {
-                atmosDevices[i].SetAtmosObject(nativeAtmosDevices[i]);
+                AtmosDevices[i].SetAtmosObject(NativeAtmosDevices[i]);
             }
         }
 
         private void LoadNativeArrays()
         {
-            for (int i = 0; i < atmosTiles.Count; i++)
+            for (int i = 0; i < AtmosTiles.Count; i++)
             {
-                nativeAtmosTiles[i] = atmosTiles[i].GetAtmosObject();
+                NativeAtmosTiles[i] = AtmosTiles[i].GetAtmosObject();
             }
 
             /*
@@ -90,25 +85,25 @@ namespace SS3D.Engine.AtmosphericsRework
         private void LoadNeighboursToArray()
         {
             // For all tiles
-            for (int tileIndex = 0; tileIndex < atmosTiles.Count; tileIndex++)
+            for (int tileIndex = 0; tileIndex < AtmosTiles.Count; tileIndex++)
             {
                 // Retrieve the neighbours that were set before
-                TileAtmosObject[] neighbours = atmosTiles[tileIndex].GetNeighbours();
+                TileAtmosObject[] neighbours = AtmosTiles[tileIndex].GetNeighbours();
 
                 // For each neighbour
                 for (int neighbourIndex = 0; neighbourIndex < neighbours.Length; neighbourIndex++)
                 {
                     // Find index
-                    int foundIndex = atmosTiles.FindIndex(tileObject => tileObject == neighbours[neighbourIndex]);
+                    int foundIndex = AtmosTiles.FindIndex(tileObject => tileObject == neighbours[neighbourIndex]);
 
                     // Get corresponding atmos object
-                    AtmosObject atmosObject = nativeAtmosTiles[tileIndex];
+                    AtmosObject atmosObject = NativeAtmosTiles[tileIndex];
 
                     // Set index for object
                     atmosObject.SetNeighbourIndex(neighbourIndex, foundIndex);
 
                     // Write back info into native array
-                    nativeAtmosTiles[tileIndex] = atmosObject;
+                    NativeAtmosTiles[tileIndex] = atmosObject;
                 }
             }
 
@@ -142,64 +137,68 @@ namespace SS3D.Engine.AtmosphericsRework
     //[BurstCompile(CompileSynchronously = true)]
     struct SimulateFluxJob : IJob
     {
-        public NativeArray<AtmosObject> buffer;
-        public float dt;
+
+        public NativeArray<AtmosObject> Buffer;
+
+        public float DeltaTime;
 
         /// <summary>
         /// Set the internal neighbour state based on the neighbour
         /// </summary>
-        /// <param name="index"></param>
         private void LoadNeighbour(int ownIndex, int neighbourIndex, int neighbourOffset)
         {
-            AtmosObjectInfo info = new (buffer[neighbourIndex].atmosObject.State, buffer[neighbourIndex].atmosObject.Container, buffer[neighbourIndex].atmosObject.Velocity, neighbourIndex);
+            AtmosObjectInfo info = new (Buffer[neighbourIndex].atmosObject.State, Buffer[neighbourIndex].atmosObject.Container, Buffer[neighbourIndex].atmosObject.Velocity, neighbourIndex);
 
-            AtmosObject writeObject = buffer[ownIndex];
+            AtmosObject writeObject = Buffer[ownIndex];
             writeObject.SetNeighbour(info, neighbourOffset);
-            buffer[ownIndex] = writeObject;
+            Buffer[ownIndex] = writeObject;
         }
 
         /// <summary>
         /// Modify the neighbour based on the internal update
         /// </summary>
-        /// <param name="index"></param>
         private void SetNeighbour(int ownIndex, int neighbourIndex, int neighbourOffset)
         {
-            AtmosObject writeObject = buffer[neighbourIndex];
-            writeObject.atmosObject = buffer[ownIndex].GetNeighbour(neighbourOffset);
-            buffer[neighbourIndex] = writeObject;
+            AtmosObject writeObject = Buffer[neighbourIndex];
+            writeObject.atmosObject = Buffer[ownIndex].GetNeighbour(neighbourOffset);
+            Buffer[neighbourIndex] = writeObject;
         }
 
         public void Execute()
         {
-            for (int index = 0; index < buffer.Length; index++)
+            for (int index = 0; index < Buffer.Length; index++)
             {
-                if (buffer[index].atmosObject.State == AtmosState.Active || buffer[index].atmosObject.State == AtmosState.Semiactive)
+                // todo : We might need to set velocity of inactive atmosObject to 0 here ?
+                if (Buffer[index].atmosObject.State != AtmosState.Active && Buffer[index].atmosObject.State != AtmosState.Semiactive)
                 {
-                    // Load neighbour
-                    for (int i = 0; i < 4; i++)
+                    continue;
+                }
+
+                // Load neighbour
+                for (int i = 0; i < 4; i++)
+                {
+                    int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
+
+                    if (neighbourIndex != -1)
                     {
-                        int neighbourIndex = buffer[index].GetNeighbourIndex(i);
-
-                        if (neighbourIndex != -1)
-                        {
-                            LoadNeighbour(index, neighbourIndex, i);
-                        }
-                    }
-
-                    // Do actual work
-                    buffer[index] = AtmosCalculator.SimulateFlux(buffer[index], dt);
-
-                    // Set neighbour
-                    for (int i = 0; i < 4; i++)
-                    {
-                        int neighbourIndex = buffer[index].GetNeighbourIndex(i);
-
-                        if (neighbourIndex != -1)
-                        {
-                            SetNeighbour(index, neighbourIndex, i);
-                        }
+                        LoadNeighbour(index, neighbourIndex, i);
                     }
                 }
+
+                // Do actual work
+                Buffer[index] = AtmosCalculator.SimulateFlux(Buffer[index], DeltaTime);
+
+                // Set neighbour
+                for (int i = 0; i < 4; i++)
+                {
+                    int neighbourIndex = Buffer[index].GetNeighbourIndex(i);
+
+                    if (neighbourIndex != -1)
+                    {
+                        SetNeighbour(index, neighbourIndex, i);
+                    }
+                }
+
             }
         }
     }

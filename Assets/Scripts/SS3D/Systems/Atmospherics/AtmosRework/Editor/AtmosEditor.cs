@@ -210,10 +210,10 @@ public class AtmosEditor : EditorWindow
 
         foreach (AtmosJob job in atmosJobs)
         {
-            for (int i = 0; i < job.atmosTiles.Count; i++)
+            for (int i = 0; i < job.AtmosTiles.Count; i++)
             {
-                Vector3 position = job.atmosTiles[i].GetWorldPosition();
-                AtmosObject atmosObject = job.atmosTiles[i].GetAtmosObject();
+                Vector3 position = job.AtmosTiles[i].GetWorldPosition();
+                AtmosObject atmosObject = job.AtmosTiles[i].GetAtmosObject();
 
                 Color stateColor;
                 AtmosState tileState = atmosObject.atmosObject.State;
