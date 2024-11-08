@@ -27,6 +27,10 @@ namespace SS3D.Engine.AtmosphericsRework
         static ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("Atmospherics.Initialize");
         static ProfilerMarker s_StepPerfMarker = new ProfilerMarker("Atmospherics.Step");
 
+        // This is purely for debugging purposes. When false, the jobs execute all on the main threads, allowing easy debugging.
+        [SerializeField]
+        private bool _usesParallelComputation;
+
         private void Start()
         {
             tileManager = Subsystems.Get<TileSystem>();
@@ -240,16 +244,27 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 counter += atmosJob.CountActive();
 
-                JobHandle simulateTilesHandle = simulateTilesJob.Schedule();
-                JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule();
+                if (_usesParallelComputation)
+                {
+                    JobHandle simulateTilesHandle = simulateTilesJob.Schedule();
+                    JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule();
 
-                jobHandlesList.Add(simulateTilesHandle);
-                jobHandlesList.Add(simulateDevicesHandle);
+                    jobHandlesList.Add(simulateTilesHandle);
+                    jobHandlesList.Add(simulateDevicesHandle);
+                }
+                else
+                {
+                    simulateTilesJob.Run();
+                    simulateDevicesJob.Run();
+                }
             }
 
-            jobHandles = new(jobHandlesList.ToArray(), Allocator.TempJob);
-            JobHandle.CompleteAll(jobHandles);
-            jobHandles.Dispose();
+            if (_usesParallelComputation)
+            {
+                jobHandles = new(jobHandlesList.ToArray(), Allocator.TempJob);
+                JobHandle.CompleteAll(jobHandles);
+                jobHandles.Dispose();
+            }
 
 
             // Step 4: Write back the results

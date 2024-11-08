@@ -10,7 +10,7 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         public AtmosState state;
         public AtmosContainer container;
-        public Vector2 velocity;
+        public float2 velocity;
         public int bufferIndex;
     }
 
@@ -112,7 +112,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             bool mixed = false;
 
-            if (math.any(atmos.atmosObject.container.GetCoreGasses() <= 0f))
+            if (math.all(atmos.atmosObject.container.GetCoreGasses() <= 0f))
             {
                 return atmos;
             }
