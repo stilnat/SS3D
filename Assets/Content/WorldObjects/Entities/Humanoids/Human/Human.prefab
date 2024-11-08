@@ -6639,6 +6639,7 @@ GameObject:
   - component: {fileID: 8703868999579586524}
   - component: {fileID: -4713880493128437662}
   - component: {fileID: -8174327676669324710}
+  - component: {fileID: 3131734554846003738}
   m_Layer: 11
   m_Name: Human
   m_TagString: Player
@@ -7249,6 +7250,22 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 2930813178971533500}
   _networkObjectCache: {fileID: 2930813178971533500}
   _humanInventory: {fileID: 1089183168752255729}
+--- !u!114 &3131734554846003738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415765038646171405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b557b777854e2fa3eab667c903c98c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 2930813178971533500}
+  _networkObjectCache: {fileID: 0}
+  ragdoll: {fileID: 8358346980019529144}
 --- !u!1 &6418095482179841189
 GameObject:
   m_ObjectHideFlags: 0

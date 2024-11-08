@@ -1,41 +1,40 @@
-﻿using System.Collections;
+﻿using SS3D.Core;
+using SS3D.Core.Behaviours;
+using SS3D.Engine.AtmosphericsRework;
+using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Tile;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace SS3D.Engine.Atmospherics
 {
-    /*
+    
     // This handles ragdolling by atmos wind, which I think should be moved elsewhere
     // makes the player ragdoll when there's strong wind
-    [RequireComponent(typeof(HumanRagdoll))]
-    public class AtmosRagdoll : MonoBehaviour
+    [RequireComponent(typeof(Ragdoll))]
+    public class AtmosRagdoll : NetworkActor
     {
-        public float minVelocity = 1;
-        public float knockdownTime = 3;
-        public float checkInterval = 0.2f;
+        private float minVelocity = 1;
+        private float knockdownTime = 3;
+        private float checkInterval = 1f;
         
-        private HumanRagdoll ragdoll;
-        private int lastX;
-        private int lastY;
-        private float lastCheck;
-        private TileManager tileManager;
-        private Vector3 origin;
-        private AtmosObject atmosObject;
+        [SerializeField]
+        private Ragdoll ragdoll;
 
-        void Start()
+        private float lastCheck;
+
+        private AtmosManager atmosSystem;
+
+
+
+        public override void OnStartServer()
         {
-            if (!NetworkServer.active)
-            {
-                Destroy(this);
-            }
-            
-            ragdoll = GetComponent<HumanRagdoll>();
-            tileManager = FindObjectOfType<TileManager>();
-            Assert.IsNotNull(tileManager);
-            // origin = tileManager.Origin;
+            base.OnStartServer();
+            atmosSystem = Subsystems.Get<AtmosManager>();
         }
 
-        void Update()
+        public void Update()
         {
             float time = Time.time;
             // Reduce check interval
@@ -45,22 +44,11 @@ namespace SS3D.Engine.Atmospherics
 
                 // Get current tile position
                 Vector3 position = transform.position;
-                int x = Mathf.FloorToInt(position.x);
-                int y = Mathf.FloorToInt(position.z);
+                AtmosObject atmosObject = atmosSystem.GetAtmosTile(position).GetAtmosObject();
 
-                // Update atmos object if tile changed
-                if (x != lastX || y != lastY)
-                {
-                    lastX = x;
-                    lastY = y;
-                    // atmosObject = tileManager.GetTile((int) (x - origin.x), (int) (y - origin.z))?.atmos;
-                }
+                Debug.Log($"atmos object {atmosObject.atmosObject.velocity}");
 
-                // Check velocity
-                if (atmosObject != null)
-                {
-                    // ApplyVelocity(atmosObject.GetVelocity());
-                }
+                ApplyVelocity(atmosObject.atmosObject.velocity);
             }
         }
 
@@ -68,9 +56,8 @@ namespace SS3D.Engine.Atmospherics
         {
             if (velocity.sqrMagnitude > minVelocity * minVelocity)
             {
-                ragdoll.KnockDown(knockdownTime);
+                ragdoll.Knockdown(knockdownTime);
             }
         }
     }
-    */
 }
