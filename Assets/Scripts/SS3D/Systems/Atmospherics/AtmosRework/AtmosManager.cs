@@ -19,7 +19,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private TileSystem tileManager;
         private List<AtmosMap> atmosMaps;
         private List<AtmosJob> atmosJobs;
-        private List<JobHandle> jobHandles;
+        private NativeArray<JobHandle> jobHandles;
         private float lastStep;
         private bool initCompleted = false;
 
@@ -32,7 +32,7 @@ namespace SS3D.Engine.AtmosphericsRework
             tileManager = Subsystems.Get<TileSystem>();
             atmosMaps = new List<AtmosMap>();
             atmosJobs = new List<AtmosJob>();
-            jobHandles = new List<JobHandle>();
+            jobHandles = new NativeArray<JobHandle>();
 
             // Initialization is invoked by the tile manager
             tileManager.TileSystemLoaded += Initialize;
@@ -252,6 +252,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 jobHandles.Add(simulateDevicesHandle);
             }
 
+            JobHandle.CompleteAll();
             // Step 3: Complete the work
             foreach (JobHandle handle in jobHandles)
             {

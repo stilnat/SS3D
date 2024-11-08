@@ -29,6 +29,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public float GetVolume()
         {
+            return GasConstants.useRealisticGasLaw ? GetRealVolume() : GetSimplifiedVolume();
+        }
+
+        private float GetSimplifiedVolume()
+        {
             return volume;
         }
 
@@ -41,7 +46,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// 
         /// </summary>
         /// <returns></returns>
-        public float GetRealVolume()
+        private float GetRealVolume()
         {
             return volume - math.csum(coreGasses * GasConstants.coreGasDensity * math.pow(10, -6));
         }
@@ -107,11 +112,16 @@ namespace SS3D.Engine.AtmosphericsRework
             return math.csum(coreGasses);
         }
 
+        public float GetPressure()
+        {
+            return GasConstants.useRealisticGasLaw ? GetRealPressure() : GetSimplifiedPressure();
+        }
+
         /// <summary>
         /// Returns the pressure based on the ideal gas law
         /// </summary>
         /// <returns></returns>
-        public float GetPressure()
+        private float GetSimplifiedPressure()
         {
             float pressure = GetTotalMoles() * GasConstants.gasConstant * temperature / volume / 1000f;
             if (math.isnan(pressure))
@@ -136,7 +146,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// 
         /// </summary>
         /// <returns></returns>
-        public float GetRealPressure()
+        private float GetRealPressure()
         {
             float pressure = math.csum(GetAllRealPartialPressures());
             if (math.isnan(pressure))
@@ -145,11 +155,16 @@ namespace SS3D.Engine.AtmosphericsRework
                 return pressure;
         }
 
-        public float4 GetAllRealPartialPressures()
+        private float4 GetAllRealPartialPressures()
         {
             return coreGasses * GasConstants.gasConstant * temperature /
                 GetRealVolume() / 1000f +
                 100 * (GasConstants.interMolecularInteraction * math.pow(coreGasses, 2)) / math.pow(volume * 1000, 2);
+        }
+
+        public float4 GetAllPartialPressures()
+        {
+            return GasConstants.useRealisticGasLaw ? GetAllSimplifiedPartialPressures() : GetAllRealPartialPressures();
         }
 
         public float GetPartialPressure(CoreAtmosGasses gas)
@@ -161,7 +176,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return pressure;
         }
 
-        public float4 GetAllPartialPressures()
+        private float4 GetAllSimplifiedPartialPressures()
         {
             return coreGasses * GasConstants.gasConstant * temperature / volume / 1000f;
         }

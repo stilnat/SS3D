@@ -139,15 +139,7 @@ public class AtmosBenchmark : MonoBehaviour
                 default: state = new Color(0, 0, 0, 1); break;
             }
             Vector3 position = GetPositionFromIndex(i);
-            float pressure = 0f;
-            if (GasConstants.useRealisticGasLaw)
-            {
-                pressure = atmosObjects[i].atmosObject.container.GetRealPressure() / 160f;
-            }
-            else
-            {
-                pressure = atmosObjects[i].atmosObject.container.GetPressure() / 160f;
-            }
+            float pressure =  atmosObjects[i].atmosObject.container.GetPressure() / 160f;;
 
             if (pressure > 0f)
             {
