@@ -2,6 +2,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
@@ -59,6 +60,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public void WriteResultsToList()
         {
+
             for (int i = 0; i < nativeAtmosTiles.Length; i++)
             {
                 atmosTiles[i].SetAtmosObject(nativeAtmosTiles[i]);
@@ -137,7 +139,7 @@ namespace SS3D.Engine.AtmosphericsRework
         }
     }
 
-    // [BurstCompile(CompileSynchronously = true)]
+    //[BurstCompile(CompileSynchronously = true)]
     struct SimulateFluxJob : IJob
     {
         public NativeArray<AtmosObject> buffer;
@@ -154,6 +156,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 state = buffer[neighbourIndex].atmosObject.state,
                 container = buffer[neighbourIndex].atmosObject.container,
                 bufferIndex = neighbourIndex,
+                velocity = buffer[neighbourIndex].atmosObject.velocity,
             };
 
             AtmosObject writeObject = buffer[ownIndex];
@@ -192,12 +195,11 @@ namespace SS3D.Engine.AtmosphericsRework
                     // Do actual work
                     buffer[index] = AtmosCalculator.SimulateFlux(buffer[index], dt);
 
-                    var atmosObject = buffer[index];
-
                     // Set neighbour
                     for (int i = 0; i < 4; i++)
                     {
                         int neighbourIndex = buffer[index].GetNeighbourIndex(i);
+
                         if (neighbourIndex != -1)
                         {
                             SetNeighbour(index, neighbourIndex, i);

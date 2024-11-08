@@ -15,7 +15,7 @@ namespace SS3D.Engine.Atmospherics
     [RequireComponent(typeof(Ragdoll))]
     public class AtmosRagdoll : NetworkActor
     {
-        private float minVelocity = 1;
+        private float minVelocity = 10;
         private float knockdownTime = 3;
         private float checkInterval = 1f;
         

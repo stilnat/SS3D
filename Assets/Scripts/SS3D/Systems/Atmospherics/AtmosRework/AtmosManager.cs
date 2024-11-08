@@ -243,6 +243,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 };
 
                 counter += atmosJob.CountActive();
+                
 
                 if (_usesParallelComputation)
                 {
