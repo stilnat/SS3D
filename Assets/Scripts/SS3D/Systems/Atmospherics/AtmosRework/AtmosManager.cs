@@ -29,11 +29,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void Start()
         {
-            tileManager = Subsystems.Get<TileSystem>();
-            atmosMaps = new List<AtmosMap>();
-            atmosJobs = new List<AtmosJob>();
-            jobHandles = new NativeArray<JobHandle>();
-
             // Initialization is invoked by the tile manager
             tileManager.TileSystemLoaded += Initialize;
         }
@@ -65,11 +60,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void Update()
         {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying)
-                return;
-#endif
-
             if (!initCompleted)
                 return;
 
@@ -110,6 +100,10 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void Initialize()
         {
+            tileManager = Subsystems.Get<TileSystem>();
+            atmosMaps = new();
+            atmosJobs = new();
+
             if (tileManager == null || tileManager.CurrentMap == null)
             {
                 Debug.LogError("AtmosManager couldn't find the tilemanager or map.");
@@ -225,8 +219,9 @@ namespace SS3D.Engine.AtmosphericsRework
             s_StepPerfMarker.Begin();
             int counter = 0;
 
+            List<JobHandle> jobHandlesList = new();
+
             // Step 0: Loop through every map
-            jobHandles.Clear();
             foreach (AtmosJob atmosJob in atmosJobs)
             {
                 // Step 1: Simulate tiles
@@ -241,23 +236,20 @@ namespace SS3D.Engine.AtmosphericsRework
                 {
                     buffer = atmosJob.nativeAtmosDevices,
                     dt = deltaTime
-        };
+                };
 
                 counter += atmosJob.CountActive();
 
                 JobHandle simulateTilesHandle = simulateTilesJob.Schedule();
                 JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule();
 
-                jobHandles.Add(simulateTilesHandle);
-                jobHandles.Add(simulateDevicesHandle);
+                jobHandlesList.Add(simulateTilesHandle);
+                jobHandlesList.Add(simulateDevicesHandle);
             }
 
-            JobHandle.CompleteAll();
-            // Step 3: Complete the work
-            foreach (JobHandle handle in jobHandles)
-            {
-                handle.Complete();
-            }
+            jobHandles = new(jobHandlesList.ToArray(), Allocator.TempJob);
+            JobHandle.CompleteAll(jobHandles);
+
 
             // Step 4: Write back the results
             foreach (AtmosJob job in atmosJobs)
