@@ -16,6 +16,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
+        public NativeArray<AtmosObject> ResultNativeAtmosTiles;
+
         public NativeArray<AtmosObject> NativeAtmosDevices;
 
         public AtmosJob(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
@@ -134,7 +136,7 @@ namespace SS3D.Engine.AtmosphericsRework
         }
     }
     
-    [BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    //[BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct SimulateFluxJob : IJobParallelFor
     {
 
@@ -144,6 +146,9 @@ namespace SS3D.Engine.AtmosphericsRework
         // https://github.com/korzen/Unity3D-JobsSystemAndBurstSamples/blob/master/Assets/JobsAndBurst/Scripts/DoubleBufferingBasics.cs
         [NativeDisableParallelForRestriction]
         public NativeArray<AtmosObject> Buffer;
+
+        [NativeDisableParallelForRestriction]
+        public NativeArray<AtmosObject> ResultBuffer;
 
         public float DeltaTime;
 
@@ -171,7 +176,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Execute(int index)
         {
-            // todo : We might need to set velocity of inactive atmosObject to 0 here ?
+            // TODO : We might need to set velocity of inactive atmosObject to 0 here ? Or maybe elsewhere, but velocity stays stuck sometimes on inactive atmosObject
             if (Buffer[index].atmosObject.State != AtmosState.Active && Buffer[index].atmosObject.State != AtmosState.Semiactive)
             {
                 return;
@@ -188,6 +193,8 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
             }
 
+            // TODO : Is it correct to rewrite to the same buffer the result of the computation ? One issue might be that doing so, the neighbours will take into account 
+            // TODO : the state of the new atmos object, when it should do computation using the state before it was modified. 
             // Do actual work
             Buffer[index] = AtmosCalculator.SimulateFlux(Buffer[index], DeltaTime);
 

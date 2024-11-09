@@ -32,8 +32,13 @@ namespace SS3D.Engine.AtmosphericsRework
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
 
+            float4[] molesToTransfer = new float4[4];
+
+            // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
             for (int i = 0; i < 4; i++)
             {
+                molesToTransfer[i] = 0;
+
                 if (atmos.GetNeighbour(i).State == AtmosState.Blocked)
                     continue;
 
@@ -54,29 +59,38 @@ namespace SS3D.Engine.AtmosphericsRework
                 float4 partialPressureDifference =  atmos.atmosObject.Container.GetAllPartialPressures() - atmos.GetNeighbour(i).Container.GetAllPartialPressures();
 
                 // Determine the amount of moles by applying the ideal gas law.
-                float4 molesToTransfer = partialPressureDifference * 1000f * atmos.atmosObject.Container.GetVolume() /
+                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.atmosObject.Container.GetVolume() /
                     (atmos.atmosObject.Container.GetTemperature() * GasConstants.gasConstant);
 
+                // Can't transfer negative amounts of moles
+                molesToTransfer[i] = math.max(molesToTransfer[i], 0f);
+
                 // Cannot transfer all moles at once
-                molesToTransfer *= GasConstants.simSpeed * dt;
+                molesToTransfer[i] *= GasConstants.simSpeed * dt;
+            }
 
-                // Cannot transfer more gasses then there are and no one below zero.
-                molesToTransfer = math.clamp(molesToTransfer, 0, atmos.atmosObject.Container.GetCoreGasses());
+            // elements represent the total amount of gas to transfer for core gasses                                   
+            float4 totalMolesToTransfer = molesToTransfer[0] +  molesToTransfer[1] + molesToTransfer[2] + molesToTransfer[3];
 
-                // Calculate wind velocity
-                neighbourFlux[i] = math.csum(molesToTransfer * GasConstants.coreGasDensity);
+            float4 totalMolesInContainer = atmos.atmosObject.Container.GetCoreGasses();
+            totalMolesInContainer += 0.000001f;
+            
 
-                // We need to pass the minimum threshold
-                //if ((math.any(molesToTransfer > (GasConstants.fluxEpsilon * GasConstants.simSpeed * dt)) || (pressure - neighbourPressure) > GasConstants.pressureEpsilon)
-                //    && math.any(molesToTransfer > 0f))
+            // It's not immediatly obvious what this does. If there's enough moles of the given gas in container, then the full amount of previously computed moles are transferred.
+            // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
+            // it's written like that to avoid using conditions branching for Burst.
+            for (int i = 0; i < 4; i++)
+            {
+                molesToTransfer[i] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            }
 
-                if (pressure - neighbourPressure <= GasConstants.pressureEpsilon || math.all(molesToTransfer <= 0f))
-                    continue;
-
-                if (atmos.GetNeighbour(i).State != AtmosState.Vacuum)
+            for (int i = 0; i < 4; i++)
+            {
+                neighbourFlux[i] =  math.csum(molesToTransfer[i] * GasConstants.coreGasDensity);
+                if (atmos.GetNeighbour(i).State != AtmosState.Vacuum && neighbourFlux[i] > 0)
                 {
                     AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                    neighbour.Container.AddCoreGasses(molesToTransfer);
+                    neighbour.Container.AddCoreGasses(molesToTransfer[i]);
                     neighbour.State = AtmosState.Active;
                     atmos.SetNeighbour(neighbour, i);
                 }
@@ -85,7 +99,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     atmos.activeDirection[i] = false;
                 }
 
-                atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer);
+                atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer[i]);
             }
 
             // Finally, calculate the 2d wind vector based on neighbour flux.

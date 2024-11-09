@@ -103,7 +103,7 @@ namespace SS3D.Engine.AtmosphericsRework
             if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
-                atmosObject.atmosObject.Container.MakeAir();
+                atmosObject.atmosObject.Container.MakeEmpty();
             }
 
             // if no plenum, then put vacuum
@@ -117,7 +117,7 @@ namespace SS3D.Engine.AtmosphericsRework
             // Set blocked with a wall
             if (!turfLayerTile.IsFullyEmpty() && turfLayerTile.TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
             {
-                atmosObject.atmosObject.Container.MakeAir();
+                atmosObject.atmosObject.Container.MakeEmpty();
                 atmosObject.atmosObject.State = AtmosState.Blocked;
             }
             
