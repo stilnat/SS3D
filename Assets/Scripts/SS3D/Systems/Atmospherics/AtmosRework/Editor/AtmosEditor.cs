@@ -40,7 +40,7 @@ public class AtmosEditor : EditorWindow
     private bool _showLog = true;
     private CoreAtmosGasses _gassSelection;
     private GasEditorOption _selectedOption;
-    private float _updateRate = 0.5f;
+    private float _updateRate = 0.05f;
 
     private bool _interactEnabled = false;
     private float _selectedAmount = 20f;

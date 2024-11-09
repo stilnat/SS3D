@@ -295,56 +295,5 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             return atmosJobs;
         }
-
-        /*
-        private void OnDrawGizmos()
-        {
-            float gizmoSize = 0.2f;
-
-            //#if UNITY_EDITOR
-            //            if (!EditorApplication.isPlaying)
-            //                return;
-            //#endif
-
-            if (atmosJobs == null)
-                return;
-
-            foreach (AtmosJob job in atmosJobs)
-            {
-
-                for (int i = 0; i < job.atmosTiles.Count; i++)
-                {
-                    Color state;
-                    AtmosState tileState = job.atmosTiles[i].GetAtmosObject().atmosObject.state;
-                    switch (tileState)
-                    {
-                        case AtmosState.Active: state = new Color(0, 0, 0, 0); break;
-                        case AtmosState.Semiactive: state = new Color(0, 1, 0, 0.4f); break;
-                        case AtmosState.Inactive: state = new Color(0, 0, 0, 0.8f); break;
-                        default: state = new Color(0, 0, 0, 1); break;
-                    }
-
-                    Vector3 position = job.atmosTiles[i].GetWorldPosition();
-                    float pressure = job.nativeAtmosTiles[i].atmosObject.container.GetPressure() / 160f;
-
-                    if (tileState == AtmosState.Active || tileState == AtmosState.Semiactive || tileState == AtmosState.Inactive)
-                    {
-                        Gizmos.color = Color.white - state;
-                        Gizmos.DrawWireCube(position + new Vector3(0, pressure, 0), new Vector3(gizmoSize, pressure * 2, gizmoSize));
-                    }
-                    else if (tileState == AtmosState.Blocked)
-                    {
-                        Gizmos.color = Color.black;
-                        Gizmos.DrawWireCube(position + new Vector3(0, 2.5f / 2f, 0), new Vector3(gizmoSize, 2.5f, gizmoSize));
-                    }
-                    else if (tileState == AtmosState.Vacuum)
-                    {
-                        Gizmos.color = Color.blue;
-                        Gizmos.DrawWireCube(position, new Vector3(1, pressure, 1));
-                    }
-                }
-            }
-        }
-        */
     }
 }

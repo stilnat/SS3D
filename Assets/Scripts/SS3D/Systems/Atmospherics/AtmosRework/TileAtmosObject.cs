@@ -93,21 +93,21 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             LoadNeighbours();
 
-            
-            // atmosObject.atmosObject.container.MakeAir();
-            // atmosObject.atmosObject.container.MakeRandom();
-
-
             // Set blocked or vacuum if there is a wall or there is no plenum
-            ITileLocation tile = tileMap.GetTileLocation(TileLayer.Plenum, GetWorldPosition());
-            if (!tile.IsFullyEmpty() &&
-                tile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.name.Contains("Plenum"))
+            ITileLocation plenumLayerTile = tileMap.GetTileLocation(TileLayer.Plenum, GetWorldPosition());
+
+            ITileLocation turfLayerTile = tileMap.GetTileLocation(TileLayer.Turf, GetWorldPosition());
+
+            // Set air if there's Plenum and no walls on top.
+            // todo : should make a difference between fully build walls and stuff like girders
+            if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
                 atmosObject.atmosObject.Container.MakeAir();
-                // atmosObject.atmosObject.container.MakeRandom();
             }
-            else
+
+            // if no plenum, then put vacuum
+            if (plenumLayerTile.IsFullyEmpty())
             {
                 atmosObject.atmosObject.Container.MakeEmpty();
                 atmosObject.atmosObject.State = AtmosState.Vacuum;
@@ -115,9 +115,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             // Set blocked with a wall
-            if (!tileMap.GetTileLocation(TileLayer.Turf, GetWorldPosition()).IsEmpty(0) &&
-                tileMap.GetTileLocation(TileLayer.Turf, GetWorldPosition())
-                .TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
+            if (!turfLayerTile.IsFullyEmpty() && turfLayerTile.TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
             {
                 atmosObject.atmosObject.Container.MakeAir();
                 atmosObject.atmosObject.State = AtmosState.Blocked;
