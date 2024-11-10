@@ -2,8 +2,10 @@
 using SS3D.Core;
 using SS3D.Systems.Tile;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
@@ -131,9 +133,11 @@ namespace SS3D.Engine.AtmosphericsRework
             int initCounter = 0;
             foreach (AtmosMap map in atmosMaps)
             {
-                List<TileAtmosObject> tiles = new List<TileAtmosObject>();
-                List<IAtmosLoop> devices = new List<IAtmosLoop>();
+                
+                List<TileAtmosObject> tiles = new();
+                List<IAtmosLoop> devices = new();
 
+                // Add tiles in chunk
                 foreach (AtmosChunk chunk in map.GetAtmosChunks())
                 {
                     var tileAtmosObjects = chunk.GetAllTileAtmosObjects();
@@ -171,6 +175,24 @@ namespace SS3D.Engine.AtmosphericsRework
                 // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
                 atmosJobs.ForEach(job => job.Refresh());
             }
+        }
+
+        public void ClearAllGasses()
+        {
+            foreach (AtmosMap map in atmosMaps)
+            {
+                foreach (AtmosChunk atmosChunk in map.GetAtmosChunks())
+                {
+                    foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                    {
+                        var atmosObject = tile.GetAtmosObject();
+                        atmosObject.ClearCoreGasses();
+                        tile.SetAtmosObject(atmosObject);
+                    }
+                }
+            }
+
+            atmosJobs.ForEach(job => job.Refresh());
         }
 
         public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
@@ -231,15 +253,11 @@ namespace SS3D.Engine.AtmosphericsRework
                 // Step 1: Simulate tiles
                 SimulateFluxJob simulateTilesJob = new SimulateFluxJob()
                 {
-                    Buffer = atmosJob.NativeAtmosTiles,
-                    DeltaTime = deltaTime
-                };
-
-                // Step 2: Simulate atmos devices and pipes
-                SimulateFluxJob simulateDevicesJob = new SimulateFluxJob()
-                {
-                    Buffer = atmosJob.NativeAtmosDevices,
-                    DeltaTime = deltaTime
+                    TileObjectBuffer = atmosJob.NativeAtmosTiles,
+                    MoleTransfers = atmosJob.MoleTransferArray,
+                    DeltaTime = deltaTime,
+                    ChunkSize = 16,
+                    ChunkKeyBuffer = new (atmosJob.Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToArray(), Allocator.TempJob),
                 };
 
                 counter += atmosJob.CountActive();
@@ -248,15 +266,11 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (_usesParallelComputation)
                 {
                     JobHandle simulateTilesHandle = simulateTilesJob.Schedule(atmosJob.AtmosTiles.Count, 100);
-                    JobHandle simulateDevicesHandle = simulateDevicesJob.Schedule(atmosJob.AtmosDevices.Count, 100);
-
                     jobHandlesList.Add(simulateTilesHandle);
-                    jobHandlesList.Add(simulateDevicesHandle);
                 }
                 else
                 {
                     simulateTilesJob.Run(atmosJob.AtmosTiles.Count);
-                    simulateDevicesJob.Run(atmosJob.AtmosDevices.Count);
                 }
             }
 
@@ -268,10 +282,46 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
 
+
+
             // Step 4: Write back the results
-            foreach (AtmosJob job in atmosJobs)
+            for (int k=0; k < atmosJobs.Count; k++)
             {
+                AtmosJob job = atmosJobs[k];
+                NativeArray<AtmosObject> copyAtmosTiles = job.NativeAtmosTiles;
+
+                for (int i = 0; i < job.MoleTransferArray.Length; i++)
+                {
+                    int atmosObjectFromIndex = job.MoleTransferArray[i].IndexFrom;
+
+                    // check the copy, as the active state might be changed by the adding and removal of gasses 
+                    if (copyAtmosTiles[atmosObjectFromIndex].State != AtmosState.Active)
+                        continue;
+
+                    AtmosObject atmosObject = job.NativeAtmosTiles[atmosObjectFromIndex];
+                    atmosObject.RemoveCoreGasses(job.MoleTransferArray[i].TransferOne.Moles);
+                    atmosObject.RemoveCoreGasses(job.MoleTransferArray[i].TransferTwo.Moles); 
+                    atmosObject.RemoveCoreGasses(job.MoleTransferArray[i].TransferThree.Moles);
+                    atmosObject.RemoveCoreGasses(job.MoleTransferArray[i].TransferFour.Moles);
+                    job.NativeAtmosTiles[atmosObjectFromIndex] = atmosObject;
+
+                    AtmosObject neighbourOne = job.NativeAtmosTiles[job.MoleTransferArray[i].TransferOne.IndexTo];
+                    AtmosObject neighbourTwo = job.NativeAtmosTiles[job.MoleTransferArray[i].TransferTwo.IndexTo];
+                    AtmosObject neighbourThree = job.NativeAtmosTiles[job.MoleTransferArray[i].TransferThree.IndexTo];
+                    AtmosObject neighbourFour = job.NativeAtmosTiles[job.MoleTransferArray[i].TransferFour.IndexTo];
+
+                    neighbourOne.AddCoreGasses(job.MoleTransferArray[i].TransferOne.Moles);
+                    neighbourTwo.AddCoreGasses(job.MoleTransferArray[i].TransferTwo.Moles);
+                    neighbourThree.AddCoreGasses(job.MoleTransferArray[i].TransferThree.Moles);
+                    neighbourFour.AddCoreGasses(job.MoleTransferArray[i].TransferFour.Moles);
+
+                    job.NativeAtmosTiles[job.MoleTransferArray[i].TransferOne.IndexTo] = neighbourOne;
+                    job.NativeAtmosTiles[job.MoleTransferArray[i].TransferTwo.IndexTo] = neighbourTwo;
+                    job.NativeAtmosTiles[job.MoleTransferArray[i].TransferThree.IndexTo] = neighbourThree;
+                    job.NativeAtmosTiles[job.MoleTransferArray[i].TransferFour.IndexTo] = neighbourFour;
+                }
                 job.WriteResultsToList();
+                
             }
 
             s_StepPerfMarker.End();

@@ -71,6 +71,11 @@ namespace SS3D.Engine.AtmosphericsRework
             coreGasses[(int)gas] = math.max(coreGasses[(int)gas] + amount, 0f);
         }
 
+        public void ChangeCoreGasses(float4 amount)
+        {
+            coreGasses = math.max(coreGasses + amount, 0f);
+        }
+
         public void AddCoreGasses(float4 amount)
         {
             coreGasses = math.max(coreGasses + amount, 0f);

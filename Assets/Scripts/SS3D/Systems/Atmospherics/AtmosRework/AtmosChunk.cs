@@ -10,42 +10,41 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <summary>
         /// Unique key for each chunk
         /// </summary>
-        private Vector2Int chunkKey;
+        private readonly Vector2Int _chunkKey;
 
-        private int width;
-        private int height;
-        private float tileSize = 1f;
-        private Vector3 originPosition;
-        protected AtmosMap map;
-        private TileAtmosObject[] atmosGridList;
+        private readonly int _width;
+        private readonly int _height;
+        private readonly float _tileSize;
+        private readonly Vector3 _originPosition;
+        private readonly AtmosMap _map;
+        private TileAtmosObject[] _atmosGridList;
 
         public AtmosChunk(AtmosMap map, Vector2Int chunkKey, int width, 
             int height, float tileSize, Vector3 originPosition)
         {
-            this.map = map;
-            this.chunkKey = chunkKey;
-            this.width = width;
-            this.height = height;
-            this.tileSize = tileSize;
-            this.originPosition = originPosition;
-
+            _map = map;
+            _chunkKey = chunkKey;
+            _width = width;
+            _height = height;
+            _tileSize = tileSize;
+            _originPosition = originPosition;
 
             CreateAllGrids();
         }
 
         public int GetWidth()
         {
-            return width;
+            return _width;
         }
 
         public int GetHeight()
         {
-            return height;
+            return _height;
         }
 
         public Vector2Int GetKey()
         {
-            return chunkKey;
+            return _chunkKey;
         }
 
         /// <summary>
@@ -56,7 +55,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <returns></returns>
         public Vector3 GetWorldPosition(int x, int y)
         {
-            return new Vector3(x, 0, y) * tileSize + originPosition;
+            return new Vector3(x, 0, y) * _tileSize + _originPosition;
         }
 
         /// <summary>
@@ -66,18 +65,18 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <returns></returns>
         public Vector2Int GetXY(Vector3 worldPosition)
         {
-            return new Vector2Int((int)Math.Round(worldPosition.x - originPosition.x), (int)Math.Round(worldPosition.z - originPosition.z));
+            return new Vector2Int((int)Math.Round(worldPosition.x - _originPosition.x), (int)Math.Round(worldPosition.z - _originPosition.z));
         }
 
         protected void CreateAllGrids()
         {
-            atmosGridList = new TileAtmosObject[GetWidth() * GetHeight()];
+            _atmosGridList = new TileAtmosObject[GetWidth() * GetHeight()];
 
             for (int x = 0; x < GetWidth(); x++)
             {
                 for (int y = 0; y < GetHeight(); y++)
                 {
-                    atmosGridList[y * GetWidth() + x] = new TileAtmosObject(map, this, x, y);
+                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y);
                 }
             }
         }
@@ -86,7 +85,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             if (x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight())
             {
-                return atmosGridList[y * GetWidth() + x];
+                return _atmosGridList[y * GetWidth() + x];
             }
             else
             {
@@ -103,7 +102,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public List<TileAtmosObject> GetAllTileAtmosObjects()
         {
-            return new List<TileAtmosObject>(atmosGridList);
+            return new List<TileAtmosObject>(_atmosGridList);
         }
 
         /*

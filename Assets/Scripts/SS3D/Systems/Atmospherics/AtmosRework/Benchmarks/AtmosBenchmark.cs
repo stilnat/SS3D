@@ -39,43 +39,15 @@ public class AtmosBenchmark : MonoBehaviour
             for (int y = 0; y < gridSize; y++)
             {
                 AtmosObject atmos = new AtmosObject();
-                atmos.Setup();
-                atmos.atmosObject.Container.MakeRandom();
 
-                atmosObjects[y * gridSize + x] = atmos;
-            }
-        }
-
-        LoadNeighboursToArray();
-    }
-
-    private void LoadNeighboursToArray()
-    {
-        for (int x = 0; x < gridSize; x++)
-        {
-            for (int y = 0; y < gridSize; y++)
-            {
-                AtmosObject atmos = atmosObjects[y * gridSize + x];
-
-                for (Direction direction = Direction.North; direction <= Direction.NorthWest; direction++)
-                {
-                    var coords = TileHelper.ToCardinalVector(direction);
-
-                    int targetX = x + coords.Item1;
-                    int targetY = y + coords.Item2;
-
-                    if (targetX >= 0 && targetX < gridSize &&
-                        targetY >= 0 && targetY < gridSize)
-                    {
-                        atmos.SetNeighbourIndex(TileHelper.GetCardinalDirectionIndex(direction), targetY * gridSize + targetX);
-                    }
-
-                }
+                atmos.Container.MakeRandom();
 
                 atmosObjects[y * gridSize + x] = atmos;
             }
         }
     }
+
+
 
     // Update is called once per frame
     void Update()
@@ -131,7 +103,7 @@ public class AtmosBenchmark : MonoBehaviour
         for (int i = 0; i < atmosObjects.Length; i++)
         {
             Color state;
-            switch (atmosObjects[i].atmosObject.State)
+            switch (atmosObjects[i].State)
             {
                 case AtmosState.Active: state = new Color(0, 0, 0, 0); break;
                 case AtmosState.Semiactive: state = new Color(0, 0, 0, 0.4f); break;
@@ -139,7 +111,7 @@ public class AtmosBenchmark : MonoBehaviour
                 default: state = new Color(0, 0, 0, 1); break;
             }
             Vector3 position = GetPositionFromIndex(i);
-            float pressure =  atmosObjects[i].atmosObject.Container.GetPressure() / 160f;;
+            float pressure =  atmosObjects[i].Container.GetPressure() / 160f;;
 
             if (pressure > 0f)
             {
@@ -155,35 +127,6 @@ public class AtmosBenchmark : MonoBehaviour
     {
         public NativeArray<int> counterArray;
         public NativeArray<AtmosObject> buffer;
-
-        /// <summary>
-        /// Set the internal neighbour state based on the neighbour
-        /// </summary>
-        /// <param name="index"></param>
-        private void LoadNeighbour(int ownIndex, int neighbourIndex, int neighbourOffset)
-        {
-            AtmosObjectInfo info = new AtmosObjectInfo()
-            {
-                State = buffer[neighbourIndex].atmosObject.State,
-                Container = buffer[neighbourIndex].atmosObject.Container,
-                BufferIndex = neighbourIndex,
-            };
-
-            AtmosObject writeObject = buffer[ownIndex];
-            writeObject.SetNeighbour(info, neighbourOffset);
-            buffer[ownIndex] = writeObject;
-        }
-
-        /// <summary>
-        /// Modify the neighbour based on the internal update
-        /// </summary>
-        /// <param name="index"></param>
-        private void SetNeighbour(int ownIndex, int neighbourIndex, int neighbourOffset)
-        {
-            AtmosObject writeObject = buffer[neighbourIndex];
-            writeObject.atmosObject = buffer[ownIndex].GetNeighbour(neighbourOffset);
-            buffer[neighbourIndex] = writeObject;
-        }
 
         public void Execute()
         {

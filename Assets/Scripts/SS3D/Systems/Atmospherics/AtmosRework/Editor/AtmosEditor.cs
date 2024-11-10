@@ -95,6 +95,7 @@ public class AtmosEditor : EditorWindow
         _showInvisible = EditorGUILayout.Toggle("Show invisible: ", _showInvisible);
         _showWalls = EditorGUILayout.Toggle("Show walls: ", _showWalls);
         _showVacuum = EditorGUILayout.Toggle("Show vacuum: ", _showVacuum);
+        
         EditorGUILayout.EndToggleGroup();
 
         EditorGUILayout.Space();
@@ -129,6 +130,12 @@ public class AtmosEditor : EditorWindow
         {
             Debug.Log("Click to add gas. Press escape to stop");
             _interactEnabled = true;
+        }
+
+        EditorGUILayout.Space();
+        if (GUILayout.Button("Clear all Gasses"))
+        {
+            _atmosManager.ClearAllGasses();
         }
     }
 
@@ -216,7 +223,7 @@ public class AtmosEditor : EditorWindow
                 AtmosObject atmosObject = job.AtmosTiles[i].GetAtmosObject();
 
                 Color stateColor;
-                AtmosState tileState = atmosObject.atmosObject.State;
+                AtmosState tileState = atmosObject.State;
                 switch (tileState)
                 {
                     case AtmosState.Active: stateColor = new Color(0, 0, 0, 0); break;
@@ -248,8 +255,8 @@ public class AtmosEditor : EditorWindow
     private void DrawPressureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
     {
         float pressureScale = 0.02f;
-        float pressure = atmosObject.atmosObject.Container.GetPressure() * pressureScale;
-        AtmosState tileState = atmosObject.atmosObject.State;
+        float pressure = atmosObject.Container.GetPressure() * pressureScale;
+        AtmosState tileState = atmosObject.State;
 
         if (tileState == AtmosState.Active || tileState == AtmosState.Semiactive || tileState == AtmosState.Inactive)
         {
@@ -277,7 +284,7 @@ public class AtmosEditor : EditorWindow
         float contentScale = 0.05f;
         float offset = 0f;
         Color[] colors = new Color[] { Color.yellow, Color.white, Color.gray, Color.magenta };
-        float4 moles = atmosObject.atmosObject.Container.GetCoreGasses() * contentScale;
+        float4 moles = atmosObject.Container.GetCoreGasses() * contentScale;
 
         for (int i = 0; i < 4; ++i)
         {
@@ -296,7 +303,7 @@ public class AtmosEditor : EditorWindow
 
     private void DrawWindGizmo(AtmosObject atmosObject, Vector3 position)
     {
-        Vector2 velocity = atmosObject.atmosObject.Velocity / 30;
+        Vector2 velocity = atmosObject.Velocity / 30;
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
@@ -306,7 +313,7 @@ public class AtmosEditor : EditorWindow
 
     private void DrawTemperatureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
     {
-        float temperature = atmosObject.atmosObject.Container.GetTemperature(); // In Celcius
+        float temperature = atmosObject.Container.GetTemperature(); // In Celcius
         float colorLerpValue = temperature / 773f;
 
         Handles.color = Color.Lerp(Color.blue, Color.red, colorLerpValue) - stateColor;

@@ -54,8 +54,7 @@ namespace SS3D.Engine.AtmosphericsRework
             this.x = x;
             this.y = y;
 
-            atmosObject = new AtmosObject();
-            atmosObject.Setup();
+            atmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y));
         }
 
         public AtmosObject GetAtmosObject()
@@ -103,22 +102,22 @@ namespace SS3D.Engine.AtmosphericsRework
             if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
-                atmosObject.atmosObject.Container.MakeEmpty();
+                atmosObject.Container.MakeEmpty();
             }
 
             // if no plenum, then put vacuum
             if (plenumLayerTile.IsFullyEmpty())
             {
-                atmosObject.atmosObject.Container.MakeEmpty();
-                atmosObject.atmosObject.State = AtmosState.Vacuum;
-                atmosObject.atmosObject.Container.SetTemperature(173); // -100 C for space
+                atmosObject.Container.MakeEmpty();
+                atmosObject.State = AtmosState.Vacuum;
+                atmosObject.Container.SetTemperature(173); // -100 C for space
             }
 
             // Set blocked with a wall
             if (!turfLayerTile.IsFullyEmpty() && turfLayerTile.TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
             {
-                atmosObject.atmosObject.Container.MakeEmpty();
-                atmosObject.atmosObject.State = AtmosState.Blocked;
+                atmosObject.Container.MakeEmpty();
+                atmosObject.State = AtmosState.Blocked;
             }
             
         }
@@ -133,7 +132,7 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosSaveState saveState = AtmosSaveState.Air;
             MixSaveState mixState = new MixSaveState(0, 0);
 
-            if (atmosObject.atmosObject.State == AtmosState.Vacuum)
+            if (atmosObject.State == AtmosState.Vacuum)
             {
                 saveState = AtmosSaveState.Vacuum;
             }
@@ -144,7 +143,7 @@ namespace SS3D.Engine.AtmosphericsRework
             else if (!atmosObject.IsEmpty())
             {
                 saveState = AtmosSaveState.Mix;
-                mixState = new MixSaveState(atmosObject.atmosObject.Container.GetCoreGasses(), atmosObject.atmosObject.Container.GetTemperature());
+                mixState = new MixSaveState(atmosObject.Container.GetCoreGasses(), atmosObject.Container.GetTemperature());
             }
             else
             {

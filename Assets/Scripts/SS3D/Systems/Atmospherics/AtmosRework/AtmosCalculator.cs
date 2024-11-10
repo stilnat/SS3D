@@ -8,46 +8,48 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public static class AtmosCalculator
     {
-        public static AtmosObject SimulateFlux(AtmosObject atmos, float dt)
+        public static AtmosObject SimulateFlux(AtmosObject atmos, float dt,  AtmosObject[] neigbours)
         {
-            if (atmos.atmosObject.State == AtmosState.Active)
-            {
-                atmos = SimulateFluxActive(atmos, dt);
-            }
+           // if (atmos.State == AtmosState.Active)
+           // {
+           //     atmos = SimulateFluxActive(atmos, dt, neigbours);
+           // }
 
-            if (atmos.atmosObject.State == AtmosState.Semiactive ||
-                atmos.atmosObject.State == AtmosState.Active)
+            if (atmos.State == AtmosState.Semiactive ||
+                atmos.State == AtmosState.Active)
             {
-                atmos = SimulateMixing(atmos, dt);
-                atmos = SimulateTemperature(atmos, dt);
+                atmos = SimulateMixing(atmos, dt, neigbours);
+                atmos = SimulateTemperature(atmos, dt, neigbours);
             }
 
             return atmos;
         }
 
-        private static AtmosObject SimulateFluxActive(AtmosObject atmos, float dt)
+        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, AtmosObject[] neighbours,int atmosIndex, int[] neighboursIndexes)
         {
-            float pressure = atmos.atmosObject.Container.GetPressure();
+            float pressure = atmos.Container.GetPressure();
+            int neighbourCount = neighbours.Length; 
 
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
 
-            float4[] molesToTransfer = new float4[4];
+            // moles of each gaz from each neighbour to transfer.
+            float4[] molesToTransfer = new float4[neighbourCount];
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < neighbourCount; i++)
             {
                 molesToTransfer[i] = 0;
 
-                if (atmos.GetNeighbour(i).State == AtmosState.Blocked)
+                if (neighbours[i].State == AtmosState.Blocked)
                     continue;
 
-                float neighbourPressure = atmos.GetNeighbour(i).Container.GetPressure();
+                float neighbourPressure = neighbours[i].Container.GetPressure();
 
                 if (pressure - neighbourPressure <= GasConstants.pressureEpsilon)
                 {
                     if (!atmos.temperatureSetting)
-                        atmos.atmosObject.State = AtmosState.Semiactive;
+                        atmos.State = AtmosState.Semiactive;
                     else
                         atmos.temperatureSetting = false;
                     continue;
@@ -56,80 +58,98 @@ namespace SS3D.Engine.AtmosphericsRework
                 atmos.activeDirection[i] = true;
 
                 // Use partial pressures to determine how much of each gas to move.
-                float4 partialPressureDifference =  atmos.atmosObject.Container.GetAllPartialPressures() - atmos.GetNeighbour(i).Container.GetAllPartialPressures();
+                float4 partialPressureDifference =  atmos.Container.GetAllPartialPressures() - neighbours[i].Container.GetAllPartialPressures();
 
                 // Determine the amount of moles by applying the ideal gas law.
-                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.atmosObject.Container.GetVolume() /
-                    (atmos.atmosObject.Container.GetTemperature() * GasConstants.gasConstant);
+                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.Container.GetVolume() /
+                    (atmos.Container.GetTemperature() * GasConstants.gasConstant);
 
-                // Can't transfer negative amounts of moles
-                molesToTransfer[i] = math.max(molesToTransfer[i], 0f);
-
-                // Cannot transfer all moles at once
                 molesToTransfer[i] *= GasConstants.simSpeed * dt;
+
+                // We only care about what we transfer here, not what we receive
+                molesToTransfer[i] = math.max(0f, molesToTransfer[i]);
             }
 
-            // elements represent the total amount of gas to transfer for core gasses                                   
-            float4 totalMolesToTransfer = molesToTransfer[0] +  molesToTransfer[1] + molesToTransfer[2] + molesToTransfer[3];
 
-            float4 totalMolesInContainer = atmos.atmosObject.Container.GetCoreGasses();
+            // elements represent the total amount of gas to transfer for core gasses  
+            float4 totalMolesToTransfer = 0;
+             
+            for (int i = 0; i < neighbourCount; i++)
+            {
+                totalMolesToTransfer += molesToTransfer[i];
+            }
+
+
+            float4 totalMolesInContainer = atmos.Container.GetCoreGasses();
             totalMolesInContainer += 0.000001f;
-            
 
-            // It's not immediatly obvious what this does. If there's enough moles of the given gas in container, then the full amount of previously computed moles are transferred.
+            // It's not immediately obvious what this does. If there's enough moles of the given gas in container, then the full amount of previously computed moles are transferred.
             // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
             // it's written like that to avoid using conditions branching for Burst.
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < neighbourCount; i++)
             {
                 molesToTransfer[i] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
             }
 
-            for (int i = 0; i < 4; i++)
+            /*for (int i = 0; i < neighbourCount; i++)
             {
                 neighbourFlux[i] =  math.csum(molesToTransfer[i] * GasConstants.coreGasDensity);
-                if (atmos.GetNeighbour(i).State != AtmosState.Vacuum && neighbourFlux[i] > 0)
-                {
-                    AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                    neighbour.Container.AddCoreGasses(molesToTransfer[i]);
-                    neighbour.State = AtmosState.Active;
-                    atmos.SetNeighbour(neighbour, i);
-                }
-                else
+                if (neighbours[i].State == AtmosState.Vacuum || neighbourFlux[i] <= 0)
                 {
                     atmos.activeDirection[i] = false;
                 }
 
-                atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer[i]);
-            }
+                atmos.Container.ChangeCoreGasses(molesToTransfer[i]);
+            } */
 
             // Finally, calculate the 2d wind vector based on neighbour flux.
-            float velHorizontal = neighbourFlux[3] - neighbourFlux[2];
-            float velVertical = neighbourFlux[0] - neighbourFlux[1];
-            atmos.atmosObject.Velocity.x = velHorizontal;
-            atmos.atmosObject.Velocity.y = velVertical;
+            //float velHorizontal = neighbourFlux[3] - neighbourFlux[2];
+            //float velVertical = neighbourFlux[0] - neighbourFlux[1];
+            //atmos.Velocity.x = velHorizontal;
+            //atmos.Velocity.y = velVertical;
 
+            MoleTransferToNeighbours moleTransferToNeighbours = new();
+            MoleTransfer[] moleTransfers = new MoleTransfer[4];
+            for (int i = 0; i < neighbourCount; i++)
+            {
+                moleTransfers[i].Moles = molesToTransfer[i];
+                moleTransfers[i].IndexTo = neighboursIndexes[i];
+            }
 
-            return atmos;
+            for (int i = neighbourCount; i < 4; i++)
+            {
+                moleTransfers[i].Moles = 0;
+                moleTransfers[i].IndexTo = 0;
+            }
+
+            moleTransferToNeighbours.TransferOne = moleTransfers[0];
+            moleTransferToNeighbours.TransferTwo = moleTransfers[1];
+            moleTransferToNeighbours.TransferThree = moleTransfers[2];
+            moleTransferToNeighbours.TransferFour = moleTransfers[3];
+            moleTransferToNeighbours.IndexFrom = atmosIndex;
+           
+
+            return moleTransferToNeighbours;
         }
 
-        private static AtmosObject SimulateMixing(AtmosObject atmos, float dt)
+        private static AtmosObject SimulateMixing(AtmosObject atmos, float dt, AtmosObject[] neighbours)
         {
             bool mixed = false;
+            int neighbourCount = neighbours.Length; 
 
-            if (math.all(atmos.atmosObject.Container.GetCoreGasses() <= 0f))
+            if (math.all(atmos.Container.GetCoreGasses() <= 0f))
             {
                 return atmos;
             }
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < neighbourCount; i++)
             {
-                if (atmos.GetNeighbour(i).State == AtmosState.Blocked || atmos.GetNeighbour(i).State == AtmosState.Vacuum)
+                if (neighbours[i].State == AtmosState.Blocked || neighbours[i].State == AtmosState.Vacuum)
                 {
                     continue;
                 }
 
-                AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                float4 molesToTransfer = (atmos.atmosObject.Container.GetCoreGasses() - atmos.GetNeighbour(i).Container.GetCoreGasses())
+                float4 molesToTransfer = (atmos.Container.GetCoreGasses() - neighbours[i].Container.GetCoreGasses())
                     * GasConstants.gasDiffusionRate;
 
                 molesToTransfer *= GasConstants.simSpeed * dt;
@@ -137,56 +157,53 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (math.any(molesToTransfer > (GasConstants.fluxEpsilon * GasConstants.simSpeed * dt)))
                 {
                     molesToTransfer = math.max(molesToTransfer, 0);
-                    neighbour.Container.AddCoreGasses(molesToTransfer);
-                    atmos.atmosObject.Container.RemoveCoreGasses(molesToTransfer);
+                    neighbours[i].Container.AddCoreGasses(molesToTransfer);
+                    atmos.Container.RemoveCoreGasses(molesToTransfer);
                     mixed = true;
                 }
 
                 // Remain active if there is still a pressure difference
-                if (math.abs(neighbour.Container.GetPressure() - atmos.atmosObject.Container.GetPressure()) > GasConstants.pressureEpsilon)
+                if (math.abs(neighbours[i].Container.GetPressure() - atmos.Container.GetPressure()) > GasConstants.pressureEpsilon)
                 {
-                    neighbour.State = AtmosState.Active;
+                    neighbours[i].State = AtmosState.Active;
                 }
-
-                atmos.SetNeighbour(neighbour, i);
             }
 
 
-            if (!mixed && atmos.atmosObject.State == AtmosState.Semiactive)
+            if (!mixed && atmos.State == AtmosState.Semiactive)
             {
-                atmos.atmosObject.State = AtmosState.Inactive;
+                atmos.State = AtmosState.Inactive;
             }
 
             return atmos;
         }
 
-        private static AtmosObject SimulateTemperature(AtmosObject atmos, float dt)
+        private static AtmosObject SimulateTemperature(AtmosObject atmos, float dt, AtmosObject[] neighbours)
         {
             float4 temperatureFlux = 0f;
-            for (int i = 0; i < 4; i++)
+            int neighbourCount = neighbours.Length; 
+            for (int i = 0; i < neighbourCount; i++)
             {
                 if (!atmos.activeDirection[i])
                 {
                     continue;
                 }
 
-                float difference = atmos.atmosObject.Container.GetTemperature() - atmos.GetNeighbour(i).Container.GetTemperature();
+                float difference = atmos.Container.GetTemperature() - neighbours[i].Container.GetTemperature();
 
                 if (difference <= GasConstants.thermalEpsilon)
                 {
                     continue;
                 }
 
-                temperatureFlux[i] = (atmos.atmosObject.Container.GetTemperature() - atmos.GetNeighbour(i).Container.GetTemperature()) *
-                    GasConstants.thermalBase * atmos.atmosObject.Container.GetVolume();
+                temperatureFlux[i] = (atmos.Container.GetTemperature() - neighbours[i].Container.GetTemperature()) *
+                    GasConstants.thermalBase * atmos.Container.GetVolume();
 
                 // Set neighbour
-                AtmosObjectInfo neighbour = atmos.GetNeighbour(i);
-                neighbour.Container.SetTemperature(neighbour.Container.GetTemperature() + temperatureFlux[i]);
-                atmos.SetNeighbour(neighbour, i);
+                neighbours[i].Container.SetTemperature(neighbours[i].Container.GetTemperature() + temperatureFlux[i]);
 
                 // Set self
-                atmos.atmosObject.Container.SetTemperature(atmos.atmosObject.Container.GetTemperature() - temperatureFlux[i]);
+                atmos.Container.SetTemperature(atmos.Container.GetTemperature() - temperatureFlux[i]);
                 atmos.temperatureSetting = true;
             }   
             
