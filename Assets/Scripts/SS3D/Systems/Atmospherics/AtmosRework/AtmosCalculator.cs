@@ -19,16 +19,15 @@ namespace SS3D.Engine.AtmosphericsRework
             if (atmos.State == AtmosState.Semiactive ||
                 atmos.State == AtmosState.Active)
             {
-                atmos = SimulateMixing(atmos, dt, neigbours);
+                //atmos = SimulateMixing(atmos, dt, neigbours);
                 atmos = SimulateTemperature(atmos, dt, neigbours);
             }
 
             return atmos;
         }
 
-        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes, int neighbourCount)
+        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes, int neighbourCount, bool activeFlux)
         {
-            float pressure = atmos.Pressure;
 
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
@@ -42,25 +41,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (neighbours[i].State == AtmosState.Blocked)
                     continue;
 
-                float neighbourPressure = neighbours[i].Pressure;
+                molesToTransfer[i] = activeFlux ? ComputeActiveFluxMoles(atmos, neighbours[i]) : ComputeDiffusionMoles(atmos, neighbours[i]);
 
-                if (pressure - neighbourPressure <= GasConstants.pressureEpsilon)
-                {
-                    if (!atmos.TemperatureSetting)
-                        atmos.State = AtmosState.Semiactive;
-                    else
-                        atmos.TemperatureSetting = false;
-                    continue;
-                }
-
-                atmos.ActiveDirection[i] = true;
-
-                // Use partial pressures to determine how much of each gas to move.
-                float4 partialPressureDifference =  atmos.GetAllPartialPressures() - neighbours[i].GetAllPartialPressures();
-
-                // Determine the amount of moles by applying the ideal gas law.
-                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.GetVolume() /
-                    (atmos.Temperature * GasConstants.gasConstant);
+                atmos.ActiveDirection[i] = math.any(molesToTransfer[i] != 0);
 
                 molesToTransfer[i] *= GasConstants.simSpeed * dt;
 
@@ -77,8 +60,6 @@ namespace SS3D.Engine.AtmosphericsRework
             totalMolesToTransfer += molesToTransfer[1];
             totalMolesToTransfer += molesToTransfer[2];
             totalMolesToTransfer += molesToTransfer[3];
-            
-
 
             float4 totalMolesInContainer = atmos.CoreGasses;
             totalMolesInContainer += 0.000001f;
@@ -123,50 +104,32 @@ namespace SS3D.Engine.AtmosphericsRework
             return moleTransferToNeighbours;
         }
 
-        private static AtmosObject SimulateMixing(AtmosObject atmos, float dt, AtmosObject[] neighbours)
+        private static float4 ComputeActiveFluxMoles(AtmosObject atmos, AtmosObject neighbour)
         {
-            bool mixed = false;
-            int neighbourCount = neighbours.Length; 
+            float neighbourPressure = neighbour.Pressure;
 
-            if (math.all(atmos.CoreGasses <= 0f))
+            if (atmos.Pressure - neighbourPressure <= GasConstants.pressureEpsilon)
             {
-                return atmos;
+                return new(0);
             }
 
-            for (int i = 0; i < neighbourCount; i++)
+            // Use partial pressures to determine how much of each gas to move.
+            float4 partialPressureDifference =  atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
+
+            // Determine the amount of moles by applying the ideal gas law.
+            return partialPressureDifference * 1000f * atmos.GetVolume() /
+                (atmos.Temperature * GasConstants.gasConstant);
+        }
+
+        private static float4 ComputeDiffusionMoles(AtmosObject atmos, AtmosObject neighbour)
+        {
+            float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
+            if (math.all(molesToTransfer <  GasConstants.fluxEpsilon))
             {
-                if (neighbours[i].State == AtmosState.Blocked || neighbours[i].State == AtmosState.Vacuum)
-                {
-                    continue;
-                }
-
-                float4 molesToTransfer = (atmos.CoreGasses - neighbours[i].CoreGasses)
-                    * GasConstants.gasDiffusionRate;
-
-                molesToTransfer *= GasConstants.simSpeed * dt;
-
-                if (math.any(molesToTransfer > (GasConstants.fluxEpsilon * GasConstants.simSpeed * dt)))
-                {
-                    molesToTransfer = math.max(molesToTransfer, 0);
-                    neighbours[i].AddCoreGasses(molesToTransfer, false);
-                    atmos.RemoveCoreGasses(molesToTransfer, false);
-                    mixed = true;
-                }
-
-                // Remain active if there is still a pressure difference
-                if (math.abs(neighbours[i].Pressure) - atmos.Pressure > GasConstants.pressureEpsilon)
-                {
-                    neighbours[i].State = AtmosState.Active;
-                }
+                return molesToTransfer;
             }
 
-
-            if (!mixed && atmos.State == AtmosState.Semiactive)
-            {
-                atmos.State = AtmosState.Inactive;
-            }
-
-            return atmos;
+            return new(0);
         }
 
         private static AtmosObject SimulateTemperature(AtmosObject atmos, float dt, AtmosObject[] neighbours)

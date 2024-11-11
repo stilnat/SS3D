@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SS3D.Engine.AtmosphericsRework
 {
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    struct ComputeActiveFluxJob : IJobParallelFor
+    struct ComputeFluxesJob : IJobParallelFor
     {
 
         // todo : using NativeDisableParallelForRestriction is a dirty trick to avoid doing proper code. This might lead to race conditions.
@@ -32,13 +32,16 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly float _deltaTime;
 
-        public ComputeActiveFluxJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime)
+        private readonly bool _activeFlux;
+
+        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime, bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _chunkSize = chunkSize;
             _deltaTime = deltaTime;
             _moleTransfers = moleTransfers;
             _chunkKeyHashMap = chunkKeyHashMap;
+            _activeFlux = activeFlux;
         }
 
         public void Execute(int index)
@@ -80,7 +83,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             // Do actual work
-            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, neighbourCount);
+            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, neighbourCount, _activeFlux);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.

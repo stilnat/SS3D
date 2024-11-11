@@ -27,6 +27,35 @@ namespace SS3D.Engine.AtmosphericsRework
             LoadNativeArrays();
         }
 
+        public void RandomizeAllGasses(float maxAmount)
+        {
+            foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
+            {
+                foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                {
+                    AtmosObject atmosObject = tile.GetAtmosObject();
+                    atmosObject.AddCoreGasses(UnityEngine.Random.Range(0, maxAmount) * maxAmount, true);
+                    tile.SetAtmosObject(atmosObject);
+                }
+            }
+            Refresh();
+        }
+
+        public void ClearAllGasses()
+        {
+
+            foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
+            {
+                foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                {
+                    AtmosObject atmosObject = tile.GetAtmosObject();
+                    atmosObject.ClearCoreGasses();
+                    tile.SetAtmosObject(atmosObject);
+                }
+            }
+            Refresh();
+        }
+
         public void Destroy()
         {
             NativeAtmosTiles.Dispose();
