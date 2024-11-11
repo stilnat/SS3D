@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace SS3D.Engine.AtmosphericsRework
             return atmos;
         }
 
-        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, AtmosObject[] neighbours,int atmosIndex, int[] neighboursIndexes)
+        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes)
         {
             float pressure = atmos.Container.GetPressure();
             int neighbourCount = neighbours.Length; 
@@ -34,7 +35,7 @@ namespace SS3D.Engine.AtmosphericsRework
             float4 neighbourFlux = 0f;
 
             // moles of each gaz from each neighbour to transfer.
-            float4[] molesToTransfer = new float4[neighbourCount];
+            NativeArray<float4> molesToTransfer = new(neighbourCount, Allocator.Temp);
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
             for (int i = 0; i < neighbourCount; i++)
@@ -109,17 +110,11 @@ namespace SS3D.Engine.AtmosphericsRework
             //atmos.Velocity.y = velVertical;
 
             MoleTransferToNeighbours moleTransferToNeighbours = new();
-            MoleTransfer[] moleTransfers = new MoleTransfer[4];
+            NativeArray<MoleTransfer> moleTransfers = new(4, Allocator.Temp);
+
             for (int i = 0; i < neighbourCount; i++)
             {
-                moleTransfers[i].Moles = molesToTransfer[i];
-                moleTransfers[i].IndexTo = neighboursIndexes[i];
-            }
-
-            for (int i = neighbourCount; i < 4; i++)
-            {
-                moleTransfers[i].Moles = 0;
-                moleTransfers[i].IndexTo = 0;
+                moleTransfers[i] = new (molesToTransfer[i], neighboursIndexes[i]);
             }
 
             moleTransferToNeighbours.TransferOne = moleTransfers[0];

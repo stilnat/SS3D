@@ -13,6 +13,12 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         public float4 Moles;
         public int IndexTo;
+
+        public MoleTransfer(float4 moles, int indexTo)
+        {
+            Moles = moles;
+            IndexTo = indexTo;
+        }
     }
 
     public struct MoleTransferToNeighbours
@@ -84,7 +90,7 @@ namespace SS3D.Engine.AtmosphericsRework
         }
     }
     
-    //[BurstCompile(CompileSynchronously = true, FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct SimulateFluxJob : IJobParallelFor
     {
 
@@ -92,72 +98,79 @@ namespace SS3D.Engine.AtmosphericsRework
         // The issue is that each jobs need to access atmos tile outside its set of indexes
         // Unity recommends using a so called double buffering methods.
         // https://github.com/korzen/Unity3D-JobsSystemAndBurstSamples/blob/master/Assets/JobsAndBurst/Scripts/DoubleBufferingBasics.cs
-
         
         [ReadOnly]
-        public NativeArray<AtmosObject> TileObjectBuffer;
+        private readonly NativeArray<AtmosObject> _tileObjectBuffer;
 
-        // Unordered array of chunk keys, as they were created by the atmos map. Useful as two adjacent tiles objects might have very different positions if they're not in the same chunk.
+        // Hashmap of chunk keys, with values indicating order as they were created by the atmos map. Useful as two adjacent tiles objects might have very different positions if they're not in the same chunk.
         // Only adjacent tile objects in the same chunk can be retrieved without that, so its necessary for computing indexes in the TileObjectBuffer of neighbours on chunk edges.
         [ReadOnly]
-        public NativeArray<int2> ChunkKeyBuffer;
+        private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
 
         [NativeDisableParallelForRestriction]
-        public NativeArray<MoleTransferToNeighbours> MoleTransfers;
+        private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
-        public int ChunkSize;
+        private readonly int _chunkSize;
 
-        public float DeltaTime;
+        private readonly float _deltaTime;
+
+        public SimulateFluxJob(NativeArray<AtmosObject> tileObjectBuffer,  NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime)
+        {
+            _tileObjectBuffer = tileObjectBuffer;
+            _chunkSize = chunkSize;
+            _deltaTime = deltaTime;
+            _moleTransfers = moleTransfers;
+            _chunkKeyHashMap = chunkKeyHashMap;
+        }
 
         public void Execute(int index)
         {
             // TODO : We might need to set velocity of inactive atmosObject to 0 here ? Or maybe elsewhere, but velocity stays stuck sometimes on inactive atmosObject
-            if (TileObjectBuffer[index].State != AtmosState.Active && TileObjectBuffer[index].State != AtmosState.Semiactive)
+            if (_tileObjectBuffer[index].State != AtmosState.Active && _tileObjectBuffer[index].State != AtmosState.Semiactive)
             {
                 return;
             }
 
-            List<AtmosObject> neigbhours = new();
-            int northNeighbourIndex = GetNorthNeighbourIndex(index, TileObjectBuffer[index].ChunkKey);
-            int southNeighbourIndex = GetSouthNeighbourIndex(index, TileObjectBuffer[index].ChunkKey);
-            int westNeighbourIndex = GetWestNeighbourIndex(index, TileObjectBuffer[index].ChunkKey);
-            int eastNeighbourIndex = GetEastNeighbourIndex(index, TileObjectBuffer[index].ChunkKey);
+            NativeArray<int> neighboursIndexes = new(4, Allocator.Temp);
+            neighboursIndexes[0] = GetNorthNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
+            neighboursIndexes[1] = GetSouthNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
+            neighboursIndexes[2] = GetWestNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
+            neighboursIndexes[3] = GetEastNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
+            int neighbourCount = 0;
 
-            List<int> neighboursIndexes = new();
+            for (int i = 0; i < 4; i++)
+            {
+                if (neighboursIndexes[i] != -1)
+                {
+                    neighbourCount++;
+                }
+            }
 
-            if (northNeighbourIndex != -1)
+            NativeArray<int> realNeighboursIndexes = new(neighbourCount, Allocator.Temp);
+            NativeArray<AtmosObject> neigbhours = new(neighbourCount, Allocator.Temp);
+
+            int j = 0;
+            for (int i = 0; i < 4; i++)
             {
-                neighboursIndexes.Add(northNeighbourIndex);
-                neigbhours.Add(TileObjectBuffer[northNeighbourIndex]);
-            }
-            if (southNeighbourIndex != -1)
-            {
-                neighboursIndexes.Add(southNeighbourIndex);
-                neigbhours.Add(TileObjectBuffer[southNeighbourIndex]);
-            }
-            if (westNeighbourIndex != -1)
-            {
-                neighboursIndexes.Add(westNeighbourIndex);
-                neigbhours.Add(TileObjectBuffer[westNeighbourIndex]);
-            }
-            if (eastNeighbourIndex != -1)
-            {
-                neighboursIndexes.Add(eastNeighbourIndex);
-                neigbhours.Add(TileObjectBuffer[eastNeighbourIndex]);
+                if (neighboursIndexes[i] != -1)
+                {
+                    realNeighboursIndexes[j] = neighboursIndexes[i];
+                    neigbhours[j] = _tileObjectBuffer[neighboursIndexes[i]];
+                    j++;
+                }
             }
              
             // Do actual work
-            MoleTransfers[index] = AtmosCalculator.SimulateGasTransfers(TileObjectBuffer[index], DeltaTime, neigbhours.ToArray(), index, neighboursIndexes.ToArray());
-
+            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
         private int GetWestNeighbourIndex(int ownIndex, int2 ownChunkKey)
         {
-            int positionInChunk = ownIndex % (ChunkSize * ChunkSize);
+            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
             // case where element is not on first column 
-            if (ownIndex % ChunkSize > 0)
+            if (ownIndex % _chunkSize > 0)
             {
                 return ownIndex - 1;
             }
@@ -172,16 +185,16 @@ namespace SS3D.Engine.AtmosphericsRework
             int westChunkFirstElementIndex = GetFirstElementIndexOfChunk(westChunkKey);
 
             // Return the element adjacent in west Chunk
-            return westChunkFirstElementIndex + positionInChunk + (ChunkSize-1);
+            return westChunkFirstElementIndex + positionInChunk + (_chunkSize-1);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
         private int GetEastNeighbourIndex(int ownIndex, int2 ownChunkKey)
         {
-            int positionInChunk = ownIndex % (ChunkSize * ChunkSize);
+            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
             // case where element is not on last column 
-            if (ownIndex % ChunkSize < ChunkSize-1)
+            if (ownIndex % _chunkSize < _chunkSize-1)
             {
                 return ownIndex + 1;
             }
@@ -196,18 +209,18 @@ namespace SS3D.Engine.AtmosphericsRework
             int eastChunkFirstElementIndex = GetFirstElementIndexOfChunk(eastChunkKey);
 
             // Return the element adjacent in east Chunk
-            return eastChunkFirstElementIndex + positionInChunk - (ChunkSize-1);
+            return eastChunkFirstElementIndex + positionInChunk - (_chunkSize-1);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
         private int GetNorthNeighbourIndex(int ownIndex, int2 ownChunkKey)
         {
-            int positionInChunk = ownIndex % (ChunkSize * ChunkSize);
+            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
             // case where element is not on last row 
-            if (ownIndex % (ChunkSize * ChunkSize) < ChunkSize * (ChunkSize-1))
+            if (ownIndex % (_chunkSize * _chunkSize) < _chunkSize * (_chunkSize-1))
             {
-                return ownIndex + ChunkSize;
+                return ownIndex + _chunkSize;
             }
 
             bool hasNorthChunkKey = TryGetNorthChunkKey(ownChunkKey, out int2 northChunkKey);
@@ -220,18 +233,18 @@ namespace SS3D.Engine.AtmosphericsRework
             int northChunkFirstElementIndex = GetFirstElementIndexOfChunk(northChunkKey);
 
             // Return the element adjacent in north Chunk
-            return northChunkFirstElementIndex + positionInChunk - ChunkSize * (ChunkSize - 1);
+            return northChunkFirstElementIndex + positionInChunk - _chunkSize * (_chunkSize - 1);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
         private int GetSouthNeighbourIndex(int ownIndex, int2 ownChunkKey)
         {
-            int positionInChunk = ownIndex % (ChunkSize * ChunkSize);
+            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
             // case where element is not on first row 
-            if (ownIndex % (ChunkSize * ChunkSize) >= ChunkSize)
+            if (ownIndex % (_chunkSize * _chunkSize) >= _chunkSize)
             {
-                return ownIndex - ChunkSize;
+                return ownIndex - _chunkSize;
             }
 
             bool hasSouthChunkKey = TryGetSouthChunkKey(ownChunkKey, out int2 southChunkKey);
@@ -244,34 +257,28 @@ namespace SS3D.Engine.AtmosphericsRework
             int southChunkFirstElementIndex = GetFirstElementIndexOfChunk(southChunkKey);
 
             // Return the element adjacent in south Chunk
-            return southChunkFirstElementIndex + ChunkSize * (ChunkSize - 1) + positionInChunk;
+            return southChunkFirstElementIndex + _chunkSize * (_chunkSize - 1) + positionInChunk;
         }
 
         private int GetFirstElementIndexOfChunk(int2 chunkKey)
         {
-            for (int i = 0; i < ChunkKeyBuffer.Length; i++)
-            {
-                if (ChunkKeyBuffer[i].x == chunkKey.x && ChunkKeyBuffer[i].y == chunkKey.y)
-                {
-                    return ChunkSize * ChunkSize * i;
-                }
-            }
+            if (!_chunkKeyHashMap.TryGetValue(chunkKey, out int index))
+                return -1;
 
-            return -1;
+            return _chunkSize * _chunkSize * index;
         }
 
         private bool TryGetChunkKey(int2 chunkKey, out int2 offsetChunkKey, int xOffset, int yOffset)
         {
             offsetChunkKey = default;
-            for (int i = 0; i < ChunkKeyBuffer.Length; i++)
-            {
-                if (ChunkKeyBuffer[i].x == chunkKey.x + xOffset && ChunkKeyBuffer[i].y == chunkKey.y + yOffset)
-                {
-                    offsetChunkKey = new int2(chunkKey.x + xOffset, chunkKey.y + yOffset);
-                    return true;
-                }
-            }
-            return false;
+
+            if (!_chunkKeyHashMap.TryGetValue(chunkKey + new int2(xOffset, yOffset), out int index))
+                return false;
+
+            offsetChunkKey = new int2(chunkKey.x + xOffset, chunkKey.y + yOffset);;
+
+            return true;
+
         }
 
         private bool TryGetSouthChunkKey(int2 chunkKey, out int2 southChunkKey) => TryGetChunkKey(chunkKey, out southChunkKey, 0, -1);
@@ -283,4 +290,56 @@ namespace SS3D.Engine.AtmosphericsRework
         private bool TryGetWestChunkKey(int2 chunkKey, out int2 westChunkKey)=> TryGetChunkKey(chunkKey, out westChunkKey, -1, 0);
 
     }
+
+    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    struct TransferGasJob : IJob
+    {
+        [ReadOnly]
+        private NativeArray<MoleTransferToNeighbours> _moleTransfers;
+
+
+        private NativeArray<AtmosObject> _tileObjectBuffer;
+
+        public TransferGasJob(NativeArray<MoleTransferToNeighbours> moleTransfers,  NativeArray<AtmosObject> tileObjectBuffer)
+        {
+            _moleTransfers = moleTransfers;
+            _tileObjectBuffer = tileObjectBuffer;
+        }
+
+        public void Execute()
+        {
+            NativeArray<AtmosObject> copyAtmosTiles = _tileObjectBuffer;
+
+            for (int i = 0; i < _moleTransfers.Length; i++)
+            {
+                int atmosObjectFromIndex = _moleTransfers[i].IndexFrom;
+
+                // check the copy, as the active state might be changed by the adding and removal of gasses 
+                if (copyAtmosTiles[atmosObjectFromIndex].State != AtmosState.Active)
+                    continue;
+
+                AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
+                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferOne.Moles);
+                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferTwo.Moles); 
+                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferThree.Moles);
+                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferFour.Moles);
+                _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
+
+                AtmosObject neighbourOne = _tileObjectBuffer[_moleTransfers[i].TransferOne.IndexTo];
+                AtmosObject neighbourTwo = _tileObjectBuffer[_moleTransfers[i].TransferTwo.IndexTo];
+                AtmosObject neighbourThree = _tileObjectBuffer[_moleTransfers[i].TransferThree.IndexTo];
+                AtmosObject neighbourFour = _tileObjectBuffer[_moleTransfers[i].TransferFour.IndexTo];
+
+                neighbourOne.AddCoreGasses(_moleTransfers[i].TransferOne.Moles);
+                neighbourTwo.AddCoreGasses(_moleTransfers[i].TransferTwo.Moles);
+                neighbourThree.AddCoreGasses(_moleTransfers[i].TransferThree.Moles);
+                neighbourFour.AddCoreGasses(_moleTransfers[i].TransferFour.Moles);
+
+                _tileObjectBuffer[_moleTransfers[i].TransferOne.IndexTo] = neighbourOne;
+                _tileObjectBuffer[_moleTransfers[i].TransferTwo.IndexTo] = neighbourTwo;
+                _tileObjectBuffer[_moleTransfers[i].TransferThree.IndexTo] = neighbourThree;
+                _tileObjectBuffer[_moleTransfers[i].TransferFour.IndexTo] = neighbourFour;
+            }
+        }
+    } 
 }
