@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SS3D.Engine.AtmosphericsRework
 {
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    struct ComputeFluxJob : IJobParallelFor
+    struct ComputeActiveFluxJob : IJobParallelFor
     {
 
         // todo : using NativeDisableParallelForRestriction is a dirty trick to avoid doing proper code. This might lead to race conditions.
@@ -32,7 +32,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly float _deltaTime;
 
-        public ComputeFluxJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime)
+        public ComputeActiveFluxJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _chunkSize = chunkSize;

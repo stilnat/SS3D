@@ -40,7 +40,7 @@ public class AtmosBenchmark : MonoBehaviour
             {
                 AtmosObject atmos = new AtmosObject();
 
-                atmos.Container.MakeRandom();
+                atmos.MakeRandom();
 
                 atmosObjects[y * gridSize + x] = atmos;
             }
@@ -111,7 +111,7 @@ public class AtmosBenchmark : MonoBehaviour
                 default: state = new Color(0, 0, 0, 1); break;
             }
             Vector3 position = GetPositionFromIndex(i);
-            float pressure =  atmosObjects[i].Container.GetPressure() / 160f;;
+            float pressure =  atmosObjects[i].Pressure / 160f;;
 
             if (pressure > 0f)
             {

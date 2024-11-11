@@ -28,7 +28,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes, int neighbourCount)
         {
-            float pressure = atmos.Container.GetPressure();
+            float pressure = atmos.Pressure;
 
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
@@ -42,25 +42,25 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (neighbours[i].State == AtmosState.Blocked)
                     continue;
 
-                float neighbourPressure = neighbours[i].Container.GetPressure();
+                float neighbourPressure = neighbours[i].Pressure;
 
                 if (pressure - neighbourPressure <= GasConstants.pressureEpsilon)
                 {
-                    if (!atmos.temperatureSetting)
+                    if (!atmos.TemperatureSetting)
                         atmos.State = AtmosState.Semiactive;
                     else
-                        atmos.temperatureSetting = false;
+                        atmos.TemperatureSetting = false;
                     continue;
                 }
 
-                atmos.activeDirection[i] = true;
+                atmos.ActiveDirection[i] = true;
 
                 // Use partial pressures to determine how much of each gas to move.
-                float4 partialPressureDifference =  atmos.Container.GetAllPartialPressures() - neighbours[i].Container.GetAllPartialPressures();
+                float4 partialPressureDifference =  atmos.GetAllPartialPressures() - neighbours[i].GetAllPartialPressures();
 
                 // Determine the amount of moles by applying the ideal gas law.
-                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.Container.GetVolume() /
-                    (atmos.Container.GetTemperature() * GasConstants.gasConstant);
+                molesToTransfer[i] = partialPressureDifference * 1000f * atmos.GetVolume() /
+                    (atmos.Temperature * GasConstants.gasConstant);
 
                 molesToTransfer[i] *= GasConstants.simSpeed * dt;
 
@@ -80,7 +80,7 @@ namespace SS3D.Engine.AtmosphericsRework
             
 
 
-            float4 totalMolesInContainer = atmos.Container.GetCoreGasses();
+            float4 totalMolesInContainer = atmos.CoreGasses;
             totalMolesInContainer += 0.000001f;
 
             // It's not immediately obvious what this does. If there's enough moles of the given gas in container, then the full amount of previously computed moles are transferred.
@@ -128,7 +128,7 @@ namespace SS3D.Engine.AtmosphericsRework
             bool mixed = false;
             int neighbourCount = neighbours.Length; 
 
-            if (math.all(atmos.Container.GetCoreGasses() <= 0f))
+            if (math.all(atmos.CoreGasses <= 0f))
             {
                 return atmos;
             }
@@ -140,7 +140,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     continue;
                 }
 
-                float4 molesToTransfer = (atmos.Container.GetCoreGasses() - neighbours[i].Container.GetCoreGasses())
+                float4 molesToTransfer = (atmos.CoreGasses - neighbours[i].CoreGasses)
                     * GasConstants.gasDiffusionRate;
 
                 molesToTransfer *= GasConstants.simSpeed * dt;
@@ -148,13 +148,13 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (math.any(molesToTransfer > (GasConstants.fluxEpsilon * GasConstants.simSpeed * dt)))
                 {
                     molesToTransfer = math.max(molesToTransfer, 0);
-                    neighbours[i].Container.AddCoreGasses(molesToTransfer);
-                    atmos.Container.RemoveCoreGasses(molesToTransfer);
+                    neighbours[i].AddCoreGasses(molesToTransfer, false);
+                    atmos.RemoveCoreGasses(molesToTransfer, false);
                     mixed = true;
                 }
 
                 // Remain active if there is still a pressure difference
-                if (math.abs(neighbours[i].Container.GetPressure() - atmos.Container.GetPressure()) > GasConstants.pressureEpsilon)
+                if (math.abs(neighbours[i].Pressure) - atmos.Pressure > GasConstants.pressureEpsilon)
                 {
                     neighbours[i].State = AtmosState.Active;
                 }
@@ -175,27 +175,27 @@ namespace SS3D.Engine.AtmosphericsRework
             int neighbourCount = neighbours.Length; 
             for (int i = 0; i < neighbourCount; i++)
             {
-                if (!atmos.activeDirection[i])
+                if (!atmos.ActiveDirection[i])
                 {
                     continue;
                 }
 
-                float difference = atmos.Container.GetTemperature() - neighbours[i].Container.GetTemperature();
+                float difference = atmos.Temperature - neighbours[i].Temperature;
 
                 if (difference <= GasConstants.thermalEpsilon)
                 {
                     continue;
                 }
 
-                temperatureFlux[i] = (atmos.Container.GetTemperature() - neighbours[i].Container.GetTemperature()) *
-                    GasConstants.thermalBase * atmos.Container.GetVolume();
+                temperatureFlux[i] = (atmos.Temperature - neighbours[i].Temperature) *
+                    GasConstants.thermalBase * atmos.Volume;
 
                 // Set neighbour
-                neighbours[i].Container.SetTemperature(neighbours[i].Container.GetTemperature() + temperatureFlux[i]);
+                neighbours[i].SetTemperature(neighbours[i].Temperature + temperatureFlux[i]);
 
                 // Set self
-                atmos.Container.SetTemperature(atmos.Container.GetTemperature() - temperatureFlux[i]);
-                atmos.temperatureSetting = true;
+                atmos.SetTemperature(atmos.Temperature - temperatureFlux[i]);
+                atmos.TemperatureSetting = true;
             }   
             
             return atmos;

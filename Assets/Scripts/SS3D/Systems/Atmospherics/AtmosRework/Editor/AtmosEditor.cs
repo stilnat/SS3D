@@ -260,7 +260,7 @@ public class AtmosEditor : EditorWindow
     private void DrawPressureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
     {
         float pressureScale = 0.02f;
-        float pressure = atmosObject.Container.GetPressure() * pressureScale;
+        float pressure = atmosObject.Pressure * pressureScale;
         AtmosState tileState = atmosObject.State;
 
         if (tileState == AtmosState.Active || tileState == AtmosState.Semiactive || tileState == AtmosState.Inactive)
@@ -289,7 +289,7 @@ public class AtmosEditor : EditorWindow
         float contentScale = 0.05f;
         float offset = 0f;
         Color[] colors = new Color[] { Color.yellow, Color.white, Color.gray, Color.magenta };
-        float4 moles = atmosObject.Container.GetCoreGasses() * contentScale;
+        float4 moles = atmosObject.CoreGasses * contentScale;
 
         for (int i = 0; i < 4; ++i)
         {
@@ -318,7 +318,7 @@ public class AtmosEditor : EditorWindow
 
     private void DrawTemperatureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
     {
-        float temperature = atmosObject.Container.GetTemperature(); // In Celcius
+        float temperature = atmosObject.Temperature; // In Celcius
         float colorLerpValue = temperature / 773f;
 
         Handles.color = Color.Lerp(Color.blue, Color.red, colorLerpValue) - stateColor;

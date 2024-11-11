@@ -35,13 +35,13 @@ public class TestAtmos : MonoBehaviour
     private void BuildGrid()
     {
         AtmosObject newAtmosObject1 = new AtmosObject();
-        newAtmosObject1.Container.MakeRandom();
+        newAtmosObject1.MakeRandom();
         // newAtmosObject1.atmosObject.container.AddCoreGas(CoreAtmosGasses.Oxygen, 300f);
         // newAtmosObject1.atmosObject.container.AddCoreGas(CoreAtmosGasses.Nitrogen, 10f);
         // newAtmosObject1.atmosObject.container.SetTemperature(500);
 
         AtmosObject newAtmosObject2 = new AtmosObject();
-        newAtmosObject2.Container.MakeRandom();
+        newAtmosObject2.MakeRandom();
         // newAtmosObject2.atmosObject.container.AddCoreGas(CoreAtmosGasses.Nitrogen, 100f);
 
 
@@ -116,7 +116,7 @@ public class TestAtmos : MonoBehaviour
             }
 
             Vector3 position = new Vector3(i, 0, 0);
-            float pressure = atmosObjects[i].Container.GetPressure() / 160f;
+            float pressure = atmosObjects[i].Pressure / 160f;
 
             if (pressure > 0f)
             {

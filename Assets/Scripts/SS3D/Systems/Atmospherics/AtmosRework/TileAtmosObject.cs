@@ -102,21 +102,21 @@ namespace SS3D.Engine.AtmosphericsRework
             if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
-                atmosObject.Container.MakeEmpty();
+                atmosObject.MakeEmpty();
             }
 
             // if no plenum, then put vacuum
             if (plenumLayerTile.IsFullyEmpty())
             {
-                atmosObject.Container.MakeEmpty();
+                atmosObject.MakeEmpty();
                 atmosObject.State = AtmosState.Vacuum;
-                atmosObject.Container.SetTemperature(173); // -100 C for space
+                atmosObject.SetTemperature(173); // -100 C for space
             }
 
             // Set blocked with a wall
             if (!turfLayerTile.IsFullyEmpty() && turfLayerTile.TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
             {
-                atmosObject.Container.MakeEmpty();
+                atmosObject.MakeEmpty();
                 atmosObject.State = AtmosState.Blocked;
             }
             
@@ -140,10 +140,10 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 saveState = AtmosSaveState.Air;
             }
-            else if (!atmosObject.IsEmpty())
+            else if (!atmosObject.IsEmpty)
             {
                 saveState = AtmosSaveState.Mix;
-                mixState = new MixSaveState(atmosObject.Container.GetCoreGasses(), atmosObject.Container.GetTemperature());
+                mixState = new MixSaveState(atmosObject.CoreGasses, atmosObject.Temperature);
             }
             else
             {

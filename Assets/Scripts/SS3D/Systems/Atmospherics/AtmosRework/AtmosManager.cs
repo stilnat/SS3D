@@ -101,7 +101,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 // Update the gas amount. Keep in mind that this is a value type.
                 AtmosObject atmosObject = tile.GetAtmosObject();
-                atmosObject.AddGas(gas, amount);
+                atmosObject.AddCoreGas(gas, amount, true);
                 tile.SetAtmosObject(atmosObject);
 
                 // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
@@ -118,7 +118,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
                     {
                         AtmosObject atmosObject = tile.GetAtmosObject();
-                        atmosObject.AddCoreGasses(_random.NextFloat() * maxAmount);
+                        atmosObject.AddCoreGasses(_random.NextFloat() * maxAmount, true);
                         tile.SetAtmosObject(atmosObject);
                     }
                 }
@@ -152,7 +152,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 // Update the gas amount. Keep in mind that this is a value type.
                 AtmosObject atmosObject = tile.GetAtmosObject();
-                atmosObject.RemoveGas(gas, amount);
+                atmosObject.RemoveCoreGas(gas, amount, true);
                 tile.SetAtmosObject(atmosObject);
 
                 // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
@@ -303,6 +303,9 @@ namespace SS3D.Engine.AtmosphericsRework
             return counter;
         }
 
+        /// <summary>
+        /// Schedule all the atmos jobs
+        /// </summary>
         private void ScheduleJobs(float deltaTime)
         {
             // Loop through every map
@@ -319,20 +322,20 @@ namespace SS3D.Engine.AtmosphericsRework
                 _nativeStructureToDispose.Add(chunkKeyHashMap);
                 _nativeStructureToDispose.Add(chunkKeyBuffer);
 
-                ComputeFluxJob simulateTilesJob = new (atmosJob.NativeAtmosTiles, chunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime);
-                TransferGasJob transferGasJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles);
+                ComputeActiveFluxJob simulateTilesJob = new (atmosJob.NativeAtmosTiles, chunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime);
+                TransferActiveFluxJob transferActiveFluxJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles);
 
                 if (_usesParallelComputation)
                 {
-                    JobHandle simulateTilesHandle = simulateTilesJob.Schedule(atmosJob.AtmosTiles.Count, 100);
-                    JobHandle transferGasHandle = transferGasJob.Schedule(simulateTilesHandle);
+                    JobHandle simulateTilesHandle = simulateTilesJob.Schedule(atmosJob.AtmosTiles.Count, 128);
+                    JobHandle transferGasHandle = transferActiveFluxJob.Schedule(simulateTilesHandle);
                     _jobHandles.Add(simulateTilesHandle);
                     _jobHandles.Add(transferGasHandle);
                 }
                 else
                 {
                     simulateTilesJob.Run(atmosJob.AtmosTiles.Count);
-                    transferGasJob.Run();
+                    transferActiveFluxJob.Run();
                 }
             }
 
@@ -340,7 +343,8 @@ namespace SS3D.Engine.AtmosphericsRework
         }
 
         /// <summary>
-        /// Delay as much as possible the job main thread completion, as the maximum allowed for temp allocation is 4 frame
+        /// Delay as much as possible the job main thread completion, as the maximum allowed for temp allocation is 4 frame. Delaying allows
+        /// spreading the jobs computation as much as possible, as we do not wish to have them all executed on a single frame, that can cause lag spikes.
         /// </summary>
         /// <returns></returns>
         private IEnumerator DelayCompleteJob()
