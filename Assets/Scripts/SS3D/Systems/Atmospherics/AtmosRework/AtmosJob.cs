@@ -21,13 +21,22 @@ namespace SS3D.Engine.AtmosphericsRework
         }
     }
 
-    public struct MoleTransferToNeighbours
+    public readonly struct MoleTransferToNeighbours
     {
-        public int IndexFrom;
-        public MoleTransfer TransferOne;
-        public MoleTransfer TransferTwo;
-        public MoleTransfer TransferThree;
-        public MoleTransfer TransferFour;
+        public readonly int IndexFrom;
+        public readonly MoleTransfer TransferOne;
+        public readonly MoleTransfer TransferTwo;
+        public readonly  MoleTransfer TransferThree;
+        public readonly MoleTransfer TransferFour;
+
+        public MoleTransferToNeighbours(int indexFrom, MoleTransfer transferOne, MoleTransfer transferTwo, MoleTransfer transferThree, MoleTransfer transferFour)
+        {
+            IndexFrom = indexFrom;
+            TransferOne = transferOne;
+            TransferTwo = transferTwo;
+            TransferThree = transferThree;
+            TransferFour = transferFour;
+        }
     }
 
     public struct AtmosJob
@@ -161,7 +170,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
              
             // Do actual work
-            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes);
+            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, neighbourCount);
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
@@ -312,33 +321,34 @@ namespace SS3D.Engine.AtmosphericsRework
 
             for (int i = 0; i < _moleTransfers.Length; i++)
             {
-                int atmosObjectFromIndex = _moleTransfers[i].IndexFrom;
+                MoleTransferToNeighbours transfer = _moleTransfers[i];
+                int atmosObjectFromIndex = transfer.IndexFrom;
 
                 // check the copy, as the active state might be changed by the adding and removal of gasses 
                 if (copyAtmosTiles[atmosObjectFromIndex].State != AtmosState.Active)
                     continue;
 
                 AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
-                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferOne.Moles);
-                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferTwo.Moles); 
-                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferThree.Moles);
-                atmosObject.RemoveCoreGasses(_moleTransfers[i].TransferFour.Moles);
+                atmosObject.RemoveCoreGasses(transfer.TransferOne.Moles);
+                atmosObject.RemoveCoreGasses(transfer.TransferTwo.Moles); 
+                atmosObject.RemoveCoreGasses(transfer.TransferThree.Moles);
+                atmosObject.RemoveCoreGasses(transfer.TransferFour.Moles);
                 _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
 
-                AtmosObject neighbourOne = _tileObjectBuffer[_moleTransfers[i].TransferOne.IndexTo];
-                AtmosObject neighbourTwo = _tileObjectBuffer[_moleTransfers[i].TransferTwo.IndexTo];
-                AtmosObject neighbourThree = _tileObjectBuffer[_moleTransfers[i].TransferThree.IndexTo];
-                AtmosObject neighbourFour = _tileObjectBuffer[_moleTransfers[i].TransferFour.IndexTo];
+                AtmosObject neighbourOne = _tileObjectBuffer[transfer.TransferOne.IndexTo];
+                AtmosObject neighbourTwo = _tileObjectBuffer[transfer.TransferTwo.IndexTo];
+                AtmosObject neighbourThree = _tileObjectBuffer[transfer.TransferThree.IndexTo];
+                AtmosObject neighbourFour = _tileObjectBuffer[transfer.TransferFour.IndexTo];
 
-                neighbourOne.AddCoreGasses(_moleTransfers[i].TransferOne.Moles);
-                neighbourTwo.AddCoreGasses(_moleTransfers[i].TransferTwo.Moles);
-                neighbourThree.AddCoreGasses(_moleTransfers[i].TransferThree.Moles);
-                neighbourFour.AddCoreGasses(_moleTransfers[i].TransferFour.Moles);
+                neighbourOne.AddCoreGasses(transfer.TransferOne.Moles);
+                neighbourTwo.AddCoreGasses(transfer.TransferTwo.Moles);
+                neighbourThree.AddCoreGasses(transfer.TransferThree.Moles);
+                neighbourFour.AddCoreGasses(transfer.TransferFour.Moles);
 
-                _tileObjectBuffer[_moleTransfers[i].TransferOne.IndexTo] = neighbourOne;
-                _tileObjectBuffer[_moleTransfers[i].TransferTwo.IndexTo] = neighbourTwo;
-                _tileObjectBuffer[_moleTransfers[i].TransferThree.IndexTo] = neighbourThree;
-                _tileObjectBuffer[_moleTransfers[i].TransferFour.IndexTo] = neighbourFour;
+                _tileObjectBuffer[transfer.TransferOne.IndexTo] = neighbourOne;
+                _tileObjectBuffer[transfer.TransferTwo.IndexTo] = neighbourTwo;
+                _tileObjectBuffer[transfer.TransferThree.IndexTo] = neighbourThree;
+                _tileObjectBuffer[transfer.TransferFour.IndexTo] = neighbourFour;
             }
         }
     } 

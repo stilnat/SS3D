@@ -25,8 +25,8 @@ namespace SS3D.Engine.AtmosphericsRework
         private float lastStep;
         private bool initCompleted = false;
 
-        private List<IDisposable> _nativeStructureToDispose = new(); 
-        private NativeList<JobHandle> _jobHandles = new();
+        private readonly List<IDisposable> _nativeStructureToDispose = new(); 
+        private NativeList<JobHandle> _jobHandles;
 
         // Performance markers
         static ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("Atmospherics.Initialize");
@@ -44,26 +44,6 @@ namespace SS3D.Engine.AtmosphericsRework
             _jobHandles = new(1, Allocator.Persistent);
         }
 
-        private void OnDestroy()
-        {
-            if (atmosMaps == null || atmosJobs == null)
-                return;
-
-            foreach (AtmosMap map in atmosMaps)
-            {
-                map.Clear();
-            }
-
-            atmosMaps.Clear();
-
-            foreach (AtmosJob job in atmosJobs)
-            {
-                job.Destroy();
-            }
-
-            atmosJobs.Clear();
-        }
-
         private void Update()
         {
             if (!initCompleted)
@@ -78,6 +58,128 @@ namespace SS3D.Engine.AtmosphericsRework
                     Debug.Log("Atmos loop took: " + (dt - UpdateRate) + " seconds, simulating " + tileCounter + " active atmos objects. Fixed update rate: " + UpdateRate);
                 lastStep = Time.fixedTime;
             }
+        }
+
+        private void LateUpdate()
+        {
+            CompleteJobs();
+        }
+
+
+        public TileAtmosObject GetAtmosTile(Vector3 worldPosition)
+        {
+            foreach (var map in atmosMaps)
+            {
+                var atmosTile = map.GetTileAtmosObject(worldPosition);
+                if (atmosTile != null)
+                    return atmosTile;
+            }
+
+            return null;
+        }
+
+        public List<AtmosJob> GetAtmosJobs()
+        {
+            return atmosJobs;
+        }
+
+        public void AddGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
+        {
+
+            var tile = GetAtmosTile(worldPosition);
+            if (tile != null)
+            {
+                // Update the gas amount. Keep in mind that this is a value type.
+                var atmosObject = tile.GetAtmosObject();
+                atmosObject.AddGas(gas, amount);
+                tile.SetAtmosObject(atmosObject);
+
+                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
+                atmosJobs.ForEach(job => job.Refresh());
+            }
+        }
+
+        public void ClearAllGasses()
+        {
+            foreach (AtmosMap map in atmosMaps)
+            {
+                foreach (AtmosChunk atmosChunk in map.GetAtmosChunks())
+                {
+                    foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                    {
+                        var atmosObject = tile.GetAtmosObject();
+                        atmosObject.ClearCoreGasses();
+                        tile.SetAtmosObject(atmosObject);
+                    }
+                }
+            }
+
+            atmosJobs.ForEach(job => job.Refresh());
+        }
+
+        public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
+        {
+            var tile = GetAtmosTile(worldPosition);
+            if (tile != null)
+            {
+                // Update the gas amount. Keep in mind that this is a value type.
+                var atmosObject = tile.GetAtmosObject();
+                atmosObject.RemoveGas(gas, amount);
+                tile.SetAtmosObject(atmosObject);
+
+                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
+                atmosJobs.ForEach(job => job.Refresh());
+            }
+        }
+
+        public void AddHeat(Vector3 worldPosition, float amount)
+        {
+            var tile = GetAtmosTile(worldPosition);
+            if (tile != null)
+            {
+                // Update the gas amount. Keep in mind that this is a value type.
+                var atmosObject = tile.GetAtmosObject();
+                atmosObject.AddHeat(amount);
+                tile.SetAtmosObject(atmosObject);
+
+                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
+                atmosJobs.ForEach(job => job.Refresh());
+            }
+        }
+
+        public void RemoveHeat(Vector3 worldPosition, float amount)
+        {
+            var tile = GetAtmosTile(worldPosition);
+            if (tile != null)
+            {
+                // Update the gas amount. Keep in mind that this is a value type.
+                var atmosObject = tile.GetAtmosObject();
+                atmosObject.RemoveHeat(amount);
+                tile.SetAtmosObject(atmosObject);
+
+                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
+                atmosJobs.ForEach(job => job.Refresh());
+            }
+        }
+
+        private void CompleteJobs()
+        {
+            if (_usesParallelComputation)
+            {
+                JobHandle.CompleteAll(_jobHandles);
+                _jobHandles.Clear();
+            }
+
+            // Write back the results
+            atmosJobs.ForEach(x => x.WriteResultsToList());
+
+            // Clean up
+            //_jobHandles.Dispose();
+            foreach (IDisposable disposable in _nativeStructureToDispose)
+            {
+                disposable.Dispose();
+            }
+            _nativeStructureToDispose.Clear();
         }
 
         private void CreateAtmosMaps()
@@ -160,84 +262,7 @@ namespace SS3D.Engine.AtmosphericsRework
             initCompleted = true;
         }
 
-        public void AddGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
-        {
 
-            var tile = GetAtmosTile(worldPosition);
-            if (tile != null)
-            {
-                // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
-                atmosObject.AddGas(gas, amount);
-                tile.SetAtmosObject(atmosObject);
-
-                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
-                atmosJobs.ForEach(job => job.Refresh());
-            }
-        }
-
-        public void ClearAllGasses()
-        {
-            foreach (AtmosMap map in atmosMaps)
-            {
-                foreach (AtmosChunk atmosChunk in map.GetAtmosChunks())
-                {
-                    foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
-                    {
-                        var atmosObject = tile.GetAtmosObject();
-                        atmosObject.ClearCoreGasses();
-                        tile.SetAtmosObject(atmosObject);
-                    }
-                }
-            }
-
-            atmosJobs.ForEach(job => job.Refresh());
-        }
-
-        public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
-        {
-            var tile = GetAtmosTile(worldPosition);
-            if (tile != null)
-            {
-                // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
-                atmosObject.RemoveGas(gas, amount);
-                tile.SetAtmosObject(atmosObject);
-
-                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
-                atmosJobs.ForEach(job => job.Refresh());
-            }
-        }
-
-        public void AddHeat(Vector3 worldPosition, float amount)
-        {
-            var tile = GetAtmosTile(worldPosition);
-            if (tile != null)
-            {
-                // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
-                atmosObject.AddHeat(amount);
-                tile.SetAtmosObject(atmosObject);
-
-                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
-                atmosJobs.ForEach(job => job.Refresh());
-            }
-        }
-
-        public void RemoveHeat(Vector3 worldPosition, float amount)
-        {
-            var tile = GetAtmosTile(worldPosition);
-            if (tile != null)
-            {
-                // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
-                atmosObject.RemoveHeat(amount);
-                tile.SetAtmosObject(atmosObject);
-
-                // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
-                atmosJobs.ForEach(job => job.Refresh());
-            }
-        }
 
         private int StepAtmos(float deltaTime)
         {
@@ -285,40 +310,24 @@ namespace SS3D.Engine.AtmosphericsRework
 
         }
 
-        private void LateUpdate()
+        private void OnDestroy()
         {
-            if (_usesParallelComputation)
+            if (atmosMaps == null || atmosJobs == null)
+                return;
+
+            foreach (AtmosMap map in atmosMaps)
             {
-                JobHandle.CompleteAll(_jobHandles);
+                map.Clear();
             }
 
-            // Write back the results
-            atmosJobs.ForEach(x => x.WriteResultsToList());
+            atmosMaps.Clear();
 
-            // Clean up
-            //_jobHandles.Dispose();
-            foreach (IDisposable disposable in _nativeStructureToDispose)
+            foreach (AtmosJob job in atmosJobs)
             {
-                disposable.Dispose();
-            }
-            _nativeStructureToDispose.Clear();
-        }
-
-        public TileAtmosObject GetAtmosTile(Vector3 worldPosition)
-        {
-            foreach (var map in atmosMaps)
-            {
-                var atmosTile = map.GetTileAtmosObject(worldPosition);
-                if (atmosTile != null)
-                    return atmosTile;
+                job.Destroy();
             }
 
-            return null;
-        }
-
-        public List<AtmosJob> GetAtmosJobs()
-        {
-            return atmosJobs;
+            atmosJobs.Clear();
         }
     }
 }

@@ -26,22 +26,19 @@ namespace SS3D.Engine.AtmosphericsRework
             return atmos;
         }
 
-        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes)
+        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes, int neighbourCount)
         {
             float pressure = atmos.Container.GetPressure();
-            int neighbourCount = neighbours.Length; 
 
             // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
             float4 neighbourFlux = 0f;
 
             // moles of each gaz from each neighbour to transfer.
-            NativeArray<float4> molesToTransfer = new(neighbourCount, Allocator.Temp);
+            float4x4 molesToTransfer = 0;
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
             for (int i = 0; i < neighbourCount; i++)
             {
-                molesToTransfer[i] = 0;
-
                 if (neighbours[i].State == AtmosState.Blocked)
                     continue;
 
@@ -75,10 +72,12 @@ namespace SS3D.Engine.AtmosphericsRework
             // elements represent the total amount of gas to transfer for core gasses  
             float4 totalMolesToTransfer = 0;
              
-            for (int i = 0; i < neighbourCount; i++)
-            {
-                totalMolesToTransfer += molesToTransfer[i];
-            }
+            // unrolling for loop for vectorization
+            totalMolesToTransfer += molesToTransfer[0];
+            totalMolesToTransfer += molesToTransfer[1];
+            totalMolesToTransfer += molesToTransfer[2];
+            totalMolesToTransfer += molesToTransfer[3];
+            
 
 
             float4 totalMolesInContainer = atmos.Container.GetCoreGasses();
@@ -87,10 +86,12 @@ namespace SS3D.Engine.AtmosphericsRework
             // It's not immediately obvious what this does. If there's enough moles of the given gas in container, then the full amount of previously computed moles are transferred.
             // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
             // it's written like that to avoid using conditions branching for Burst.
-            for (int i = 0; i < neighbourCount; i++)
-            {
-                molesToTransfer[i] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            }
+            // It works okay even if a neighbour is not present as the amount of moles to transfer will be zero.
+            molesToTransfer[0] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[1] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[2] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[3] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+
 
             /*for (int i = 0; i < neighbourCount; i++)
             {
@@ -109,7 +110,7 @@ namespace SS3D.Engine.AtmosphericsRework
             //atmos.Velocity.x = velHorizontal;
             //atmos.Velocity.y = velVertical;
 
-            MoleTransferToNeighbours moleTransferToNeighbours = new();
+            
             NativeArray<MoleTransfer> moleTransfers = new(4, Allocator.Temp);
 
             for (int i = 0; i < neighbourCount; i++)
@@ -117,12 +118,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 moleTransfers[i] = new (molesToTransfer[i], neighboursIndexes[i]);
             }
 
-            moleTransferToNeighbours.TransferOne = moleTransfers[0];
-            moleTransferToNeighbours.TransferTwo = moleTransfers[1];
-            moleTransferToNeighbours.TransferThree = moleTransfers[2];
-            moleTransferToNeighbours.TransferFour = moleTransfers[3];
-            moleTransferToNeighbours.IndexFrom = atmosIndex;
-           
+            MoleTransferToNeighbours moleTransferToNeighbours = new(atmosIndex, moleTransfers[0], moleTransfers[1],moleTransfers[2],moleTransfers[3]);
 
             return moleTransferToNeighbours;
         }
