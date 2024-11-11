@@ -2,6 +2,7 @@
 using SS3D.Core;
 using SS3D.Systems.Tile;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -10,6 +11,7 @@ using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
@@ -20,7 +22,7 @@ namespace SS3D.Engine.AtmosphericsRework
        
         private TileSystem tileManager;
         private List<AtmosMap> atmosMaps;
-        private List<AtmosJob> atmosJobs;
+        private List<AtmosJobPersistentData> atmosJobs;
         
         private float lastStep;
         private bool initCompleted = false;
@@ -35,6 +37,11 @@ namespace SS3D.Engine.AtmosphericsRework
         // This is purely for debugging purposes. When false, the jobs execute all on the main threads, allowing easy debugging.
         [SerializeField]
         private bool _usesParallelComputation;
+
+        // True when jobs are scheduled, false after making sure they completed.
+        private bool _jobsScheduled;
+
+        private Random _random = new(0x6E624EB7u);
 
         private void Start()
         {
@@ -51,8 +58,16 @@ namespace SS3D.Engine.AtmosphericsRework
 
             if (Time.fixedTime >= lastStep + UpdateRate)
             {
+                // If the time step is smaller than the number of frames waited by the DelayCompleteJob method, then its necessary to ensure jobs are complete before proceeding
+                if (_jobsScheduled)
+                {
+                    CompleteJobs();
+                }
+
                 float dt = Time.fixedTime - lastStep;
                 int tileCounter = StepAtmos(dt);
+
+                StartCoroutine(DelayCompleteJob());
 
                 if (ShowUpdate)
                     Debug.Log("Atmos loop took: " + (dt - UpdateRate) + " seconds, simulating " + tileCounter + " active atmos objects. Fixed update rate: " + UpdateRate);
@@ -60,17 +75,12 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        private void LateUpdate()
-        {
-            CompleteJobs();
-        }
-
 
         public TileAtmosObject GetAtmosTile(Vector3 worldPosition)
         {
-            foreach (var map in atmosMaps)
+            foreach (AtmosMap map in atmosMaps)
             {
-                var atmosTile = map.GetTileAtmosObject(worldPosition);
+                TileAtmosObject atmosTile = map.GetTileAtmosObject(worldPosition);
                 if (atmosTile != null)
                     return atmosTile;
             }
@@ -78,7 +88,7 @@ namespace SS3D.Engine.AtmosphericsRework
             return null;
         }
 
-        public List<AtmosJob> GetAtmosJobs()
+        public List<AtmosJobPersistentData> GetAtmosJobs()
         {
             return atmosJobs;
         }
@@ -86,17 +96,35 @@ namespace SS3D.Engine.AtmosphericsRework
         public void AddGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
         {
 
-            var tile = GetAtmosTile(worldPosition);
+            TileAtmosObject tile = GetAtmosTile(worldPosition);
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
+                AtmosObject atmosObject = tile.GetAtmosObject();
                 atmosObject.AddGas(gas, amount);
                 tile.SetAtmosObject(atmosObject);
 
                 // Indicate a refresh for the AtmosJob. TODO: Optimize to not loop everything
                 atmosJobs.ForEach(job => job.Refresh());
             }
+        }
+
+        public void RandomizeAllGasses(float maxAmount)
+        {
+            foreach (AtmosMap map in atmosMaps)
+            {
+                foreach (AtmosChunk atmosChunk in map.GetAtmosChunks())
+                {
+                    foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                    {
+                        AtmosObject atmosObject = tile.GetAtmosObject();
+                        atmosObject.AddCoreGasses(_random.NextFloat() * maxAmount);
+                        tile.SetAtmosObject(atmosObject);
+                    }
+                }
+            }
+
+            atmosJobs.ForEach(job => job.Refresh());
         }
 
         public void ClearAllGasses()
@@ -107,7 +135,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 {
                     foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
                     {
-                        var atmosObject = tile.GetAtmosObject();
+                        AtmosObject atmosObject = tile.GetAtmosObject();
                         atmosObject.ClearCoreGasses();
                         tile.SetAtmosObject(atmosObject);
                     }
@@ -119,11 +147,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
         {
-            var tile = GetAtmosTile(worldPosition);
+            TileAtmosObject tile = GetAtmosTile(worldPosition);
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
+                AtmosObject atmosObject = tile.GetAtmosObject();
                 atmosObject.RemoveGas(gas, amount);
                 tile.SetAtmosObject(atmosObject);
 
@@ -134,11 +162,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void AddHeat(Vector3 worldPosition, float amount)
         {
-            var tile = GetAtmosTile(worldPosition);
+            TileAtmosObject tile = GetAtmosTile(worldPosition);
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
+                AtmosObject atmosObject = tile.GetAtmosObject();
                 atmosObject.AddHeat(amount);
                 tile.SetAtmosObject(atmosObject);
 
@@ -149,11 +177,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void RemoveHeat(Vector3 worldPosition, float amount)
         {
-            var tile = GetAtmosTile(worldPosition);
+            TileAtmosObject tile = GetAtmosTile(worldPosition);
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
-                var atmosObject = tile.GetAtmosObject();
+                AtmosObject atmosObject = tile.GetAtmosObject();
                 atmosObject.RemoveHeat(amount);
                 tile.SetAtmosObject(atmosObject);
 
@@ -180,6 +208,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 disposable.Dispose();
             }
             _nativeStructureToDispose.Clear();
+            _jobsScheduled = false;
         }
 
         private void CreateAtmosMaps()
@@ -241,7 +270,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 // Add tiles in chunk
                 foreach (AtmosChunk chunk in map.GetAtmosChunks())
                 {
-                    var tileAtmosObjects = chunk.GetAllTileAtmosObjects();
+                    List<TileAtmosObject> tileAtmosObjects = chunk.GetAllTileAtmosObjects();
 
                     // Initialize the atmos tiles. Cannot be done in the tilemap as it may still be creating tiles.
                     tileAtmosObjects.ForEach(tile => tile.Initialize(map.GetLinkedTileMap()));
@@ -250,7 +279,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 devices.AddRange(tileManager.GetComponentsInChildren<IAtmosLoop>());
 
-                AtmosJob atmosJob = new AtmosJob(map, tiles, devices);
+                AtmosJobPersistentData atmosJob = new(map, tiles, devices);
                 atmosJobs.Add(atmosJob);
 
                 initCounter += tiles.Count; 
@@ -277,7 +306,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private void ScheduleJobs(float deltaTime)
         {
             // Loop through every map
-            foreach (AtmosJob atmosJob in atmosJobs)
+            foreach (AtmosJobPersistentData atmosJob in atmosJobs)
             {
                 NativeArray<int2> chunkKeyBuffer = new(atmosJob.Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToArray(), Allocator.TempJob);
 
@@ -290,7 +319,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 _nativeStructureToDispose.Add(chunkKeyHashMap);
                 _nativeStructureToDispose.Add(chunkKeyBuffer);
 
-                SimulateFluxJob simulateTilesJob = new (atmosJob.NativeAtmosTiles, chunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime);
+                ComputeFluxJob simulateTilesJob = new (atmosJob.NativeAtmosTiles, chunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime);
                 TransferGasJob transferGasJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles);
 
                 if (_usesParallelComputation)
@@ -307,7 +336,23 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
             }
 
+            _jobsScheduled = true;
+        }
 
+        /// <summary>
+        /// Delay as much as possible the job main thread completion, as the maximum allowed for temp allocation is 4 frame
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator DelayCompleteJob()
+        {
+            yield return null;
+            yield return null;
+            yield return null;
+
+            if (_jobsScheduled)
+            {
+                CompleteJobs();
+            }
         }
 
         private void OnDestroy()
@@ -322,7 +367,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             atmosMaps.Clear();
 
-            foreach (AtmosJob job in atmosJobs)
+            foreach (AtmosJobPersistentData job in atmosJobs)
             {
                 job.Destroy();
             }

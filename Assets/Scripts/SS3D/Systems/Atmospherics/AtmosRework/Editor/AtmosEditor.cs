@@ -137,6 +137,11 @@ public class AtmosEditor : EditorWindow
         {
             _atmosManager.ClearAllGasses();
         }
+
+        if (GUILayout.Button("Randomize all Gasses"))
+        {
+            _atmosManager.RandomizeAllGasses(_selectedAmount);
+        }
     }
 
     private void OnSceneGUI(SceneView sceneView)
@@ -215,7 +220,7 @@ public class AtmosEditor : EditorWindow
 
         var atmosJobs = _atmosManager.GetAtmosJobs();
 
-        foreach (AtmosJob job in atmosJobs)
+        foreach (AtmosJobPersistentData job in atmosJobs)
         {
             for (int i = 0; i < job.AtmosTiles.Count; i++)
             {

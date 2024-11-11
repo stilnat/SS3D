@@ -59,7 +59,11 @@ namespace SS3D.Engine.AtmosphericsRework
         public void AddGas(CoreAtmosGasses gas, float amount)
         {
             Container.AddCoreGas(gas, amount);
-            State = AtmosState.Active;
+
+            if (amount != 0)
+            {
+                State = AtmosState.Active;
+            }
         }
 
         public void RemoveGas(CoreAtmosGasses gas, float amount)
