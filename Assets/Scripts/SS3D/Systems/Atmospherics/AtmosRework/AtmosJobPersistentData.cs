@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
@@ -17,14 +18,46 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
 
+        private readonly List<TileAtmosObject> _atmosObjectsToChange;
+
+        /// <summary>
+        /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
+        /// TODO : update when chunk added
+        /// </summary>
+        public NativeHashMap<int2, int> ChunkKeyHashMap;
+
+
         public AtmosJobPersistentData(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
         {
             Map = map;
             AtmosTiles = atmosTiles;
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
+            List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
+            ChunkKeyHashMap = new(chunkKeyBuffer.Count, Allocator.Persistent);
+            for (int i = 0; i < chunkKeyBuffer.Count; i++)
+            {
+                ChunkKeyHashMap.Add(chunkKeyBuffer[i], i);
+            }
 
+            _atmosObjectsToChange = new();
             LoadNativeArrays();
+        }
+
+        public void AddGas(TileAtmosObject tile, CoreAtmosGasses gas, float amount)
+        {
+            AtmosObject atmosObject = tile.AtmosObject;
+            atmosObject.AddCoreGas(gas, amount, true);
+            tile.AtmosObject = atmosObject;
+            _atmosObjectsToChange.Add(tile);
+        }
+
+        public void RemoveGas(TileAtmosObject tile, CoreAtmosGasses gas, float amount)
+        {
+            AtmosObject atmosObject = tile.AtmosObject;
+            atmosObject.RemoveCoreGas(gas, amount, true);
+            tile.AtmosObject = atmosObject;
+            _atmosObjectsToChange.Add(tile);
         }
 
         public void RandomizeAllGasses(float maxAmount)
@@ -33,27 +66,51 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
                 {
-                    AtmosObject atmosObject = tile.GetAtmosObject();
+                    AtmosObject atmosObject = tile.AtmosObject;
                     atmosObject.AddCoreGasses(UnityEngine.Random.Range(0, maxAmount) * maxAmount, true);
-                    tile.SetAtmosObject(atmosObject);
+                    tile.AtmosObject = atmosObject;
+                    _atmosObjectsToChange.Add(tile);
                 }
             }
-            Refresh();
         }
 
         public void ClearAllGasses()
         {
-
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
             {
                 foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
                 {
-                    AtmosObject atmosObject = tile.GetAtmosObject();
+                    AtmosObject atmosObject = tile.AtmosObject;
                     atmosObject.ClearCoreGasses();
-                    tile.SetAtmosObject(atmosObject);
+                    tile.AtmosObject = atmosObject;
+                    _atmosObjectsToChange.Add(tile);
                 }
             }
-            Refresh();
+        }
+
+        /// <summary>
+        /// Refreshes the calculation array. Must be called when gas is added/removed from the system.
+        /// </summary>
+        public void Refresh()
+        {
+            foreach (TileAtmosObject atmosObject in _atmosObjectsToChange)
+            {
+                int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
+
+                if (indexInNativeArray != -1)
+                {
+                    NativeAtmosTiles[indexInNativeArray] = atmosObject.AtmosObject;
+                }
+            }
+            _atmosObjectsToChange.Clear();
+        }
+
+        private void LoadNativeArrays()
+        {
+            for (int i = 0; i < AtmosTiles.Count; i++)
+            {
+                NativeAtmosTiles[i] = AtmosTiles[i].AtmosObject;
+            }
         }
 
         public void Destroy()
@@ -63,15 +120,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public int CountActive()
         {
-            return NativeAtmosTiles.Count(atmosObject => atmosObject.State == AtmosState.Active || atmosObject.State == AtmosState.Semiactive);
-        }
-
-        /// <summary>
-        /// Refreshes the calculation array. Must be called when gas is added/removed from the system.
-        /// </summary>
-        public void Refresh()
-        {
-            LoadNativeArrays();
+            return AtmosTiles.Count(atmosObject => atmosObject.AtmosObject.State == AtmosState.Active || atmosObject.AtmosObject.State == AtmosState.Semiactive);
         }
 
         /// <summary>
@@ -81,16 +130,16 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             for (int i = 0; i < NativeAtmosTiles.Length; i++)
             {
-                AtmosTiles[i].SetAtmosObject(NativeAtmosTiles[i]);
+                AtmosTiles[i].AtmosObject = NativeAtmosTiles[i];
             }
         }
 
-        private void LoadNativeArrays()
+        private int IndexOfTileAtmosObject(TileAtmosObject atmosObject)
         {
-            for (int i = 0; i < AtmosTiles.Count; i++)
-            {
-                NativeAtmosTiles[i] = AtmosTiles[i].GetAtmosObject();
-            }
+            if (!ChunkKeyHashMap.TryGetValue(atmosObject.AtmosObject.ChunkKey, out int indexChunk))
+                return -1;
+
+            return indexChunk * 16 * 16 + atmosObject.X + 16 * atmosObject.Y;
         }
     }
 

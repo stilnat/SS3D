@@ -44,7 +44,7 @@ namespace SS3D.Engine.Atmospherics
 
                 // Get current tile position
                 Vector3 position = transform.position;
-                AtmosObject atmosObject = atmosSystem.GetAtmosTile(position).GetAtmosObject();
+                AtmosObject atmosObject = atmosSystem.GetAtmosTile(position).AtmosObject;
 
                 Debug.Log($"atmos object {atmosObject.Velocity}");
 

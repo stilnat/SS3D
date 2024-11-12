@@ -22,6 +22,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         // Hashmap of chunk keys, with values indicating order as they were created by the atmos map. Useful as two adjacent tiles objects might have very different positions if they're not in the same chunk.
         // Only adjacent tile objects in the same chunk can be retrieved without that, so its necessary for computing indexes in the TileObjectBuffer of neighbours on chunk edges.
+        // todo : might be more efficient to use a sorter native array as burst doesn't like NativeHashMap
         [ReadOnly]
         private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
 
@@ -46,7 +47,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Execute(int index)
         {
-            // TODO : We might need to set velocity of inactive atmosObject to 0 here ? Or maybe elsewhere, but velocity stays stuck sometimes on inactive atmosObject
             if (_tileObjectBuffer[index].State != AtmosState.Active && _tileObjectBuffer[index].State != AtmosState.Semiactive)
             {
                 return;

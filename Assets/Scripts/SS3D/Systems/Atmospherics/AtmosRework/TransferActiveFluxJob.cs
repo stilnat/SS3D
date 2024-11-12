@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
@@ -11,6 +12,7 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
+        //private NativeHashSet<int> _activeTransferIndex;
 
         private NativeArray<AtmosObject> _tileObjectBuffer;
 
@@ -21,6 +23,7 @@ namespace SS3D.Engine.AtmosphericsRework
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;
             _diffusion = diffusion;
+            //_activeTransferIndex = activeTransferIndex;
         }
 
         public void Execute()
@@ -29,13 +32,9 @@ namespace SS3D.Engine.AtmosphericsRework
 
             for (int i = 0; i < _moleTransfers.Length; i++)
             {
+ 
                 MoleTransferToNeighbours transfer = _moleTransfers[i];
                 int atmosObjectFromIndex = transfer.IndexFrom;
-
-                // check the copy, as the active state might be changed by the adding and removal of gasses 
-                if (copyAtmosTiles[atmosObjectFromIndex].State != AtmosState.Active)
-                    continue;
-
                 AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
                 atmosObject.RemoveCoreGasses(transfer.TransferOne.Moles, _diffusion);
                 atmosObject.RemoveCoreGasses(transfer.TransferTwo.Moles, _diffusion);

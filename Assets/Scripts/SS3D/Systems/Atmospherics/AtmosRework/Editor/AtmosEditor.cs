@@ -225,7 +225,7 @@ public class AtmosEditor : EditorWindow
             for (int i = 0; i < job.AtmosTiles.Count; i++)
             {
                 Vector3 position = job.AtmosTiles[i].GetWorldPosition();
-                AtmosObject atmosObject = job.AtmosTiles[i].GetAtmosObject();
+                AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
 
                 Color stateColor;
                 AtmosState tileState = atmosObject.State;

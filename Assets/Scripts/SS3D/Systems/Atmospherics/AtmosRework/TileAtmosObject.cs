@@ -40,58 +40,28 @@ namespace SS3D.Engine.AtmosphericsRework
             public MixSaveState mix;
         }
 
-        private TileAtmosObject[] neighbours;
-        private AtmosObject atmosObject;
-        private AtmosMap map;
-        private AtmosChunk chunk;
-        private int x;
-        private int y;
+        public AtmosObject AtmosObject { get; set; }
+
+        public AtmosMap Map { get; }
+
+        public int X { get; }
+
+        public int Y { get; }
+
+        public AtmosChunk Chunk { get; }
 
         public TileAtmosObject(AtmosMap map, AtmosChunk chunk, int x, int y)
         {
-            this.map = map;
-            this.chunk = chunk;
-            this.x = x;
-            this.y = y;
+            Map = map;
+            Chunk = chunk;
+            X = x;
+            Y = y;
 
-            atmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y));
-        }
-
-        public AtmosObject GetAtmosObject()
-        {
-            return atmosObject;
-        }
-
-        public void SetAtmosObject(AtmosObject atmosObject)
-        {
-            this.atmosObject = atmosObject;
-        }
-
-        public void LoadNeighbours()
-        {
-            // Get neighbours
-            TileAtmosObject[] neighbours = new TileAtmosObject[4];
-            for (Direction direction = Direction.North; direction <= Direction.NorthWest; direction += 2)
-            {
-                var vector = TileHelper.ToCardinalVector(direction);
-
-                TileAtmosObject tileAtmosObject = map.GetTileAtmosObject(chunk.GetWorldPosition(x + vector.Item1, y + vector.Item2));
-                if (tileAtmosObject != null)
-                    neighbours[TileHelper.GetCardinalDirectionIndex(direction)] = tileAtmosObject;
-            }
-
-            this.neighbours = neighbours;
-        }
-
-        public TileAtmosObject[] GetNeighbours()
-        {
-            return neighbours;
+            AtmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y));
         }
 
         public void Initialize(TileMap tileMap)
         {
-            LoadNeighbours();
-
             // Set blocked or vacuum if there is a wall or there is no plenum
             ITileLocation plenumLayerTile = tileMap.GetTileLocation(TileLayer.Plenum, GetWorldPosition());
 
@@ -102,29 +72,29 @@ namespace SS3D.Engine.AtmosphericsRework
             if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
-                atmosObject.MakeEmpty();
+                AtmosObject.MakeEmpty();
             }
 
             // if no plenum, then put vacuum
             if (plenumLayerTile.IsFullyEmpty())
             {
-                atmosObject.MakeEmpty();
-                atmosObject.State = AtmosState.Vacuum;
-                atmosObject.SetTemperature(173); // -100 C for space
+                AtmosObject.MakeEmpty();
+                AtmosObject.SetVacuum();
+                AtmosObject.SetTemperature(173); // -100 C for space
             }
 
             // Set blocked with a wall
             if (!turfLayerTile.IsFullyEmpty() && turfLayerTile.TryGetPlacedObject(out placedObject) && placedObject.GenericType == TileObjectGenericType.Wall)
             {
-                atmosObject.MakeEmpty();
-                atmosObject.State = AtmosState.Blocked;
+                AtmosObject.MakeEmpty();
+                AtmosObject.SetBlocked();
             }
             
         }
 
         public Vector3 GetWorldPosition()
         {
-            return chunk.GetWorldPosition(x, y);
+            return Chunk.GetWorldPosition(X, Y);
         }
 
         public AtmosSaveObject Save()
@@ -132,18 +102,18 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosSaveState saveState = AtmosSaveState.Air;
             MixSaveState mixState = new MixSaveState(0, 0);
 
-            if (atmosObject.State == AtmosState.Vacuum)
+            if (AtmosObject.State == AtmosState.Vacuum)
             {
                 saveState = AtmosSaveState.Vacuum;
             }
-            else if (atmosObject.IsAir())   // TODO: Skip if just a regular air tile
+            else if (AtmosObject.IsAir())   // TODO: Skip if just a regular air tile
             {
                 saveState = AtmosSaveState.Air;
             }
-            else if (!atmosObject.IsEmpty)
+            else if (!AtmosObject.IsEmpty)
             {
                 saveState = AtmosSaveState.Mix;
-                mixState = new MixSaveState(atmosObject.CoreGasses, atmosObject.Temperature);
+                mixState = new MixSaveState(AtmosObject.CoreGasses, AtmosObject.Temperature);
             }
             else
             {
@@ -152,8 +122,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
             return new AtmosSaveObject
             {
-                x = x,
-                y = y,
+                x = X,
+                y = Y,
                 state = saveState,
                 mix = mixState
             };

@@ -124,7 +124,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private static float4 ComputeDiffusionMoles(AtmosObject atmos, AtmosObject neighbour)
         {
             float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
-            if (math.all(molesToTransfer <  GasConstants.fluxEpsilon))
+            if (math.any(molesToTransfer > GasConstants.fluxEpsilon))
             {
                 return molesToTransfer;
             }

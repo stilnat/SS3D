@@ -36,7 +36,7 @@ namespace SS3D.Engine.AtmosphericsRework
         // public const float drag = 0.95f;         // Fluid drag, slows down flux so that gases don't infinitely slosh
         public const float thermalBase = 0.024f;    // * volume | Rate of temperature equalization
         // public const float mixRate = 0.1f;       // Rate of gas mixing
-        public const float fluxEpsilon = 0.050f;    // Minimum flux difference to simulate
+        public const float fluxEpsilon = 0.1f;    // Minimum flux difference to simulate
         public const float pressureEpsilon = 1.0f;
         public const float thermalEpsilon = 0.5f;   // Minimum temperature difference to simulate
 

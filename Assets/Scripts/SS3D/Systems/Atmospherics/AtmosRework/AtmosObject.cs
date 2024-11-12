@@ -33,6 +33,8 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public float Mass => math.csum(CoreGasses * GasConstants.coreGasDensity);
 
+        
+
 
         public AtmosObject(int2 chunkKey)
         {
@@ -45,6 +47,13 @@ namespace SS3D.Engine.AtmosphericsRework
             TemperatureSetting = false;
             ActiveDirection = default;
         }
+
+        public void SetBlocked() => State = AtmosState.Blocked;
+
+        public void SetVacuum() => State = AtmosState.Vacuum;
+
+        public void SetInactive() => State = AtmosState.Inactive;
+
 
         public void ClearCoreGasses()
         {
