@@ -14,6 +14,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public readonly List<TileAtmosObject> AtmosTiles;
 
+        public NativeArray<AtmosObjectNeighboursIndexes> NeighbourIndexes;
+
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
@@ -33,6 +35,7 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosTiles = atmosTiles;
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
+            NeighbourIndexes = new(atmosTiles.Count, Allocator.Persistent);
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
             ChunkKeyHashMap = new(chunkKeyBuffer.Count, Allocator.Persistent);
             for (int i = 0; i < chunkKeyBuffer.Count; i++)

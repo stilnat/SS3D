@@ -108,7 +108,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             float neighbourPressure = neighbour.Pressure;
 
-            if (atmos.Pressure - neighbourPressure <= GasConstants.pressureEpsilon)
+            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.pressureEpsilon)
             {
                 return new(0);
             }

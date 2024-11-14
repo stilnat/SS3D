@@ -26,23 +26,25 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
 
+        [ReadOnly]
+        private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
+
         [NativeDisableParallelForRestriction]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
-
-        private readonly int _chunkSize;
 
         private readonly float _deltaTime;
 
         private readonly bool _activeFlux;
 
-        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers, int chunkSize, float deltaTime, bool activeFlux)
+        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers,
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, float deltaTime, bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
-            _chunkSize = chunkSize;
             _deltaTime = deltaTime;
             _moleTransfers = moleTransfers;
             _chunkKeyHashMap = chunkKeyHashMap;
             _activeFlux = activeFlux;
+            _neighboursIndexes = neighboursIndexes;
         }
 
         public void Execute(int index)
@@ -53,22 +55,14 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             NativeArray<int> neighboursIndexes = new(4, Allocator.Temp);
-            neighboursIndexes[0] = GetNorthNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
-            neighboursIndexes[1] = GetSouthNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
-            neighboursIndexes[2] = GetWestNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
-            neighboursIndexes[3] = GetEastNeighbourIndex(index, _tileObjectBuffer[index].ChunkKey);
-            int neighbourCount = 0;
+            neighboursIndexes[0] = _neighboursIndexes[index].NorthNeighbour;
+            neighboursIndexes[1] = _neighboursIndexes[index].SouthNeighbour;
+            neighboursIndexes[2] = _neighboursIndexes[index].EastNeighbour;
+            neighboursIndexes[3] = _neighboursIndexes[index].WestNeighbour;
 
-            for (int i = 0; i < 4; i++)
-            {
-                if (neighboursIndexes[i] != -1)
-                {
-                    neighbourCount++;
-                }
-            }
 
-            NativeArray<int> realNeighboursIndexes = new(neighbourCount, Allocator.Temp);
-            NativeArray<AtmosObject> neigbhours = new(neighbourCount, Allocator.Temp);
+            NativeArray<int> realNeighboursIndexes = new(_neighboursIndexes[index].NeighbourCount, Allocator.Temp);
+            NativeArray<AtmosObject> neigbhours = new(_neighboursIndexes[index].NeighbourCount, Allocator.Temp);
 
             int j = 0;
 
@@ -83,133 +77,9 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             // Do actual work
-            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, neighbourCount, _activeFlux);
+            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, _neighboursIndexes[index].NeighbourCount, _activeFlux);
         }
 
-        // Assumes first element of chunk is in the south-west corner, and last one in north east.
-        private int GetWestNeighbourIndex(int ownIndex, int2 ownChunkKey)
-        {
-            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
-
-            // case where element is not on first column 
-            if (ownIndex % _chunkSize > 0)
-            {
-                return ownIndex - 1;
-            }
-
-            bool hasWestChunkKey = TryGetWestChunkKey(ownChunkKey, out int2 westChunkKey);
-
-            if (!hasWestChunkKey)
-            {
-                return -1;
-            }
-
-            int westChunkFirstElementIndex = GetFirstElementIndexOfChunk(westChunkKey);
-
-            // Return the element adjacent in west Chunk
-            return westChunkFirstElementIndex + positionInChunk + (_chunkSize - 1);
-        }
-
-        // Assumes first element of chunk is in the south-west corner, and last one in north east.
-        private int GetEastNeighbourIndex(int ownIndex, int2 ownChunkKey)
-        {
-            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
-
-            // case where element is not on last column 
-            if (ownIndex % _chunkSize < _chunkSize - 1)
-            {
-                return ownIndex + 1;
-            }
-
-            bool hasEastChunkKey = TryGetEastChunkKey(ownChunkKey, out int2 eastChunkKey);
-
-            if (!hasEastChunkKey)
-            {
-                return -1;
-            }
-
-            int eastChunkFirstElementIndex = GetFirstElementIndexOfChunk(eastChunkKey);
-
-            // Return the element adjacent in east Chunk
-            return eastChunkFirstElementIndex + positionInChunk - (_chunkSize - 1);
-        }
-
-        // Assumes first element of chunk is in the south-west corner, and last one in north east.
-        private int GetNorthNeighbourIndex(int ownIndex, int2 ownChunkKey)
-        {
-            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
-
-            // case where element is not on last row 
-            if (ownIndex % (_chunkSize * _chunkSize) < _chunkSize * (_chunkSize - 1))
-            {
-                return ownIndex + _chunkSize;
-            }
-
-            bool hasNorthChunkKey = TryGetNorthChunkKey(ownChunkKey, out int2 northChunkKey);
-
-            if (!hasNorthChunkKey)
-            {
-                return -1;
-            }
-
-            int northChunkFirstElementIndex = GetFirstElementIndexOfChunk(northChunkKey);
-
-            // Return the element adjacent in north Chunk
-            return northChunkFirstElementIndex + positionInChunk - _chunkSize * (_chunkSize - 1);
-        }
-
-        // Assumes first element of chunk is in the south-west corner, and last one in north east.
-        private int GetSouthNeighbourIndex(int ownIndex, int2 ownChunkKey)
-        {
-            int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
-
-            // case where element is not on first row 
-            if (ownIndex % (_chunkSize * _chunkSize) >= _chunkSize)
-            {
-                return ownIndex - _chunkSize;
-            }
-
-            bool hasSouthChunkKey = TryGetSouthChunkKey(ownChunkKey, out int2 southChunkKey);
-
-            if (!hasSouthChunkKey)
-            {
-                return -1;
-            }
-
-            int southChunkFirstElementIndex = GetFirstElementIndexOfChunk(southChunkKey);
-
-            // Return the element adjacent in south Chunk
-            return southChunkFirstElementIndex + _chunkSize * (_chunkSize - 1) + positionInChunk;
-        }
-
-        private int GetFirstElementIndexOfChunk(int2 chunkKey)
-        {
-            if (!_chunkKeyHashMap.TryGetValue(chunkKey, out int index))
-                return -1;
-
-            return _chunkSize * _chunkSize * index;
-        }
-
-        private bool TryGetChunkKey(int2 chunkKey, out int2 offsetChunkKey, int xOffset, int yOffset)
-        {
-            offsetChunkKey = default;
-
-            if (!_chunkKeyHashMap.TryGetValue(chunkKey + new int2(xOffset, yOffset), out int index))
-                return false;
-
-            offsetChunkKey = new int2(chunkKey.x + xOffset, chunkKey.y + yOffset);
-            ;
-
-            return true;
-
-        }
-
-        private bool TryGetSouthChunkKey(int2 chunkKey, out int2 southChunkKey) => TryGetChunkKey(chunkKey, out southChunkKey, 0, -1);
-
-        private bool TryGetNorthChunkKey(int2 chunkKey, out int2 northChunkKey) => TryGetChunkKey(chunkKey, out northChunkKey, 0, 1);
-
-        private bool TryGetEastChunkKey(int2 chunkKey, out int2 eastChunkKey) => TryGetChunkKey(chunkKey, out eastChunkKey, 1, 0);
-
-        private bool TryGetWestChunkKey(int2 chunkKey, out int2 westChunkKey) => TryGetChunkKey(chunkKey, out westChunkKey, -1, 0);
+      
     }
 }

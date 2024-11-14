@@ -40,8 +40,7 @@ namespace SS3D.Engine.AtmosphericsRework
             public MixSaveState mix;
         }
 
-        public AtmosObject AtmosObject { get; set; }
-
+        public AtmosObject AtmosObject;
         public AtmosMap Map { get; }
 
         public int X { get; }

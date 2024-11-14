@@ -271,30 +271,43 @@ namespace SS3D.Engine.AtmosphericsRework
                 s_StepPerfMarker.Begin();
                 atmosJob.Refresh();
                 s_StepPerfMarker.End();
-                ComputeFluxesJob diffusionFluxJob = new (atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime, false);
-                TransferActiveFluxJob transferDiffusionFluxJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, true);
 
-                ComputeFluxesJob activeFluxJob = new (atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, 16, deltaTime, true);
-                TransferActiveFluxJob transferActiveFluxJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, false);
+                ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
+
+                NativeHashSet<int> activeTransferIndex = new(atmosJob.NativeAtmosTiles.Length, Allocator.TempJob);
+                _nativeStructureToDispose.Add(activeTransferIndex);
+
+                ComputeFluxesJob diffusionFluxJob = new (atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, false);
+                TransferActiveFluxJob transferDiffusionFluxJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, activeTransferIndex, true);
+
+                ComputeFluxesJob activeFluxJob = new (atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, true);
+                TransferActiveFluxJob transferActiveFluxJob = new (atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, activeTransferIndex, false);
+                SetInactiveJob setInactiveJob = new(atmosJob.NativeAtmosTiles, activeTransferIndex);
 
                 if (_usesParallelComputation)
                 {
-                    JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64);
+                    JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
+                    JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
                     JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
                     JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferDiffusionFluxHandle);
                     JobHandle transferActiveFluxHandle = transferDiffusionFluxJob.Schedule(activeFluxHandle);
+                    JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
 
+                    _jobHandles.Add(computeIndexesHandle);
                     _jobHandles.Add(diffusionFluxHandle);
                     _jobHandles.Add(transferDiffusionFluxHandle);
                     _jobHandles.Add(activeFluxHandle);
                     _jobHandles.Add(transferActiveFluxHandle);
+                    _jobHandles.Add(setInactiveHandle);
                 }
                 else
                 {
+                    computeIndexesJob.Run(atmosJob.AtmosTiles.Count);
                     diffusionFluxJob.Run(atmosJob.AtmosTiles.Count);
                     transferActiveFluxJob.Run();
                     activeFluxJob.Run(atmosJob.AtmosTiles.Count);
                     transferActiveFluxJob.Run();
+                    setInactiveJob.Run(atmosJob.AtmosTiles.Count);
                 }
             }
 
