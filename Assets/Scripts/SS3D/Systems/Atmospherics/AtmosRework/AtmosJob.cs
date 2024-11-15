@@ -9,34 +9,21 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public readonly struct MoleTransfer
-    {
-        public readonly float4 Moles;
-        public readonly int IndexTo;
-
-        public MoleTransfer(float4 moles, int indexTo)
-        {
-            Moles = moles;
-            IndexTo = indexTo;
-        }
-    }
-
     public readonly struct MoleTransferToNeighbours
     {
         public readonly int IndexFrom;
-        public readonly MoleTransfer TransferOne;
-        public readonly MoleTransfer TransferTwo;
-        public readonly  MoleTransfer TransferThree;
-        public readonly MoleTransfer TransferFour;
+        public readonly float4 TransferMolesNorth;
+        public readonly float4 TransferMolesSouth;
+        public readonly float4 TransferMolesEast;
+        public readonly float4 TransferMolesWest;
 
-        public MoleTransferToNeighbours(int indexFrom, MoleTransfer transferOne, MoleTransfer transferTwo, MoleTransfer transferThree, MoleTransfer transferFour)
+        public MoleTransferToNeighbours(int indexFrom, float4 transferMolesNorth, float4 transferMolesSouth, float4 transferMolesEast, float4 transferMolesWest)
         {
             IndexFrom = indexFrom;
-            TransferOne = transferOne;
-            TransferTwo = transferTwo;
-            TransferThree = transferThree;
-            TransferFour = transferFour;
+            TransferMolesNorth = transferMolesNorth;
+            TransferMolesSouth = transferMolesSouth;
+            TransferMolesEast = transferMolesEast;
+            TransferMolesWest = transferMolesWest;
         }
     }
-
 }

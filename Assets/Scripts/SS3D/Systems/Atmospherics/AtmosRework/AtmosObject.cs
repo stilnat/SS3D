@@ -12,6 +12,11 @@ namespace SS3D.Engine.AtmosphericsRework
         public float2 Velocity;
         public int2 ChunkKey;
 
+        public float VelocityNorth;
+        public float VelocitySouth;
+        public float VelocityEast;
+        public float VelocityWest;
+
         public float Volume { get; private set; }
         public float Temperature { get; private set; }
         public float4 CoreGasses { get; private set; }
@@ -33,9 +38,6 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public float Mass => math.csum(CoreGasses * GasConstants.coreGasDensity);
 
-        
-
-
         public AtmosObject(int2 chunkKey)
         {
             ChunkKey = chunkKey;
@@ -46,6 +48,10 @@ namespace SS3D.Engine.AtmosphericsRework
             Velocity = default;
             TemperatureSetting = false;
             ActiveDirection = default;
+            VelocityNorth = default;
+            VelocitySouth = default;
+            VelocityEast = default;
+            VelocityWest = default;
         }
 
         public void SetBlocked() => State = AtmosState.Blocked;

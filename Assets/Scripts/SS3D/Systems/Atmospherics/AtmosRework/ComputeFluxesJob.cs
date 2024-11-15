@@ -29,7 +29,6 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
-        [NativeDisableParallelForRestriction]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
         private readonly float _deltaTime;
@@ -51,33 +50,20 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             if (_tileObjectBuffer[index].State != AtmosState.Active && _tileObjectBuffer[index].State != AtmosState.Semiactive)
             {
+                _moleTransfers[index] = default;
                 return;
             }
 
-            NativeArray<int> neighboursIndexes = new(4, Allocator.Temp);
-            neighboursIndexes[0] = _neighboursIndexes[index].NorthNeighbour;
-            neighboursIndexes[1] = _neighboursIndexes[index].SouthNeighbour;
-            neighboursIndexes[2] = _neighboursIndexes[index].EastNeighbour;
-            neighboursIndexes[3] = _neighboursIndexes[index].WestNeighbour;
-
-
-            NativeArray<int> realNeighboursIndexes = new(_neighboursIndexes[index].NeighbourCount, Allocator.Temp);
-            NativeArray<AtmosObject> neigbhours = new(_neighboursIndexes[index].NeighbourCount, Allocator.Temp);
-
-            int j = 0;
-
-            for (int i = 0; i < 4; i++)
-            {
-                if (neighboursIndexes[i] != -1)
-                {
-                    realNeighboursIndexes[j] = neighboursIndexes[i];
-                    neigbhours[j] = _tileObjectBuffer[neighboursIndexes[i]];
-                    j++;
-                }
-            }
-
             // Do actual work
-            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, _neighboursIndexes[index].NeighbourCount, _activeFlux);
+            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(
+                index, 
+                _neighboursIndexes[index].NorthNeighbour,
+                _neighboursIndexes[index].SouthNeighbour, 
+                _neighboursIndexes[index].EastNeighbour,
+                _neighboursIndexes[index].WestNeighbour,
+                _tileObjectBuffer,
+                _deltaTime, 
+                _activeFlux);
         }
     }
 }

@@ -15,6 +15,12 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private NativeHashSet<int> _activeTransferIndex;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tileObjectBuffer"> The array containing all atmos objects of a given atmos map.</param>
+        /// <param name="activeTransferIndex"> A hashset containing the indexes from _tileObjectBuffer that did some
+        /// transfer of gas moles to any of their neighbours in the current atmos simulation iteration.</param>
         public SetInactiveJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashSet<int> activeTransferIndex)
         {
             _tileObjectBuffer = tileObjectBuffer;
@@ -23,7 +29,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Execute(int index)
         {
-            if (_activeTransferIndex.Contains(index) || _tileObjectBuffer[index].State == AtmosState.Blocked ||  _tileObjectBuffer[index].State == AtmosState.Vacuum)
+            if (_activeTransferIndex.Contains(index) || _tileObjectBuffer[index].State == AtmosState.Blocked || _tileObjectBuffer[index].State == AtmosState.Vacuum)
             {
                 return;
             }

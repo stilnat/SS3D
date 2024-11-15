@@ -11,6 +11,9 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         [ReadOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
+        
+        [ReadOnly]
+        private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
         private NativeHashSet<int> _activeTransferIndex;
 
@@ -18,12 +21,15 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly bool _diffusion;
 
-        public TransferActiveFluxJob(NativeArray<MoleTransferToNeighbours> moleTransfers, NativeArray<AtmosObject> tileObjectBuffer, NativeHashSet<int> activeTransferIndex, bool diffusion)
+        public TransferActiveFluxJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
+            NativeArray<AtmosObject> tileObjectBuffer,
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeHashSet<int> activeTransferIndex, bool diffusion)
         {
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;
             _diffusion = diffusion;
             _activeTransferIndex = activeTransferIndex;
+            _neighboursIndexes = neighboursIndexes;
         }
 
         public void Execute()
@@ -34,10 +40,10 @@ namespace SS3D.Engine.AtmosphericsRework
                 MoleTransferToNeighbours transfer = _moleTransfers[i];
                 int atmosObjectFromIndex = transfer.IndexFrom;
                 AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
-                atmosObject.RemoveCoreGasses(transfer.TransferOne.Moles, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferTwo.Moles, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferThree.Moles, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferFour.Moles, _diffusion);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesNorth, _diffusion);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesSouth, _diffusion);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesEast, _diffusion);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesWest, _diffusion);
 
                 if (math.any(atmosObject.CoreGasses - _tileObjectBuffer[atmosObjectFromIndex].CoreGasses != 0))
                 {
@@ -45,38 +51,31 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
                 
                 _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
+                
+                int neighbourNorthIndex = _neighboursIndexes[i].NorthNeighbour;
+                int neighbourSouthIndex = _neighboursIndexes[i].SouthNeighbour;
+                int neighbourEastIndex = _neighboursIndexes[i].EastNeighbour;
+                int neighbourWestIndex = _neighboursIndexes[i].WestNeighbour;
 
-                AtmosObject neighbourOne = _tileObjectBuffer[transfer.TransferOne.IndexTo];
-                AtmosObject neighbourTwo = _tileObjectBuffer[transfer.TransferTwo.IndexTo];
-                AtmosObject neighbourThree = _tileObjectBuffer[transfer.TransferThree.IndexTo];
-                AtmosObject neighbourFour = _tileObjectBuffer[transfer.TransferFour.IndexTo];
+                TransferToNeighbour(neighbourNorthIndex, transfer.TransferMolesNorth);
+                TransferToNeighbour(neighbourSouthIndex, transfer.TransferMolesSouth);
+                TransferToNeighbour(neighbourEastIndex, transfer.TransferMolesEast);
+                TransferToNeighbour(neighbourWestIndex, transfer.TransferMolesWest);
+            }
+        }
 
-                neighbourOne.AddCoreGasses(transfer.TransferOne.Moles, _diffusion);
-                neighbourTwo.AddCoreGasses(transfer.TransferTwo.Moles, _diffusion);
-                neighbourThree.AddCoreGasses(transfer.TransferThree.Moles, _diffusion);
-                neighbourFour.AddCoreGasses(transfer.TransferFour.Moles, _diffusion);
-
-                if (math.any(transfer.TransferOne.Moles != 0))
+        private void TransferToNeighbour(int neighbourIndex, float4 transfer)
+        {
+            if (neighbourIndex != -1)
+            {
+                AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
+                neighbour.AddCoreGasses(transfer, _diffusion);
+                if (math.any(transfer != 0))
                 {
-                    _activeTransferIndex.Add(transfer.TransferOne.IndexTo);
+                    _activeTransferIndex.Add(neighbourIndex);
                 }
-                if (math.any(transfer.TransferTwo.Moles != 0))
-                {
-                    _activeTransferIndex.Add(transfer.TransferTwo.IndexTo);
-                }
-                if (math.any(transfer.TransferThree.Moles != 0))
-                {
-                    _activeTransferIndex.Add(transfer.TransferThree.IndexTo);
-                }
-                if (math.any(transfer.TransferFour.Moles != 0))
-                {
-                    _activeTransferIndex.Add(transfer.TransferFour.IndexTo);
-                }
-
-                _tileObjectBuffer[transfer.TransferOne.IndexTo] = neighbourOne;
-                _tileObjectBuffer[transfer.TransferTwo.IndexTo] = neighbourTwo;
-                _tileObjectBuffer[transfer.TransferThree.IndexTo] = neighbourThree;
-                _tileObjectBuffer[transfer.TransferFour.IndexTo] = neighbourFour;
+                
+                _tileObjectBuffer[neighbourIndex] = neighbour;
             }
         }
     }

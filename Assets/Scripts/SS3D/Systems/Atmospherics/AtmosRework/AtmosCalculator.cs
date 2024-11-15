@@ -26,30 +26,19 @@ namespace SS3D.Engine.AtmosphericsRework
             return atmos;
         }
 
-        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, float dt, NativeArray<AtmosObject> neighbours,int atmosIndex, NativeArray<int> neighboursIndexes, int neighbourCount, bool activeFlux)
+        public static MoleTransferToNeighbours SimulateGasTransfers(int atmosIndex, int northIndex, int southIndex,
+            int eastIndex, int westIndex, NativeArray<AtmosObject> tileObjectBuffer, float dt, bool activeFlux)
         {
-
-            // Holds the weight of gas that passes to the neighbours. Used for calculating wind strength.
-            float4 neighbourFlux = 0f;
-
+            AtmosObject atmos = tileObjectBuffer[atmosIndex];
+            
             // moles of each gaz from each neighbour to transfer.
             float4x4 molesToTransfer = 0;
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
-            for (int i = 0; i < neighbourCount; i++)
-            {
-                if (neighbours[i].State == AtmosState.Blocked)
-                    continue;
-
-                molesToTransfer[i] = activeFlux ? ComputeActiveFluxMoles(ref atmos,neighbours[i]) : ComputeDiffusionMoles(ref atmos, neighbours[i]);
-
-                atmos.ActiveDirection[i] = math.any(molesToTransfer[i] != 0);
-
-                molesToTransfer[i] *= GasConstants.simSpeed * dt;
-
-                // We only care about what we transfer here, not what we receive
-                molesToTransfer[i] = math.max(0f, molesToTransfer[i]);
-            }
+            molesToTransfer[0] = MolesToTransfer(tileObjectBuffer, northIndex, ref atmos, activeFlux, dt, atmos.VelocityNorth);
+            molesToTransfer[1] = MolesToTransfer(tileObjectBuffer, southIndex, ref atmos, activeFlux, dt, atmos.VelocitySouth);
+            molesToTransfer[2] = MolesToTransfer(tileObjectBuffer, eastIndex, ref atmos, activeFlux, dt, atmos.VelocityEast);
+            molesToTransfer[3] = MolesToTransfer(tileObjectBuffer, westIndex, ref atmos, activeFlux, dt, atmos.VelocityWest);
 
 
             // elements represent the total amount of gas to transfer for core gasses  
@@ -73,37 +62,40 @@ namespace SS3D.Engine.AtmosphericsRework
             molesToTransfer[2] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
             molesToTransfer[3] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
 
-
-            /*for (int i = 0; i < neighbourCount; i++)
-            {
-                neighbourFlux[i] =  math.csum(molesToTransfer[i] * GasConstants.coreGasDensity);
-                if (neighbours[i].State == AtmosState.Vacuum || neighbourFlux[i] <= 0)
-                {
-                    atmos.activeDirection[i] = false;
-                }
-
-                atmos.Container.ChangeCoreGasses(molesToTransfer[i]);
-            } */
-
-            // Finally, calculate the 2d wind vector based on neighbour flux.
-            //float velHorizontal = neighbourFlux[3] - neighbourFlux[2];
-            //float velVertical = neighbourFlux[0] - neighbourFlux[1];
-            //atmos.Velocity.x = velHorizontal;
-            //atmos.Velocity.y = velVertical;
-
-            NativeArray<MoleTransfer> moleTransfers = new(4, Allocator.Temp);
-
-            for (int i = 0; i < neighbourCount; i++)
-            {
-                moleTransfers[i] = new (molesToTransfer[i], neighboursIndexes[i]);
-            }
-
-            MoleTransferToNeighbours moleTransferToNeighbours = new(atmosIndex, moleTransfers[0], moleTransfers[1],moleTransfers[2],moleTransfers[3]);
+            MoleTransferToNeighbours moleTransferToNeighbours = new(
+                atmosIndex, molesToTransfer[0], molesToTransfer[1], molesToTransfer[2],molesToTransfer[3]);
 
             return moleTransferToNeighbours;
         }
 
-        public static float4 ComputeActiveFluxMoles(ref AtmosObject atmos, AtmosObject neighbour)
+        private static float4 MolesToTransfer(NativeArray<AtmosObject> tileObjectBuffer, int neighbourIndex,
+            ref AtmosObject atmos, bool activeFlux, float dt, float atmosVelocity)
+        {
+            float4 molesToTransfer = 0;
+
+            if (neighbourIndex == -1)
+            {
+                return molesToTransfer;
+            }
+            
+            AtmosObject neighbour = tileObjectBuffer[neighbourIndex];
+            
+            if (neighbour.State == AtmosState.Blocked)
+            {
+                return molesToTransfer;
+            }
+
+            molesToTransfer = activeFlux ? ComputeActiveFluxMoles(ref atmos, neighbour, atmosVelocity) : ComputeDiffusionMoles(ref atmos, neighbour);
+
+            molesToTransfer *= GasConstants.simSpeed * dt;
+
+            // We only care about what we transfer here, not what we receive
+            molesToTransfer = math.max(0f, molesToTransfer);
+
+            return molesToTransfer;
+        }
+
+        private static float4 ComputeActiveFluxMoles(ref AtmosObject atmos, AtmosObject neighbour, float atmosVelocity)
         {
             float neighbourPressure = neighbour.Pressure;
 
@@ -116,11 +108,11 @@ namespace SS3D.Engine.AtmosphericsRework
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles by applying the ideal gas law.
-            return partialPressureDifference * 1000f * atmos.GetVolume() /
+            return atmosVelocity * partialPressureDifference * 1000f * atmos.GetVolume() /
                 (atmos.Temperature * GasConstants.gasConstant);
         }
 
-        public static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
+        private static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
         {
             float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
             if (math.any(molesToTransfer > GasConstants.fluxEpsilon))

@@ -280,10 +280,15 @@ namespace SS3D.Engine.AtmosphericsRework
                 _nativeStructureToDispose.Add(activeTransferIndex);
 
                 ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, false);
-                TransferActiveFluxJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, activeTransferIndex, true);
+                TransferActiveFluxJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
+                    atmosJob.NeighbourIndexes, activeTransferIndex, true);
 
                 ComputeFluxesJob activeFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, true);
-                TransferActiveFluxJob transferActiveFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, activeTransferIndex, false);
+                TransferActiveFluxJob transferActiveFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
+                    atmosJob.NeighbourIndexes, activeTransferIndex, false);
+                
+                ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray);
+                
                 SetInactiveJob setInactiveJob = new(atmosJob.NativeAtmosTiles, activeTransferIndex);
 
                 if (_usesParallelComputation)
@@ -294,7 +299,8 @@ namespace SS3D.Engine.AtmosphericsRework
                     JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
                     JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferDiffusionFluxHandle);
                     JobHandle transferActiveFluxHandle = transferDiffusionFluxJob.Schedule(activeFluxHandle);
-                    JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
+                    JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
+                    JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeVelocityHandle);
 
                     _jobHandles.Add(computeIndexesHandle);
                     _jobHandles.Add(setActiveHandle);
@@ -302,6 +308,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     _jobHandles.Add(transferDiffusionFluxHandle);
                     _jobHandles.Add(activeFluxHandle);
                     _jobHandles.Add(transferActiveFluxHandle);
+                    _jobHandles.Add(computeVelocityHandle);
                     _jobHandles.Add(setInactiveHandle);
                 }
                 else
@@ -312,6 +319,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     transferActiveFluxJob.Run();
                     activeFluxJob.Run(atmosJob.AtmosTiles.Count);
                     transferActiveFluxJob.Run();
+                    velocityJob.Run(atmosJob.AtmosTiles.Count);
                     setInactiveJob.Run(atmosJob.AtmosTiles.Count);
                 }
             }
