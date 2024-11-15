@@ -79,7 +79,5 @@ namespace SS3D.Engine.AtmosphericsRework
             // Do actual work
             _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(_tileObjectBuffer[index], _deltaTime, neigbhours, index, realNeighboursIndexes, _neighboursIndexes[index].NeighbourCount, _activeFlux);
         }
-
-      
     }
 }

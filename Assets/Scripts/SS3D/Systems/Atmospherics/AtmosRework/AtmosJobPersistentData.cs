@@ -19,15 +19,15 @@ namespace SS3D.Engine.AtmosphericsRework
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
-
-        private readonly List<TileAtmosObject> _atmosObjectsToChange;
-
+        
         /// <summary>
         /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
         /// TODO : update when chunk added
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
 
+        private readonly List<TileAtmosObject> _atmosObjectsToChange;
+        
 
         public AtmosJobPersistentData(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
         {

@@ -41,7 +41,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (neighbours[i].State == AtmosState.Blocked)
                     continue;
 
-                molesToTransfer[i] = activeFlux ? ComputeActiveFluxMoles(atmos, neighbours[i]) : ComputeDiffusionMoles(atmos, neighbours[i]);
+                molesToTransfer[i] = activeFlux ? ComputeActiveFluxMoles(ref atmos,neighbours[i]) : ComputeDiffusionMoles(ref atmos, neighbours[i]);
 
                 atmos.ActiveDirection[i] = math.any(molesToTransfer[i] != 0);
 
@@ -91,7 +91,6 @@ namespace SS3D.Engine.AtmosphericsRework
             //atmos.Velocity.x = velHorizontal;
             //atmos.Velocity.y = velVertical;
 
-            
             NativeArray<MoleTransfer> moleTransfers = new(4, Allocator.Temp);
 
             for (int i = 0; i < neighbourCount; i++)
@@ -104,7 +103,7 @@ namespace SS3D.Engine.AtmosphericsRework
             return moleTransferToNeighbours;
         }
 
-        private static float4 ComputeActiveFluxMoles(AtmosObject atmos, AtmosObject neighbour)
+        public static float4 ComputeActiveFluxMoles(ref AtmosObject atmos, AtmosObject neighbour)
         {
             float neighbourPressure = neighbour.Pressure;
 
@@ -114,14 +113,14 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             // Use partial pressures to determine how much of each gas to move.
-            float4 partialPressureDifference =  atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
+            float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles by applying the ideal gas law.
             return partialPressureDifference * 1000f * atmos.GetVolume() /
                 (atmos.Temperature * GasConstants.gasConstant);
         }
 
-        private static float4 ComputeDiffusionMoles(AtmosObject atmos, AtmosObject neighbour)
+        public static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
         {
             float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
             if (math.any(molesToTransfer > GasConstants.fluxEpsilon))
