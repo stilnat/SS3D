@@ -35,10 +35,10 @@ namespace SS3D.Engine.AtmosphericsRework
             float4x4 molesToTransfer = 0;
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
-            molesToTransfer[0] = MolesToTransfer(tileObjectBuffer, northIndex, ref atmos, activeFlux, dt, atmos.VelocityNorth);
-            molesToTransfer[1] = MolesToTransfer(tileObjectBuffer, southIndex, ref atmos, activeFlux, dt, atmos.VelocitySouth);
-            molesToTransfer[2] = MolesToTransfer(tileObjectBuffer, eastIndex, ref atmos, activeFlux, dt, atmos.VelocityEast);
-            molesToTransfer[3] = MolesToTransfer(tileObjectBuffer, westIndex, ref atmos, activeFlux, dt, atmos.VelocityWest);
+            molesToTransfer[0] = MolesToTransfer(tileObjectBuffer, northIndex, ref atmos, activeFlux, dt, atmos.VelocityNorth, tileObjectBuffer[northIndex].VelocitySouth);
+            molesToTransfer[1] = MolesToTransfer(tileObjectBuffer, southIndex, ref atmos, activeFlux, dt, atmos.VelocitySouth, tileObjectBuffer[northIndex].VelocityNorth);
+            molesToTransfer[2] = MolesToTransfer(tileObjectBuffer, eastIndex, ref atmos, activeFlux, dt, atmos.VelocityEast, tileObjectBuffer[northIndex].VelocityWest);
+            molesToTransfer[3] = MolesToTransfer(tileObjectBuffer, westIndex, ref atmos, activeFlux, dt, atmos.VelocityWest, tileObjectBuffer[northIndex].VelocityEast);
 
 
             // elements represent the total amount of gas to transfer for core gasses  
@@ -69,7 +69,7 @@ namespace SS3D.Engine.AtmosphericsRework
         }
 
         private static float4 MolesToTransfer(NativeArray<AtmosObject> tileObjectBuffer, int neighbourIndex,
-            ref AtmosObject atmos, bool activeFlux, float dt, float atmosVelocity)
+            ref AtmosObject atmos, bool activeFlux, float dt, float atmosVelocity, float oppositeVelocity)
         {
             float4 molesToTransfer = 0;
 
@@ -85,7 +85,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return molesToTransfer;
             }
 
-            molesToTransfer = activeFlux ? ComputeActiveFluxMoles(ref atmos, neighbour, atmosVelocity) : ComputeDiffusionMoles(ref atmos, neighbour);
+            molesToTransfer = activeFlux ? ComputeActiveFluxMoles(ref atmos, neighbour, atmosVelocity, oppositeVelocity) : ComputeDiffusionMoles(ref atmos, neighbour);
 
             molesToTransfer *= GasConstants.simSpeed * dt;
 
@@ -95,7 +95,7 @@ namespace SS3D.Engine.AtmosphericsRework
             return molesToTransfer;
         }
 
-        private static float4 ComputeActiveFluxMoles(ref AtmosObject atmos, AtmosObject neighbour, float atmosVelocity)
+        private static float4 ComputeActiveFluxMoles(ref AtmosObject atmos, AtmosObject neighbour, float atmosVelocity, float oppositeVelocity)
         {
             float neighbourPressure = neighbour.Pressure;
 
@@ -107,8 +107,8 @@ namespace SS3D.Engine.AtmosphericsRework
             // Use partial pressures to determine how much of each gas to move.
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
-            // Determine the amount of moles by applying the ideal gas law.
-            return atmosVelocity * partialPressureDifference * 1000f * atmos.GetVolume() /
+            // Determine the amount of moles by applying the ideal gas law and taking wind into account.
+            return (1 + (0.1f * math.max(0f, atmosVelocity - oppositeVelocity))) * partialPressureDifference * 1000f * atmos.GetVolume() /
                 (atmos.Temperature * GasConstants.gasConstant);
         }
 

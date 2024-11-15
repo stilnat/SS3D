@@ -27,7 +27,6 @@ namespace SS3D.Engine.AtmosphericsRework
         public NativeHashMap<int2, int> ChunkKeyHashMap;
 
         private readonly List<TileAtmosObject> _atmosObjectsToChange;
-        
 
         public AtmosJobPersistentData(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
         {

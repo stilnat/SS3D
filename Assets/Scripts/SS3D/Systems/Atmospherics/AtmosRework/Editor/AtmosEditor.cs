@@ -308,12 +308,35 @@ public class AtmosEditor : EditorWindow
 
     private void DrawWindGizmo(AtmosObject atmosObject, Vector3 position)
     {
-        Vector2 velocity = atmosObject.Velocity / 30;
-
+        float velocityNorth = atmosObject.VelocityNorth / 30;
+        float velocitySouth = atmosObject.VelocitySouth / 30;
+        float velocityEast = atmosObject.VelocityEast / 30;
+        float velocityWest = atmosObject.VelocityWest / 30;
         Handles.color = Color.white;
-        Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
-        Handles.DrawLine(position, position + new Vector3(velocity.x, 0, velocity.y));
 
+        if (velocityNorth > 0f)
+        {
+            Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
+            Handles.DrawLine(position, position + new Vector3(0, 0, velocityNorth));
+        }
+
+        if (velocitySouth > 0f)
+        {
+            Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
+            Handles.DrawLine(position, position + new Vector3(0, 0, -velocitySouth));
+        }
+
+        if (velocityEast > 0f)
+        {
+            Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
+            Handles.DrawLine(position, position + new Vector3(velocityEast, 0, 0));
+        }
+
+        if (velocityWest > 0f)
+        {
+            Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
+            Handles.DrawLine(position, position + new Vector3(velocityWest, 0, 0));
+        }
     }
 
     private void DrawTemperatureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
