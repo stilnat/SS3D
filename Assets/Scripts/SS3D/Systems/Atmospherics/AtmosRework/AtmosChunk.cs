@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS3D.Systems.Tile;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,8 @@ namespace SS3D.Engine.AtmosphericsRework
         private readonly float _tileSize;
         private readonly Vector3 _originPosition;
         private readonly AtmosMap _map;
-        private TileAtmosObject[] _atmosGridList;
+        private AtmosContainer[] _atmosGridList;
+        private AtmosContainer[] _atmosPipeLeftList;
 
         public AtmosChunk(AtmosMap map, Vector2Int chunkKey, int width, 
             int height, float tileSize, Vector3 originPosition)
@@ -70,80 +72,51 @@ namespace SS3D.Engine.AtmosphericsRework
 
         protected void CreateAllGrids()
         {
-            _atmosGridList = new TileAtmosObject[GetWidth() * GetHeight()];
+            _atmosGridList = new AtmosContainer[GetWidth() * GetHeight()];
+            _atmosPipeLeftList =  new AtmosContainer[GetWidth() * GetHeight()];
 
             for (int x = 0; x < GetWidth(); x++)
             {
                 for (int y = 0; y < GetHeight(); y++)
                 {
-                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y);
+                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.Turf);
+                    _atmosPipeLeftList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.PipeLeft);
+
                 }
             }
         }
 
-        public TileAtmosObject GetTileAtmosObject(int x, int y)
+        public AtmosContainer GetTileAtmosObject(int x, int y, TileLayer layer)
         {
             if (x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight())
             {
-                return _atmosGridList[y * GetWidth() + x];
-            }
-            else
-            {
-                return default;
-            }
-        }
-
-        public TileAtmosObject GetTileAtmosObject(Vector3 worldPosition)
-        {
-            Vector2Int vector = new Vector2Int();
-            vector = GetXY(worldPosition);
-            return GetTileAtmosObject(vector.x, vector.y);
-        }
-
-        public List<TileAtmosObject> GetAllTileAtmosObjects()
-        {
-            return new List<TileAtmosObject>(_atmosGridList);
-        }
-
-        /*
-        /// <summary>
-        /// Saves all the TileAtmosObjects in the chunk.
-        /// </summary>
-        /// <returns></returns>
-        public ChunkSaveObject Save()
-        {
-            
-            // Let's save the tile objects first
-            List<TileAtmosObject.AtmosSaveObject> atmosObjectSaveList = new List<TileAtmosObject.AtmosSaveObject>();
-            foreach (TileLayer layer in TileHelper.GetTileLayers())
-            {
-                for (int x = 0; x < GetWidth(); x++)
+                switch (layer)
                 {
-                    for (int y = 0; y < GetHeight(); y++)
-                    {
-                        TileAtmosObject atmosObject = GetTileAtmosObject(x, y);
-                        
-                        atmosObjectSaveList.Add(atmosObject.Save());
-                    }
+                    case TileLayer.Turf:
+                        return _atmosGridList[y * GetWidth() + x];
+                    case TileLayer.PipeLeft:
+                        return _atmosPipeLeftList[y * GetWidth() + x];
                 }
             }
 
-            ChunkSaveObject<TileAtmosObject.AtmosSaveObject> saveObject = new ChunkSaveObject<TileAtmosObject.AtmosSaveObject>
-            {
-                height = GetHeight(),
-                originPosition = GetOrigin(),
-                tileSize = GetTileSize(),
-                width = GetWidth(),
-                chunkKey = GetKey(),
-                saveArray = atmosObjectSaveList.ToArray()
-            };
-
-            return saveObject;
-            
-
-            return null;
+            return default;
         }
 
-    */
+        public AtmosContainer GetTileAtmosObject(Vector3 worldPosition, TileLayer layer)
+        {
+            Vector2Int vector = new Vector2Int();
+            vector = GetXY(worldPosition);
+            return GetTileAtmosObject(vector.x, vector.y, layer);
+        }
+
+        public List<AtmosContainer> GetAllTileAtmosObjects()
+        {
+            return new(_atmosGridList);
+        }
+
+        public List<AtmosContainer> GetAllPipeLeftAtmosObjects()
+        {
+            return new(_atmosPipeLeftList);
+        }
     }
 }

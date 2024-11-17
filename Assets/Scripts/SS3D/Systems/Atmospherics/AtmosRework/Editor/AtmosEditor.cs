@@ -188,22 +188,22 @@ public class AtmosEditor : EditorWindow
             switch (_selectedOption)
             {
                 case GasEditorOption.AddGasEnvironment:
-                    _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount);
+                    _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.Turf);
                     break;
                 case GasEditorOption.RemoveGasEnvironment:
-                    _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount);
+                    _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.Turf);
                     break;
                 case GasEditorOption.AddGasPipeLeft:
-                    _atmosManager.AddGasToPipe(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
+                    _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.RemoveGasPipeLeft:
-                    _atmosManager.RemoveGasToPipe(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
+                    _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.AddHeat:
-                    _atmosManager.AddHeat(snappedPosition, _selectedAmount);
+                    _atmosManager.AddHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
                     break;
                 case GasEditorOption.RemoveHeat:
-                    _atmosManager.RemoveHeat(snappedPosition, _selectedAmount);
+                    _atmosManager.RemoveHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
                     break;
             }
 
@@ -265,10 +265,10 @@ public class AtmosEditor : EditorWindow
 
     private void DisplayLeftPipeObjects(AtmosJobPersistentData job)
     {
-        for (int i = 0; i < job.AtmosDevices.Count; i++)
+        for (int i = 0; i < job.AtmosLeftPipes.Count; i++)
         {
-            Vector3 position = job.AtmosDevices[i].GameObject.transform.position;
-            AtmosObject atmosObject = job.AtmosDevices[i].GetAtmosObject();
+            Vector3 position = job.AtmosLeftPipes[i].GetWorldPosition();
+            AtmosObject atmosObject = job.AtmosLeftPipes[i].AtmosObject;
             DisplayAtmosObjects(position, atmosObject);
         }
     }

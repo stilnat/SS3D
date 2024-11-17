@@ -1,7 +1,9 @@
+using SS3D.Systems.Tile;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine.Serialization;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
@@ -12,14 +14,13 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         public readonly AtmosMap Map;
 
-        public readonly List<TileAtmosObject> AtmosTiles;
-
-        public readonly List<IAtmosLoop> AtmosDevices;
+        public readonly List<AtmosContainer> AtmosTiles;
+        public readonly List<AtmosContainer> AtmosLeftPipes;
 
         /// <summary>
         ///  For a given index in this array, return the indexes of all its neighbours, used by the atmos tiles. 
         /// </summary>
-        public NativeArray<AtmosObjectNeighboursIndexes> NeighbourIndexes;
+        public NativeArray<AtmosObjectNeighboursIndexes> NeighbourTileIndexes;
 
         /// <summary>
         /// Contains all atmos objects for all tiles on the map.
@@ -27,9 +28,19 @@ namespace SS3D.Engine.AtmosphericsRework
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
         /// <summary>
+        /// Contains all atmos objects for all pipe left on the map
+        /// </summary>
+        public NativeArray<AtmosObject> NativeAtmosPipesLeft;
+
+        /// <summary>
         /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
         /// </summary>
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
+
+        /// <summary>
+        /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
+        /// </summary>
+        public NativeArray<MoleTransferToNeighbours> PipeMoleTransferArray;
         
         /// <summary>
         /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
@@ -37,15 +48,37 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
 
-        private readonly List<TileAtmosObject> _atmosObjectsToChange;
+        /// <summary>
+        /// 
+        /// </summary>
+        public  NativeHashSet<int> ActiveTransferIndex ;
 
-        public AtmosJobPersistentData(AtmosMap map, List<TileAtmosObject> atmosTiles, List<IAtmosLoop> atmosDevices)
+        /// <summary>
+        /// 
+        /// </summary>
+        public NativeHashSet<int> PipeActiveTransferIndex; 
+
+        // Keeps track of changed atmos objects 
+        private readonly List<AtmosContainer> _atmosObjectsToChange;
+
+        // Keeps track of changed atmos objects 
+        private readonly List<AtmosContainer> _pipeAtmosObjectsToChange;
+
+        public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles, List<AtmosContainer> atmosPipesleft)
         {
             Map = map;
             AtmosTiles = atmosTiles;
+            AtmosLeftPipes = atmosPipesleft;
+
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
-            NeighbourIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            NeighbourTileIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            NativeAtmosPipesLeft = new(atmosTiles.Count, Allocator.Persistent);
+            ActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
+            PipeMoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
+            PipeActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
+
+            // Fill the chunk key hash map in order of chunks created in the map
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
             ChunkKeyHashMap = new(chunkKeyBuffer.Count, Allocator.Persistent);
             for (int i = 0; i < chunkKeyBuffer.Count; i++)
@@ -53,21 +86,42 @@ namespace SS3D.Engine.AtmosphericsRework
                 ChunkKeyHashMap.Add(chunkKeyBuffer[i], i);
             }
 
-            AtmosDevices = atmosDevices;
+           
             _atmosObjectsToChange = new();
+            _pipeAtmosObjectsToChange = new();
             LoadNativeArrays();
         }
 
-        public void AddGas(TileAtmosObject tile, CoreAtmosGasses gas, float amount)
+        public void AddGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
         {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+
             AtmosObject atmosObject = tile.AtmosObject;
             atmosObject.AddCoreGas(gas, amount, true);
             tile.AtmosObject = atmosObject;
-            _atmosObjectsToChange.Add(tile);
+
+            switch (tile.Layer)
+            {
+                   case TileLayer.Turf:
+                       _atmosObjectsToChange.Add(tile);
+                       break;
+                   case TileLayer.PipeLeft:
+                       _pipeAtmosObjectsToChange.Add(tile);
+                       break;
+            }
+           
         }
 
-        public void RemoveGas(TileAtmosObject tile, CoreAtmosGasses gas, float amount)
+        public void RemoveGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
         {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+
             AtmosObject atmosObject = tile.AtmosObject;
             atmosObject.RemoveCoreGas(gas, amount, true);
             tile.AtmosObject = atmosObject;
@@ -78,7 +132,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
             {
-                foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
                     atmosObject.AddCoreGasses(UnityEngine.Random.Range(0, maxAmount) * maxAmount, true);
@@ -92,7 +146,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
             {
-                foreach (TileAtmosObject tile in atmosChunk.GetAllTileAtmosObjects())
+                foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
                     atmosObject.ClearCoreGasses();
@@ -107,7 +161,8 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public void Refresh()
         {
-            foreach (TileAtmosObject atmosObject in _atmosObjectsToChange)
+            
+            foreach (AtmosContainer atmosObject in _atmosObjectsToChange)
             {
                 int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
 
@@ -116,7 +171,17 @@ namespace SS3D.Engine.AtmosphericsRework
                     NativeAtmosTiles[indexInNativeArray] = atmosObject.AtmosObject;
                 }
             }
+            foreach (AtmosContainer atmosObject in _pipeAtmosObjectsToChange)
+            {
+                int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
+
+                if (indexInNativeArray != -1)
+                {
+                    NativeAtmosPipesLeft[indexInNativeArray] = atmosObject.AtmosObject;
+                }
+            }
             _atmosObjectsToChange.Clear();
+            _pipeAtmosObjectsToChange.Clear();
         }
 
         private void LoadNativeArrays()
@@ -124,6 +189,7 @@ namespace SS3D.Engine.AtmosphericsRework
             for (int i = 0; i < AtmosTiles.Count; i++)
             {
                 NativeAtmosTiles[i] = AtmosTiles[i].AtmosObject;
+                NativeAtmosPipesLeft[i] = AtmosLeftPipes[i].AtmosObject;
             }
         }
 
@@ -145,10 +211,11 @@ namespace SS3D.Engine.AtmosphericsRework
             for (int i = 0; i < NativeAtmosTiles.Length; i++)
             {
                 AtmosTiles[i].AtmosObject = NativeAtmosTiles[i];
+                AtmosLeftPipes[i].AtmosObject = NativeAtmosPipesLeft[i];
             }
         }
 
-        private int IndexOfTileAtmosObject(TileAtmosObject atmosObject)
+        private int IndexOfTileAtmosObject(AtmosContainer atmosObject)
         {
             if (!ChunkKeyHashMap.TryGetValue(atmosObject.AtmosObject.ChunkKey, out int indexChunk))
                 return -1;
