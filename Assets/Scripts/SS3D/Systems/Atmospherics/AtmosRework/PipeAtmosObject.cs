@@ -1,39 +1,52 @@
 ﻿using SS3D.Systems.Tile.Connections;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
     public class PipeAtmosObject : MonoBehaviour, IAtmosLoop
     {
-        private AtmosObject atmosObject;
-        private MultiAdjacencyConnector connector;
+        private AtmosObject _internalAtmosObject;
+
+        [SerializeField]
+        private PipeAdjacencyConnector _connector;
+
+        private List<IAtmosLoop> _neighbours;
+
+        private void Start()
+        {
+            _internalAtmosObject = new (default);
+        }
 
         public AtmosObject GetAtmosObject()
         {
-            return atmosObject;
+            return _internalAtmosObject;
+        }
+
+        public List<IAtmosLoop> GetNeighbours()
+        {
+            if (_neighbours == null)
+            {
+                _neighbours = _connector.GetNeighbours()
+                    .Where(x => x.Connector.IsConnected(_connector.PlacedObject))
+                    .Select(x => x.GetComponent<IAtmosLoop>()).ToList();
+            }
+
+            return _neighbours;
         }
 
         public void SetAtmosObject(AtmosObject atmos)
         {
-            atmosObject = atmos;
+            _internalAtmosObject = atmos;
         }
 
         public void Initialize()
         {
-            throw new System.NotImplementedException();
+            _internalAtmosObject = default;
         }
 
-        private void LoadNeighbours()
-        {
-            
-        }
-
-        
-        //private IAtmosLoop[] GetNeighbours()
-        //{
-
-        //}
+        public GameObject GameObject => gameObject;
     }
 }

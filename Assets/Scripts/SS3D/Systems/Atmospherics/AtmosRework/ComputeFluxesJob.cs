@@ -20,12 +20,6 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeArray<AtmosObject> _tileObjectBuffer;
 
-        // Hashmap of chunk keys, with values indicating order as they were created by the atmos map. Useful as two adjacent tiles objects might have very different positions if they're not in the same chunk.
-        // Only adjacent tile objects in the same chunk can be retrieved without that, so its necessary for computing indexes in the TileObjectBuffer of neighbours on chunk edges.
-        // todo : might be more efficient to use a sorter native array as burst doesn't like NativeHashMap
-        [ReadOnly]
-        private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
-
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
@@ -35,13 +29,12 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly bool _activeFlux;
 
-        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeHashMap<int2, int> chunkKeyHashMap, NativeArray<MoleTransferToNeighbours> moleTransfers,
+        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, float deltaTime, bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _deltaTime = deltaTime;
             _moleTransfers = moleTransfers;
-            _chunkKeyHashMap = chunkKeyHashMap;
             _activeFlux = activeFlux;
             _neighboursIndexes = neighboursIndexes;
         }
@@ -54,16 +47,29 @@ namespace SS3D.Engine.AtmosphericsRework
                 return;
             }
 
+            AtmosObject defaultAtmos = default;
+
+            AtmosObject northNeighbour = _neighboursIndexes[index].NorthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].NorthNeighbour];
+            AtmosObject southNeighbour = _neighboursIndexes[index].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].SouthNeighbour]; 
+            AtmosObject eastNeighbour = _neighboursIndexes[index].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].EastNeighbour]; 
+            AtmosObject westNeighbour = _neighboursIndexes[index].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].WestNeighbour]; 
+
+            bool4 hasNeighbours = new(_neighboursIndexes[index].NorthNeighbour != -1,
+                _neighboursIndexes[index].SouthNeighbour != -1,
+                _neighboursIndexes[index].EastNeighbour != -1,
+            _neighboursIndexes[index].WestNeighbour != -1);
+
             // Do actual work
             _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(
-                index, 
-                _neighboursIndexes[index].NorthNeighbour,
-                _neighboursIndexes[index].SouthNeighbour, 
-                _neighboursIndexes[index].EastNeighbour,
-                _neighboursIndexes[index].WestNeighbour,
-                _tileObjectBuffer,
+                _tileObjectBuffer[index], 
+                index,
+                northNeighbour,
+                southNeighbour, 
+                eastNeighbour,
+                westNeighbour,
                 _deltaTime, 
-                _activeFlux);
+                _activeFlux,
+                hasNeighbours);
         }
     }
 }

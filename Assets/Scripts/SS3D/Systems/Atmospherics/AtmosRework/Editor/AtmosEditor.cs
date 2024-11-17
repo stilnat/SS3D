@@ -12,8 +12,10 @@ public class AtmosEditor : EditorWindow
 {
     private enum GasEditorOption
     {
-        AddGas,
-        RemoveGas,
+        AddGasEnvironment,
+        RemoveGasEnvironment,
+        AddGasPipeLeft,
+        RemoveGasPipeLeft,
         AddHeat,
         RemoveHeat
     }
@@ -26,11 +28,18 @@ public class AtmosEditor : EditorWindow
         Wind
     }
 
+    private enum ViewContent
+    {
+        Environment,
+        PipeLeft,
+    }
+
 
     private TileSystem _tileManager;
     private AtmosManager _atmosManager;
 
     private ViewType _viewOption = ViewType.Pressure;
+    private ViewContent _viewContent = ViewContent.Environment;
     private bool _showGizmos = true;
     private bool _showTiles = true;
     private bool _showPipes = false;
@@ -111,6 +120,10 @@ public class AtmosEditor : EditorWindow
         _viewOption = (ViewType)EditorGUILayout.EnumPopup(_viewOption);
 
         EditorGUILayout.Space();
+        EditorGUILayout.PrefixLabel("Content View:");
+        _viewContent = (ViewContent)EditorGUILayout.EnumPopup(_viewContent);
+
+        EditorGUILayout.Space();
         EditorGUILayout.PrefixLabel("Update rate:");
         EditorGUI.BeginChangeCheck();
         _updateRate = EditorGUILayout.Slider(_updateRate, 0.01f, 5f);
@@ -174,11 +187,17 @@ public class AtmosEditor : EditorWindow
 
             switch (_selectedOption)
             {
-                case GasEditorOption.AddGas:
+                case GasEditorOption.AddGasEnvironment:
                     _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount);
                     break;
-                case GasEditorOption.RemoveGas:
+                case GasEditorOption.RemoveGasEnvironment:
                     _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount);
+                    break;
+                case GasEditorOption.AddGasPipeLeft:
+                    _atmosManager.AddGasToPipe(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
+                    break;
+                case GasEditorOption.RemoveGasPipeLeft:
+                    _atmosManager.RemoveGasToPipe(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.AddHeat:
                     _atmosManager.AddHeat(snappedPosition, _selectedAmount);
@@ -222,38 +241,64 @@ public class AtmosEditor : EditorWindow
 
         foreach (AtmosJobPersistentData job in atmosJobs)
         {
-            for (int i = 0; i < job.AtmosTiles.Count; i++)
+            switch (_viewContent)
             {
-                Vector3 position = job.AtmosTiles[i].GetWorldPosition();
-                AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
-
-                Color stateColor;
-                AtmosState tileState = atmosObject.State;
-                switch (tileState)
-                {
-                    case AtmosState.Active: stateColor = new Color(0, 0, 0, 0); break;
-                    case AtmosState.Semiactive: stateColor = new Color(0, 0, 0, 0.5f); break;
-                    case AtmosState.Inactive: stateColor = new Color(0, 0, 0, 0.8f); break;
-                    default: stateColor = new Color(0, 0, 0, 0); break;
-                }
-
-                switch (_viewOption)
-                {
-                    case ViewType.Pressure:
-                        DrawPressureGizmo(atmosObject, position, stateColor);
-                        break;
-                    case ViewType.Content:
-                        DrawContentGizmo(atmosObject, position, stateColor);
-                        break;
-                    case ViewType.Temperature:
-                        DrawTemperatureGizmo(atmosObject, position, stateColor);
-                        break;
-                    case ViewType.Wind:
-                        DrawWindGizmo(atmosObject, position);
-                        break;
-                }
-                
+                 case ViewContent.Environment:
+                     DisplayEnvironmentObjects(job);
+                     break;
+                 case ViewContent.PipeLeft:
+                     DisplayLeftPipeObjects(job);
+                     break;
             }
+        }
+    }
+
+    private void DisplayEnvironmentObjects(AtmosJobPersistentData job)
+    {
+        for (int i = 0; i < job.AtmosTiles.Count; i++)
+        {
+            Vector3 position = job.AtmosTiles[i].GetWorldPosition();
+            AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
+            DisplayAtmosObjects(position, atmosObject);
+        }
+    }
+
+    private void DisplayLeftPipeObjects(AtmosJobPersistentData job)
+    {
+        for (int i = 0; i < job.AtmosDevices.Count; i++)
+        {
+            Vector3 position = job.AtmosDevices[i].GameObject.transform.position;
+            AtmosObject atmosObject = job.AtmosDevices[i].GetAtmosObject();
+            DisplayAtmosObjects(position, atmosObject);
+        }
+    }
+
+    private void DisplayAtmosObjects(Vector3 position, AtmosObject atmosObject)
+    {
+        Color stateColor;
+        AtmosState tileState = atmosObject.State;
+        switch (tileState)
+        {
+            case AtmosState.Active: stateColor = new Color(0, 0, 0, 0); break;
+            case AtmosState.Semiactive: stateColor = new Color(0, 0, 0, 0.5f); break;
+            case AtmosState.Inactive: stateColor = new Color(0, 0, 0, 0.8f); break;
+            default: stateColor = new Color(0, 0, 0, 0); break;
+        }
+
+        switch (_viewOption)
+        {
+            case ViewType.Pressure:
+                DrawPressureGizmo(atmosObject, position, stateColor);
+                break;
+            case ViewType.Content:
+                DrawContentGizmo(atmosObject, position, stateColor);
+                break;
+            case ViewType.Temperature:
+                DrawTemperatureGizmo(atmosObject, position, stateColor);
+                break;
+            case ViewType.Wind:
+                DrawWindGizmo(atmosObject, position);
+                break;
         }
     }
 

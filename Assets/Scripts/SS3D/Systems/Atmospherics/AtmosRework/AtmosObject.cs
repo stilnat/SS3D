@@ -9,7 +9,6 @@ namespace SS3D.Engine.AtmosphericsRework
  public struct AtmosObject
  {
         public AtmosState State;
-        public float2 Velocity;
         public int2 ChunkKey;
 
         public float VelocityNorth;
@@ -45,7 +44,6 @@ namespace SS3D.Engine.AtmosphericsRework
             Volume = 2.5f;      // One tile size
             Temperature = 293f; // Room temperature in Kelvin
             CoreGasses = 0f;
-            Velocity = default;
             TemperatureSetting = false;
             ActiveDirection = default;
             VelocityNorth = default;

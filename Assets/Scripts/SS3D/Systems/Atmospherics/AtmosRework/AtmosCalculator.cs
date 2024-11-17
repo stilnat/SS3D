@@ -9,36 +9,30 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public static class AtmosCalculator
     {
-        public static AtmosObject SimulateFlux(AtmosObject atmos, float dt,  AtmosObject[] neigbours)
+        public static MoleTransferToNeighbours SimulateGasTransfers(AtmosObject atmos, int atmosIndex, AtmosObject northNeighbour, AtmosObject southNeighbour,
+            AtmosObject eastNeighbour, AtmosObject westNeighbour, float dt, bool activeFlux, bool4 hasNeighbour)
         {
-           // if (atmos.State == AtmosState.Active)
-           // {
-           //     atmos = SimulateFluxActive(atmos, dt, neigbours);
-           // }
-
-            if (atmos.State == AtmosState.Semiactive ||
-                atmos.State == AtmosState.Active)
-            {
-                //atmos = SimulateMixing(atmos, dt, neigbours);
-                atmos = SimulateTemperature(atmos, dt, neigbours);
-            }
-
-            return atmos;
-        }
-
-        public static MoleTransferToNeighbours SimulateGasTransfers(int atmosIndex, int northIndex, int southIndex,
-            int eastIndex, int westIndex, NativeArray<AtmosObject> tileObjectBuffer, float dt, bool activeFlux)
-        {
-            AtmosObject atmos = tileObjectBuffer[atmosIndex];
             
             // moles of each gaz from each neighbour to transfer.
             float4x4 molesToTransfer = 0;
 
             // Compute the amount of moles to transfer in each direction like if there was an infinite amount of moles
-            molesToTransfer[0] = MolesToTransfer(tileObjectBuffer, northIndex, ref atmos, activeFlux, dt, atmos.VelocityNorth, tileObjectBuffer[northIndex].VelocitySouth);
-            molesToTransfer[1] = MolesToTransfer(tileObjectBuffer, southIndex, ref atmos, activeFlux, dt, atmos.VelocitySouth, tileObjectBuffer[northIndex].VelocityNorth);
-            molesToTransfer[2] = MolesToTransfer(tileObjectBuffer, eastIndex, ref atmos, activeFlux, dt, atmos.VelocityEast, tileObjectBuffer[northIndex].VelocityWest);
-            molesToTransfer[3] = MolesToTransfer(tileObjectBuffer, westIndex, ref atmos, activeFlux, dt, atmos.VelocityWest, tileObjectBuffer[northIndex].VelocityEast);
+            if (hasNeighbour[0])
+            {
+                molesToTransfer[0] = MolesToTransfer(northNeighbour, ref atmos, activeFlux, dt, atmos.VelocityNorth, northNeighbour.VelocitySouth);
+            }
+            if (hasNeighbour[1])
+            {
+                molesToTransfer[1] = MolesToTransfer(southNeighbour, ref atmos, activeFlux, dt, atmos.VelocitySouth, southNeighbour.VelocityNorth);
+            }
+            if (hasNeighbour[2])
+            {
+                molesToTransfer[2] = MolesToTransfer(eastNeighbour, ref atmos, activeFlux, dt, atmos.VelocityEast, eastNeighbour.VelocityWest);
+            }
+            if (hasNeighbour[3])
+            {
+                molesToTransfer[3] = MolesToTransfer(westNeighbour, ref atmos, activeFlux, dt, atmos.VelocityWest, westNeighbour.VelocityEast);
+            }
 
 
             // elements represent the total amount of gas to transfer for core gasses  
@@ -68,17 +62,10 @@ namespace SS3D.Engine.AtmosphericsRework
             return moleTransferToNeighbours;
         }
 
-        private static float4 MolesToTransfer(NativeArray<AtmosObject> tileObjectBuffer, int neighbourIndex,
+        public static float4 MolesToTransfer(AtmosObject neighbour,
             ref AtmosObject atmos, bool activeFlux, float dt, float atmosVelocity, float oppositeVelocity)
         {
             float4 molesToTransfer = 0;
-
-            if (neighbourIndex == -1)
-            {
-                return molesToTransfer;
-            }
-            
-            AtmosObject neighbour = tileObjectBuffer[neighbourIndex];
             
             if (neighbour.State == AtmosState.Blocked)
             {

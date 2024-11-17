@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -2184613742833408818}
   - component: {fileID: 8762327486351513096}
   - component: {fileID: -7818111786806045911}
+  - component: {fileID: 5023078111968428479}
   m_Layer: 0
   m_Name: AtmosPipesL1
   m_TagString: Untagged
@@ -59,8 +60,8 @@ MonoBehaviour:
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    LocalScale: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
   _isGlobal: 0
   _initializeOrder: 0
@@ -190,3 +191,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: {fileID: 11400000, guid: 1560fd5f9b47de74fbf91224b725ba61, type: 2}
+--- !u!114 &5023078111968428479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802364579275783218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0c6fc05b49f6b14fa477c8d2d76bcf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _connector: {fileID: 2229135679135330135}

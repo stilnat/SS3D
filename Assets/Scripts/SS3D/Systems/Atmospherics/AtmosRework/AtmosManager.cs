@@ -19,20 +19,22 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         public bool ShowUpdate = true;
         public float UpdateRate = 0.5f;
-       
+
         private TileSystem tileManager;
         private List<AtmosMap> atmosMaps;
         private List<AtmosJobPersistentData> atmosJobs;
-        
+
         private float lastStep;
         private bool initCompleted = false;
 
-        private readonly List<IDisposable> _nativeStructureToDispose = new(); 
+        private readonly List<IDisposable> _nativeStructureToDispose = new();
         private NativeList<JobHandle> _jobHandles;
 
         // Performance markers
         static ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("Atmospherics.Initialize");
         static ProfilerMarker s_StepPerfMarker = new ProfilerMarker("Atmospherics.Step");
+
+        private static ProfilerMarker PipePerfMarker = new ProfilerMarker("Atmospherics.Pipes");
 
         // This is purely for debugging purposes. When false, the jobs execute all on the main thread, allowing easy debugging.
         [SerializeField]
@@ -45,6 +47,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private void Start()
         {
             tileManager = Subsystems.Get<TileSystem>();
+
             // Initialization is invoked by the tile manager
             tileManager.TileSystemLoaded += Initialize;
             _jobHandles = new(1, Allocator.Persistent);
@@ -64,12 +67,10 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
 
                 float dt = Time.fixedTime - lastStep;
-                int tileCounter = StepAtmos(dt);
-
+                
+                ScheduleJobs(dt);
                 StartCoroutine(DelayCompleteJob());
 
-                if (ShowUpdate)
-                    Debug.Log("Atmos loop took: " + (dt - UpdateRate) + " seconds, simulating " + tileCounter + " active atmos objects. Fixed update rate: " + UpdateRate);
                 lastStep = Time.fixedTime;
             }
         }
@@ -80,6 +81,7 @@ namespace SS3D.Engine.AtmosphericsRework
             foreach (AtmosMap map in atmosMaps)
             {
                 TileAtmosObject atmosTile = map.GetTileAtmosObject(worldPosition);
+
                 if (atmosTile != null)
                     return atmosTile;
             }
@@ -92,10 +94,44 @@ namespace SS3D.Engine.AtmosphericsRework
             return atmosJobs;
         }
 
+        public void AddGasToPipe(Vector3 worldPosition, CoreAtmosGasses gas, float amount, TileLayer layer)
+        {
+            if (atmosMaps[0].GetLinkedTileMap().GetTileLocation(layer, worldPosition) is not SingleTileLocation pipeLocation)
+            {
+                  return;
+            }
+
+            if (!pipeLocation.TryGetPlacedObject(out PlacedTileObject pipe))
+            {
+                return;
+            }
+
+            AtmosObject atmos = pipe.GetComponent<IAtmosLoop>().GetAtmosObject();
+            atmos.AddCoreGas(gas, amount, true);
+            pipe.GetComponent<IAtmosLoop>().SetAtmosObject(atmos);
+        }
+
+        public void RemoveGasToPipe(Vector3 worldPosition, CoreAtmosGasses gas, float amount, TileLayer layer)
+        {
+            if (atmosMaps[0].GetLinkedTileMap().GetTileLocation(layer, worldPosition) is not SingleTileLocation pipeLocation)
+            {
+                return;
+            }
+
+            if (!pipeLocation.TryGetPlacedObject(out PlacedTileObject pipe))
+            {
+                return;
+            }
+
+            AtmosObject atmos = pipe.GetComponent<IAtmosLoop>().GetAtmosObject();
+            atmos.RemoveCoreGas(gas, amount, true);
+            pipe.GetComponent<IAtmosLoop>().SetAtmosObject(atmos);
+        }
+
         public void AddGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
         {
-
             TileAtmosObject tile = GetAtmosTile(worldPosition);
+
             if (tile != null)
             {
                 atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddGas(tile, gas, amount);
@@ -115,6 +151,7 @@ namespace SS3D.Engine.AtmosphericsRework
         public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount)
         {
             TileAtmosObject tile = GetAtmosTile(worldPosition);
+
             if (tile != null)
             {
                 atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveGas(tile, gas, amount);
@@ -124,6 +161,7 @@ namespace SS3D.Engine.AtmosphericsRework
         public void AddHeat(Vector3 worldPosition, float amount)
         {
             TileAtmosObject tile = GetAtmosTile(worldPosition);
+
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
@@ -136,6 +174,7 @@ namespace SS3D.Engine.AtmosphericsRework
         public void RemoveHeat(Vector3 worldPosition, float amount)
         {
             TileAtmosObject tile = GetAtmosTile(worldPosition);
+
             if (tile != null)
             {
                 // Update the gas amount. Keep in mind that this is a value type.
@@ -161,6 +200,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 disposable.Dispose();
             }
+
             _nativeStructureToDispose.Clear();
             _jobsScheduled = false;
         }
@@ -176,7 +216,7 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosMap atmosMap = new AtmosMap(map, map.Name);
 
             List<TileChunk> tileChunks = map.Chunks;
-            
+
             foreach (TileChunk chunk in tileChunks)
             {
                 atmosMap.CreateChunkFromTileChunk(chunk.Key, chunk.Origin);
@@ -196,6 +236,7 @@ namespace SS3D.Engine.AtmosphericsRework
             if (tileManager == null || tileManager.CurrentMap == null)
             {
                 Debug.LogError("AtmosManager couldn't find the tilemanager or map.");
+
                 return;
             }
 
@@ -215,9 +256,10 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             int initCounter = 0;
+
             foreach (AtmosMap map in atmosMaps)
             {
-                
+
                 List<TileAtmosObject> tiles = new();
                 List<IAtmosLoop> devices = new();
 
@@ -236,7 +278,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 AtmosJobPersistentData atmosJob = new(map, tiles, devices);
                 atmosJobs.Add(atmosJob);
 
-                initCounter += tiles.Count; 
+                initCounter += tiles.Count;
             }
 
             if (ShowUpdate)
@@ -249,82 +291,119 @@ namespace SS3D.Engine.AtmosphericsRework
 
 
 
-        private int StepAtmos(float deltaTime)
-        {
-            s_StepPerfMarker.Begin();
-            int counter = atmosJobs.Sum(x => x.CountActive());
-            
-            ScheduleJobs(deltaTime);
-
-            return counter;
-        }
-
         /// <summary>
         /// Schedule all the atmos jobs
         /// </summary>
         private void ScheduleJobs(float deltaTime)
         {
-            
+
             // Loop through every map
             foreach (AtmosJobPersistentData atmosJob in atmosJobs)
             {
-                s_StepPerfMarker.Begin();
                 atmosJob.Refresh();
-                s_StepPerfMarker.End();
-
-                ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
-
-                SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourIndexes);
-                
-                NativeHashSet<int> activeTransferIndex = new(atmosJob.NativeAtmosTiles.Length, Allocator.TempJob);
-                _nativeStructureToDispose.Add(activeTransferIndex);
-
-                ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, false);
-                TransferActiveFluxJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                    atmosJob.NeighbourIndexes, activeTransferIndex, true);
-
-                ComputeFluxesJob activeFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, true);
-                TransferActiveFluxJob transferActiveFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                    atmosJob.NeighbourIndexes, activeTransferIndex, false);
-                
-                ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray);
-                
-                SetInactiveJob setInactiveJob = new(atmosJob.NativeAtmosTiles, activeTransferIndex);
-
-                if (_usesParallelComputation)
-                {
-                    JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
-                    JobHandle setActiveHandle = setActiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
-                    JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, setActiveHandle);
-                    JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
-                    JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferDiffusionFluxHandle);
-                    JobHandle transferActiveFluxHandle = transferDiffusionFluxJob.Schedule(activeFluxHandle);
-                    JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
-                    JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeVelocityHandle);
-
-                    _jobHandles.Add(computeIndexesHandle);
-                    _jobHandles.Add(setActiveHandle);
-                    _jobHandles.Add(diffusionFluxHandle);
-                    _jobHandles.Add(transferDiffusionFluxHandle);
-                    _jobHandles.Add(activeFluxHandle);
-                    _jobHandles.Add(transferActiveFluxHandle);
-                    _jobHandles.Add(computeVelocityHandle);
-                    _jobHandles.Add(setInactiveHandle);
-                }
-                else
-                {
-                    computeIndexesJob.Run(atmosJob.AtmosTiles.Count);
-                    setActiveJob.Run(atmosJob.AtmosTiles.Count);
-                    diffusionFluxJob.Run(atmosJob.AtmosTiles.Count);
-                    transferActiveFluxJob.Run();
-                    activeFluxJob.Run(atmosJob.AtmosTiles.Count);
-                    transferActiveFluxJob.Run();
-                    velocityJob.Run(atmosJob.AtmosTiles.Count);
-                    setInactiveJob.Run(atmosJob.AtmosTiles.Count);
-                }
+                ScheduleTileObjectJobs(atmosJob, deltaTime);
+                StepPipeObjects(atmosJob, deltaTime);
             }
 
             _jobsScheduled = true;
+        }
+        private void StepPipeObjects(AtmosJobPersistentData atmosJob, float deltaTime)
+        {
+            PipePerfMarker.Begin();
+            List<List<float4>> molesToTransferAllDevices = new();
+            foreach (IAtmosLoop atmosDevice in atmosJob.AtmosDevices)
+            {
+                AtmosObject atmos = atmosDevice.GetAtmosObject();
+
+                List<IAtmosLoop> neighbours = atmosDevice.GetNeighbours();
+                List<float4> molesToTransfer = new();
+                float4 totalMoleToTransfer = default;
+                foreach (IAtmosLoop neighbour in neighbours)
+                {
+                    float4 molesActive = AtmosCalculator.MolesToTransfer(neighbour.GetAtmosObject(), ref atmos, true, deltaTime, 0, 0);
+                    molesToTransfer.Add(molesActive);
+                    totalMoleToTransfer += molesActive;
+                }
+                molesToTransferAllDevices.Add(molesToTransfer);
+            }
+
+            int i = 0;
+            foreach (IAtmosLoop atmosDevice in atmosJob.AtmosDevices)
+            {
+                List<IAtmosLoop> neighbours = atmosDevice.GetNeighbours();
+                List<float4> molesToTransfer = molesToTransferAllDevices[i];
+                int j = 0;
+                foreach (IAtmosLoop neighbour in neighbours)
+                {
+                    AtmosObject atmosNeighbour = neighbour.GetAtmosObject();
+                    atmosNeighbour.AddCoreGasses(molesToTransfer[j], true);
+                    neighbour.SetAtmosObject(atmosNeighbour);
+
+                    AtmosObject atmos = atmosDevice.GetAtmosObject();
+                    atmos.RemoveCoreGasses(molesToTransfer[j], true);
+                    atmosDevice.SetAtmosObject(atmos);
+
+                    j++;
+                }
+
+                i++;
+            }
+            PipePerfMarker.End();
+        }
+
+        private void ScheduleTileObjectJobs(AtmosJobPersistentData atmosJob, float deltaTime)
+        {
+            // compute neighbour indexes of tile atmos objects
+            ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
+
+            SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourIndexes);
+            
+            NativeHashSet<int> activeTransferIndex = new(atmosJob.NativeAtmosTiles.Length, Allocator.TempJob);
+            _nativeStructureToDispose.Add(activeTransferIndex);
+
+            ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, false);
+            TransferActiveFluxJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourIndexes, activeTransferIndex, true);
+
+            ComputeFluxesJob activeFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourIndexes, deltaTime, true);
+            TransferActiveFluxJob transferActiveFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourIndexes, activeTransferIndex, false);
+            
+            ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray);
+            
+            SetInactiveJob setInactiveJob = new(atmosJob.NativeAtmosTiles, activeTransferIndex);
+
+            if (_usesParallelComputation)
+            {
+                JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
+                JobHandle setActiveHandle = setActiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
+                JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, setActiveHandle);
+                JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
+                JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferDiffusionFluxHandle);
+                JobHandle transferActiveFluxHandle = transferDiffusionFluxJob.Schedule(activeFluxHandle);
+                JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
+                JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeVelocityHandle);
+
+                _jobHandles.Add(computeIndexesHandle);
+                _jobHandles.Add(setActiveHandle);
+                _jobHandles.Add(diffusionFluxHandle);
+                _jobHandles.Add(transferDiffusionFluxHandle);
+                _jobHandles.Add(activeFluxHandle);
+                _jobHandles.Add(transferActiveFluxHandle);
+                _jobHandles.Add(computeVelocityHandle);
+                _jobHandles.Add(setInactiveHandle);
+            }
+            else
+            {
+                computeIndexesJob.Run(atmosJob.AtmosTiles.Count);
+                setActiveJob.Run(atmosJob.AtmosTiles.Count);
+                diffusionFluxJob.Run(atmosJob.AtmosTiles.Count);
+                transferActiveFluxJob.Run();
+                activeFluxJob.Run(atmosJob.AtmosTiles.Count);
+                transferActiveFluxJob.Run();
+                velocityJob.Run(atmosJob.AtmosTiles.Count);
+                setInactiveJob.Run(atmosJob.AtmosTiles.Count);
+            }
         }
 
         /// <summary>

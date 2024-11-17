@@ -14,10 +14,21 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public readonly List<TileAtmosObject> AtmosTiles;
 
+        public readonly List<IAtmosLoop> AtmosDevices;
+
+        /// <summary>
+        ///  For a given index in this array, return the indexes of all its neighbours, used by the atmos tiles. 
+        /// </summary>
         public NativeArray<AtmosObjectNeighboursIndexes> NeighbourIndexes;
 
+        /// <summary>
+        /// Contains all atmos objects for all tiles on the map.
+        /// </summary>
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
+        /// <summary>
+        /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
+        /// </summary>
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
         
         /// <summary>
@@ -42,6 +53,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 ChunkKeyHashMap.Add(chunkKeyBuffer[i], i);
             }
 
+            AtmosDevices = atmosDevices;
             _atmosObjectsToChange = new();
             LoadNativeArrays();
         }
