@@ -269,42 +269,42 @@ namespace SS3D.Engine.AtmosphericsRework
             // compute neighbour indexes of tile atmos objects. TODO :  No need to run this job unless a new chunk was created
             ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourTileIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
 
-            SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes);
+            SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveIndexes, atmosJob.SemiActiveIndexes);
 
-            ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, deltaTime, false);
-            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, true);
+           // ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveIndexes, deltaTime, false);
+           // TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
+         //       atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, atmosJob.ActiveIndexes, true);
 
-            ComputeFluxesJob activeFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, deltaTime, true);
+            ComputeFluxesJob activeFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveIndexes, deltaTime, true);
             TransferFluxesJob transferFluxesJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, false);
+                atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, atmosJob.ActiveIndexes, false);
 
             ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray);
             SetInactiveJob setInactiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.ActiveTransferIndex);
 
             // Pipe stuff
-            ComputeFluxesJob pipeActiveFluxJob = new(atmosJob.NativeAtmosPipesLeft, atmosJob.PipeMoleTransferArray, atmosJob.NeighbourTileIndexes, deltaTime, true);
+            ComputeFluxesJob pipeActiveFluxJob = new(atmosJob.NativeAtmosPipesLeft, atmosJob.PipeMoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.PipeActiveIndexes, deltaTime, true);
             TransferFluxesJob transferPipeFluxesJob = new(atmosJob.PipeMoleTransferArray, atmosJob.NativeAtmosPipesLeft,
-                atmosJob.NeighbourTileIndexes, atmosJob.PipeActiveTransferIndex, false);
+                atmosJob.NeighbourTileIndexes, atmosJob.PipeActiveTransferIndex, atmosJob.PipeActiveIndexes, false);
 
             if (_usesParallelComputation)
             {
                 JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
                 JobHandle setActiveHandle = setActiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
-                JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, setActiveHandle);
-                JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
-                JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferDiffusionFluxHandle);
-                JobHandle transferActiveFluxHandle = transferDiffusionFluxJob.Schedule(activeFluxHandle);
+               // JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.SemiActiveIndexes.Length, 64, setActiveHandle);
+              //  JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
+                JobHandle activeFluxHandle = activeFluxJob.Schedule(atmosJob.ActiveIndexes.Length, 64, setActiveHandle);
+                JobHandle transferActiveFluxHandle = transferFluxesJob.Schedule(activeFluxHandle);
                 JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
                 JobHandle setInactiveHandle = setInactiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeVelocityHandle);
 
-                JobHandle pipeActiveFluxHandle = pipeActiveFluxJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
+                JobHandle pipeActiveFluxHandle = pipeActiveFluxJob.Schedule(atmosJob.PipeActiveIndexes.Length, 64, computeIndexesHandle);
                 JobHandle transferPipeActiveFluxHandle = transferPipeFluxesJob.Schedule(pipeActiveFluxHandle);
 
                 _jobHandles.Add(computeIndexesHandle);
                 _jobHandles.Add(setActiveHandle);
-                _jobHandles.Add(diffusionFluxHandle);
-                _jobHandles.Add(transferDiffusionFluxHandle);
+               // _jobHandles.Add(diffusionFluxHandle);
+                //_jobHandles.Add(transferDiffusionFluxHandle);
                 _jobHandles.Add(activeFluxHandle);
                 _jobHandles.Add(transferActiveFluxHandle);
                 _jobHandles.Add(computeVelocityHandle);
@@ -317,14 +317,14 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 computeIndexesJob.Run(atmosJob.AtmosTiles.Count);
                 setActiveJob.Run(atmosJob.AtmosTiles.Count);
-                diffusionFluxJob.Run(atmosJob.AtmosTiles.Count);
-                transferFluxesJob.Run();
-                activeFluxJob.Run(atmosJob.AtmosTiles.Count);
+               // diffusionFluxJob.Run(atmosJob.SemiActiveIndexes.Length);
+               // transferFluxesJob.Run();
+                activeFluxJob.Run(atmosJob.ActiveIndexes.Length);
                 transferFluxesJob.Run();
                 velocityJob.Run(atmosJob.AtmosTiles.Count);
                 setInactiveJob.Run(atmosJob.AtmosTiles.Count);
 
-                pipeActiveFluxJob.Run(atmosJob.AtmosTiles.Count);
+                pipeActiveFluxJob.Run(atmosJob.PipeActiveIndexes.Length);
                 transferPipeFluxesJob.Run();
             }
         }

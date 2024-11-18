@@ -6,7 +6,7 @@ using Unity.Mathematics;
 namespace SS3D.Engine.AtmosphericsRework
 {
 
-    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct TransferFluxesJob : IJob
     {
         [ReadOnly]
@@ -19,25 +19,28 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private NativeArray<AtmosObject> _tileObjectBuffer;
 
+        private NativeList<int> _activeIndexes;
+
         private readonly bool _diffusion;
 
         public TransferFluxesJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeHashSet<int> activeTransferIndex, bool diffusion)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeHashSet<int> activeTransferIndex, NativeList<int> activeIndexes, bool diffusion)
         {
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;
             _diffusion = diffusion;
             _activeTransferIndex = activeTransferIndex;
             _neighboursIndexes = neighboursIndexes;
+            _activeIndexes = activeIndexes;
         }
 
         public void Execute()
         {
-            for (int i = 0; i < _moleTransfers.Length; i++)
+            for (int i = 0; i < _activeIndexes.Length; i++)
             {
- 
-                MoleTransferToNeighbours transfer = _moleTransfers[i];
+                int activeIndex = _activeIndexes[i];
+                MoleTransferToNeighbours transfer = _moleTransfers[activeIndex];
                 int atmosObjectFromIndex = transfer.IndexFrom;
                 AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
                 atmosObject.RemoveCoreGasses(transfer.TransferMolesNorth, _diffusion);
@@ -52,10 +55,10 @@ namespace SS3D.Engine.AtmosphericsRework
                 
                 _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
                 
-                int neighbourNorthIndex = _neighboursIndexes[i].NorthNeighbour;
-                int neighbourSouthIndex = _neighboursIndexes[i].SouthNeighbour;
-                int neighbourEastIndex = _neighboursIndexes[i].EastNeighbour;
-                int neighbourWestIndex = _neighboursIndexes[i].WestNeighbour;
+                int neighbourNorthIndex = _neighboursIndexes[activeIndex].NorthNeighbour;
+                int neighbourSouthIndex = _neighboursIndexes[activeIndex].SouthNeighbour;
+                int neighbourEastIndex = _neighboursIndexes[activeIndex].EastNeighbour;
+                int neighbourWestIndex = _neighboursIndexes[activeIndex].WestNeighbour;
 
                 TransferToNeighbour(neighbourNorthIndex, transfer.TransferMolesNorth);
                 TransferToNeighbour(neighbourSouthIndex, transfer.TransferMolesSouth);

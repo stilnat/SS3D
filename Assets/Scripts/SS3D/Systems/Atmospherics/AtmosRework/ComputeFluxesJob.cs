@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct ComputeFluxesJob : IJobParallelFor
     {
 
@@ -23,6 +23,10 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
+        [ReadOnly]
+        private readonly NativeList<int> _activeIndexes;
+
+        [NativeDisableParallelForRestriction]
         [WriteOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
@@ -30,40 +34,44 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly bool _activeFlux;
 
+
+
         public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<MoleTransferToNeighbours> moleTransfers,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, float deltaTime, bool activeFlux)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeList<int> activeIndexes, float deltaTime, bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _deltaTime = deltaTime;
             _moleTransfers = moleTransfers;
             _activeFlux = activeFlux;
             _neighboursIndexes = neighboursIndexes;
+            _activeIndexes = activeIndexes;
         }
 
         public void Execute(int index)
         {
-            if (_tileObjectBuffer[index].State != AtmosState.Active && _tileObjectBuffer[index].State != AtmosState.Semiactive)
+            int activeIndex = _activeIndexes[index];
+            /*if (_tileObjectBuffer[activeIndex].State != AtmosState.Active && _tileObjectBuffer[activeIndex].State != AtmosState.Semiactive)
             {
                 _moleTransfers[index] = default;
                 return;
-            }
+            }*/
 
             AtmosObject defaultAtmos = default;
 
-            AtmosObject northNeighbour = _neighboursIndexes[index].NorthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].NorthNeighbour];
-            AtmosObject southNeighbour = _neighboursIndexes[index].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].SouthNeighbour]; 
-            AtmosObject eastNeighbour = _neighboursIndexes[index].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].EastNeighbour]; 
-            AtmosObject westNeighbour = _neighboursIndexes[index].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[index].WestNeighbour]; 
+            AtmosObject northNeighbour = _neighboursIndexes[activeIndex].NorthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].NorthNeighbour];
+            AtmosObject southNeighbour = _neighboursIndexes[activeIndex].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].SouthNeighbour]; 
+            AtmosObject eastNeighbour = _neighboursIndexes[activeIndex].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].EastNeighbour]; 
+            AtmosObject westNeighbour = _neighboursIndexes[activeIndex].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].WestNeighbour]; 
 
-            bool4 hasNeighbours = new(_neighboursIndexes[index].NorthNeighbour != -1,
-                _neighboursIndexes[index].SouthNeighbour != -1,
-                _neighboursIndexes[index].EastNeighbour != -1,
-            _neighboursIndexes[index].WestNeighbour != -1);
+            bool4 hasNeighbours = new(_neighboursIndexes[activeIndex].NorthNeighbour != -1,
+                _neighboursIndexes[activeIndex].SouthNeighbour != -1,
+                _neighboursIndexes[activeIndex].EastNeighbour != -1,
+            _neighboursIndexes[activeIndex].WestNeighbour != -1);
 
             // Do actual work
-            _moleTransfers[index] = AtmosCalculator.SimulateGasTransfers(
-                _tileObjectBuffer[index], 
-                index,
+            _moleTransfers[activeIndex] = AtmosCalculator.SimulateGasTransfers(
+                _tileObjectBuffer[activeIndex], 
+                activeIndex,
                 northNeighbour,
                 southNeighbour, 
                 eastNeighbour,

@@ -56,7 +56,14 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <summary>
         /// 
         /// </summary>
-        public NativeHashSet<int> PipeActiveTransferIndex; 
+        public NativeHashSet<int> PipeActiveTransferIndex;
+        
+
+        public NativeList<int> ActiveIndexes;
+
+        public NativeList<int> SemiActiveIndexes;
+
+        public NativeList<int> PipeActiveIndexes;
 
         // Keeps track of changed atmos objects 
         private readonly List<AtmosContainer> _atmosObjectsToChange;
@@ -77,6 +84,9 @@ namespace SS3D.Engine.AtmosphericsRework
             ActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
             PipeMoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             PipeActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
+            ActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            SemiActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            PipeActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
 
             // Fill the chunk key hash map in order of chunks created in the map
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
@@ -182,6 +192,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
             _atmosObjectsToChange.Clear();
             _pipeAtmosObjectsToChange.Clear();
+            ActiveIndexes.Clear();
         }
 
         private void LoadNativeArrays()

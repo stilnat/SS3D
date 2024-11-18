@@ -18,21 +18,45 @@ namespace SS3D.Engine.AtmosphericsRework
         
         [NativeDisableParallelForRestriction]
         private NativeArray<AtmosObject> _tileObjectBuffer;
+
+        private NativeList<int> _activeIndexes;
+
+        private NativeList<int> _semiactiveIndexes;
         
         public SetActiveJob(NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
+            NativeList<int> activeIndexes,
+            NativeList<int> semiactiveIndexes)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _neighboursIndexes = neighboursIndexes;
+            _activeIndexes = activeIndexes;
+            _semiactiveIndexes = semiactiveIndexes;
         }
 
         public void Execute(int index)
         {
+            if (_tileObjectBuffer[index].State == AtmosState.Blocked)
+            {
+                return;
+            }
             AtmosObjectNeighboursIndexes neighbourIndexes = _neighboursIndexes[index];
 
+            if (_tileObjectBuffer[index].State == AtmosState.Active)
+            {
+                _activeIndexes.Add(index);
+                return;
+            }
+
             TreatNeighbour(index, neighbourIndexes.NorthNeighbour);
+            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
+
             TreatNeighbour(index, neighbourIndexes.SouthNeighbour);
+            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
+
             TreatNeighbour(index, neighbourIndexes.EastNeighbour);
+            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
+
             TreatNeighbour(index, neighbourIndexes.WestNeighbour);
         }
 
@@ -46,8 +70,7 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
             AtmosObject atmos = _tileObjectBuffer[index];
 
-            if (neighbour.State == AtmosState.Blocked || neighbour.State == AtmosState.Inactive
-            || atmos.State == AtmosState.Active || atmos.State == AtmosState.Blocked)
+            if (neighbour.State == AtmosState.Blocked || neighbour.State == AtmosState.Inactive)
             {
                 return;
             }
@@ -56,6 +79,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 atmos.State = AtmosState.Active;
                 _tileObjectBuffer[index] = atmos;
+                _activeIndexes.Add(index);
                 return;
             }
             
@@ -64,6 +88,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 atmos.State = AtmosState.Semiactive;
                 _tileObjectBuffer[index] = atmos;
+                _semiactiveIndexes.Add(index);
             }
         }
     }
