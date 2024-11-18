@@ -23,6 +23,7 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
+        [WriteOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
         private readonly float _deltaTime;

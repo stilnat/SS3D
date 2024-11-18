@@ -7,7 +7,7 @@ namespace SS3D.Engine.AtmosphericsRework
 {
 
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    struct TransferActiveFluxJob : IJob
+    struct TransferFluxesJob : IJob
     {
         [ReadOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
@@ -21,7 +21,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly bool _diffusion;
 
-        public TransferActiveFluxJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
+        public TransferFluxesJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObject> tileObjectBuffer,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeHashSet<int> activeTransferIndex, bool diffusion)
         {
