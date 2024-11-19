@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct SetActiveJob : IJobParallelFor
     {
                 
@@ -40,56 +40,63 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 return;
             }
+
             AtmosObjectNeighboursIndexes neighbourIndexes = _neighboursIndexes[index];
 
-            if (_tileObjectBuffer[index].State == AtmosState.Active)
+            bool2 isActiveOrSemiActive = false;
+
+            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.NorthNeighbour);
+            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.SouthNeighbour);
+            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.EastNeighbour);
+            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.WestNeighbour);
+
+            AtmosObject atmos = _tileObjectBuffer[index];
+
+            if (isActiveOrSemiActive[0])
             {
+                atmos.State = AtmosState.Active;
                 _activeIndexes.Add(index);
-                return;
+            }
+            else if(isActiveOrSemiActive[1])
+            {
+                atmos.State = AtmosState.Semiactive;
+                _semiactiveIndexes.Add(index);
+            }
+            else
+            {
+                atmos.State = AtmosState.Inactive;
             }
 
-            TreatNeighbour(index, neighbourIndexes.NorthNeighbour);
-            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
-
-            TreatNeighbour(index, neighbourIndexes.SouthNeighbour);
-            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
-
-            TreatNeighbour(index, neighbourIndexes.EastNeighbour);
-            if (_tileObjectBuffer[index].State == AtmosState.Active) return;
-
-            TreatNeighbour(index, neighbourIndexes.WestNeighbour);
+            _tileObjectBuffer[index] = atmos;
         }
 
-        private void TreatNeighbour(int index, int neighbourIndex)
+        private bool2 TreatNeighbour(int index, int neighbourIndex)
         {
             if (neighbourIndex == -1)
             {
-                return;
+                return false;
             }
             
             AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
             AtmosObject atmos = _tileObjectBuffer[index];
 
-            if (neighbour.State == AtmosState.Blocked || neighbour.State == AtmosState.Inactive)
+            if (neighbour.State == AtmosState.Blocked)
             {
-                return;
+                return false;
             }
 
             if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.pressureEpsilon)
             {
-                atmos.State = AtmosState.Active;
-                _tileObjectBuffer[index] = atmos;
-                _activeIndexes.Add(index);
-                return;
+                return new(true, false);
             }
             
             float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
             if (math.any(molesToTransfer > GasConstants.fluxEpsilon))
             {
-                atmos.State = AtmosState.Semiactive;
-                _tileObjectBuffer[index] = atmos;
-                _semiactiveIndexes.Add(index);
+                return new(false, true);
             }
+
+            return false;
         }
     }
 }

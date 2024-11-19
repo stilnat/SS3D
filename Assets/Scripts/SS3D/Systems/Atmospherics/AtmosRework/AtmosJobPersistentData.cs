@@ -48,22 +48,20 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
 
-        /// <summary>
-        /// 
-        /// </summary>
+
         public  NativeHashSet<int> ActiveTransferIndex ;
 
-        /// <summary>
-        /// 
-        /// </summary>
+
         public NativeHashSet<int> PipeActiveTransferIndex;
+
         
+        public NativeList<int> ActiveEnvironmentIndexes;
 
-        public NativeList<int> ActiveIndexes;
+        public NativeList<int> SemiActiveEnvironmentIndexes;
 
-        public NativeList<int> SemiActiveIndexes;
+        public NativeList<int> ActiveLeftPipeIndexes;
 
-        public NativeList<int> PipeActiveIndexes;
+        public NativeList<int> SemiActiveLeftPipeIndexes;
 
         // Keeps track of changed atmos objects 
         private readonly List<AtmosContainer> _atmosObjectsToChange;
@@ -84,9 +82,10 @@ namespace SS3D.Engine.AtmosphericsRework
             ActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
             PipeMoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             PipeActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
-            ActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
-            SemiActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
-            PipeActiveIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            ActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            SemiActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            ActiveLeftPipeIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            SemiActiveLeftPipeIndexes = new(atmosTiles.Count, Allocator.Persistent);
 
             // Fill the chunk key hash map in order of chunks created in the map
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
@@ -192,7 +191,10 @@ namespace SS3D.Engine.AtmosphericsRework
             }
             _atmosObjectsToChange.Clear();
             _pipeAtmosObjectsToChange.Clear();
-            ActiveIndexes.Clear();
+            ActiveEnvironmentIndexes.Clear();
+            SemiActiveEnvironmentIndexes.Clear();
+            ActiveLeftPipeIndexes.Clear();
+            SemiActiveLeftPipeIndexes.Clear();
         }
 
         private void LoadNativeArrays()
