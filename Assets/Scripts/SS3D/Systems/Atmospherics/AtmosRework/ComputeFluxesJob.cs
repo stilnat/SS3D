@@ -50,11 +50,6 @@ namespace SS3D.Engine.AtmosphericsRework
         public void Execute(int index)
         {
             int activeIndex = _activeIndexes[index];
-            /*if (_tileObjectBuffer[activeIndex].State != AtmosState.Active && _tileObjectBuffer[activeIndex].State != AtmosState.Semiactive)
-            {
-                _moleTransfers[index] = default;
-                return;
-            }*/
 
             AtmosObject defaultAtmos = default;
 
