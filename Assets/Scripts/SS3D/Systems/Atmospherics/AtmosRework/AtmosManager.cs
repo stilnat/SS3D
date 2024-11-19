@@ -18,7 +18,6 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public class AtmosManager : MonoBehaviour
     {
-        public bool ShowUpdate = true;
         public float UpdateRate = 0.5f;
 
         private TileSystem tileManager;
@@ -28,16 +27,8 @@ namespace SS3D.Engine.AtmosphericsRework
         private float lastStep;
         private bool initCompleted = false;
 
-        private readonly List<IDisposable> _nativeStructureToDispose = new();
+        // This list track job handles to complete jobs after a while.
         private NativeList<JobHandle> _jobHandles;
-
-        // Performance markers
-        static ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("Atmospherics.Initialize");
-        static ProfilerMarker s_StepPerfMarker = new ProfilerMarker("Atmospherics.Step");
-
-        private static ProfilerMarker PipePerfMarker = new ProfilerMarker("Atmospherics.Pipes");
-
-        private static ProfilerMarker BullshitPerfMarker = new ProfilerMarker("Atmospherics.Bullshit");
 
         // This is purely for debugging purposes. When false, the jobs execute all on the main thread, allowing easy debugging.
         [SerializeField]
@@ -71,7 +62,14 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 float dt = Time.fixedTime - lastStep;
                 
-                ScheduleJobs(dt);
+                // Loop through every map
+                foreach (AtmosJobPersistentData atmosJob in atmosJobs)
+                {
+                    atmosJob.Refresh();
+                    ScheduleTileObjectJobs(atmosJob, dt);
+                }
+                _jobsScheduled = true;
+
                 StartCoroutine(DelayCompleteJob());
 
                 lastStep = Time.fixedTime;
@@ -163,14 +161,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
             // Write back the results
             atmosJobs.ForEach(x => x.WriteResultsToList());
-
-            // Clean up
-            foreach (IDisposable disposable in _nativeStructureToDispose)
-            {
-                disposable.Dispose();
-            }
-
-            _nativeStructureToDispose.Clear();
             _jobsScheduled = false;
         }
 
@@ -237,31 +227,12 @@ namespace SS3D.Engine.AtmosphericsRework
                 initCounter += tiles.Count;
             }
 
-            if (ShowUpdate)
-            {
-                Debug.Log($"AtmosManager: Finished initializing {initCounter} tiles");
-            }
-
             initCompleted = true;
         }
 
 
 
-        /// <summary>
-        /// Schedule all the atmos jobs
-        /// </summary>
-        private void ScheduleJobs(float deltaTime)
-        {
 
-            // Loop through every map
-            foreach (AtmosJobPersistentData atmosJob in atmosJobs)
-            {
-                atmosJob.Refresh();
-                ScheduleTileObjectJobs(atmosJob, deltaTime);
-            }
-
-            _jobsScheduled = true;
-        }
 
 
         private void ScheduleTileObjectJobs(AtmosJobPersistentData atmosJob, float deltaTime)
@@ -272,22 +243,24 @@ namespace SS3D.Engine.AtmosphericsRework
             SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, atmosJob.SemiActiveEnvironmentIndexes);
 
             ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes, deltaTime, false);
-            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, atmosJob.SemiActiveEnvironmentIndexes, true);
+            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes, true);
 
             ComputeFluxesJob activeFluxesJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, deltaTime, true);
             TransferFluxesJob transferActiveFluxesJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveTransferIndex, atmosJob.ActiveEnvironmentIndexes, false);
+                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, false);
 
             ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray);
 
             // Pipe stuff
-            ComputeFluxesJob pipeActiveFluxJob = new(atmosJob.NativeAtmosPipesLeft, atmosJob.PipeMoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveLeftPipeIndexes, deltaTime, true);
-            TransferFluxesJob transferPipeFluxesJob = new(atmosJob.PipeMoleTransferArray, atmosJob.NativeAtmosPipesLeft,
-                atmosJob.NeighbourTileIndexes, atmosJob.PipeActiveTransferIndex, atmosJob.ActiveLeftPipeIndexes, false);
+            SetActiveJob leftPipeSetActiveJob = new(atmosJob.NativeAtmosPipesLeft, atmosJob.NeighbourTileIndexes, atmosJob.ActiveLeftPipeIndexes, atmosJob.SemiActiveLeftPipeIndexes);
+            ComputeFluxesJob leftPipeComputeFluxesJob = new(atmosJob.NativeAtmosPipesLeft, atmosJob.PipeMoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveLeftPipeIndexes, deltaTime, true);
+            TransferFluxesJob leftPipeTransferFluxesJob = new(atmosJob.PipeMoleTransferArray, atmosJob.NativeAtmosPipesLeft,
+                atmosJob.NeighbourTileIndexes, atmosJob.ActiveLeftPipeIndexes, false);
 
             if (_usesParallelComputation)
             {
                 JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
+
                 JobHandle setActiveHandle = setActiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
                 JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.SemiActiveEnvironmentIndexes.Length, 64, setActiveHandle);
                 JobHandle transferDiffusionFluxHandle = transferDiffusionFluxJob.Schedule(diffusionFluxHandle);
@@ -295,8 +268,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 JobHandle transferActiveFluxHandle = transferActiveFluxesJob.Schedule(activeFluxHandle);
                 JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.AtmosTiles.Count, 64, transferActiveFluxHandle);
 
-                JobHandle pipeActiveFluxHandle = pipeActiveFluxJob.Schedule(atmosJob.ActiveLeftPipeIndexes.Length, 64, computeIndexesHandle);
-                JobHandle transferPipeActiveFluxHandle = transferPipeFluxesJob.Schedule(pipeActiveFluxHandle);
+                JobHandle leftPipeSetActiveHandle = leftPipeSetActiveJob.Schedule(atmosJob.AtmosTiles.Count, 64, computeIndexesHandle);
+                JobHandle leftPipeActiveFluxesHandle = leftPipeComputeFluxesJob.Schedule(atmosJob.ActiveLeftPipeIndexes.Length, 64, leftPipeSetActiveHandle);
+                JobHandle leftPipeTransferFluxesHandle = leftPipeTransferFluxesJob.Schedule(leftPipeActiveFluxesHandle);
 
                 _jobHandles.Add(computeIndexesHandle);
                 _jobHandles.Add(setActiveHandle); 
@@ -307,8 +281,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 _jobHandles.Add(computeVelocityHandle);
 
 
-                _jobHandles.Add(pipeActiveFluxHandle);
-                _jobHandles.Add(transferPipeActiveFluxHandle);
+                _jobHandles.Add(leftPipeSetActiveHandle);
+                _jobHandles.Add(leftPipeActiveFluxesHandle);
+                _jobHandles.Add(leftPipeTransferFluxesHandle);
             }
             else
             {
@@ -320,8 +295,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 transferActiveFluxesJob.Run();
                 velocityJob.Run(atmosJob.AtmosTiles.Count);
 
-                pipeActiveFluxJob.Run(atmosJob.ActiveLeftPipeIndexes.Length);
-                transferPipeFluxesJob.Run();
+                leftPipeSetActiveJob.Run(atmosJob.AtmosTiles.Count);
+                leftPipeComputeFluxesJob.Run(atmosJob.ActiveLeftPipeIndexes.Length);
+                leftPipeTransferFluxesJob.Run();
             }
         }
 

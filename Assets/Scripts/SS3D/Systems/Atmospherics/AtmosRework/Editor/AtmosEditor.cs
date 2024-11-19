@@ -107,13 +107,6 @@ public class AtmosEditor : EditorWindow
         
         EditorGUILayout.EndToggleGroup();
 
-        EditorGUILayout.Space();
-        EditorGUI.BeginChangeCheck();
-        _showLog = EditorGUILayout.Toggle("Show messages: ", _showLog);
-        if (EditorGUI.EndChangeCheck())
-        {
-            _atmosManager.ShowUpdate = _showLog;
-        }
 
         EditorGUILayout.Space();
         EditorGUILayout.PrefixLabel("Draw View:");

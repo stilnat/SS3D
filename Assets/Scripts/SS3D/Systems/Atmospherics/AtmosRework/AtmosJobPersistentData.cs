@@ -48,12 +48,6 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
 
-
-        public  NativeHashSet<int> ActiveTransferIndex ;
-
-
-        public NativeHashSet<int> PipeActiveTransferIndex;
-
         
         public NativeList<int> ActiveEnvironmentIndexes;
 
@@ -79,9 +73,7 @@ namespace SS3D.Engine.AtmosphericsRework
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             NeighbourTileIndexes = new(atmosTiles.Count, Allocator.Persistent);
             NativeAtmosPipesLeft = new(atmosTiles.Count, Allocator.Persistent);
-            ActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
             PipeMoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
-            PipeActiveTransferIndex = new(atmosTiles.Count, Allocator.Persistent);
             ActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
             SemiActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
             ActiveLeftPipeIndexes = new(atmosTiles.Count, Allocator.Persistent);
@@ -209,11 +201,10 @@ namespace SS3D.Engine.AtmosphericsRework
         public void Destroy()
         {
             NativeAtmosTiles.Dispose();
-        }
-
-        public int CountActive()
-        {
-            return AtmosTiles.Count(atmosObject => atmosObject.AtmosObject.State == AtmosState.Active || atmosObject.AtmosObject.State == AtmosState.Semiactive);
+            NativeAtmosPipesLeft.Dispose();
+            NeighbourTileIndexes.Dispose();
+            MoleTransferArray.Dispose();
+            PipeMoleTransferArray.Dispose();
         }
 
         /// <summary>
@@ -221,10 +212,19 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public void WriteResultsToList()
         {
-            for (int i = 0; i < NativeAtmosTiles.Length; i++)
+            WriteResults(ActiveEnvironmentIndexes, NativeAtmosTiles, AtmosTiles);
+            WriteResults(SemiActiveEnvironmentIndexes, NativeAtmosTiles, AtmosTiles);
+
+            WriteResults(ActiveLeftPipeIndexes, NativeAtmosPipesLeft, AtmosLeftPipes);
+            WriteResults(SemiActiveLeftPipeIndexes, NativeAtmosPipesLeft, AtmosLeftPipes);
+        }
+
+        private void WriteResults(NativeList<int> activeIndexes, NativeArray<AtmosObject> nativeAtmosObjects, List<AtmosContainer> atmosObjects)
+        {
+            for (int i = 0; i < activeIndexes.Length; i++)
             {
-                AtmosTiles[i].AtmosObject = NativeAtmosTiles[i];
-                AtmosLeftPipes[i].AtmosObject = NativeAtmosPipesLeft[i];
+                int activeIndex = activeIndexes[i];
+                atmosObjects[activeIndex].AtmosObject = nativeAtmosObjects[activeIndex];
             }
         }
 

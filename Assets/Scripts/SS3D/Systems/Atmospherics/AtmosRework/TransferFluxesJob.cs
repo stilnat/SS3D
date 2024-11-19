@@ -15,8 +15,6 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
-        private NativeHashSet<int> _activeTransferIndex;
-
         private NativeArray<AtmosObject> _tileObjectBuffer;
 
         private NativeList<int> _activeIndexes;
@@ -25,12 +23,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public TransferFluxesJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeHashSet<int> activeTransferIndex, NativeList<int> activeIndexes, bool diffusion)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeList<int> activeIndexes, bool diffusion)
         {
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;
             _diffusion = diffusion;
-            _activeTransferIndex = activeTransferIndex;
             _neighboursIndexes = neighboursIndexes;
             _activeIndexes = activeIndexes;
         }
@@ -47,11 +44,6 @@ namespace SS3D.Engine.AtmosphericsRework
                 atmosObject.RemoveCoreGasses(transfer.TransferMolesSouth, _diffusion);
                 atmosObject.RemoveCoreGasses(transfer.TransferMolesEast, _diffusion);
                 atmosObject.RemoveCoreGasses(transfer.TransferMolesWest, _diffusion);
-
-                if (math.any(atmosObject.CoreGasses - _tileObjectBuffer[atmosObjectFromIndex].CoreGasses != 0))
-                {
-                    _activeTransferIndex.Add(atmosObjectFromIndex);
-                }
                 
                 _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
                 
@@ -69,17 +61,12 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void TransferToNeighbour(int neighbourIndex, float4 transfer)
         {
-            if (neighbourIndex != -1)
-            {
-                AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
-                neighbour.AddCoreGasses(transfer, _diffusion);
-                if (math.any(transfer != 0))
-                {
-                    _activeTransferIndex.Add(neighbourIndex);
-                }
-                
-                _tileObjectBuffer[neighbourIndex] = neighbour;
-            }
+            if (neighbourIndex == -1)
+                return;
+
+            AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
+            neighbour.AddCoreGasses(transfer, _diffusion);
+            _tileObjectBuffer[neighbourIndex] = neighbour;
         }
     }
 } 
