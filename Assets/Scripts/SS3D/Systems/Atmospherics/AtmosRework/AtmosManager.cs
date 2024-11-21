@@ -16,8 +16,10 @@ using Random = Unity.Mathematics.Random;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public class AtmosManager : MonoBehaviour
+    public class AtmosManager : Core.Behaviours.System
     {
+        public Action AtmosTick;
+
         public float UpdateRate = 0.5f;
 
         private TileSystem tileManager;
@@ -73,6 +75,8 @@ namespace SS3D.Engine.AtmosphericsRework
                 StartCoroutine(DelayCompleteJob());
 
                 lastStep = Time.fixedTime;
+
+                AtmosTick?.Invoke();
             }
         }
 
