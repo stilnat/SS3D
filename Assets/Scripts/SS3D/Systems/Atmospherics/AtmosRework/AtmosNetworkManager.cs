@@ -23,15 +23,26 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public class AtmosNetworkManager : NetworkSystem
     {
-        
-        private readonly Dictionary<NetworkConnection, PreviousValuesChunkCentered> _previousValuesChunkCenteredPlayers = new();
-        
+        private struct PreviousValuesChunkCentered
+        {
+            public byte[] PreviousConcentrationValues;
+            public Vector2Int ChunkKey;
+
+            public PreviousValuesChunkCentered(byte[] previousConcentrationValues, Vector2Int chunkKey)
+            {
+                PreviousConcentrationValues = previousConcentrationValues;
+                ChunkKey = chunkKey;
+            }
+        }
+
         // the granularity of values representing a concentration, the higher the more the change between two different concentrations
         // can be subtle. But keep in mind setting a higher value for this will mean having to send more data to clients.
         private const byte ConcentrationRange = 16;
         
         // The amount of moles for which the concentration will look at its maximum on client
         private const int MaxMoles = 1000;
+        
+        private readonly Dictionary<NetworkConnection, PreviousValuesChunkCentered> _previousValuesChunkCenteredPlayers = new();
         
         private List<Entity> _playersEntities = new();
         private AtmosManager _atmosManager;
@@ -209,6 +220,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 maxError = math.max(math.abs(originalData[i] - reconstitutedData[i]), maxError);
                 averageError += (math.abs(originalData[i] - reconstitutedData[i]) - averageError) / (i + 1);
             }
+            
             Debug.Log($"method {name}, Original byte array size: {originalData.Length}, compressed data {compressedData.Length}");
             Debug.Log($"method {name} max error between original and reconstituted data {maxError}. Average error {averageError}");
         }
@@ -229,19 +241,6 @@ namespace SS3D.Engine.AtmosphericsRework
         private void RpcSendPreviousValues(NetworkConnection connection, byte[] previousValues)
         {
             _previousConcentrationValues = previousValues;
-        }
-
-        
-        private struct PreviousValuesChunkCentered
-        {
-            public byte[] PreviousConcentrationValues;
-            public Vector2Int ChunkKey;
-
-            public PreviousValuesChunkCentered(byte[] previousConcentrationValues, Vector2Int chunkKey)
-            {
-                PreviousConcentrationValues = previousConcentrationValues;
-                ChunkKey = chunkKey;
-            }
         }
     }
 }

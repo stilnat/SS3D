@@ -47,7 +47,6 @@ namespace SS3D.Engine.AtmosphericsRework
         /// TODO : update when chunk added
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
-
         
         public NativeList<int> ActiveEnvironmentIndexes;
 
@@ -112,7 +111,6 @@ namespace SS3D.Engine.AtmosphericsRework
                        _pipeAtmosObjectsToChange.Add(tile);
                        break;
             }
-           
         }
 
         public void RemoveGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
@@ -161,7 +159,6 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public void Refresh()
         {
-            
             foreach (AtmosContainer atmosObject in _atmosObjectsToChange)
             {
                 int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
@@ -171,6 +168,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     NativeAtmosTiles[indexInNativeArray] = atmosObject.AtmosObject;
                 }
             }
+            
             foreach (AtmosContainer atmosObject in _pipeAtmosObjectsToChange)
             {
                 int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
@@ -180,6 +178,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     NativeAtmosPipesLeft[indexInNativeArray] = atmosObject.AtmosObject;
                 }
             }
+            
             _atmosObjectsToChange.Clear();
             _pipeAtmosObjectsToChange.Clear();
             ActiveEnvironmentIndexes.Clear();
@@ -230,9 +229,11 @@ namespace SS3D.Engine.AtmosphericsRework
         private int IndexOfTileAtmosObject(AtmosContainer atmosObject)
         {
             if (!ChunkKeyHashMap.TryGetValue(atmosObject.AtmosObject.ChunkKey, out int indexChunk))
+            {
                 return -1;
+            }
 
-            return indexChunk * 16 * 16 + atmosObject.X + 16 * atmosObject.Y;
+            return (indexChunk * 16 * 16) + atmosObject.X + (16 * atmosObject.Y);
         }
     }
 
