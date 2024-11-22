@@ -13,7 +13,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <summary>
         /// Number of TileAtmosObjects that should go in a chunk. 16 x 16
         /// </summary>
-        public const int CHUNK_SIZE = 16;
+        public static readonly int CHUNK_SIZE = 16;
 
         /// <summary>
         /// The size of each tile.
