@@ -138,6 +138,33 @@ namespace SS3D.Engine.AtmosphericsRework
 
             return atmosChunks[key];
         }
+
+        public AtmosChunk[] GetChunkAndEightNeighbours(Vector3 worldPosition)
+        {
+            AtmosChunk[] chunks = new AtmosChunk[9];
+            chunks[0] = GetChunk(worldPosition);                                                                 // center
+            chunks[1] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE));                                // north chunk
+            chunks[2] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE) + (Vector3.right * CHUNK_SIZE)); // north east chunk
+            chunks[3] = GetChunk(worldPosition + (Vector3.right * CHUNK_SIZE));                                  // east chunk
+            chunks[4] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE) + (Vector3.right * CHUNK_SIZE)); // south east chunk
+            chunks[5] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE));                                // south chunk
+            chunks[6] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE) - (Vector3.right * CHUNK_SIZE)); // south west chunk
+            chunks[7] = GetChunk(worldPosition - (Vector3.right * CHUNK_SIZE));                                  // west chunk
+            chunks[8] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE) - (Vector3.right * CHUNK_SIZE));  // north west chunk
+
+            return chunks;
+        }
+
+        public AtmosChunk GetChunk(Vector3 worldPosition)
+        {
+            Vector2Int key = GetKey(worldPosition);
+            if (!atmosChunks.TryGetValue(key, out AtmosChunk chunk))
+            {
+                return null;
+            }
+
+            return chunk;
+        }
         
         public AtmosChunk[] GetAtmosChunks()
         {

@@ -87,7 +87,6 @@ namespace SS3D.Engine.AtmosphericsRework
                 ChunkKeyHashMap.Add(chunkKeyBuffer[i], i);
             }
 
-           
             _atmosObjectsToChange = new();
             _pipeAtmosObjectsToChange = new();
             LoadNativeArrays();
