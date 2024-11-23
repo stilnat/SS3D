@@ -21,14 +21,14 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public TileLayer Layer { get; }
 
-        public AtmosContainer(AtmosMap map, AtmosChunk chunk, int x, int y, TileLayer layer)
+        public AtmosContainer(AtmosMap map, AtmosChunk chunk, int x, int y, TileLayer layer, float volume)
         {
             Map = map;
             Chunk = chunk;
             X = x;
             Y = y;
             Layer = layer;
-            AtmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y));
+            AtmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y), volume);
         }
 
         public void Initialize()

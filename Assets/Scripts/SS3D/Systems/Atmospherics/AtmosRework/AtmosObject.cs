@@ -41,11 +41,11 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public float Mass => math.csum(CoreGasses * GasConstants.coreGasDensity);
 
-        public AtmosObject(int2 chunkKey)
+        public AtmosObject(int2 chunkKey, float volume)
         {
             ChunkKey = chunkKey;
             State = AtmosState.Inactive;
-            Volume = 2.5f;      // One tile size
+            Volume = volume;      // One tile size
             Temperature = 293f; // Room temperature in Kelvin
             CoreGasses = 0f;
             TemperatureSetting = false;

@@ -79,9 +79,8 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 for (int y = 0; y < GetHeight(); y++)
                 {
-                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.Turf);
-                    _atmosPipeLeftList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.PipeLeft);
-
+                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.Turf, 2.5f);
+                    _atmosPipeLeftList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.PipeLeft, 0.25f);
                 }
             }
         }

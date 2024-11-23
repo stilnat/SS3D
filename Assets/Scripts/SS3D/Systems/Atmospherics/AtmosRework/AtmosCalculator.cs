@@ -86,16 +86,26 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             float neighbourPressure = neighbour.Pressure;
 
-            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.pressureEpsilon)
+            // when adjacent to an almost empty neighbour and atmos being itself almost empty, don't transfer.
+            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.pressureEpsilon && neighbourPressure <= GasConstants.pressureEpsilon)
             {
                 return new(0);
             }
+            
+            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.fluxEpsilon)
+            {
+                return new(0);
+            }
+            
+            // TODO : currently does transfer even with extremely small pressure differences.
+            // We can't just say to stop transfer under a given pressure difference with neighbours because it creates "pressure plugs".
+            // Instead, under a given pressure difference it should just fully equalize pressure.
 
             // Use partial pressures to determine how much of each gas to move.
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles by applying the ideal gas law and taking wind into account.
-            return partialPressureDifference * 1000f * atmos.GetVolume() /
+            return (1 + (0.1f * math.max(0f, atmosVelocity - oppositeVelocity))) * partialPressureDifference * 1000f * atmos.GetVolume() /
                 (atmos.Temperature * GasConstants.gasConstant);
         }
 
