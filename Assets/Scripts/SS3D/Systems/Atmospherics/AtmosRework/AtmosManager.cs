@@ -88,6 +88,11 @@ namespace SS3D.Engine.AtmosphericsRework
                 AtmosTick?.Invoke();
             }
         }
+        
+        public void RemoveAtmosDevice(IAtmosLoop atmosDevice)
+        {
+            _atmosDevices.Remove(atmosDevice);
+        }
 
         public void RegisterAtmosDevice(IAtmosLoop atmosDevice)
         {

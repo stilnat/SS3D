@@ -55,6 +55,11 @@ namespace SS3D.Engine.AtmosphericsRework
             Subsystems.Get<AtmosManager>().RegisterAtmosDevice(this); 
         }
 
+        private void OnDestroy()
+        {
+            Subsystems.Get<AtmosManager>().RemoveAtmosDevice(this); 
+        }
+
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             return new IInteraction[]
@@ -105,6 +110,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 {
                     float4 filteredGasses = atmos.CoreGasses * (int4)_filterCoreGasses;
                     toSiphon = (filteredGasses / math.csum(filteredGasses)) * math.min(math.csum(filteredGasses), _molesRemovedPerCyle);
+                    toSiphon = math.any(math.isnan(toSiphon)) ? 0 : toSiphon;
                 }
                 
                 Subsystems.Get<AtmosManager>().AddGasses(transform.position, toSiphon, _pipeLayer);

@@ -55,7 +55,7 @@ namespace SS3D.Engine.AtmosphericsRework
             if (!plenumLayerTile.IsFullyEmpty() && (turfLayerTile.IsFullyEmpty() || turfLayerTile.TryGetPlacedObject(out PlacedTileObject placedObject) && placedObject.GenericType != TileObjectGenericType.Wall))
             {
                 // Set to default air mixture
-                AtmosObject.MakeEmpty();
+                AtmosObject.MakeAir();
             }
 
             // if no plenum, then put vacuum
