@@ -39,6 +39,8 @@ namespace SS3D.Engine.AtmosphericsRework
         // True when jobs are scheduled, false after making sure they completed.
         private bool _jobsScheduled;
 
+        private List<IAtmosLoop> _atmosDevices = new();
+
 
         private void Start()
         {
@@ -52,7 +54,9 @@ namespace SS3D.Engine.AtmosphericsRework
         private void Update()
         {
             if (!initCompleted)
+            {
                 return;
+            }
 
             if (Time.fixedTime >= lastStep + UpdateRate)
             {
@@ -63,13 +67,18 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
 
                 float dt = Time.fixedTime - lastStep;
-                
-                // Loop through every map
+
+                foreach (IAtmosLoop atmosDevice in _atmosDevices)
+                {
+                    atmosDevice.Step();
+                }
+
                 foreach (AtmosJobPersistentData atmosJob in atmosJobs)
                 {
                     atmosJob.Refresh();
                     ScheduleTileObjectJobs(atmosJob, dt);
                 }
+                
                 _jobsScheduled = true;
 
                 StartCoroutine(DelayCompleteJob());
@@ -80,6 +89,11 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
+        public void RegisterAtmosDevice(IAtmosLoop atmosDevice)
+        {
+            _atmosDevices.Add(atmosDevice);
+        }
+
         public AtmosContainer GetAtmosContainer(Vector3 worldPosition, TileLayer layer)
         {
             foreach (AtmosMap map in atmosMaps)
@@ -87,7 +101,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 AtmosContainer atmos = map.GetTileAtmosObject(worldPosition, layer);
 
                 if (atmos != null)
+                {
                     return atmos;
+                }
             }
 
             return null;
@@ -96,6 +112,16 @@ namespace SS3D.Engine.AtmosphericsRework
         public List<AtmosJobPersistentData> GetAtmosJobs()
         {
             return atmosJobs;
+        }
+        
+        public void AddGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
+        {
+            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+
+            if (tile != null)
+            {
+                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddGasses(tile, amount);
+            }
         }
 
 
@@ -126,6 +152,16 @@ namespace SS3D.Engine.AtmosphericsRework
             if (tile != null)
             {
                 atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveGas(tile, gas, amount);
+            }
+        }
+        
+        public void RemoveGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
+        {
+            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+
+            if (tile != null)
+            {
+                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveGasses(tile, amount);
             }
         }
 
@@ -208,10 +244,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
             foreach (AtmosMap map in atmosMaps)
             {
-
                 List<AtmosContainer> tiles = new();
                 List<AtmosContainer> pipesLeft = new();
-
 
                 // Add tiles in chunk
                 foreach (AtmosChunk chunk in map.GetAtmosChunks())
@@ -233,11 +267,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
             initCompleted = true;
         }
-
-
-
-
-
 
         private void ScheduleTileObjectJobs(AtmosJobPersistentData atmosJob, float deltaTime)
         {

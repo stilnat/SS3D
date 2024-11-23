@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SS3D.Engine.Atmospherics
+/*namespace SS3D.Engine.Atmospherics
 {
-    /*
+    
     public class ScrubberObject : MonoBehaviour, IAtmosLoop, IInteractionTarget
     {
         
@@ -246,5 +246,5 @@ namespace SS3D.Engine.Atmospherics
         }
 
     }
-*/
-}
+
+}*/

@@ -7,11 +7,6 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public interface IAtmosLoop : IGameObjectProvider
     {
-        void Initialize();
-        // void Step();
-        void SetAtmosObject(AtmosObject atmos);
-        AtmosObject GetAtmosObject();
-
-        List<IAtmosLoop> GetNeighbours();
+        void Step();
     }
 }

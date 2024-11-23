@@ -90,6 +90,28 @@ namespace SS3D.Engine.AtmosphericsRework
             _pipeAtmosObjectsToChange = new();
             LoadNativeArrays();
         }
+        
+        public void AddGasses(AtmosContainer tile, float4 amount)
+        {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+
+            AtmosObject atmosObject = tile.AtmosObject;
+            atmosObject.AddCoreGasses(amount, true);
+            tile.AtmosObject = atmosObject;
+
+            switch (tile.Layer)
+            {
+                case TileLayer.Turf:
+                    _atmosObjectsToChange.Add(tile);
+                    break;
+                case TileLayer.PipeLeft:
+                    _pipeAtmosObjectsToChange.Add(tile);
+                    break;
+            }
+        }
 
         public void AddGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
         {
@@ -234,6 +256,19 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             return (indexChunk * 16 * 16) + atmosObject.X + (16 * atmosObject.Y);
+        }
+
+        public void RemoveGasses(AtmosContainer tile, float4 amount)
+        {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+
+            AtmosObject atmosObject = tile.AtmosObject;
+            atmosObject.RemoveCoreGasses(amount, true);
+            tile.AtmosObject = atmosObject;
+            _atmosObjectsToChange.Add(tile);
         }
     }
 

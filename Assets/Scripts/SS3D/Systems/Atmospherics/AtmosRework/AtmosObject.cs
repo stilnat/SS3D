@@ -27,6 +27,10 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public bool IsEmpty => math.all(CoreGasses == 0f);
 
+        public float4 CoreGassesProportions => TotalMoles != 0 ? CoreGasses / math.csum(CoreGasses) : 0;
+        
+        public float TotalMoles => math.csum(CoreGasses);
+
         /// <summary>
         /// The compressibility factor: How much does a gas deviate from the ideal gas law.
         /// </summary>
@@ -183,7 +187,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public float GetSpecificHeat()
         {
-            return (math.csum(CoreGasses * GasConstants.coreSpecificHeat) / GetTotalMoles());
+            return (math.csum(CoreGasses * GasConstants.coreSpecificHeat) / TotalMoles);
         }
 
 
@@ -218,7 +222,7 @@ namespace SS3D.Engine.AtmosphericsRework
         /// <returns></returns>
         private float GetSimplifiedPressure()
         {
-            float pressure = GetTotalMoles() * GasConstants.gasConstant * Temperature / Volume / 1000f;
+            float pressure = TotalMoles * GasConstants.gasConstant * Temperature / Volume / 1000f;
             if (math.isnan(pressure))
                 return 0f;
             else
@@ -274,11 +278,6 @@ namespace SS3D.Engine.AtmosphericsRework
                 return 0f;
             else
                 return pressure;
-        }
-
-        private float GetTotalMoles()
-        {
-            return math.csum(CoreGasses);
         }
 
         public void MakeEmpty()
