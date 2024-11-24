@@ -145,7 +145,16 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosObject atmosObject = tile.AtmosObject;
             atmosObject.RemoveCoreGas(gas, amount, true);
             tile.AtmosObject = atmosObject;
-            _atmosObjectsToChange.Add(tile);
+            
+            switch (tile.Layer)
+            {
+                case TileLayer.Turf:
+                    _atmosObjectsToChange.Add(tile);
+                    break;
+                case TileLayer.PipeLeft:
+                    _pipeAtmosObjectsToChange.Add(tile);
+                    break;
+            }
         }
 
         public void RandomizeAllGasses(float maxAmount)
@@ -268,7 +277,16 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosObject atmosObject = tile.AtmosObject;
             atmosObject.RemoveCoreGasses(amount, true);
             tile.AtmosObject = atmosObject;
-            _atmosObjectsToChange.Add(tile);
+            
+            switch (tile.Layer)
+            {
+                case TileLayer.Turf:
+                    _atmosObjectsToChange.Add(tile);
+                    break;
+                case TileLayer.PipeLeft:
+                    _pipeAtmosObjectsToChange.Add(tile);
+                    break;
+            }
         }
     }
 

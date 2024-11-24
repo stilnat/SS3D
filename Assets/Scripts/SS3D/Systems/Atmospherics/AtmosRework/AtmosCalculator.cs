@@ -106,7 +106,7 @@ namespace SS3D.Engine.AtmosphericsRework
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles by applying the ideal gas law and taking wind into account.
-            return (1 + (1f * math.max(0f, atmosVelocity - oppositeVelocity))) * partialPressureDifference * 1000f * atmos.GetVolume() /
+            return (1 + (0.1f * math.max(0f, atmosVelocity - oppositeVelocity))) * partialPressureDifference * 1000f * atmos.GetVolume() /
                 (atmos.Temperature * GasConstants.gasConstant);
         }
 

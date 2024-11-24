@@ -66,8 +66,11 @@ namespace SS3D.Engine.AtmosphericsRework
             
             float4 toTransfer = AtmosCalculator.MolesToTransfer(atmosToTransferTo, ref atmosToTransferFrom, true, 0.1f, 0f, 0f);
 
-            Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, layerToTransferTo);
-            Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, layerToTransferFrom);
+            if (math.any(toTransfer > 0f))
+            {
+                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, layerToTransferTo);
+                Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, layerToTransferFrom);
+            }
         }
         
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
