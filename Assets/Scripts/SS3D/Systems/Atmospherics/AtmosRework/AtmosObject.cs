@@ -11,10 +11,10 @@ namespace SS3D.Engine.AtmosphericsRework
         public AtmosState State;
         public int2 ChunkKey;
 
-        public float VelocityNorth;
-        public float VelocitySouth;
-        public float VelocityEast;
-        public float VelocityWest;
+        public float4 VelocityNorth;
+        public float4 VelocitySouth;
+        public float4 VelocityEast;
+        public float4 VelocityWest;
 
         public float Volume { get; private set; }
         public float Temperature { get; private set; }

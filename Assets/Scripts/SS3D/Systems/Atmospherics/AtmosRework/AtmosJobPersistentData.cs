@@ -186,7 +186,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
             {
-                foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
+                foreach (AtmosContainer tile in atmosChunk.GetAllAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
                     
@@ -198,8 +198,16 @@ namespace SS3D.Engine.AtmosphericsRework
                         ChunkKey = atmosObject.ChunkKey,
                         Moles = atmosObject.CoreGasses, 
                     };
-                    
-                    _atmosObjectsToChange.Add(tileChanges);
+
+                    switch (tile.Layer)
+                    {
+                        case TileLayer.Turf:
+                            _atmosObjectsToChange.Add(tileChanges);
+                            break;
+                        case TileLayer.PipeLeft:
+                            _pipeAtmosObjectsToChange.Add(tileChanges);
+                            break;
+                    }
                 }
             }
         }

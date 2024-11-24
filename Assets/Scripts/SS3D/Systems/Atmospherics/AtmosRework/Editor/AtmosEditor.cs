@@ -351,10 +351,10 @@ public class AtmosEditor : EditorWindow
 
     private void DrawWindGizmo(AtmosObject atmosObject, Vector3 position)
     {
-        float velocityNorth = atmosObject.VelocityNorth / 30;
-        float velocitySouth = atmosObject.VelocitySouth / 30;
-        float velocityEast = atmosObject.VelocityEast / 30;
-        float velocityWest = atmosObject.VelocityWest / 30;
+        float velocityNorth = math.csum(atmosObject.VelocityNorth / 30);
+        float velocitySouth = math.csum(atmosObject.VelocitySouth / 30);
+        float velocityEast = math.csum(atmosObject.VelocityEast / 30);
+        float velocityWest = math.csum(atmosObject.VelocityWest / 30);
         Handles.color = Color.white;
 
         if (velocityNorth > 0f)

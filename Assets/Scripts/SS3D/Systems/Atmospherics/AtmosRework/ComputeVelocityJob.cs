@@ -8,29 +8,35 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct ComputeVelocityJob : IJobParallelFor
     {
         [ReadOnly]
         private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
+        [NativeDisableParallelForRestriction]
         private NativeArray<AtmosObject> _tileObjectBuffer;
         
+        [ReadOnly]
+        private NativeList<int> _activeIndexes;
+        
         public ComputeVelocityJob(NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<MoleTransferToNeighbours> moleTransfers)
+            NativeArray<MoleTransferToNeighbours> moleTransfers, NativeList<int> activeIndexes)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _moleTransfers = moleTransfers;
+            _activeIndexes = activeIndexes;
         }
 
         public void Execute(int index)
         {
-            AtmosObject atmosObject = _tileObjectBuffer[index];
-            atmosObject.VelocityNorth = math.csum(_moleTransfers[index].TransferMolesNorth * GasConstants.coreGasDensity);
-            atmosObject.VelocitySouth = math.csum(_moleTransfers[index].TransferMolesSouth * GasConstants.coreGasDensity);
-            atmosObject.VelocityEast = math.csum(_moleTransfers[index].TransferMolesEast * GasConstants.coreGasDensity);
-            atmosObject.VelocityWest = math.csum(_moleTransfers[index].TransferMolesWest * GasConstants.coreGasDensity);
-            _tileObjectBuffer[index] = atmosObject;
+            int activeIndex = _activeIndexes[index];
+            AtmosObject atmosObject = _tileObjectBuffer[activeIndex];
+            atmosObject.VelocityNorth = _moleTransfers[activeIndex].TransferMolesNorth;
+            atmosObject.VelocitySouth = _moleTransfers[activeIndex].TransferMolesSouth;
+            atmosObject.VelocityEast = _moleTransfers[activeIndex].TransferMolesEast;
+            atmosObject.VelocityWest = _moleTransfers[activeIndex].TransferMolesWest;
+            _tileObjectBuffer[activeIndex] = atmosObject;
         }
     }
 }

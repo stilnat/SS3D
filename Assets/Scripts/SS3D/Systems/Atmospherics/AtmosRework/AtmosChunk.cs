@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
@@ -106,6 +107,11 @@ namespace SS3D.Engine.AtmosphericsRework
             Vector2Int vector = new Vector2Int();
             vector = GetXY(worldPosition);
             return GetTileAtmosObject(vector.x, vector.y, layer);
+        }
+        
+        public List<AtmosContainer> GetAllAtmosObjects()
+        {
+            return new(_atmosGridList.Concat(_atmosPipeLeftList));
         }
 
         public List<AtmosContainer> GetAllTileAtmosObjects()

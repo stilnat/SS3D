@@ -64,7 +64,7 @@ namespace SS3D.Engine.AtmosphericsRework
             AtmosObject atmosToTransferTo = _operatingMode == OperatingMode.Pump ? atmosEnv : atmosPipe;
             AtmosObject atmosToTransferFrom = _operatingMode == OperatingMode.Suck ? atmosEnv : atmosPipe;
             
-            float4 toTransfer = AtmosCalculator.MolesToTransfer(atmosToTransferTo, ref atmosToTransferFrom, true, 0.1f, 0f, 0f);
+            float4 toTransfer = AtmosCalculator.MolesToTransfer(atmosToTransferTo, atmosToTransferFrom, true, 0.1f, 0f, 0f);
 
             if (math.any(toTransfer > 0f))
             {
