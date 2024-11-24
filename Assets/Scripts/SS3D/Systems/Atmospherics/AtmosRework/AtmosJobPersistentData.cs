@@ -12,6 +12,15 @@ namespace SS3D.Engine.AtmosphericsRework
     /// </summary>
     public struct AtmosJobPersistentData
     {
+        private struct TileChanges
+        {
+            public bool Add;
+            public int X;
+            public int Y;
+            public int2 ChunkKey;
+            public float4 Moles;
+        }
+        
         public readonly AtmosMap Map;
 
         public readonly List<AtmosContainer> AtmosTiles;
@@ -57,10 +66,10 @@ namespace SS3D.Engine.AtmosphericsRework
         public NativeList<int> SemiActiveLeftPipeIndexes;
 
         // Keeps track of changed atmos objects 
-        private readonly List<AtmosContainer> _atmosObjectsToChange;
+        private readonly List<TileChanges> _atmosObjectsToChange;
 
         // Keeps track of changed atmos objects 
-        private readonly List<AtmosContainer> _pipeAtmosObjectsToChange;
+        private readonly List<TileChanges> _pipeAtmosObjectsToChange;
 
         public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles, List<AtmosContainer> atmosPipesleft)
         {
@@ -91,68 +100,61 @@ namespace SS3D.Engine.AtmosphericsRework
             LoadNativeArrays();
         }
         
+        public void RemoveGasses(AtmosContainer tile, float4 amount)
+        {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+
+            AtmosObject atmosObject = tile.AtmosObject;
+
+            TileChanges tileChanges = new()
+            {
+                Add = false,
+                X = tile.X,
+                Y = tile.Y,
+                ChunkKey = atmosObject.ChunkKey,
+                Moles = amount, 
+            };
+
+
+            switch (tile.Layer)
+            {
+                case TileLayer.Turf:
+                    _atmosObjectsToChange.Add(tileChanges);
+                    break;
+                case TileLayer.PipeLeft:
+                    _pipeAtmosObjectsToChange.Add(tileChanges);
+                    break;
+            }
+        }
+        
         public void AddGasses(AtmosContainer tile, float4 amount)
         {
             if (tile.AtmosObject.State == AtmosState.Blocked)
             {
                 return;
             }
-
+            
             AtmosObject atmosObject = tile.AtmosObject;
-            atmosObject.AddCoreGasses(amount, true);
-            tile.AtmosObject = atmosObject;
 
-            switch (tile.Layer)
+            TileChanges tileChanges = new()
             {
-                case TileLayer.Turf:
-                    _atmosObjectsToChange.Add(tile);
-                    break;
-                case TileLayer.PipeLeft:
-                    _pipeAtmosObjectsToChange.Add(tile);
-                    break;
-            }
-        }
-
-        public void AddGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
-        {
-            if (tile.AtmosObject.State == AtmosState.Blocked)
-            {
-                return;
-            }
-
-            AtmosObject atmosObject = tile.AtmosObject;
-            atmosObject.AddCoreGas(gas, amount, true);
-            tile.AtmosObject = atmosObject;
-
-            switch (tile.Layer)
-            {
-                   case TileLayer.Turf:
-                       _atmosObjectsToChange.Add(tile);
-                       break;
-                   case TileLayer.PipeLeft:
-                       _pipeAtmosObjectsToChange.Add(tile);
-                       break;
-            }
-        }
-
-        public void RemoveGas(AtmosContainer tile, CoreAtmosGasses gas, float amount)
-        {
-            if (tile.AtmosObject.State == AtmosState.Blocked)
-            {
-                return;
-            }
-
-            AtmosObject atmosObject = tile.AtmosObject;
-            atmosObject.RemoveCoreGas(gas, amount, true);
-            tile.AtmosObject = atmosObject;
+                Add = true,
+                X = tile.X,
+                Y = tile.Y,
+                ChunkKey = atmosObject.ChunkKey,
+                Moles = amount, 
+            };
             
             switch (tile.Layer)
             {
                 case TileLayer.Turf:
-                    _atmosObjectsToChange.Add(tile);
+                    _atmosObjectsToChange.Add(tileChanges);
                     break;
                 case TileLayer.PipeLeft:
-                    _pipeAtmosObjectsToChange.Add(tile);
+                    _pipeAtmosObjectsToChange.Add(tileChanges);
                     break;
             }
         }
@@ -164,9 +166,18 @@ namespace SS3D.Engine.AtmosphericsRework
                 foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
-                    atmosObject.AddCoreGasses(UnityEngine.Random.Range(0, maxAmount) * maxAmount, true);
-                    tile.AtmosObject = atmosObject;
-                    _atmosObjectsToChange.Add(tile);
+                    float4 moles = UnityEngine.Random.Range(0, maxAmount);
+
+                    TileChanges tileChanges = new()
+                    {
+                        Add = true,
+                        X = tile.X,
+                        Y = tile.Y,
+                        ChunkKey = atmosObject.ChunkKey,
+                        Moles = moles, 
+                    };
+                    
+                    _atmosObjectsToChange.Add(tileChanges);
                 }
             }
         }
@@ -178,9 +189,17 @@ namespace SS3D.Engine.AtmosphericsRework
                 foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
-                    atmosObject.ClearCoreGasses();
-                    tile.AtmosObject = atmosObject;
-                    _atmosObjectsToChange.Add(tile);
+                    
+                    TileChanges tileChanges = new()
+                    {
+                        Add = false,
+                        X = tile.X,
+                        Y = tile.Y,
+                        ChunkKey = atmosObject.ChunkKey,
+                        Moles = atmosObject.CoreGasses, 
+                    };
+                    
+                    _atmosObjectsToChange.Add(tileChanges);
                 }
             }
         }
@@ -190,24 +209,50 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public void Refresh()
         {
-            foreach (AtmosContainer atmosObject in _atmosObjectsToChange)
+            foreach (TileChanges change in _atmosObjectsToChange)
             {
-                int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
+                int indexInNativeArray = IndexOfTileAtmosObject(change.ChunkKey, change.X, change.Y);
 
-                if (indexInNativeArray != -1)
+                if (indexInNativeArray == -1)
                 {
-                    NativeAtmosTiles[indexInNativeArray] = atmosObject.AtmosObject;
+                    continue;
                 }
+
+                AtmosObject atmosObject = NativeAtmosTiles[indexInNativeArray];
+
+                if (change.Add)
+                {
+                    atmosObject.AddCoreGasses(change.Moles, true); 
+                }
+                else
+                {
+                    atmosObject.RemoveCoreGasses(change.Moles, true); 
+                }
+                    
+                NativeAtmosTiles[indexInNativeArray] = atmosObject;
             }
             
-            foreach (AtmosContainer atmosObject in _pipeAtmosObjectsToChange)
+            foreach (TileChanges change in _pipeAtmosObjectsToChange)
             {
-                int indexInNativeArray = IndexOfTileAtmosObject(atmosObject);
+                int indexInNativeArray = IndexOfTileAtmosObject(change.ChunkKey, change.X, change.Y);
 
-                if (indexInNativeArray != -1)
+                if (indexInNativeArray == -1)
                 {
-                    NativeAtmosPipesLeft[indexInNativeArray] = atmosObject.AtmosObject;
+                    continue;
                 }
+
+                AtmosObject atmosObject = NativeAtmosPipesLeft[indexInNativeArray];
+
+                if (change.Add)
+                {
+                    atmosObject.AddCoreGasses(change.Moles, true); 
+                }
+                else
+                {
+                    atmosObject.RemoveCoreGasses(change.Moles, true); 
+                }
+                    
+                NativeAtmosPipesLeft[indexInNativeArray] = atmosObject;
             }
             
             _atmosObjectsToChange.Clear();
@@ -257,36 +302,14 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        private int IndexOfTileAtmosObject(AtmosContainer atmosObject)
+        private int IndexOfTileAtmosObject(int2 chunkKey, int x, int y)
         {
-            if (!ChunkKeyHashMap.TryGetValue(atmosObject.AtmosObject.ChunkKey, out int indexChunk))
+            if (!ChunkKeyHashMap.TryGetValue(chunkKey, out int indexChunk))
             {
                 return -1;
             }
 
-            return (indexChunk * 16 * 16) + atmosObject.X + (16 * atmosObject.Y);
-        }
-
-        public void RemoveGasses(AtmosContainer tile, float4 amount)
-        {
-            if (tile.AtmosObject.State == AtmosState.Blocked)
-            {
-                return;
-            }
-
-            AtmosObject atmosObject = tile.AtmosObject;
-            atmosObject.RemoveCoreGasses(amount, true);
-            tile.AtmosObject = atmosObject;
-            
-            switch (tile.Layer)
-            {
-                case TileLayer.Turf:
-                    _atmosObjectsToChange.Add(tile);
-                    break;
-                case TileLayer.PipeLeft:
-                    _pipeAtmosObjectsToChange.Add(tile);
-                    break;
-            }
+            return (indexChunk * 16 * 16) + x + (16 * y);
         }
     }
 

@@ -178,19 +178,26 @@ public class AtmosEditor : EditorWindow
             _lastPlacementTime = EditorApplication.timeSinceStartup;
             _lastPlacement = snappedPosition;
 
+            float4 amount = 0;
+            amount.w = _selectedAmount * (_gassSelection == CoreAtmosGasses.Oxygen ? 1 : 0);
+            amount.x = _selectedAmount * (_gassSelection == CoreAtmosGasses.Nitrogen ? 1 : 0);
+            amount.y = _selectedAmount * (_gassSelection == CoreAtmosGasses.CarbonDioxide ? 1 : 0);
+            amount.z = _selectedAmount * (_gassSelection == CoreAtmosGasses.Plasma ? 1 : 0);
+                
+
             switch (_selectedOption)
             {
                 case GasEditorOption.AddGasEnvironment:
-                    _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.Turf);
+                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.Turf);
                     break;
                 case GasEditorOption.RemoveGasEnvironment:
-                    _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.Turf);
+                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.Turf);
                     break;
                 case GasEditorOption.AddGasPipeLeft:
-                    _atmosManager.AddGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
+                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.RemoveGasPipeLeft:
-                    _atmosManager.RemoveGas(snappedPosition, _gassSelection, _selectedAmount, TileLayer.PipeLeft);
+                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.AddHeat:
                     _atmosManager.AddHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
@@ -199,8 +206,6 @@ public class AtmosEditor : EditorWindow
                     _atmosManager.RemoveHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
                     break;
             }
-
-            
         }
 
         else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)

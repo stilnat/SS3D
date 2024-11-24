@@ -129,17 +129,6 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-
-        public void AddGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount, TileLayer layer)
-        {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
-
-            if (tile != null)
-            {
-                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddGas(tile, gas, amount);
-            }
-        }
-
         public void RandomizeAllGasses(float maxAmount)
         {
             atmosJobs.ForEach(job => job.RandomizeAllGasses(maxAmount));
@@ -148,16 +137,6 @@ namespace SS3D.Engine.AtmosphericsRework
         public void ClearAllGasses()
         {
             atmosJobs.ForEach(job => job.ClearAllGasses());
-        }
-
-        public void RemoveGas(Vector3 worldPosition, CoreAtmosGasses gas, float amount, TileLayer layer)
-        {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
-
-            if (tile != null)
-            {
-                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveGas(tile, gas, amount);
-            }
         }
         
         public void RemoveGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
