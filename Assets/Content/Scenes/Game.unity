@@ -1633,7 +1633,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021075485018, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -230.00002
+      value: -230.00003
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021449001342, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2444,6 +2444,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UpdateRate: 0.5
   _usesParallelComputation: 0
+  _viscosity: 0.0001
 --- !u!114 &1798120481
 MonoBehaviour:
   m_ObjectHideFlags: 0

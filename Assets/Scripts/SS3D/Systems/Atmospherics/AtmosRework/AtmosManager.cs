@@ -20,12 +20,13 @@ namespace SS3D.Engine.AtmosphericsRework
     {
         public Action AtmosTick;
 
-        public float UpdateRate = 0.5f;
+        public float UpdateRate = 0.1f;
 
-        private TileSystem tileManager;
+        private TileSystem _tileManager;
 
-        private float lastStep;
-        private bool initCompleted = false;
+        private float _lastStep;
+
+        private bool _initCompleted = false;
 
         // This list track job handles to complete jobs after a while.
         private NativeList<JobHandle> _jobHandles;
@@ -38,33 +39,36 @@ namespace SS3D.Engine.AtmosphericsRework
         private bool _jobsScheduled;
 
         private List<IAtmosLoop> _atmosDevices = new();
+
+        [SerializeField]
+        private float _viscosity = 1f;
         
         public AtmosMap Map { get; private set; }
 
 
         private void Start()
         {
-            tileManager = Subsystems.Get<TileSystem>();
+            _tileManager = Subsystems.Get<TileSystem>();
 
             // Initialization is invoked by the tile manager
-            tileManager.TileSystemLoaded += Initialize;
+            _tileManager.TileSystemLoaded += Initialize;
             _jobHandles = new(1, Allocator.Persistent);
         }
 
         private void Update()
         {
-            if (!initCompleted)
+            if (!_initCompleted)
             {
                 return;
             }
 
-            if (Time.fixedTime >= lastStep + UpdateRate)
+            if (Time.fixedTime >= _lastStep + UpdateRate)
             {
-                float dt = Time.fixedTime - lastStep;
+                float dt = Time.fixedTime - _lastStep;
 
-                lastStep = Time.fixedTime;
+                _lastStep = Time.fixedTime;
                 
-                Map.Simulate(dt);
+                Map.Simulate(dt, _viscosity);
 
                 //AtmosTick?.Invoke();
             }
@@ -82,16 +86,16 @@ namespace SS3D.Engine.AtmosphericsRework
         
         private void Initialize()
         {
-            if (tileManager == null || tileManager.CurrentMap == null)
+            if (_tileManager == null || _tileManager.CurrentMap == null)
             {
                 Debug.LogError("AtmosManager couldn't find the tilemanager or map.");
 
                 return;
             }
 
-            TileMap map = tileManager.CurrentMap;
-            Map = new(map, map.Name, 25);
-            initCompleted = true;
+            TileMap map = _tileManager.CurrentMap;
+            Map = new(map, map.Name, 301);
+            _initCompleted = true;
         }
     }
 }

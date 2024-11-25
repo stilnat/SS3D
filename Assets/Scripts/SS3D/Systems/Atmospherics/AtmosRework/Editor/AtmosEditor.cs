@@ -139,6 +139,12 @@ public class AtmosEditor : EditorWindow
         }
 
         EditorGUILayout.Space();
+
+        if (GUILayout.Button("Clear all Gasses"))
+        {
+            _atmosManager.Map.ClearGas();
+        }
+
     }
 
     private void OnSceneGUI(SceneView sceneView)
@@ -216,7 +222,7 @@ public class AtmosEditor : EditorWindow
 
     private void DisplayEnvironmentObjects()
     {
-        float scale = 0.01f;
+        float scale = 0.1f;
         for (int i = 0; i < _atmosManager.Map.WidthAndBorder; i++)
         {
             for (int j = 0; j < _atmosManager.Map.WidthAndBorder; j++)

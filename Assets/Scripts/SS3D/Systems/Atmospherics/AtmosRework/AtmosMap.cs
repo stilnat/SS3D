@@ -37,6 +37,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private int Coords(int i, int j) => i + (WidthAndBorder * j);
 
+        private float _massAdded;
+
         public AtmosMap(TileMap tileMap, string name, int width)
         {
             atmosManager = Subsystems.Get<AtmosManager>();
@@ -52,10 +54,12 @@ namespace SS3D.Engine.AtmosphericsRework
             _originPosition = new Vector3(- width / 2, 0, - width / 2);
         }
 
-        public void Simulate(float dt)
+        public void Simulate(float dt, float viscosity)
         {
-            VelStep(_velHor, _velVert, _velHorPrev, _velVertPrev, 0.000001f, dt);
-            DensStep(_dens, _densPrev, _velHor, _velVert, 0.000001f, dt);
+            VelStep(_velHor, _velVert, _velHorPrev, _velVertPrev, viscosity, dt);
+            DensStep(_dens, _densPrev, _velHor, _velVert, viscosity, dt);
+            CleanPrevs();
+            TotalMass();
         }
 
         public float DensityAtWorldPosition(Vector3 pos)
@@ -75,7 +79,6 @@ namespace SS3D.Engine.AtmosphericsRework
             Vector2Int coords = GetXY(worldPosition);
             int i = Coords(coords.x, coords.y);
             _densPrev[i] += amount;
-            _velVertPrev[i] += amount;
         }
 
         public void RemoveGas(Vector3 worldPosition, float amount)
@@ -85,7 +88,16 @@ namespace SS3D.Engine.AtmosphericsRework
             _densPrev[i] -= amount;
             _densPrev[i] = math.max(0, _densPrev[i]);
         }
-        
+
+        public void ClearGas()
+        {
+            Array.Clear(_dens, 0, _dens.Length);
+            Array.Clear(_velVert, 0, _velVert.Length);
+            Array.Clear(_velHor, 0, _velHor.Length);
+            _massAdded = 0f;
+        }
+
+
         public Vector2Int GetXY(Vector3 worldPosition)
         {
             int x = (int)Math.Round((worldPosition.x - _originPosition.x) / _tileSize);
@@ -103,19 +115,30 @@ namespace SS3D.Engine.AtmosphericsRework
             return tileMap;
         }
 
-        private void Swap(float[] x, float[] x0)
+        private void TotalMass()
         {
-            float[] tmp = x0;
-            x0 = x;
-            x = tmp;
+            float mass = _dens.Sum();
+            Debug.Log($"mass percent preserved {100 * mass/_massAdded}");
+        }
+
+        private void CleanPrevs()
+        {
+            Array.Clear(_velVertPrev, 0, _velVertPrev.Length);
+            Array.Clear(_velHorPrev, 0, _velHorPrev.Length);
+            Array.Clear(_densPrev, 0, _densPrev.Length);
+        }
+
+        private void Swap(ref float[] x, ref float[] x0)
+        {
+            (x0, x) = (x, x0);
         }
 
         private void DensStep(float[] x, float[] x0,  float[] u, float[] v, float diff, float dt)
         {
             AddSource(x, x0, dt);
-            Swap(x, x0);
+            Swap(ref x, ref x0);
             Diffuse(0, diff, x, x0, dt);
-            Swap(x, x0);
+            Swap(ref x, ref x0);
             Advect(0, x, x0, u, v, dt);
         }
         
@@ -123,15 +146,15 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             AddSource(v, v0, dt);
             AddSource(u, u0, dt);
-            Swap(u, u0);
-            Swap(v, v0);
-            Diffuse(0, visc, u, u0, dt);
-            Diffuse(0, visc, v, v0, dt);
+            Swap(ref u, ref u0);
+            Swap(ref v, ref v0);
+            Diffuse(1, visc, u, u0, dt);
+            Diffuse(2, visc, v, v0, dt);
             Project(u, v, u0, v0);
-            Swap(u, u0);
-            Swap(v, v0);
-            Advect(0, u, u0, u0, v0, dt);
-            Advect(0, v, v0, u0, v0, dt);
+            Swap(ref u, ref u0);
+            Swap(ref v, ref v0);
+            Advect(1, u, u0, u0, v0, dt);
+            Advect(2, v, v0, u0, v0, dt);
             Project(u, v, u0, v0);
         }
         
@@ -183,6 +206,7 @@ namespace SS3D.Engine.AtmosphericsRework
             for (int i = 0; i < Size; i++)
             {
                 x[i] += dt * x0[i];
+                _massAdded += dt * x0[i];
             }
         }
         
