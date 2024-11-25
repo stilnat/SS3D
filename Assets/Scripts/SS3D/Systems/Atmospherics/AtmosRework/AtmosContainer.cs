@@ -21,14 +21,13 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public TileLayer Layer { get; }
 
-        public AtmosContainer(AtmosMap map, AtmosChunk chunk, int x, int y, TileLayer layer, float volume)
+        public AtmosContainer(AtmosMap map, int x, int y, TileLayer layer, float volume)
         {
             Map = map;
-            Chunk = chunk;
             X = x;
             Y = y;
             Layer = layer;
-            AtmosObject = new(new(chunk.GetKey().x, chunk.GetKey().y), volume);
+            AtmosObject = new(volume);
         }
 
         public void Initialize()
@@ -96,7 +95,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public Vector3 GetWorldPosition()
         {
-            return Chunk.GetWorldPosition(X, Y);
+            return Vector3.back;
         }
     }
 }

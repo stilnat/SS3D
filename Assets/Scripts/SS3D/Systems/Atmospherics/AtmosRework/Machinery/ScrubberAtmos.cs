@@ -77,7 +77,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Step()
         {
-            if (!_deviceActive)
+            /*if (!_deviceActive)
             {
                 return; 
             }
@@ -115,7 +115,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 
                 Subsystems.Get<AtmosManager>().AddGasses(transform.position, toSiphon, _pipeLayer);
                 Subsystems.Get<AtmosManager>().RemoveGasses(_atmosNeighboursPositions[i], toSiphon, TileLayer.Turf);
-            }
+            }*/
         }
 
 

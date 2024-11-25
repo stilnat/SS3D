@@ -45,7 +45,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Step()
         {
-            if (!_deviceActive)
+           /*if (!_deviceActive)
             {
                 return; 
             }
@@ -70,7 +70,7 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, layerToTransferTo);
                 Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, layerToTransferFrom);
-            }
+            }*/
         }
         
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)

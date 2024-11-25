@@ -139,15 +139,6 @@ public class AtmosEditor : EditorWindow
         }
 
         EditorGUILayout.Space();
-        if (GUILayout.Button("Clear all Gasses"))
-        {
-            _atmosManager.ClearAllGasses();
-        }
-
-        if (GUILayout.Button("Randomize all Gasses"))
-        {
-            _atmosManager.RandomizeAllGasses(_selectedAmount);
-        }
     }
 
     private void OnSceneGUI(SceneView sceneView)
@@ -178,32 +169,13 @@ public class AtmosEditor : EditorWindow
             _lastPlacementTime = EditorApplication.timeSinceStartup;
             _lastPlacement = snappedPosition;
 
-            float4 amount = 0;
-            amount.w = _selectedAmount * (_gassSelection == CoreAtmosGasses.Oxygen ? 1 : 0);
-            amount.x = _selectedAmount * (_gassSelection == CoreAtmosGasses.Nitrogen ? 1 : 0);
-            amount.y = _selectedAmount * (_gassSelection == CoreAtmosGasses.CarbonDioxide ? 1 : 0);
-            amount.z = _selectedAmount * (_gassSelection == CoreAtmosGasses.Plasma ? 1 : 0);
-                
-
             switch (_selectedOption)
             {
                 case GasEditorOption.AddGasEnvironment:
-                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.Turf);
+                    _atmosManager.Map.AddGas(snappedPosition, _selectedAmount);
                     break;
                 case GasEditorOption.RemoveGasEnvironment:
-                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.Turf);
-                    break;
-                case GasEditorOption.AddGasPipeLeft:
-                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.PipeLeft);
-                    break;
-                case GasEditorOption.RemoveGasPipeLeft:
-                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.PipeLeft);
-                    break;
-                case GasEditorOption.AddHeat:
-                    _atmosManager.AddHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
-                    break;
-                case GasEditorOption.RemoveHeat:
-                    _atmosManager.RemoveHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
+                    _atmosManager.Map.RemoveGas(snappedPosition, _selectedAmount);
                     break;
             }
         }
@@ -227,7 +199,6 @@ public class AtmosEditor : EditorWindow
 
         Vector3[] lines = { cube1, cube2, cube2, cube3, cube3, cube4, cube4, cube1 };
         Handles.DrawLines(lines);
-
     }
 
     private void DisplayGizmos()
@@ -235,68 +206,30 @@ public class AtmosEditor : EditorWindow
         if (_atmosManager == null)
             return;
 
-        var atmosJobs = _atmosManager.GetAtmosJobs();
-
-        foreach (AtmosJobPersistentData job in atmosJobs)
+        switch (_viewContent)
         {
-            switch (_viewContent)
+             case ViewContent.Environment:
+                 DisplayEnvironmentObjects();
+                 break;
+        }
+    }
+
+    private void DisplayEnvironmentObjects()
+    {
+        float scale = 0.01f;
+        for (int i = 0; i < _atmosManager.Map.WidthAndBorder; i++)
+        {
+            for (int j = 0; j < _atmosManager.Map.WidthAndBorder; j++)
             {
-                 case ViewContent.Environment:
-                     DisplayEnvironmentObjects(job);
-                     break;
-                 case ViewContent.PipeLeft:
-                     DisplayLeftPipeObjects(job);
-                     break;
+                Vector3 position = _atmosManager.Map.GetWorldPosition(i, j);
+                float density = _atmosManager.Map.DensityAtWorldPosition(position);
+                float2 velocity = _atmosManager.Map.VelocityAtWorldPosition(position);
+                Handles.color = Color.white;
+                Handles.DrawWireCube(position + new Vector3(0, scale * density / 2f, 0), new Vector3(_gizmoSize, scale * density, _gizmoSize));
+                Handles.color = Color.red;
+                Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
+                Handles.DrawLine(position, position + new Vector3(velocity.x, 0, velocity.y));
             }
-        }
-    }
-
-    private void DisplayEnvironmentObjects(AtmosJobPersistentData job)
-    {
-        for (int i = 0; i < job.AtmosTiles.Count; i++)
-        {
-            Vector3 position = job.AtmosTiles[i].GetWorldPosition();
-            AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
-            DisplayAtmosObjects(position, atmosObject);
-        }
-    }
-
-    private void DisplayLeftPipeObjects(AtmosJobPersistentData job)
-    {
-        for (int i = 0; i < job.AtmosLeftPipes.Count; i++)
-        {
-            Vector3 position = job.AtmosLeftPipes[i].GetWorldPosition();
-            AtmosObject atmosObject = job.AtmosLeftPipes[i].AtmosObject;
-            DisplayAtmosObjects(position, atmosObject);
-        }
-    }
-
-    private void DisplayAtmosObjects(Vector3 position, AtmosObject atmosObject)
-    {
-        Color stateColor;
-        AtmosState tileState = atmosObject.State;
-        switch (tileState)
-        {
-            case AtmosState.Active: stateColor = new Color(0, 0, 0, 0); break;
-            case AtmosState.Semiactive: stateColor = new Color(0, 0, 0, 0.5f); break;
-            case AtmosState.Inactive: stateColor = new Color(0, 0, 0, 0.8f); break;
-            default: stateColor = new Color(0, 0, 0, 0); break;
-        }
-
-        switch (_viewOption)
-        {
-            case ViewType.Pressure:
-                DrawPressureGizmo(atmosObject, position, stateColor);
-                break;
-            case ViewType.Content:
-                DrawContentGizmo(atmosObject, position, stateColor);
-                break;
-            case ViewType.Temperature:
-                DrawTemperatureGizmo(atmosObject, position, stateColor);
-                break;
-            case ViewType.Wind:
-                DrawWindGizmo(atmosObject, position);
-                break;
         }
     }
 

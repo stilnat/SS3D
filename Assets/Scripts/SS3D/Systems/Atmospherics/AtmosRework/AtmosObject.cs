@@ -9,7 +9,6 @@ namespace SS3D.Engine.AtmosphericsRework
  public struct AtmosObject
  {
         public AtmosState State;
-        public int2 ChunkKey;
 
         public float VelocityNorth;
         public float VelocitySouth;
@@ -41,9 +40,9 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public float Mass => math.csum(CoreGasses * GasConstants.coreGasDensity);
 
-        public AtmosObject(int2 chunkKey, float volume)
+        public AtmosObject(float volume)
         {
-            ChunkKey = chunkKey;
+   
             State = AtmosState.Inactive;
             Volume = volume;      // One tile size
             Temperature = 293f; // Room temperature in Kelvin

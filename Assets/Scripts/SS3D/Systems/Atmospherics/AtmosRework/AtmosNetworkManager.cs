@@ -23,7 +23,7 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public class AtmosNetworkManager : NetworkSystem
     {
-        private struct PreviousValuesChunkCentered
+       /* private struct PreviousValuesChunkCentered
         {
             public byte[] PreviousConcentrationValues;
             public Vector2Int ChunkKey;
@@ -242,5 +242,6 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             _previousConcentrationValues = previousValues;
         }
+        */
     }
 }
