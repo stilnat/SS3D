@@ -1,4 +1,10 @@
-﻿using SS3D.Core;
+﻿using CSparse;
+using CSparse.Double.Factorization;
+using CSparse.IO;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Single.Solvers;
+using SS3D.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,12 +23,12 @@ namespace SS3D.Engine.AtmosphericsRework
         
         private AtmosContainer[] _atmosGridList;
 
-        private float[] _velHor;
-        private float[] _velVert;
-        private float[] _velHorPrev;
-        private float[] _velVertPrev;
-        private float[] _dens;
-        private float[] _densPrev;
+        private double[] _velHor;
+        private double[] _velVert;
+        private double[] _velHorPrev;
+        private double[] _velVertPrev;
+        private double[] _dens;
+        private double[] _densPrev;
         
         private Vector3 _originPosition;
         private float _tileSize = 1f;
@@ -33,11 +39,13 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public int Size => WidthAndBorder * WidthAndBorder;
         
-        public float[] Dens => _dens;
+        public double[] Dens => _dens;
 
         private int Coords(int i, int j) => i + (WidthAndBorder * j);
 
-        private float _massAdded;
+        private double _massAdded;
+
+        private SparseLu _diffuseSystem;
 
         public AtmosMap(TileMap tileMap, string name, int width)
         {
@@ -45,30 +53,37 @@ namespace SS3D.Engine.AtmosphericsRework
             mapName = name;
             this.tileMap = tileMap;
             Width = width;
-            _velHor = new float[Size];
-            _velVert = new float[Size];
-            _velHorPrev = new float[Size];
-            _velVertPrev = new float[Size];
-            _dens = new float[Size];
-            _densPrev = new float[Size];
+            _velHor = new double[Size];
+            _velVert = new double[Size];
+            _velHorPrev = new double[Size];
+            _velVertPrev = new double[Size];
+            _dens = new double[Size];
+            _densPrev = new double[Size];
             _originPosition = new Vector3(- width / 2, 0, - width / 2);
+            
         }
 
         public void Simulate(float dt, float viscosity)
         {
-            VelStep(_velHor, _velVert, _velHorPrev, _velVertPrev, viscosity, dt);
+            if (_diffuseSystem == null)
+            {
+                CreateDiffuseSystem(dt, viscosity);
+            }
+
+
+            //VelStep(_velHor, _velVert, _velHorPrev, _velVertPrev, viscosity, dt);
             DensStep(_dens, _densPrev, _velHor, _velVert, viscosity, dt);
             CleanPrevs();
             TotalMass();
         }
 
-        public float DensityAtWorldPosition(Vector3 pos)
+        public double DensityAtWorldPosition(Vector3 pos)
         {
             Vector2Int xy = GetXY(pos);
             return _dens[Coords(xy.x, xy.y)];
         }
         
-        public float2 VelocityAtWorldPosition(Vector3 pos)
+        public double2 VelocityAtWorldPosition(Vector3 pos)
         {
             Vector2Int xy = GetXY(pos);
             return new(_velHor[Coords(xy.x, xy.y)], _velVert[Coords(xy.x, xy.y)]);
@@ -117,7 +132,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private void TotalMass()
         {
-            float mass = _dens.Sum();
+            double mass = _dens.Sum();
             Debug.Log($"mass percent preserved {100 * mass/_massAdded}");
         }
 
@@ -128,28 +143,28 @@ namespace SS3D.Engine.AtmosphericsRework
             Array.Clear(_densPrev, 0, _densPrev.Length);
         }
 
-        private void Swap(ref float[] x, ref float[] x0)
+        private void Swap(ref double[] x, ref double[] x0)
         {
             (x0, x) = (x, x0);
         }
 
-        private void DensStep(float[] x, float[] x0,  float[] u, float[] v, float diff, float dt)
+        private void DensStep(double[] x, double[] x0,  double[] u, double[] v, double diff, double dt)
         {
             AddSource(x, x0, dt);
             Swap(ref x, ref x0);
-            Diffuse(0, diff, x, x0, dt);
+            Diffuse(0, diff, ref x, x0, dt);
             Swap(ref x, ref x0);
             Advect(0, x, x0, u, v, dt);
         }
         
-        private void VelStep(float[] u, float[] v,  float[] u0, float[] v0, float visc, float dt)
+        private void VelStep(double[] u, double[] v,  double[] u0, double[] v0, double visc, double dt)
         {
             AddSource(v, v0, dt);
             AddSource(u, u0, dt);
             Swap(ref u, ref u0);
             Swap(ref v, ref v0);
-            Diffuse(1, visc, u, u0, dt);
-            Diffuse(2, visc, v, v0, dt);
+            Diffuse(1, visc, ref u, u0, dt);
+            Diffuse(2, visc, ref v, v0, dt);
             Project(u, v, u0, v0);
             Swap(ref u, ref u0);
             Swap(ref v, ref v0);
@@ -158,7 +173,7 @@ namespace SS3D.Engine.AtmosphericsRework
             Project(u, v, u0, v0);
         }
         
-        private void Project(float[] u, float[] v, float[] p, float[] div)
+        private void Project(double[] u, double[] v, double[] p, double[] div)
         {
             float h = 1.0f / Width;
 
@@ -201,7 +216,7 @@ namespace SS3D.Engine.AtmosphericsRework
             SetBoundaries(2, v);
         }
         
-        private void AddSource(float[] x, float[] x0, float dt)
+        private void AddSource(double[] x, double[] x0, double dt)
         {
             for (int i = 0; i < Size; i++)
             {
@@ -209,29 +224,83 @@ namespace SS3D.Engine.AtmosphericsRework
                 _massAdded += dt * x0[i];
             }
         }
-        
-        private void Diffuse(int b, float diff, float[] x, float[] x0, float dt)
+
+        private void CreateDiffuseSystem(double dt, double diff)
         {
-            float a = dt * diff * Width * Width;
-            for (int k = 0; k < 20; k++)
+
+            double a = dt * diff * Width * Width;
+
+            SparseMatrix matrix = SparseMatrix.Create(Size, Size, (i, j) =>
+            {
+                /* // south west corner
+                 if ((i == 0 && j == 1) || (i==0 && j == WidthAndBorder))
+                 {
+                     return 0.5f;
+                 }
+
+                 // south
+                 if (i < WidthAndBorder && j == i+WidthAndBorder)
+                 {
+                     return 1f;
+                 }
+
+                 if (i == WidthAndBorder && j == i+WidthAndBorder)
+                 {
+                     return 0.5f;
+                 }  
+                 */  
+
+
+                if (i == j)
+                {
+                    return 1 + 4 * a;
+                }
+
+                if (i - 1 == j || i + 1 == j || i == j - WidthAndBorder || i == j + WidthAndBorder)
+                {
+                    return -a;
+                }
+
+                return 0;
+            });
+
+            _diffuseSystem = SparseLu.Create(matrix, ColumnOrdering.MinimumDegreeAtPlusA, 0.1);
+        }    
+        
+        private void Diffuse(int b, double diff, ref double[] x, double[] x0, double dt)
+        {
+
+            Vector<double> rightTerm = Vector<double>.Build.Dense(x0);
+            Vector<double> result = Vector<double>.Build.Dense(x);
+            _diffuseSystem.Solve(rightTerm, result);
+            x = result.ToArray();
+
+
+            //Vector<float> sol = _diffuseSystem.SolveIterative(rightTerm, new CompositeSolver());
+
+            //x = sol.ToArray();
+
+
+
+            /*for (int k = 0; k < 20; k++)
             {
                 for (int i = 1; i <= Width; i++)
                 {
-                    for (int j = 1; j <= Width; j++) 
+                    for (int j = 1; j <= Width; j++)
                     {
                         x[Coords(i, j)] = (x0[Coords(i, j)] + (a * (x[Coords(i - 1, j)] + x[Coords(i + 1, j)] +
                             x[Coords(i, j - 1)] + x[Coords(i, j + 1)]))) / (1 + (4 * a));
                     }
                 }
-                
+
                 SetBoundaries(b, x);
-            }
+            }*/
         }
         
-        private void Advect(int b,  float[] d, float[] d0,  float[] u, float[] v, float dt)
+        private void Advect(int b,  double[] d, double[] d0,  double[] u, double[] v, double dt)
         {
             int i0, j0, i1, j1;
-            float x, y, s0, t0, s1, t1, dt0;
+            double x, y, s0, t0, s1, t1, dt0;
             dt0 = dt * Width;
             for (int i = 1; i <= Width; i++) 
             {
@@ -261,7 +330,7 @@ namespace SS3D.Engine.AtmosphericsRework
             SetBoundaries(b, d);
         }
 
-        private void SetBoundaries(int b, float[] x)
+        private void SetBoundaries(int b, double[] x)
         {
             for (int i = 1; i <= Width; i++)
             {

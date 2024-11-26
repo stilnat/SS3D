@@ -228,13 +228,13 @@ public class AtmosEditor : EditorWindow
             for (int j = 0; j < _atmosManager.Map.WidthAndBorder; j++)
             {
                 Vector3 position = _atmosManager.Map.GetWorldPosition(i, j);
-                float density = _atmosManager.Map.DensityAtWorldPosition(position);
-                float2 velocity = _atmosManager.Map.VelocityAtWorldPosition(position);
+                double density = _atmosManager.Map.DensityAtWorldPosition(position);
+                double2 velocity = _atmosManager.Map.VelocityAtWorldPosition(position);
                 Handles.color = Color.white;
-                Handles.DrawWireCube(position + new Vector3(0, scale * density / 2f, 0), new Vector3(_gizmoSize, scale * density, _gizmoSize));
+                Handles.DrawWireCube(position + new Vector3(0, (float)(scale * density / 2), 0), new Vector3(_gizmoSize, (float)(scale * density), _gizmoSize));
                 Handles.color = Color.red;
                 Handles.DrawSolidDisc(position, Vector3.up, _gizmoSize / 4f);
-                Handles.DrawLine(position, position + new Vector3(velocity.x, 0, velocity.y));
+                Handles.DrawLine(position, position + new Vector3((float)velocity.x, 0, (float)velocity.y));
             }
         }
     }
