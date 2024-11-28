@@ -110,8 +110,8 @@ namespace SS3D.Engine.AtmosphericsRework
             // Use partial pressures to determine how much of each gas to move.
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
-            // Determine the amount of moles and taking wind into account.
-            return (0.9f * (enteringVelocity - neighbourOppositeVelocity)) + partialPressureDifference;
+            // Determine the amount of moles to transfer.
+            return partialPressureDifference;
         }
 
         private static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
