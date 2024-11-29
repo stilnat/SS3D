@@ -39,9 +39,6 @@ namespace SS3D.Engine.AtmosphericsRework
         // True when jobs are scheduled, false after making sure they completed.
         private bool _jobsScheduled;
 
-        private List<IAtmosLoop> _atmosDevices = new();
-
-
         private void Start()
         {
             tileManager = Subsystems.Get<TileSystem>();
@@ -67,12 +64,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
 
                 float dt = Time.fixedTime - lastStep;
-
-                foreach (IAtmosLoop atmosDevice in _atmosDevices)
-                {
-                    atmosDevice.Step();
-                }
-
+                
                 foreach (AtmosJobPersistentData atmosJob in atmosJobs)
                 {
                     atmosJob.Refresh();
@@ -87,16 +79,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 AtmosTick?.Invoke();
             }
-        }
-        
-        public void RemoveAtmosDevice(IAtmosLoop atmosDevice)
-        {
-            _atmosDevices.Remove(atmosDevice);
-        }
-
-        public void RegisterAtmosDevice(IAtmosLoop atmosDevice)
-        {
-            _atmosDevices.Add(atmosDevice);
         }
 
         public AtmosContainer GetAtmosContainer(Vector3 worldPosition, TileLayer layer)

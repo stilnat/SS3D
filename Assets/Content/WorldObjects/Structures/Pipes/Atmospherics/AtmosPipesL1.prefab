@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -2184613742833408818}
   - component: {fileID: 8762327486351513096}
   - component: {fileID: -7818111786806045911}
+  - component: {fileID: 1517725324955553934}
   m_Layer: 0
   m_Name: AtmosPipesL1
   m_TagString: Untagged
@@ -66,7 +67,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 81
+  <PrefabId>k__BackingField: 101
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
@@ -190,3 +191,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: {fileID: 11400000, guid: 1560fd5f9b47de74fbf91224b725ba61, type: 2}
+--- !u!114 &1517725324955553934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802364579275783218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5064f08d782f64295eb0712467d2a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: -7727686409064562107}
+  _networkObjectCache: {fileID: 0}

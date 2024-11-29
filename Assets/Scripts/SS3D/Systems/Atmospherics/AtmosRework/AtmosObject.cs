@@ -76,55 +76,36 @@ namespace SS3D.Engine.AtmosphericsRework
         public void MakeAir()
         {
             MakeEmpty();
-            AddCoreGas(CoreAtmosGasses.Oxygen, 20.79f, true);
-            AddCoreGas(CoreAtmosGasses.Nitrogen, 83.17f, true);
+            AddCoreGas(CoreAtmosGasses.Oxygen, 20.79f);
+            AddCoreGas(CoreAtmosGasses.Nitrogen, 83.17f);
             Temperature = 293f;
         }
 
-        public void AddCoreGasses(float4 amount, bool activeFlux)
+        public void AddCoreGasses(float4 amount)
         {
             CoreGasses += math.max(0, amount);
-            if (math.any(amount != float4.zero))
-            {
-                State = activeFlux ?  AtmosState.Active:AtmosState.Semiactive;
-            }
         }
 
-        public void RemoveCoreGasses(float4 amount, bool activeFlux)
+        public void RemoveCoreGasses(float4 amount)
         {
             amount = math.max(0, amount);
-            CoreGasses =  math.max(0,CoreGasses - amount); ;
-
-            if (math.any(amount != float4.zero))
-            {
-                State = activeFlux ?  AtmosState.Active:AtmosState.Semiactive;
-            }
+            CoreGasses = math.max(0, CoreGasses - amount);
         }
 
-        public void AddCoreGas(CoreAtmosGasses gas, float amount, bool activeFlux)
+        public void AddCoreGas(CoreAtmosGasses gas, float amount)
         {
             amount = math.max(0, amount);
             float4 coreGasses = CoreGasses;
             coreGasses[(int)gas] = math.max(coreGasses[(int)gas] + amount, 0f);
             CoreGasses = coreGasses;
-
-            if (amount != 0)
-            {
-                State = activeFlux ?  AtmosState.Active:AtmosState.Semiactive;
-            }
         }
 
-        public void RemoveCoreGas(CoreAtmosGasses gas, float amount, bool activeFlux)
+        public void RemoveCoreGas(CoreAtmosGasses gas, float amount)
         {
             amount = math.max(0, amount);
             float4 coreGasses = CoreGasses;
             coreGasses[(int)gas] = math.max(coreGasses[(int)gas] - amount, 0f);
             CoreGasses = coreGasses;
-
-            if (amount != 0)
-            {
-                State = activeFlux ?  AtmosState.Active:AtmosState.Semiactive;
-            }
         }
 
         public void AddHeat(float amount)
@@ -132,11 +113,6 @@ namespace SS3D.Engine.AtmosphericsRework
             // todo check formula from amount in joules
             amount = math.max(0, amount);
             Temperature += amount;
-
-            if (amount != 0)
-            {
-                State = AtmosState.Active;
-            }
         }
 
         public void RemoveHeat(float amount)
@@ -144,11 +120,6 @@ namespace SS3D.Engine.AtmosphericsRework
             // todo check formula from amount in joules
             amount = math.max(0, amount);
             Temperature = math.max(0, Temperature - amount);
-
-            if (amount != 0)
-            {
-                State = AtmosState.Active;
-            }
         }
 
         public bool IsAir()
@@ -168,7 +139,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             for (int i = 0; i < 4; i++)
             {
-                AddCoreGas((CoreAtmosGasses)i, UnityEngine.Random.Range(0, 300f), true);
+                AddCoreGas((CoreAtmosGasses)i, UnityEngine.Random.Range(0, 300f));
             }
         }
 

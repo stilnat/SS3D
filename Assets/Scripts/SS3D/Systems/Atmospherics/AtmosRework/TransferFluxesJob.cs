@@ -40,10 +40,10 @@ namespace SS3D.Engine.AtmosphericsRework
                 MoleTransferToNeighbours transfer = _moleTransfers[activeIndex];
                 int atmosObjectFromIndex = transfer.IndexFrom;
                 AtmosObject atmosObject = _tileObjectBuffer[atmosObjectFromIndex];
-                atmosObject.RemoveCoreGasses(transfer.TransferMolesNorth, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferMolesSouth, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferMolesEast, _diffusion);
-                atmosObject.RemoveCoreGasses(transfer.TransferMolesWest, _diffusion);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesNorth);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesSouth);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesEast);
+                atmosObject.RemoveCoreGasses(transfer.TransferMolesWest);
                 
                 _tileObjectBuffer[atmosObjectFromIndex] = atmosObject;
                 
@@ -65,7 +65,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return;
 
             AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
-            neighbour.AddCoreGasses(transfer, _diffusion);
+            neighbour.AddCoreGasses(transfer);
             _tileObjectBuffer[neighbourIndex] = neighbour;
         }
     }

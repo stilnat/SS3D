@@ -235,39 +235,40 @@ public class AtmosEditor : EditorWindow
         if (_atmosManager == null)
             return;
 
+        switch (_viewContent)
+        {
+             case ViewContent.Environment:
+                 DisplayEnvironmentObjects();
+                 break;
+             case ViewContent.PipeLeft:
+                 DisplayLeftPipeObjects();
+                 break;
+        }
+    }
+
+    private void DisplayEnvironmentObjects()
+    {
         var atmosJobs = _atmosManager.GetAtmosJobs();
 
         foreach (AtmosJobPersistentData job in atmosJobs)
         {
-            switch (_viewContent)
+            for (int i = 0; i < job.AtmosTiles.Count; i++)
             {
-                 case ViewContent.Environment:
-                     DisplayEnvironmentObjects(job);
-                     break;
-                 case ViewContent.PipeLeft:
-                     DisplayLeftPipeObjects(job);
-                     break;
+                Vector3 position = job.AtmosTiles[i].GetWorldPosition();
+                AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
+                DisplayAtmosObjects(position, atmosObject);
             }
         }
     }
 
-    private void DisplayEnvironmentObjects(AtmosJobPersistentData job)
+    private void DisplayLeftPipeObjects()
     {
-        for (int i = 0; i < job.AtmosTiles.Count; i++)
-        {
-            Vector3 position = job.AtmosTiles[i].GetWorldPosition();
-            AtmosObject atmosObject = job.AtmosTiles[i].AtmosObject;
-            DisplayAtmosObjects(position, atmosObject);
-        }
-    }
+        List<IAtmosPipe> pipes = Subsystems.Get<PipeSystem>().GetPipes(TileLayer.PipeLeft);
 
-    private void DisplayLeftPipeObjects(AtmosJobPersistentData job)
-    {
-        for (int i = 0; i < job.AtmosLeftPipes.Count; i++)
+        foreach (IAtmosPipe pipe in pipes)
         {
-            Vector3 position = job.AtmosLeftPipes[i].GetWorldPosition();
-            AtmosObject atmosObject = job.AtmosLeftPipes[i].AtmosObject;
-            DisplayAtmosObjects(position, atmosObject);
+            Vector3 position = new(pipe.PlacedTileObject.WorldOrigin.x, 0, pipe.PlacedTileObject.WorldOrigin.y);
+            DisplayAtmosObjects(position, pipe.AtmosObject);
         }
     }
 

@@ -1633,7 +1633,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021075485018, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -230.00002
+      value: -230.00003
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021449001342, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2408,6 +2408,7 @@ GameObject:
   - component: {fileID: 1798120479}
   - component: {fileID: 1798120480}
   - component: {fileID: 1798120481}
+  - component: {fileID: 1798120482}
   m_Layer: 0
   m_Name: AtmosSystem
   m_TagString: Untagged
@@ -2459,6 +2460,21 @@ MonoBehaviour:
   _componentIndexCache: 8
   _addedNetworkObject: {fileID: 1506918116}
   _networkObjectCache: {fileID: 1506918116}
+--- !u!114 &1798120482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798120478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aada7a13b4180e74bb57d406bbbe437d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1506918116}
+  _networkObjectCache: {fileID: 0}
 --- !u!4 &1820032161 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7939122254879796211, guid: 2dff3e99d61d74c4282d2983e482289c, type: 3}

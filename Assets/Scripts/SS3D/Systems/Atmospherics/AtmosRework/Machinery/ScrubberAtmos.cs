@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public class ScrubberAtmos : NetworkActor, IInteractionTarget, IAtmosLoop
+    public class ScrubberAtmos : NetworkActor, IInteractionTarget, IAtmosDevice
     {
         private enum OperatingMode
         {
@@ -30,7 +30,7 @@ namespace SS3D.Engine.AtmosphericsRework
         
         private Range _range = Range.Normal;
         
-        private float _molesRemovedPerCyle = 20f;
+        private float _molesRemovedPerSecond = 500f;
 
         private bool4 _filterCoreGasses;
 
@@ -52,12 +52,16 @@ namespace SS3D.Engine.AtmosphericsRework
                 position + Vector3.right,
                 position + Vector3.left,
             };
-            Subsystems.Get<AtmosManager>().RegisterAtmosDevice(this); 
+            
+            if (Subsystems.Get<PipeSystem>().IsSetUp)
+                Subsystems.Get<PipeSystem>().RegisterAtmosDevice(this);
+            else
+                Subsystems.Get<PipeSystem>().OnSystemSetUp += () => Subsystems.Get<PipeSystem>().RegisterAtmosDevice(this);
         }
 
         private void OnDestroy()
         {
-            Subsystems.Get<AtmosManager>().RemoveAtmosDevice(this); 
+            Subsystems.Get<PipeSystem>().RemoveAtmosDevice(this); 
         }
 
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
@@ -75,7 +79,7 @@ namespace SS3D.Engine.AtmosphericsRework
             };
         }
 
-        public void Step()
+        public void StepAtmos(float dt)
         {
             if (!_deviceActive)
             {
@@ -102,19 +106,22 @@ namespace SS3D.Engine.AtmosphericsRework
                 
                 if (_mode == OperatingMode.Siphoning)
                 {
-                    toSiphon = atmos.CoreGassesProportions * math.min(atmos.TotalMoles, _molesRemovedPerCyle);
+                    toSiphon = atmos.CoreGassesProportions * math.min(atmos.TotalMoles, _molesRemovedPerSecond * dt);
                 }
 
                 // If scrubbing, remove only filtered gas
                 else if (_mode == OperatingMode.Scrubbing)
                 {
                     float4 filteredGasses = atmos.CoreGasses * (int4)_filterCoreGasses;
-                    toSiphon = (filteredGasses / math.csum(filteredGasses)) * math.min(math.csum(filteredGasses), _molesRemovedPerCyle);
+                    toSiphon = (filteredGasses / math.csum(filteredGasses)) * math.min(math.csum(filteredGasses), _molesRemovedPerSecond * dt);
                     toSiphon = math.any(math.isnan(toSiphon)) ? 0 : toSiphon;
                 }
-                
-                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toSiphon, _pipeLayer);
-                Subsystems.Get<AtmosManager>().RemoveGasses(_atmosNeighboursPositions[i], toSiphon, TileLayer.Turf);
+
+                if (Subsystems.Get<PipeSystem>().TryGetAtmosPipe(transform.position, _pipeLayer, out IAtmosPipe pipe))
+                {
+                    Subsystems.Get<PipeSystem>().AddGasToPipeNet(pipe.PipeNetIndex, toSiphon);
+                    Subsystems.Get<AtmosManager>().RemoveGasses(_atmosNeighboursPositions[i], toSiphon, TileLayer.Turf);
+                }
             }
         }
 
@@ -133,5 +140,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 _ => _mode,
             };
         }
+
+
     }
 }

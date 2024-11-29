@@ -230,11 +230,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 if (change.Add)
                 {
-                    atmosObject.AddCoreGasses(change.Moles, true); 
+                    atmosObject.AddCoreGasses(change.Moles); 
                 }
                 else
                 {
-                    atmosObject.RemoveCoreGasses(change.Moles, true); 
+                    atmosObject.RemoveCoreGasses(change.Moles); 
                 }
                     
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
@@ -253,11 +253,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 if (change.Add)
                 {
-                    atmosObject.AddCoreGasses(change.Moles, true); 
+                    atmosObject.AddCoreGasses(change.Moles); 
                 }
                 else
                 {
-                    atmosObject.RemoveCoreGasses(change.Moles, true); 
+                    atmosObject.RemoveCoreGasses(change.Moles); 
                 }
                     
                 NativeAtmosPipesLeft[indexInNativeArray] = atmosObject;

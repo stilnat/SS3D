@@ -211,6 +211,11 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public List<PlacedTileObject> GetNeighbours()
         {
+            if (!_initialized)
+            {
+                Setup();
+            }
+            
             TileSystem tileSystem = Subsystems.Get<TileSystem>();
             var map = tileSystem.CurrentMap;
             var neighbours = map.GetNeighbourPlacedObjects(_placedObject.Layer, _placedObject.gameObject.transform.position).ToList();

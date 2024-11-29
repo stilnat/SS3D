@@ -35,12 +35,12 @@ namespace SS3D.Engine.AtmosphericsRework
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Subsystems.Get<AtmosManager>().RegisterAtmosDevice(this); 
+           // Subsystems.Get<AtmosManager>().RegisterAtmosDevice(this); 
         }
         
         private void OnDestroy()
         {
-            Subsystems.Get<AtmosManager>().RemoveAtmosDevice(this); 
+            //Subsystems.Get<AtmosManager>().RemoveAtmosDevice(this); 
         }
 
         public void Step()
