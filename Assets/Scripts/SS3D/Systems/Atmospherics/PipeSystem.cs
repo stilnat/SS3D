@@ -128,10 +128,25 @@ public class PipeSystem : NetworkSystem
 
         return true;
     }
-
-    public void AddGasToPipeNet(int pipenetIndex, float4 coreGasses)
+    
+    public void AddCoreGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
     {
-        _netPipes[pipenetIndex].AddCoreGasses(coreGasses);
+        if (!TryGetAtmosPipe(transform.position, layer, out IAtmosPipe pipe))
+        {
+            return;
+        }
+        
+        _netPipes[pipe.PipeNetIndex].AddCoreGasses(amount);
+    }
+    
+    public void RemoveCoreGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
+    {
+        if (!TryGetAtmosPipe(transform.position, layer, out IAtmosPipe pipe))
+        {
+            return;
+        }
+        
+        _netPipes[pipe.PipeNetIndex].RemoveCoreGasses(amount);
     }
 
     public void SetValve(IAtmosValve valve)

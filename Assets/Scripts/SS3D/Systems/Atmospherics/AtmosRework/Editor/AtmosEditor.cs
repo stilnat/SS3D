@@ -119,7 +119,7 @@ public class AtmosEditor : EditorWindow
         EditorGUILayout.Space();
         EditorGUILayout.PrefixLabel("Update rate:");
         EditorGUI.BeginChangeCheck();
-        _updateRate = EditorGUILayout.Slider(_updateRate, 0.01f, 5f);
+        _updateRate = EditorGUILayout.Slider(_updateRate, 0.01f, 2f);
         if (EditorGUI.EndChangeCheck())
         {
             _atmosManager.UpdateRate = _updateRate;
@@ -127,14 +127,12 @@ public class AtmosEditor : EditorWindow
 
 
         _selectedOption = (GasEditorOption)EditorGUILayout.EnumPopup(_selectedOption);
-        EditorGUILayout.PrefixLabel("Insert gas:");
+        EditorGUILayout.PrefixLabel("Change gas:");
         _gassSelection = (CoreAtmosGasses)EditorGUILayout.EnumPopup(_gassSelection);
-
         _selectedAmount = EditorGUILayout.Slider(_selectedAmount, 1, 1000);
 
-        if (GUILayout.Button("Add gas"))
+        if (GUILayout.Button("Change gas amount"))
         {
-            Debug.Log("Click to add gas. Press escape to stop");
             _interactEnabled = true;
         }
 
@@ -179,10 +177,10 @@ public class AtmosEditor : EditorWindow
             _lastPlacement = snappedPosition;
 
             float4 amount = 0;
-            amount.w = _selectedAmount * (_gassSelection == CoreAtmosGasses.Oxygen ? 1 : 0);
-            amount.x = _selectedAmount * (_gassSelection == CoreAtmosGasses.Nitrogen ? 1 : 0);
-            amount.y = _selectedAmount * (_gassSelection == CoreAtmosGasses.CarbonDioxide ? 1 : 0);
-            amount.z = _selectedAmount * (_gassSelection == CoreAtmosGasses.Plasma ? 1 : 0);
+            amount[0] = _selectedAmount * (_gassSelection == CoreAtmosGasses.Oxygen ? 1 : 0);
+            amount[1] = _selectedAmount * (_gassSelection == CoreAtmosGasses.Nitrogen ? 1 : 0);
+            amount[2] = _selectedAmount * (_gassSelection == CoreAtmosGasses.CarbonDioxide ? 1 : 0);
+            amount[3] = _selectedAmount * (_gassSelection == CoreAtmosGasses.Plasma ? 1 : 0);
                 
 
             switch (_selectedOption)

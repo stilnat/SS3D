@@ -3,6 +3,7 @@ using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Atmospherics.AtmosRework.Machinery;
 using SS3D.Systems.Tile;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public class UnaryVentAtmos : NetworkActor, IInteractionTarget, IAtmosLoop
+    public class UnaryVentAtmos : BasicAtmosDevice, IInteractionTarget
     {
         
         private bool _deviceActive = true;
@@ -31,45 +32,47 @@ namespace SS3D.Engine.AtmosphericsRework
             Pump,
             Suck,
         }
-        
-        public override void OnStartServer()
-        {
-            base.OnStartServer();
-           // Subsystems.Get<AtmosManager>().RegisterAtmosDevice(this); 
-        }
-        
-        private void OnDestroy()
-        {
-            //Subsystems.Get<AtmosManager>().RemoveAtmosDevice(this); 
-        }
 
-        public void Step()
+        public override void StepAtmos(float dt)
         {
             if (!_deviceActive)
             {
                 return; 
             }
+            
+            if (!Subsystems.Get<PipeSystem>().TryGetAtmosPipe(transform.position, _pipeLayer, out IAtmosPipe pipe))
+            {
+                return;
+            }
 
             AtmosObject atmosEnv = Subsystems.Get<AtmosManager>().GetAtmosContainer(transform.position, TileLayer.Turf).AtmosObject;
-            AtmosObject atmosPipe = Subsystems.Get<AtmosManager>().GetAtmosContainer(transform.position, _pipeLayer).AtmosObject;
-            
+            AtmosObject atmosPipe = pipe.AtmosObject;
+
             if ((_pressureMode == PressureEqualizingMode.External && atmosEnv.Pressure > _targetPressure) ||
                 (_pressureMode == PressureEqualizingMode.Internal && atmosPipe.Pressure > _targetPressure))
             {
                return;
             }
-            
-            TileLayer layerToTransferTo = _operatingMode == OperatingMode.Pump ? TileLayer.Turf : _pipeLayer;
-            TileLayer layerToTransferFrom = _operatingMode == OperatingMode.Suck ? TileLayer.Turf : _pipeLayer;
+
             AtmosObject atmosToTransferTo = _operatingMode == OperatingMode.Pump ? atmosEnv : atmosPipe;
             AtmosObject atmosToTransferFrom = _operatingMode == OperatingMode.Suck ? atmosEnv : atmosPipe;
             
-            float4 toTransfer = AtmosCalculator.MolesToTransfer(atmosToTransferTo, atmosToTransferFrom, true, 0.1f, 0f, 0f);
+            float4 toTransfer = AtmosCalculator.MolesToTransfer(atmosToTransferTo, atmosToTransferFrom, true, dt, 0f, 0f);
 
-            if (math.any(toTransfer > 0f))
+            if (!math.any(toTransfer > 0f))
             {
-                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, layerToTransferTo);
-                Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, layerToTransferFrom);
+                return;
+            }
+
+            if (_operatingMode == OperatingMode.Pump)
+            {
+                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, TileLayer.Turf);
+                Subsystems.Get<PipeSystem>().RemoveCoreGasses(transform.position, toTransfer, _pipeLayer);
+            }
+            else
+            {
+                Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, TileLayer.Turf);
+                Subsystems.Get<PipeSystem>().AddCoreGasses(transform.position, toTransfer, _pipeLayer);
             }
         }
         
