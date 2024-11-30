@@ -9,8 +9,8 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    public struct SetActiveJob : IJobParallelFor
+    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    public struct SetActiveJob : IJob
     {
                 
         [ReadOnly]
@@ -22,6 +22,9 @@ namespace SS3D.Engine.AtmosphericsRework
         private NativeList<int> _activeIndexes;
 
         private NativeList<int> _semiactiveIndexes;
+
+        public int ActiveCount;
+        public int SemiActiveCount;
         
         public SetActiveJob(NativeArray<AtmosObject> tileObjectBuffer,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
@@ -32,42 +35,47 @@ namespace SS3D.Engine.AtmosphericsRework
             _neighboursIndexes = neighboursIndexes;
             _activeIndexes = activeIndexes;
             _semiactiveIndexes = semiactiveIndexes;
+            ActiveCount = 0;
+            SemiActiveCount = 0;
         }
 
-        public void Execute(int index)
+        public void Execute()
         {
-            if (_tileObjectBuffer[index].State == AtmosState.Blocked)
+            for (int index = 0; index < _tileObjectBuffer.Length; index++)
             {
-                return;
+                if (_tileObjectBuffer[index].State == AtmosState.Blocked)
+                {
+                    continue;
+                }
+
+                AtmosObjectNeighboursIndexes neighbourIndexes = _neighboursIndexes[index];
+
+                bool2 isActiveOrSemiActive = false;
+
+                isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.NorthNeighbour);
+                isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.SouthNeighbour);
+                isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.EastNeighbour);
+                isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.WestNeighbour);
+
+                AtmosObject atmos = _tileObjectBuffer[index];
+
+                if (isActiveOrSemiActive[0])
+                {
+                    atmos.State = AtmosState.Active;
+                    _activeIndexes[ActiveCount] = index;
+                }
+                else if(isActiveOrSemiActive[1])
+                {
+                    atmos.State = AtmosState.Semiactive;
+                    _semiactiveIndexes[SemiActiveCount] = index;
+                }
+                else
+                {
+                    atmos.State = AtmosState.Inactive;
+                }
+
+                _tileObjectBuffer[index] = atmos;
             }
-
-            AtmosObjectNeighboursIndexes neighbourIndexes = _neighboursIndexes[index];
-
-            bool2 isActiveOrSemiActive = false;
-
-            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.NorthNeighbour);
-            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.SouthNeighbour);
-            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.EastNeighbour);
-            isActiveOrSemiActive |= TreatNeighbour(index, neighbourIndexes.WestNeighbour);
-
-            AtmosObject atmos = _tileObjectBuffer[index];
-
-            if (isActiveOrSemiActive[0])
-            {
-                atmos.State = AtmosState.Active;
-                _activeIndexes.Add(index);
-            }
-            else if(isActiveOrSemiActive[1])
-            {
-                atmos.State = AtmosState.Semiactive;
-                _semiactiveIndexes.Add(index);
-            }
-            else
-            {
-                atmos.State = AtmosState.Inactive;
-            }
-
-            _tileObjectBuffer[index] = atmos;
         }
 
         private bool2 TreatNeighbour(int index, int neighbourIndex)
