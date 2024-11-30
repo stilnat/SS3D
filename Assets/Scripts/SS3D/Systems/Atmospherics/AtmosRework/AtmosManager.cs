@@ -281,8 +281,6 @@ namespace SS3D.Engine.AtmosphericsRework
                 _jobHandles.Add(activeFluxHandle);
                 _jobHandles.Add(transferActiveFluxHandle);
                 _jobHandles.Add(computeVelocityHandle);
-               
-
 
                 _jobHandles.Add(leftPipeSetActiveHandle);
                 _jobHandles.Add(leftPipeActiveFluxesHandle);

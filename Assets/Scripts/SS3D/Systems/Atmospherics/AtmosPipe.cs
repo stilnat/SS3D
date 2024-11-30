@@ -32,6 +32,4 @@ public class AtmosPipe : NetworkActor, IAtmosPipe
             Subsystems.Get<PipeSystem>().OnSystemSetUp += () => Subsystems.Get<PipeSystem>().RegisterPipe(this);
         }
     }
-    
-     
 }

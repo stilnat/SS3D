@@ -71,7 +71,8 @@ public class PipeSystem : NetworkSystem
     
     public void RemovePipe(IAtmosPipe pipe)
     {
-        
+        PlacedTileObject tileObject = pipe.PlacedTileObject;
+        _pipesGraph.RemoveVertex(new((short)tileObject.WorldOrigin.x, (short)tileObject.WorldOrigin.y, (byte)tileObject.Layer));
     }
 
     public void RegisterPipe(IAtmosPipe pipe)
