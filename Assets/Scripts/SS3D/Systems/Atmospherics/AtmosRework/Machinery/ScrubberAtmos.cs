@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
-    public class ScrubberAtmos : BasicAtmosDevice, IInteractionTarget, IAtmosDevice
+    public class ScrubberAtmos : BasicAtmosDevice, IInteractionTarget
     {
         private enum OperatingMode
         {
@@ -76,6 +76,11 @@ namespace SS3D.Engine.AtmosphericsRework
             }
             
             if (!Subsystems.Get<PipeSystem>().TryGetAtmosPipe(transform.position, _pipeLayer, out IAtmosPipe pipe))
+            {
+                return;
+            }
+
+            if (pipe.AtmosObject.Pressure > 5000)
             {
                 return;
             }

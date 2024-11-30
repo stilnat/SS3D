@@ -37,6 +37,7 @@ public class AtmosEditor : EditorWindow
 
     private TileSystem _tileManager;
     private AtmosManager _atmosManager;
+    private PipeSystem _pipeSystem;
 
     private ViewType _viewOption = ViewType.Pressure;
     private ViewContent _viewContent = ViewContent.Environment;
@@ -82,6 +83,7 @@ public class AtmosEditor : EditorWindow
     {
         _tileManager = Subsystems.Get<TileSystem>();
         _atmosManager = FindObjectOfType<AtmosManager>();
+        _pipeSystem = Subsystems.Get<PipeSystem>();
 
         SceneView.duringSceneGui += OnSceneGUI;
     }
@@ -181,7 +183,6 @@ public class AtmosEditor : EditorWindow
             amount[1] = _selectedAmount * (_gassSelection == CoreAtmosGasses.Nitrogen ? 1 : 0);
             amount[2] = _selectedAmount * (_gassSelection == CoreAtmosGasses.CarbonDioxide ? 1 : 0);
             amount[3] = _selectedAmount * (_gassSelection == CoreAtmosGasses.Plasma ? 1 : 0);
-                
 
             switch (_selectedOption)
             {
@@ -192,10 +193,10 @@ public class AtmosEditor : EditorWindow
                     _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.Turf);
                     break;
                 case GasEditorOption.AddGasPipeLeft:
-                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.PipeLeft);
+                    _pipeSystem.AddCoreGasses(snappedPosition, amount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.RemoveGasPipeLeft:
-                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.PipeLeft);
+                    _pipeSystem.RemoveCoreGasses(snappedPosition, amount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.AddHeat:
                     _atmosManager.AddHeat(snappedPosition, _selectedAmount, TileLayer.Turf);

@@ -10,6 +10,9 @@ public class PipeNet
 {
     private readonly List<IAtmosPipe> _pipes = new();
 
+    private float4 _gassesToAdd = float4.zero;
+    private float4 _gassesToRemove = float4.zero;
+
     public List<IAtmosPipe> GetPipes(TileLayer layerType)
     {
         return _pipes.Where(x => x.PlacedTileObject.Layer == layerType).ToList();
@@ -40,7 +43,23 @@ public class PipeNet
     
     public void AddCoreGasses(float4 gasses)
     {
-        float4 gassesPerPipe = gasses / _pipes.Count;
+        _gassesToAdd += gasses;
+    }
+    
+    public void RemoveCoreGasses(float4 gasses)
+    {
+        _gassesToRemove += gasses;
+    }
+    
+    public void ApplyGasses()
+    {
+        AddGasses();
+        RemoveGasses();
+    }
+
+    private void AddGasses()
+    {
+        float4 gassesPerPipe = _gassesToAdd / _pipes.Count;
         foreach (IAtmosPipe pipe in _pipes)
         {
             AtmosObject atmos = pipe.AtmosObject;
@@ -49,9 +68,9 @@ public class PipeNet
         }
     }
     
-    public void RemoveCoreGasses(float4 gasses)
+    private void RemoveGasses()
     {
-        float4 gassesPerPipe = gasses / _pipes.Count;
+        float4 gassesPerPipe = _gassesToRemove / _pipes.Count;
         foreach (IAtmosPipe pipe in _pipes)
         {
             AtmosObject atmos = pipe.AtmosObject;

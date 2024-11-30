@@ -6,20 +6,18 @@ using SS3D.Core.Behaviours;
 using SS3D.Engine.AtmosphericsRework;
 using SS3D.Systems.Tile;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.InputSystem.OnScreen;
 
 public class PipeSystem : NetworkSystem
 {
-    public bool IsSetUp { get; private set; }
+    private sealed record PipeVertice(short X, short Y, byte Layer);
     
     public event Action OnSystemSetUp;
-    
-    private record PipeVertice(short X, short Y, byte Layer);
+
+    public bool IsSetUp { get; private set; }
 
     private bool _pipesGraphIsDirty;
 
@@ -79,7 +77,9 @@ public class PipeSystem : NetworkSystem
     public void RegisterPipe(IAtmosPipe pipe)
     {
         PlacedTileObject tileObject = pipe.PlacedTileObject;
-        PipeVertice pipeVertice = new((short)tileObject.WorldOrigin.x, (short)tileObject.WorldOrigin.y,
+        PipeVertice pipeVertice = new(
+            (short)tileObject.WorldOrigin.x, 
+            (short)tileObject.WorldOrigin.y,
             (byte)tileObject.Layer);
 
 
@@ -88,7 +88,9 @@ public class PipeSystem : NetworkSystem
         foreach (PlacedTileObject neighbour in neighbours)
         {
             // todo : should check if pipe
-            PipeVertice neighbourPipe = new((short)neighbour.WorldOrigin.x, (short)neighbour.WorldOrigin.y,
+            PipeVertice neighbourPipe = new(
+                (short)neighbour.WorldOrigin.x,
+                (short)neighbour.WorldOrigin.y,
                 (byte)neighbour.Layer);
                 
             _pipesGraph.AddVertex(neighbourPipe);
@@ -108,6 +110,11 @@ public class PipeSystem : NetworkSystem
         foreach (IAtmosDevice atmosDevice in _atmosDevices)
         {
             atmosDevice.StepAtmos(0.1f);
+        }
+
+        foreach (PipeNet pipeNet in _netPipes.Values)
+        {
+            pipeNet.ApplyGasses();
         }
     }
 
@@ -131,7 +138,7 @@ public class PipeSystem : NetworkSystem
     
     public void AddCoreGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
     {
-        if (!TryGetAtmosPipe(transform.position, layer, out IAtmosPipe pipe))
+        if (!TryGetAtmosPipe(worldPosition, layer, out IAtmosPipe pipe))
         {
             return;
         }
@@ -141,7 +148,7 @@ public class PipeSystem : NetworkSystem
     
     public void RemoveCoreGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
     {
-        if (!TryGetAtmosPipe(transform.position, layer, out IAtmosPipe pipe))
+        if (!TryGetAtmosPipe(worldPosition, layer, out IAtmosPipe pipe))
         {
             return;
         }
@@ -167,7 +174,9 @@ public class PipeSystem : NetworkSystem
             foreach (PlacedTileObject neighbour in neighbours)
             {
                 // todo : should check if pipe
-                PipeVertice neighbourPipe = new((short)neighbour.WorldOrigin.x, (short)neighbour.WorldOrigin.y,
+                PipeVertice neighbourPipe = new(
+                    (short)neighbour.WorldOrigin.x,
+                    (short)neighbour.WorldOrigin.y,
                     (byte)neighbour.Layer);
                 
                 _pipesGraph.AddVertex(neighbourPipe);
@@ -205,9 +214,15 @@ public class PipeSystem : NetworkSystem
                 TileSystem tileSystem = Subsystems.Get<TileSystem>();
                 SingleTileLocation location = tileSystem.CurrentMap.GetTileLocation((TileLayer)coord.Layer, new(coord.X, 0f, coord.Y)) as SingleTileLocation;
 
-                if (!location.TryGetPlacedObject(out PlacedTileObject placedObject)) continue;
+                if (!location.TryGetPlacedObject(out PlacedTileObject placedObject))
+                {
+                    continue;
+                }
 
-                if (!placedObject.TryGetComponent(out IAtmosPipe pipe)) continue;
+                if (!placedObject.TryGetComponent(out IAtmosPipe pipe))
+                {
+                    continue;
+                }
 
                 _netPipes[componentIndex].AddPipe(pipe);
                 
