@@ -6,10 +6,7 @@ using UnityEngine;
 
 public class ValveAdjacencyConnector : AbstractHorizontalConnector
 {
-    
-    [SerializeField]
-    private OffsetConnector _connector;
-    
+
     
     protected override IMeshAndDirectionResolver AdjacencyResolver { get; }
     
@@ -19,9 +16,12 @@ public class ValveAdjacencyConnector : AbstractHorizontalConnector
         if (neighbourObject != null)
         {
             isConnected = (neighbourObject && neighbourObject.HasAdjacencyConnector);
-            isConnected &= neighbourObject.GenericType == _genericType || _genericType == TileObjectGenericType.None;
-            isConnected &= neighbourObject.SpecificType == _specificType || _specificType == TileObjectSpecificType.None;
+            isConnected &= neighbourObject.GenericType == TileObjectGenericType.Pipe;
+            isConnected &= neighbourObject.WorldOrigin == GetComponent<PlacedTileObject>().WorldOrigin + new Vector2Int((int)gameObject.transform.forward.x, (int)gameObject.transform.forward.z)
+                ||  neighbourObject.WorldOrigin == GetComponent<PlacedTileObject>().WorldOrigin - new Vector2Int((int)gameObject.transform.forward.x, (int)gameObject.transform.forward.z);
         }
+
+        
         return isConnected;
     }
 }

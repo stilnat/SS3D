@@ -102,6 +102,7 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset SteelWindowReinforced = new DatabaseAsset("SteelWindowReinforced", "Items");
         public static DatabaseAsset HeadsetSecurityLeft = new DatabaseAsset("HeadsetSecurityLeft", "Items");
         public static DatabaseAsset HeadsetSecurityRight = new DatabaseAsset("HeadsetSecurityRight", "Items");
+        public static DatabaseAsset ValveManual = new DatabaseAsset("ValveManual", "Items");
     }
 }
 

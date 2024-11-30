@@ -66,6 +66,8 @@ public class PipeNet
             atmos.AddCoreGasses(gassesPerPipe);
             pipe.AtmosObject = atmos;
         }
+
+        _gassesToAdd = 0f;
     }
     
     private void RemoveGasses()
@@ -77,5 +79,6 @@ public class PipeNet
             atmos.RemoveCoreGasses(gassesPerPipe);
             pipe.AtmosObject = atmos;
         }
+        _gassesToRemove = 0f;
     }
 }

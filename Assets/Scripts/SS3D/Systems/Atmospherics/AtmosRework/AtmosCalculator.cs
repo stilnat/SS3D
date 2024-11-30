@@ -111,7 +111,7 @@ namespace SS3D.Engine.AtmosphericsRework
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles to transfer.
-            return partialPressureDifference;
+            return partialPressureDifference * 5;
         }
 
         private static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
