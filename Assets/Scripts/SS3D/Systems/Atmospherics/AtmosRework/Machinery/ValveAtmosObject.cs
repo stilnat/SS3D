@@ -28,12 +28,16 @@ public class ValveAtmosObject : NetworkActor, IInteractionTarget, IAtmosPipe
     public int PipeNetIndex { get; set; }
     
     public AtmosObject AtmosObject { get; set; }
-    
+    public TileLayer TileLayer { get; private set; }
+    public Vector2Int WorldOrigin { get; private set; }
+
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        AtmosObject = new(new int2(0, 0), 0.5f);
+        AtmosObject = new(new(0, 0), 0.5f);
+        TileLayer = PlacedTileObject.Layer;
+        WorldOrigin = PlacedTileObject.WorldOrigin;
 
         if (Subsystems.Get<PipeSystem>().IsSetUp)
         {

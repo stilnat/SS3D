@@ -71,8 +71,9 @@ public class PipeSystem : NetworkSystem
     
     public void RemovePipe(IAtmosPipe pipe)
     {
-        PlacedTileObject tileObject = pipe.PlacedTileObject;
-        _pipesGraph.RemoveVertex(new((short)tileObject.WorldOrigin.x, (short)tileObject.WorldOrigin.y, (byte)tileObject.Layer));
+        _netPipes[pipe.PipeNetIndex].RemovePipe(pipe);
+        _pipesGraph.RemoveVertex(new((short)pipe.WorldOrigin.x, (short)pipe.WorldOrigin.y, (byte)pipe.TileLayer));
+        _pipesGraphIsDirty = true;
     }
 
     public void RegisterPipe(IAtmosPipe pipe)
@@ -112,7 +113,7 @@ public class PipeSystem : NetworkSystem
         _pipesGraphIsDirty = true;
     }
 
-    private void OnTick()
+    private void OnTick(float dt)
     {
         if (_pipesGraphIsDirty)
         {
@@ -121,7 +122,7 @@ public class PipeSystem : NetworkSystem
 
         foreach (IAtmosDevice atmosDevice in _atmosDevices)
         {
-            atmosDevice.StepAtmos(0.1f);
+            atmosDevice.StepAtmos(dt);
         }
 
         foreach (PipeNet pipeNet in _netPipes.Values)
@@ -260,6 +261,10 @@ public interface IAtmosPipe
     public int PipeNetIndex { get; set; }
     
     public AtmosObject AtmosObject { get; set; }
+
+    public TileLayer TileLayer { get; }
+
+    public Vector2Int WorldOrigin { get; }
 }
 
 public interface IAtmosValve : IAtmosPipe

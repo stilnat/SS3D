@@ -16,6 +16,10 @@ public class AtmosPipe : NetworkActor, IAtmosPipe
     public PlacedTileObject PlacedTileObject => GetComponent<PlacedTileObject>();
     
     public int PipeNetIndex { get; set; }
+
+    public Vector2Int WorldOrigin { get; private set; }
+
+    public TileLayer TileLayer { get; private set; }
     
     public override void OnStartServer()
     {
@@ -31,5 +35,14 @@ public class AtmosPipe : NetworkActor, IAtmosPipe
         {
             Subsystems.Get<PipeSystem>().OnSystemSetUp += () => Subsystems.Get<PipeSystem>().RegisterPipe(this);
         }
+
+        WorldOrigin = PlacedTileObject.WorldOrigin;
+        TileLayer = PlacedTileObject.Layer;
+    }
+
+    protected void OnDestroy()
+    {
+         base.OnDestroy();
+         Subsystems.Get<PipeSystem>().RemovePipe(this);
     }
 }

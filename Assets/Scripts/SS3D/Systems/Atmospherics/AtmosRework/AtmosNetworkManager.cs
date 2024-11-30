@@ -60,12 +60,18 @@ namespace SS3D.Engine.AtmosphericsRework
         }
 
         [Server]
-        private void HandleAtmosTick()
+        private void HandleAtmosTick(float dt)
         {
             foreach (Entity player in _playersEntities)
             { 
                 AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(player.Position, TileLayer.Turf);
-                Vector2Int key = atmosTile.Map.GetChunk(player.Position).GetKey();
+                AtmosChunk chunk = atmosTile.Map.GetChunk(player.Position);
+
+                if (chunk == null)
+                {
+                    return;
+                }
+                Vector2Int key = chunk.GetKey();
 
                 byte[] data = RetrieveGasData(player.Position);
                 

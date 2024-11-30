@@ -18,7 +18,7 @@ namespace SS3D.Engine.AtmosphericsRework
 {
     public class AtmosManager : Core.Behaviours.System
     {
-        public Action AtmosTick;
+        public Action<float> AtmosTick;
 
         public float UpdateRate = 0.5f;
 
@@ -77,7 +77,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 lastStep = Time.fixedTime;
 
-                AtmosTick?.Invoke();
+                AtmosTick?.Invoke(dt);
             }
         }
 

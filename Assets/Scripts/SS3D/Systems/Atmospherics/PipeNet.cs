@@ -23,6 +23,11 @@ public class PipeNet
         _pipes.Add(pipe);
     }
 
+    public void RemovePipe(IAtmosPipe pipe)
+    {
+        _pipes.Remove(pipe);
+    }
+
     public void Equalize()
     {
         float4 gasses = float4.zero;
