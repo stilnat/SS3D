@@ -17,13 +17,14 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private NativeArray<AtmosObject> _tileObjectBuffer;
 
-        private NativeList<int> _activeIndexes;
+        [ReadOnly]
+        private NativeArray<int> _activeIndexes;
 
         private readonly bool _diffusion;
 
         public TransferFluxesJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeList<int> activeIndexes, bool diffusion)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, bool diffusion)
         {
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;

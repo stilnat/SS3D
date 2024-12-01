@@ -23,8 +23,6 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private NativeList<int> _semiactiveIndexes;
 
-        public int ActiveCount;
-        public int SemiActiveCount;
         
         public SetActiveJob(NativeArray<AtmosObject> tileObjectBuffer,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
@@ -35,8 +33,6 @@ namespace SS3D.Engine.AtmosphericsRework
             _neighboursIndexes = neighboursIndexes;
             _activeIndexes = activeIndexes;
             _semiactiveIndexes = semiactiveIndexes;
-            ActiveCount = 0;
-            SemiActiveCount = 0;
         }
 
         public void Execute()
@@ -62,12 +58,12 @@ namespace SS3D.Engine.AtmosphericsRework
                 if (isActiveOrSemiActive[0])
                 {
                     atmos.State = AtmosState.Active;
-                    _activeIndexes[ActiveCount] = index;
+                    _activeIndexes.Add(index);
                 }
                 else if(isActiveOrSemiActive[1])
                 {
                     atmos.State = AtmosState.Semiactive;
-                    _semiactiveIndexes[SemiActiveCount] = index;
+                    _semiactiveIndexes.Add(index);
                 }
                 else
                 {
@@ -92,6 +88,11 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 return false;
             }
+
+            /*if (neighbour.State == AtmosState.Inactive && atmos.State == AtmosState.Inactive)
+            {
+                return false;
+            }  */
 
             if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.pressureEpsilon)
             {

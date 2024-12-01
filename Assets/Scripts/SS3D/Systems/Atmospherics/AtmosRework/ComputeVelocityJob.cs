@@ -18,10 +18,10 @@ namespace SS3D.Engine.AtmosphericsRework
         private NativeArray<AtmosObject> _tileObjectBuffer;
         
         [ReadOnly]
-        private NativeList<int> _activeIndexes;
+        private NativeArray<int> _activeIndexes;
         
         public ComputeVelocityJob(NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<MoleTransferToNeighbours> moleTransfers, NativeList<int> activeIndexes)
+            NativeArray<MoleTransferToNeighbours> moleTransfers, NativeArray<int> activeIndexes)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _moleTransfers = moleTransfers;

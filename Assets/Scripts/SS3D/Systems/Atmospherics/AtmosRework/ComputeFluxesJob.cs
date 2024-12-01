@@ -24,7 +24,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
         [ReadOnly]
-        private readonly NativeList<int> _activeIndexes;
+        private readonly NativeArray<int> _activeIndexes;
 
         [NativeDisableParallelForRestriction]
         [WriteOnly]
@@ -37,7 +37,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
 
         public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<MoleTransferToNeighbours> moleTransfers,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeList<int> activeIndexes, float deltaTime, bool activeFlux)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, float deltaTime, bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _deltaTime = deltaTime;

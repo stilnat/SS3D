@@ -37,19 +37,9 @@ namespace SS3D.Engine.AtmosphericsRework
         public NativeArray<AtmosObject> NativeAtmosTiles;
 
         /// <summary>
-        /// Contains all atmos objects for all pipe left on the map
-        /// </summary>
-        public NativeArray<AtmosObject> NativeAtmosPipesLeft;
-
-        /// <summary>
         /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
         /// </summary>
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
-
-        /// <summary>
-        /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
-        /// </summary>
-        public NativeArray<MoleTransferToNeighbours> PipeMoleTransferArray;
         
         /// <summary>
         /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
@@ -61,15 +51,8 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public NativeList<int> SemiActiveEnvironmentIndexes;
 
-        public NativeList<int> ActiveLeftPipeIndexes;
-
-        public NativeList<int> SemiActiveLeftPipeIndexes;
-
         // Keeps track of changed atmos objects 
         private readonly List<TileChanges> _atmosObjectsToChange;
-
-        // Keeps track of changed atmos objects 
-        private readonly List<TileChanges> _pipeAtmosObjectsToChange;
 
         public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles, List<AtmosContainer> atmosPipesleft)
         {
@@ -80,12 +63,8 @@ namespace SS3D.Engine.AtmosphericsRework
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             NeighbourTileIndexes = new(atmosTiles.Count, Allocator.Persistent);
-            NativeAtmosPipesLeft = new(atmosTiles.Count, Allocator.Persistent);
-            PipeMoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             ActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
             SemiActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
-            ActiveLeftPipeIndexes = new(atmosTiles.Count, Allocator.Persistent);
-            SemiActiveLeftPipeIndexes = new(atmosTiles.Count, Allocator.Persistent);
 
             // Fill the chunk key hash map in order of chunks created in the map
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
@@ -96,7 +75,6 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             _atmosObjectsToChange = new();
-            _pipeAtmosObjectsToChange = new();
             LoadNativeArrays();
         }
         
@@ -118,16 +96,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 Moles = amount, 
             };
 
-
-            switch (tile.Layer)
-            {
-                case TileLayer.Turf:
-                    _atmosObjectsToChange.Add(tileChanges);
-                    break;
-                case TileLayer.PipeLeft:
-                    _pipeAtmosObjectsToChange.Add(tileChanges);
-                    break;
-            }
+            _atmosObjectsToChange.Add(tileChanges);
         }
         
         public void AddGasses(AtmosContainer tile, float4 amount)
@@ -147,16 +116,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 ChunkKey = atmosObject.ChunkKey,
                 Moles = amount, 
             };
-            
-            switch (tile.Layer)
-            {
-                case TileLayer.Turf:
-                    _atmosObjectsToChange.Add(tileChanges);
-                    break;
-                case TileLayer.PipeLeft:
-                    _pipeAtmosObjectsToChange.Add(tileChanges);
-                    break;
-            }
+            _atmosObjectsToChange.Add(tileChanges);
         }
 
         public void RandomizeAllGasses(float maxAmount)
@@ -199,15 +159,7 @@ namespace SS3D.Engine.AtmosphericsRework
                         Moles = atmosObject.CoreGasses, 
                     };
 
-                    switch (tile.Layer)
-                    {
-                        case TileLayer.Turf:
-                            _atmosObjectsToChange.Add(tileChanges);
-                            break;
-                        case TileLayer.PipeLeft:
-                            _pipeAtmosObjectsToChange.Add(tileChanges);
-                            break;
-                    }
+                    _atmosObjectsToChange.Add(tileChanges);
                 }
             }
         }
@@ -240,35 +192,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
             }
             
-            foreach (TileChanges change in _pipeAtmosObjectsToChange)
-            {
-                int indexInNativeArray = IndexOfTileAtmosObject(change.ChunkKey, change.X, change.Y);
-
-                if (indexInNativeArray == -1)
-                {
-                    continue;
-                }
-
-                AtmosObject atmosObject = NativeAtmosPipesLeft[indexInNativeArray];
-
-                if (change.Add)
-                {
-                    atmosObject.AddCoreGasses(change.Moles); 
-                }
-                else
-                {
-                    atmosObject.RemoveCoreGasses(change.Moles); 
-                }
-                    
-                NativeAtmosPipesLeft[indexInNativeArray] = atmosObject;
-            }
-            
             _atmosObjectsToChange.Clear();
-            _pipeAtmosObjectsToChange.Clear();
             ActiveEnvironmentIndexes.Clear();
             SemiActiveEnvironmentIndexes.Clear();
-            ActiveLeftPipeIndexes.Clear();
-            SemiActiveLeftPipeIndexes.Clear();
         }
 
         private void LoadNativeArrays()
@@ -276,17 +202,14 @@ namespace SS3D.Engine.AtmosphericsRework
             for (int i = 0; i < AtmosTiles.Count; i++)
             {
                 NativeAtmosTiles[i] = AtmosTiles[i].AtmosObject;
-                NativeAtmosPipesLeft[i] = AtmosLeftPipes[i].AtmosObject;
             }
         }
 
         public void Destroy()
         {
             NativeAtmosTiles.Dispose();
-            NativeAtmosPipesLeft.Dispose();
             NeighbourTileIndexes.Dispose();
             MoleTransferArray.Dispose();
-            PipeMoleTransferArray.Dispose();
         }
 
         /// <summary>
@@ -296,9 +219,6 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             WriteResults(ActiveEnvironmentIndexes, NativeAtmosTiles, AtmosTiles);
             WriteResults(SemiActiveEnvironmentIndexes, NativeAtmosTiles, AtmosTiles);
-
-            WriteResults(ActiveLeftPipeIndexes, NativeAtmosPipesLeft, AtmosLeftPipes);
-            WriteResults(SemiActiveLeftPipeIndexes, NativeAtmosPipesLeft, AtmosLeftPipes);
         }
 
         private void WriteResults(NativeList<int> activeIndexes, NativeArray<AtmosObject> nativeAtmosObjects, List<AtmosContainer> atmosObjects)
