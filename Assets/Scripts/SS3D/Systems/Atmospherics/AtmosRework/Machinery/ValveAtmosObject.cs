@@ -5,9 +5,6 @@ using SS3D.Engine.AtmosphericsRework;
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Tile;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class ValveAtmosObject : NetworkActor, IInteractionTarget, IAtmosPipe
