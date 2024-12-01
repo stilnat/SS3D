@@ -91,14 +91,15 @@ namespace SS3D.Engine.AtmosphericsRework
         private static float4 ComputeActiveFluxMoles(AtmosObject atmos, AtmosObject neighbour, float4 enteringVelocity, float4 neighbourOppositeVelocity)
         {
             float neighbourPressure = neighbour.Pressure;
+            float absolutePressureDif = math.abs(atmos.Pressure - neighbourPressure);
 
             // when adjacent to an almost empty neighbour and atmos being itself almost empty, don't transfer.
-            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.pressureEpsilon && neighbourPressure <= GasConstants.pressureEpsilon)
+            if (absolutePressureDif <= GasConstants.pressureEpsilon && neighbourPressure <= GasConstants.pressureEpsilon)
             {
                 return new(0);
             }
             
-            if (math.abs(atmos.Pressure - neighbourPressure) <= GasConstants.fluxEpsilon)
+            if (absolutePressureDif <= GasConstants.fluxEpsilon)
             {
                 return new(0);
             }

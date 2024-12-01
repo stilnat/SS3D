@@ -44,6 +44,13 @@ namespace SS3D.Engine.AtmosphericsRework
             Pump,
             Suck,
         }
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            Animate();
+        }
+
+
 
         public override void StepAtmos(float dt)
         {
