@@ -188,6 +188,8 @@ namespace SS3D.Engine.AtmosphericsRework
                 {
                     atmosObject.RemoveCoreGasses(change.Moles); 
                 }
+
+                atmosObject.State = AtmosState.Active;
                     
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
             }

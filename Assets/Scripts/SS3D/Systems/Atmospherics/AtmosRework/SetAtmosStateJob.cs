@@ -10,7 +10,7 @@ using UnityEngine;
 namespace SS3D.Engine.AtmosphericsRework
 {
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    public struct SetActiveJob : IJob
+    public struct SetAtmosStateJob : IJob
     {
                 
         [ReadOnly]
@@ -24,7 +24,7 @@ namespace SS3D.Engine.AtmosphericsRework
         private NativeList<int> _semiactiveIndexes;
 
         
-        public SetActiveJob(NativeArray<AtmosObject> tileObjectBuffer,
+        public SetAtmosStateJob(NativeArray<AtmosObject> tileObjectBuffer,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
             NativeList<int> activeIndexes,
             NativeList<int> semiactiveIndexes)
@@ -89,10 +89,10 @@ namespace SS3D.Engine.AtmosphericsRework
                 return false;
             }
 
-            /*if (neighbour.State == AtmosState.Inactive && atmos.State == AtmosState.Inactive)
+            if (neighbour.State == AtmosState.Inactive && atmos.State == AtmosState.Inactive)
             {
                 return false;
-            }  */
+            } 
 
             if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.pressureEpsilon)
             {

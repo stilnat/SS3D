@@ -239,21 +239,21 @@ namespace SS3D.Engine.AtmosphericsRework
             // compute neighbour indexes of tile atmos objects. TODO :  No need to run this job unless a new chunk was created
             ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourTileIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
 
-            SetActiveJob setActiveJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, atmosJob.SemiActiveEnvironmentIndexes);
+            SetAtmosStateJob setAtmosStateJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, atmosJob.SemiActiveEnvironmentIndexes);
 
             ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime, false);
-            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray(), true);
+            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray());
 
             ComputeFluxesJob activeFluxesJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime, true);
             TransferFluxesJob transferActiveFluxesJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(), false);
+                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
             ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
             if (_usesParallelComputation)
             {
                 JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
-                JobHandle setActiveHandle = setActiveJob.Schedule(computeIndexesHandle);
+                JobHandle setActiveHandle = setAtmosStateJob.Schedule(computeIndexesHandle);
                 setActiveHandle.Complete();
 
                 JobHandle diffusionFluxHandle = diffusionFluxJob.Schedule(atmosJob.SemiActiveEnvironmentIndexes.Length, 64, setActiveHandle);
@@ -274,13 +274,16 @@ namespace SS3D.Engine.AtmosphericsRework
             else
             {
                 computeIndexesJob.Run(atmosJob.AtmosTiles.Count);
-                setActiveJob.Run();
+                setAtmosStateJob.Run();
                 diffusionFluxJob.Run(atmosJob.SemiActiveEnvironmentIndexes.Length);
                 transferDiffusionFluxJob.Run();
                 activeFluxesJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
                 transferActiveFluxesJob.Run();
                 velocityJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
             }
+            Debug.Log($"Active count : {atmosJob.ActiveEnvironmentIndexes.Length}, SemiActive count : {atmosJob.SemiActiveEnvironmentIndexes.Length}, "
+                + $"Inactive count : {atmosJob.NativeAtmosTiles.Length - atmosJob.ActiveEnvironmentIndexes.Length - atmosJob.SemiActiveEnvironmentIndexes.Length}");
+
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ using Unity.Mathematics;
 namespace SS3D.Engine.AtmosphericsRework
 {
 
-    //[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
+    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct TransferFluxesJob : IJob
     {
         [ReadOnly]
@@ -20,17 +20,14 @@ namespace SS3D.Engine.AtmosphericsRework
         [ReadOnly]
         private NativeArray<int> _activeIndexes;
 
-        private readonly bool _diffusion;
-
         public TransferFluxesJob(NativeArray<MoleTransferToNeighbours> moleTransfers,
             NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, bool diffusion)
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes)
         {
             _moleTransfers = moleTransfers;
             _tileObjectBuffer = tileObjectBuffer;
-            _diffusion = diffusion;
-            _neighboursIndexes = neighboursIndexes;
             _activeIndexes = activeIndexes;
+            _neighboursIndexes = neighboursIndexes;
         }
 
         public void Execute()
