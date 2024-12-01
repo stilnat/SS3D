@@ -42,6 +42,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private Vector3[] _atmosNeighboursPositions;
 
+        [SerializeField]
         private Transform _fans;
 
         private TweenerCore<Quaternion, Vector3, QuaternionOptions> _rotationTween;
@@ -167,7 +168,7 @@ namespace SS3D.Engine.AtmosphericsRework
             if(_deviceActive)
             {
                 float speed = _mode == OperatingMode.Scrubbing ? RotationSpeedScrubbing : RotationSpeedSiphoning;
-                _rotationTween = transform.DORotate(Vector3.up * (speed * 360), 1f, RotateMode.WorldAxisAdd)
+                _rotationTween = _fans.DORotate(Vector3.up * (speed * 360), 1f, RotateMode.WorldAxisAdd)
                     .SetEase(Ease.Linear) // Ensures constant speed
                     .SetLoops(-1, LoopType.Incremental);
             }
