@@ -50,8 +50,6 @@ namespace SS3D.Engine.AtmosphericsRework
             Animate();
         }
 
-
-
         public override void StepAtmos(float dt)
         {
             if (!_deviceActive)
