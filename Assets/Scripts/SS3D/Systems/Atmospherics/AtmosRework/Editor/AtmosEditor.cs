@@ -302,8 +302,8 @@ public class AtmosEditor : EditorWindow
 
     private void DrawPressureGizmo(AtmosObject atmosObject, Vector3 position, Color stateColor)
     {
-        float pressureScale = 0.02f;
-        float pressure = atmosObject.Pressure * pressureScale;
+        // we divide like this so air at atmos pressure appear as 1 meter high.
+        float pressure = atmosObject.Pressure / 101.32f;
         AtmosState tileState = atmosObject.State;
 
         if (tileState == AtmosState.Active || tileState == AtmosState.Semiactive || tileState == AtmosState.Inactive)
@@ -311,7 +311,6 @@ public class AtmosEditor : EditorWindow
             if (_showTiles)
             {
                 Handles.color = Color.white - stateColor;
-                float colorLerpValue = pressure / 100f;
                 Handles.DrawWireCube(position + new Vector3(0, pressure / 2, 0), new Vector3(_gizmoSize, pressure, _gizmoSize));
             }
         }
@@ -332,7 +331,8 @@ public class AtmosEditor : EditorWindow
         float contentScale = 0.05f;
         float offset = 0f;
         Color[] colors = new Color[] { Color.yellow, Color.white, Color.gray, Color.magenta };
-        float4 moles = atmosObject.CoreGasses * contentScale;
+        // divide by 107 so the amount corresponds roughly to one meter high for normal atmos pressure and 20 degree celsius.
+        float4 moles = atmosObject.CoreGasses / 107f;
 
         for (int i = 0; i < 4; ++i)
         {

@@ -2444,7 +2444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f60b6c7627b0e1442ba89319e509a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpdateRate: 0.5
+  UpdateRate: 0.1
   _usesParallelComputation: 0
 --- !u!114 &1798120481
 MonoBehaviour:
