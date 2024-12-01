@@ -1,3 +1,6 @@
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using SS3D.Content.Systems.Interactions;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
@@ -39,6 +42,14 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private Vector3[] _atmosNeighboursPositions;
 
+        private Transform _fans;
+
+        private TweenerCore<Quaternion, Vector3, QuaternionOptions> _rotationTween;
+
+        private const float RotationSpeedScrubbing = 1f;
+
+        private const float RotationSpeedSiphoning = 1.5f;
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -51,6 +62,8 @@ namespace SS3D.Engine.AtmosphericsRework
                 position + Vector3.right,
                 position + Vector3.left,
             };
+
+            Animate();
         }
 
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
@@ -100,7 +113,7 @@ namespace SS3D.Engine.AtmosphericsRework
             // We loop 1 or 5 times based on the range setting
             for (int i = 0; i < numOfTiles; i++)
             {
-                AtmosObject atmos = Subsystems.Get<AtmosManager>().GetAtmosContainer(_atmosNeighboursPositions[i], TileLayer.Turf).AtmosObject;
+                AtmosObject atmos = Subsystems.Get<AtmosManager>().GetAtmosContainer(_atmosNeighboursPositions[i]).AtmosObject;
                 float4 toSiphon = 0;
                 
                 if (_mode == OperatingMode.Siphoning)
@@ -122,13 +135,14 @@ namespace SS3D.Engine.AtmosphericsRework
                 }
 
                 Subsystems.Get<PipeSystem>().AddCoreGasses(pipe.PlacedTileObject.gameObject.transform.position, toSiphon, _pipeLayer);
-                Subsystems.Get<AtmosManager>().RemoveGasses(_atmosNeighboursPositions[i], toSiphon, TileLayer.Turf);
+                Subsystems.Get<AtmosManager>().RemoveGasses(_atmosNeighboursPositions[i], toSiphon);
             }
         }
 
         private void ActiveInteract(InteractionEvent interactionEvent, InteractionReference arg2)
         {
             _deviceActive = !_deviceActive;
+            Animate();
         }
 
         private void ModeInteract(InteractionEvent interactionEvent, InteractionReference arg2)
@@ -139,6 +153,25 @@ namespace SS3D.Engine.AtmosphericsRework
                 OperatingMode.Siphoning => OperatingMode.Scrubbing,
                 _ => _mode,
             };
+            Animate();
+        }
+
+        private void Animate()
+        {
+            if (_rotationTween != null && _rotationTween.IsActive())
+            {
+                _rotationTween.Kill(); // Stops the tween
+                _rotationTween = null; // Reset the reference
+            }
+
+            if(_deviceActive)
+            {
+                float speed = _mode == OperatingMode.Scrubbing ? RotationSpeedScrubbing : RotationSpeedSiphoning;
+                _rotationTween = transform.DORotate(Vector3.up * (speed * 360), 1f, RotateMode.WorldAxisAdd)
+                    .SetEase(Ease.Linear) // Ensures constant speed
+                    .SetLoops(-1, LoopType.Incremental);
+            }
+          
         }
     }
 }

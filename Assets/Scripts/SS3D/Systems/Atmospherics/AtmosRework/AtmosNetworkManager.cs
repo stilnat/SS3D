@@ -64,7 +64,7 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             foreach (Entity player in _playersEntities)
             { 
-                AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(player.Position, TileLayer.Turf);
+                AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(player.Position);
                 AtmosChunk chunk = atmosTile.Map.GetChunk(player.Position);
 
                 if (chunk == null)
@@ -111,7 +111,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private byte[] RetrieveGasData(Vector3 position)
         {
-            AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(position, TileLayer.Turf);
+            AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(position);
             AtmosChunk[] chunks = atmosTile.Map.GetChunkAndEightNeighbours(position);
                 
             List<byte> chunkBytesList = new();
@@ -237,7 +237,7 @@ namespace SS3D.Engine.AtmosphericsRework
             // todo : should track player controlled entity instead of spawned entity as spawned entity can change
             _playersEntities = e.SpawnedPlayers;
             Entity lastSpawned = e.SpawnedPlayers.Last();
-            AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(lastSpawned.Position, TileLayer.Turf);
+            AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(lastSpawned.Position);
             _previousValuesChunkCenteredPlayers[lastSpawned.Owner] = 
                 new(RetrieveGasData(lastSpawned.Position), atmosTile.Chunk.GetKey());
             RpcSendPreviousValues(lastSpawned.Owner, _previousValuesChunkCenteredPlayers[lastSpawned.Owner].PreviousConcentrationValues);

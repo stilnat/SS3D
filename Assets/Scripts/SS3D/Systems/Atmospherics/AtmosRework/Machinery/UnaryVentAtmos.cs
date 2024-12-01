@@ -1,3 +1,6 @@
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using SS3D.Content.Systems.Interactions;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
@@ -20,6 +23,15 @@ namespace SS3D.Engine.AtmosphericsRework
         private float _targetPressure = 101.3f;
         private PressureEqualizingMode _pressureMode = PressureEqualizingMode.External;
         private OperatingMode _operatingMode = OperatingMode.Pump;
+
+        [SerializeField]
+        private Transform _fans;
+
+        private TweenerCore<Quaternion, Vector3, QuaternionOptions> _rotationTween;
+
+        private const float RotationSpeedSucking = 1f;
+
+        private const float RotationSpeedPumping = -1f;
 
         private enum PressureEqualizingMode
         {
@@ -45,7 +57,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return;
             }
 
-            AtmosObject atmosEnv = Subsystems.Get<AtmosManager>().GetAtmosContainer(transform.position, TileLayer.Turf).AtmosObject;
+            AtmosObject atmosEnv = Subsystems.Get<AtmosManager>().GetAtmosContainer(transform.position).AtmosObject;
             AtmosObject atmosPipe = pipe.AtmosObject;
 
             if ((_pressureMode == PressureEqualizingMode.External && atmosEnv.Pressure > _targetPressure) ||
@@ -66,12 +78,12 @@ namespace SS3D.Engine.AtmosphericsRework
 
             if (_operatingMode == OperatingMode.Pump)
             {
-                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer, TileLayer.Turf);
+                Subsystems.Get<AtmosManager>().AddGasses(transform.position, toTransfer);
                 Subsystems.Get<PipeSystem>().RemoveCoreGasses(transform.position, toTransfer, _pipeLayer);
             }
             else
             {
-                Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer, TileLayer.Turf);
+                Subsystems.Get<AtmosManager>().RemoveGasses(transform.position, toTransfer);
                 Subsystems.Get<PipeSystem>().AddCoreGasses(transform.position, toTransfer, _pipeLayer);
             }
         }
@@ -103,11 +115,14 @@ namespace SS3D.Engine.AtmosphericsRework
                 OperatingMode.Suck => OperatingMode.Pump,
                 _ => _operatingMode,
             };
+
+            Animate();
         }
 
         private void ActiveInteract(InteractionEvent interactionEvent, InteractionReference arg2)
         {
             _deviceActive = !_deviceActive;
+            Animate();
         }
 
         private void PressureModeInteract(InteractionEvent interactionEvent, InteractionReference arg2)
@@ -119,6 +134,24 @@ namespace SS3D.Engine.AtmosphericsRework
                 _ => _pressureMode,
             };
         }
+
+        private void Animate()
+        {
+            if (_rotationTween != null && _rotationTween.IsActive())
+            {
+                _rotationTween.Kill(); // Stops the tween
+                _rotationTween = null; // Reset the reference
+            }
+
+            if(_deviceActive)
+            {
+                float speed = _operatingMode == OperatingMode.Pump ? RotationSpeedPumping : RotationSpeedSucking;
+                _rotationTween = transform.DORotate(Vector3.up * (speed * 360), 1f, RotateMode.WorldAxisAdd)
+                    .SetEase(Ease.Linear) // Ensures constant speed
+                    .SetLoops(-1, LoopType.Incremental);
+            }
+          
+        }
+
     }
 }
-

@@ -86,27 +86,21 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        public AtmosContainer GetTileAtmosObject(int x, int y, TileLayer layer)
+        public AtmosContainer GetTileAtmosObject(int x, int y)
         {
             if (x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight())
             {
-                switch (layer)
-                {
-                    case TileLayer.Turf:
-                        return _atmosGridList[y * GetWidth() + x];
-                    case TileLayer.PipeLeft:
-                        return _atmosPipeLeftList[y * GetWidth() + x];
-                }
+                return _atmosGridList[y * GetWidth() + x];
             }
 
             return default;
         }
 
-        public AtmosContainer GetTileAtmosObject(Vector3 worldPosition, TileLayer layer)
+        public AtmosContainer GetTileAtmosObject(Vector3 worldPosition)
         {
             Vector2Int vector = new Vector2Int();
             vector = GetXY(worldPosition);
-            return GetTileAtmosObject(vector.x, vector.y, layer);
+            return GetTileAtmosObject(vector.x, vector.y);
         }
         
         public List<AtmosContainer> GetAllAtmosObjects()

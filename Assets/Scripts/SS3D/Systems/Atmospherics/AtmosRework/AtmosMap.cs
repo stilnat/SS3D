@@ -35,7 +35,7 @@ namespace SS3D.Engine.AtmosphericsRework
             this.tileMap = tileMap;
         }
 
-        public AtmosContainer GetTileAtmosObject(Vector3 worldPosition, TileLayer layer)
+        public AtmosContainer GetTileAtmosObject(Vector3 worldPosition)
         {
             /*
             AtmosChunk chunk = GetOrCreateAtmosChunk(worldPosition);
@@ -51,7 +51,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return null;
             }
 
-            return chunk.GetTileAtmosObject(worldPosition, layer);
+            return chunk.GetTileAtmosObject(worldPosition);
         }
 
         public string GetName()

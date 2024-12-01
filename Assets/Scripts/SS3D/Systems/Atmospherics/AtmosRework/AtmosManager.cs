@@ -81,11 +81,11 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        public AtmosContainer GetAtmosContainer(Vector3 worldPosition, TileLayer layer)
+        public AtmosContainer GetAtmosContainer(Vector3 worldPosition)
         {
             foreach (AtmosMap map in atmosMaps)
             {
-                AtmosContainer atmos = map.GetTileAtmosObject(worldPosition, layer);
+                AtmosContainer atmos = map.GetTileAtmosObject(worldPosition);
 
                 if (atmos != null)
                 {
@@ -101,9 +101,9 @@ namespace SS3D.Engine.AtmosphericsRework
             return atmosJobs;
         }
         
-        public void AddGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
+        public void AddGasses(Vector3 worldPosition, float4 amount)
         {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+            AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {
@@ -121,9 +121,9 @@ namespace SS3D.Engine.AtmosphericsRework
             atmosJobs.ForEach(job => job.ClearAllGasses());
         }
         
-        public void RemoveGasses(Vector3 worldPosition, float4 amount, TileLayer layer)
+        public void RemoveGasses(Vector3 worldPosition, float4 amount)
         {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+            AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {
@@ -131,9 +131,9 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        public void AddHeat(Vector3 worldPosition, float amount, TileLayer layer)
+        public void AddHeat(Vector3 worldPosition, float amount)
         {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+            AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {
@@ -144,9 +144,9 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
-        public void RemoveHeat(Vector3 worldPosition, float amount, TileLayer layer)
+        public void RemoveHeat(Vector3 worldPosition, float amount)
         {
-            AtmosContainer tile = GetAtmosContainer(worldPosition, layer);
+            AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {

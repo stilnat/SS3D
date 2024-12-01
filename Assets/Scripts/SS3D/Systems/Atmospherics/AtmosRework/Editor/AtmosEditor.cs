@@ -187,10 +187,10 @@ public class AtmosEditor : EditorWindow
             switch (_selectedOption)
             {
                 case GasEditorOption.AddGasEnvironment:
-                    _atmosManager.AddGasses(snappedPosition, amount, TileLayer.Turf);
+                    _atmosManager.AddGasses(snappedPosition, amount);
                     break;
                 case GasEditorOption.RemoveGasEnvironment:
-                    _atmosManager.RemoveGasses(snappedPosition, amount, TileLayer.Turf);
+                    _atmosManager.RemoveGasses(snappedPosition, amount);
                     break;
                 case GasEditorOption.AddGasPipeLeft:
                     _pipeSystem.AddCoreGasses(snappedPosition, amount, TileLayer.PipeLeft);
@@ -199,10 +199,10 @@ public class AtmosEditor : EditorWindow
                     _pipeSystem.RemoveCoreGasses(snappedPosition, amount, TileLayer.PipeLeft);
                     break;
                 case GasEditorOption.AddHeat:
-                    _atmosManager.AddHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
+                    _atmosManager.AddHeat(snappedPosition, _selectedAmount);
                     break;
                 case GasEditorOption.RemoveHeat:
-                    _atmosManager.RemoveHeat(snappedPosition, _selectedAmount, TileLayer.Turf);
+                    _atmosManager.RemoveHeat(snappedPosition, _selectedAmount);
                     break;
             }
         }
