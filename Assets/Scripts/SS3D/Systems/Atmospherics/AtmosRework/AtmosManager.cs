@@ -100,6 +100,16 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             return atmosJobs;
         }
+
+        public void ChangeState(Vector3 worldPosition, AtmosState state)
+        {
+            AtmosContainer tile = GetAtmosContainer(worldPosition);
+
+            if (tile != null)
+            {
+                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).ChangeState(tile, state);
+            }
+        }
         
         public void AddGasses(Vector3 worldPosition, float4 amount)
         {
@@ -225,7 +235,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     pipesLeft.AddRange(pipeLeftAtmosObjects);
                 }
 
-                AtmosJobPersistentData atmosJob = new(map, tiles, pipesLeft);
+                AtmosJobPersistentData atmosJob = new(map, tiles);
                 atmosJobs.Add(atmosJob);
 
                 initCounter += tiles.Count;

@@ -1,4 +1,6 @@
 ﻿using FishNet.Object;
+using SS3D.Core;
+using SS3D.Engine.AtmosphericsRework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,6 +95,7 @@ namespace SS3D.Systems.Furniture
         [Server]
         private void SetOpen(bool open)
         {
+            Subsystems.Get<AtmosManager>().ChangeState(transform.position, open ? AtmosState.Active : AtmosState.Blocked);
             _animator.SetBool(OpenId, open);
         }
     }

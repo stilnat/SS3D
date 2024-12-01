@@ -12,19 +12,27 @@ namespace SS3D.Engine.AtmosphericsRework
     /// </summary>
     public struct AtmosJobPersistentData
     {
+
+        private enum ChangeType
+        {
+            Add,
+            Remove,
+            StateChange,
+        }
+
         private struct TileChanges
         {
-            public bool Add;
+            public ChangeType ChangeType;
             public int X;
             public int Y;
             public int2 ChunkKey;
             public float4 Moles;
+            public AtmosState State;
         }
         
         public readonly AtmosMap Map;
 
         public readonly List<AtmosContainer> AtmosTiles;
-        public readonly List<AtmosContainer> AtmosLeftPipes;
 
         /// <summary>
         ///  For a given index in this array, return the indexes of all its neighbours, used by the atmos tiles. 
@@ -54,11 +62,10 @@ namespace SS3D.Engine.AtmosphericsRework
         // Keeps track of changed atmos objects 
         private readonly List<TileChanges> _atmosObjectsToChange;
 
-        public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles, List<AtmosContainer> atmosPipesleft)
+        public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles)
         {
             Map = map;
             AtmosTiles = atmosTiles;
-            AtmosLeftPipes = atmosPipesleft;
 
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
@@ -77,6 +84,23 @@ namespace SS3D.Engine.AtmosphericsRework
             _atmosObjectsToChange = new();
             LoadNativeArrays();
         }
+
+        public void ChangeState(AtmosContainer tile, AtmosState state)
+        {
+            AtmosObject atmosObject = tile.AtmosObject;
+
+            TileChanges tileChanges = new()
+            {
+                ChangeType = ChangeType.StateChange,
+                X = tile.X,
+                Y = tile.Y,
+                ChunkKey = atmosObject.ChunkKey,
+                Moles = 0, 
+                State = state,
+            };
+
+            _atmosObjectsToChange.Add(tileChanges);
+        }
         
         public void RemoveGasses(AtmosContainer tile, float4 amount)
         {
@@ -89,7 +113,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             TileChanges tileChanges = new()
             {
-                Add = false,
+                ChangeType = ChangeType.Remove,
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
@@ -110,7 +134,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             TileChanges tileChanges = new()
             {
-                Add = true,
+                ChangeType = ChangeType.Add,
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
@@ -130,7 +154,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
                     TileChanges tileChanges = new()
                     {
-                        Add = true,
+                        ChangeType = ChangeType.Add,
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
@@ -152,7 +176,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     
                     TileChanges tileChanges = new()
                     {
-                        Add = false,
+                        ChangeType = ChangeType.Remove,
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
@@ -180,16 +204,22 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 AtmosObject atmosObject = NativeAtmosTiles[indexInNativeArray];
 
-                if (change.Add)
+                switch (change.ChangeType)
                 {
-                    atmosObject.AddCoreGasses(change.Moles); 
-                }
-                else
-                {
-                    atmosObject.RemoveCoreGasses(change.Moles); 
+                     case ChangeType.Add:
+                         atmosObject.AddCoreGasses(change.Moles);
+                         atmosObject.State = AtmosState.Active;
+                         break;
+                     case ChangeType.Remove:
+                         atmosObject.RemoveCoreGasses(change.Moles);
+                         atmosObject.State = AtmosState.Active;
+                         break;
+                     case ChangeType.StateChange:
+                         atmosObject.State = change.State;
+                         break;
                 }
 
-                atmosObject.State = AtmosState.Active;
+                
                     
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
             }
