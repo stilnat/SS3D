@@ -212,4 +212,6 @@ MonoBehaviour:
       _value: {fileID: 2114292304283180005, guid: bc08055e4ec2e204f8f46a379b2b6603, type: 3}
     - _key: ValveManual
       _value: {fileID: 7517227644148288971, guid: e27b2c3f420e9b64da16541e1e381830, type: 3}
+    - _key: FilterR
+      _value: {fileID: 5199170345094387172, guid: 420c8757d9e32fa43bee79d6c980fd19, type: 3}
     _new: 

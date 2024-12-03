@@ -1,3 +1,5 @@
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using SS3D.Content.Systems.Interactions;
 using SS3D.Core;
 using SS3D.Engine.AtmosphericsRework;
@@ -15,16 +17,36 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 {
     private const float MaxPressure = 4500f;
 
-    private const float LitersPerSecond = 10f;
+
+    [SyncVar]
+    private float _litersPerSecond = 10f;
     
     private bool _filterActive = false;
 
     private float _targetPressure;
-    
-    private bool4 _filterCoreGasses = new(false, false, false, true);
+
+    [SyncVar(OnChange = nameof(SyncFilterOxygen))]
+    private bool _filterOxygen;
+
+    [SyncVar(OnChange = nameof(SyncFilterNitrogen))]
+    private bool _filterNitrogen;
+
+    [SyncVar(OnChange = nameof(SyncFilterCarbonDioxyde))]
+    private bool _filterCarbonDioxyde;
+
+    [SyncVar(OnChange = nameof(SyncFilterPlasma))]
+    private bool _filterPlasma;
 
     private TileLayer _pipeLayer = TileLayer.PipeLeft;
 
+    public GameObject FilterViewPrefab;
+
+    public Action<bool, CoreAtmosGasses> UpdateFilterGas;
+
+    public void SetFlux(float litersPerSecond)
+    {
+        _litersPerSecond = litersPerSecond;
+    }
 
 
     public void SetActive(bool filterActive)
@@ -32,6 +54,7 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
         _filterActive = filterActive;
     }
     
+    [Server]
     public override void StepAtmos(float dt)
     {
         if (!_filterActive)
@@ -57,17 +80,20 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
         }
 
         AtmosObject atmosInput = input.AtmosObject;
-        float maxMolesToTransfer = (atmosInput.Pressure * LitersPerSecond * dt) / (GasConstants.gasConstant * atmosInput.Temperature);
+        float maxMolesToTransfer = (atmosInput.Pressure * _litersPerSecond * dt) / (GasConstants.gasConstant * atmosInput.Temperature);
         float4 molesToTransfer = atmosInput.CoreGassesProportions * math.max(maxMolesToTransfer, atmosInput.TotalMoles);
+
+        bool4 filterCoreGasses= new bool4(_filterOxygen, _filterNitrogen, _filterCarbonDioxyde, _filterPlasma);
         
-        Subsystems.Get<PipeSystem>().AddCoreGasses(filterOutputPosition, molesToTransfer * (int4)_filterCoreGasses, _pipeLayer);
-        Subsystems.Get<PipeSystem>().AddCoreGasses(otherOutputPosition, molesToTransfer * (int4)!_filterCoreGasses, _pipeLayer);
+        Subsystems.Get<PipeSystem>().AddCoreGasses(filterOutputPosition, molesToTransfer * (int4)filterCoreGasses, _pipeLayer);
+        Subsystems.Get<PipeSystem>().AddCoreGasses(otherOutputPosition, molesToTransfer * (int4)!filterCoreGasses, _pipeLayer);
         Subsystems.Get<PipeSystem>().RemoveCoreGasses(otherOutputPosition, molesToTransfer, _pipeLayer);
     }
 
     private void FilterInteract(InteractionEvent interactionEvent, InteractionReference arg2)
     {
-        SetActive(!_filterActive);
+        GameObject filterView = Instantiate(FilterViewPrefab);
+        filterView.GetComponent<FilterView>().Initialize(this);
     }
 
     public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
@@ -79,5 +105,51 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
                 Name = _filterActive ? "Stop filter" : "Start filter", Interact = FilterInteract, RangeCheck = true,
             },
         };
+    }
+
+    [Client]
+    public void FilterGas(bool isFiltering, CoreAtmosGasses gas)
+    {
+        RpcFilterGas(isFiltering, gas);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RpcFilterGas(bool isFiltering, CoreAtmosGasses gas)
+    {
+        switch (gas)
+        {
+              case CoreAtmosGasses.Nitrogen:
+                  _filterNitrogen = isFiltering;
+                  break;
+              case CoreAtmosGasses.Oxygen:
+                  _filterOxygen = isFiltering;
+                  break;
+              case CoreAtmosGasses.CarbonDioxide:
+                  _filterCarbonDioxyde = isFiltering;
+                  break;
+              case CoreAtmosGasses.Plasma:
+                  _filterPlasma = isFiltering;
+                  break;
+        }
+    }
+
+    private void SyncFilterOxygen(bool oldValue, bool newValue, bool asServer)
+    {
+        UpdateFilterGas?.Invoke(newValue, CoreAtmosGasses.Oxygen);
+    }
+
+    private void SyncFilterNitrogen(bool oldValue, bool newValue, bool asServer)
+    {
+        UpdateFilterGas?.Invoke(newValue, CoreAtmosGasses.Nitrogen);
+    }
+
+    private void SyncFilterPlasma(bool oldValue, bool newValue, bool asServer)
+    {
+        UpdateFilterGas?.Invoke(newValue, CoreAtmosGasses.Plasma);
+    }
+
+    private void SyncFilterCarbonDioxyde(bool oldValue, bool newValue, bool asServer)
+    {
+        UpdateFilterGas?.Invoke(newValue, CoreAtmosGasses.CarbonDioxide);
     }
 }
