@@ -89,17 +89,6 @@ public class PipeSystem : NetworkSystem
         List<PlacedTileObject> neighbours = tileObject.Connector?.GetNeighbours();
         foreach (PlacedTileObject neighbour in neighbours)
         {
-            if (neighbour.TryGetComponent(out IAtmosValve valve) && 
-                neighbour.WorldOrigin + new Vector2Int((int)neighbour.transform.forward.x, (int)neighbour.transform.forward.z) != tileObject.WorldOrigin && 
-                neighbour.WorldOrigin - new Vector2Int((int)neighbour.transform.forward.x, (int)neighbour.transform.forward.z) != tileObject.WorldOrigin)
-            {
-                continue;
-            }
-
-            if (valve is not null && !valve.IsOpen)
-            {
-                continue;
-            }
 
             PipeVertice neighbourPipe = new(
                 (short)neighbour.WorldOrigin.x,

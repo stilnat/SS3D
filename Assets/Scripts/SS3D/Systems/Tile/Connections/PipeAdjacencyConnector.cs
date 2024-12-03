@@ -18,12 +18,33 @@ namespace SS3D.Systems.Tile.Connections
         public override bool IsConnected(PlacedTileObject neighbourObject)
         {
             bool isConnected = false;
-            if (neighbourObject != null)
+            PlacedTileObject tileObject =GetComponent<PlacedTileObject>();
+
+            if (neighbourObject == null || tileObject == null)
             {
-                isConnected = (neighbourObject && neighbourObject.HasAdjacencyConnector);
-                isConnected &= neighbourObject.GenericType == _genericType || _genericType == TileObjectGenericType.None;
-                isConnected &= neighbourObject.SpecificType == _specificType || _specificType == TileObjectSpecificType.None;
+                return false;
             }
+
+            isConnected = (neighbourObject && neighbourObject.HasAdjacencyConnector);
+            isConnected &= neighbourObject.GenericType == _genericType || _genericType == TileObjectGenericType.None;
+            isConnected &= neighbourObject.SpecificType == _specificType || _specificType == TileObjectSpecificType.None;
+
+
+            if (neighbourObject.TryGetComponent(out IAtmosValve valve))
+            {
+                isConnected &=  tileObject.WorldOrigin  == neighbourObject.WorldOrigin + new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z) || 
+                    tileObject.WorldOrigin == neighbourObject.WorldOrigin - new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z);
+
+                isConnected &= valve.IsOpen;
+            }
+
+            if (neighbourObject.TryGetComponent(out FilterAtmosObject filter))
+            {
+                isConnected &=  tileObject.WorldOrigin  == neighbourObject.WorldOrigin + new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z) || 
+                    tileObject.WorldOrigin == neighbourObject.WorldOrigin - new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z)
+                    ||  tileObject.WorldOrigin == neighbourObject.WorldOrigin + new Vector2Int((int)gameObject.transform.right.x, (int)gameObject.transform.right.z);
+            }
+
             return isConnected;
         }
     }

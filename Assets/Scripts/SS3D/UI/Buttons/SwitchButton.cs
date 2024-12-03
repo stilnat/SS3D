@@ -43,6 +43,7 @@ public class SwitchButton : MonoBehaviour
     {
         if(state == State) return;
 
+        State = state;
         _image.sprite = state ? _stateOnSprite : _stateOffSprite;
         Switch?.Invoke(state);
     }
