@@ -8,6 +8,7 @@ using SS3D.Systems.Tile.Connections;
 using SS3D.Systems.Tile.Connections.AdjacencyTypes;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Systems.Tile.Connections
@@ -26,6 +27,11 @@ namespace SS3D.Systems.Tile.Connections
         private void Setup()
         {
             _placedObject = GetComponent<PlacedTileObject>();
+        }
+
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
         }
 
         /// <summary>

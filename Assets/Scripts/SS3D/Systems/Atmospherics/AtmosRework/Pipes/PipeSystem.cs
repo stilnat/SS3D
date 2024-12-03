@@ -86,9 +86,14 @@ public class PipeSystem : NetworkSystem
 
 
         _pipesGraph.AddVertex(pipeVertice);
-        List<PlacedTileObject> neighbours = tileObject.Connector?.GetNeighbours();
+        List<PlacedTileObject> neighbours = tileObject.Connector?.GetConnectedNeighbours();
         foreach (PlacedTileObject neighbour in neighbours)
         {
+            // some stuff can be neighbour in the connectable sense, but should not be connected to the pipenet, e.g. atmos mixers and filters.
+            if (!neighbour.TryGetComponent(out IAtmosPipe pipeNeighbour))
+            {
+                continue;
+            }
 
             PipeVertice neighbourPipe = new(
                 (short)neighbour.WorldOrigin.x,

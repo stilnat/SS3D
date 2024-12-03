@@ -109,6 +109,11 @@ namespace SS3D.Systems.Tile.Connections
                 x.TryGetComponent<DirectionalAdjacencyConnector>(out var component)).ToList();
         }
 
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
+        }
+
         /// <summary>
         /// implement
         /// </summary>
@@ -738,4 +743,3 @@ namespace SS3D.Systems.Tile.Connections
 
 
 }
-

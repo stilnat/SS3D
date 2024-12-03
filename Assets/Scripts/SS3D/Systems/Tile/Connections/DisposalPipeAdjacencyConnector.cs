@@ -72,6 +72,11 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public int HorizontalConnectionCount => _adjacencyMap.CardinalConnectionCount;
 
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
+        }
+
 
         private void Setup()
         {

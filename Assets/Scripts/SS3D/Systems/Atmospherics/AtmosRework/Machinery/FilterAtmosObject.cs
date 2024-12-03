@@ -19,7 +19,7 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 
 
     [SyncVar]
-    private float _litersPerSecond = 10f;
+    private float _litersPerSecond = 1f;
     
     private bool _filterActive = false;
 
@@ -83,11 +83,16 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
         float maxMolesToTransfer = (atmosInput.Pressure * _litersPerSecond * dt) / (GasConstants.gasConstant * atmosInput.Temperature);
         float4 molesToTransfer = atmosInput.CoreGassesProportions * math.max(maxMolesToTransfer, atmosInput.TotalMoles);
 
+        if (math.all(molesToTransfer == 0))
+        {
+            return;
+        }
+
+
         bool4 filterCoreGasses= new bool4(_filterOxygen, _filterNitrogen, _filterCarbonDioxyde, _filterPlasma);
-        
         Subsystems.Get<PipeSystem>().AddCoreGasses(filterOutputPosition, molesToTransfer * (int4)filterCoreGasses, _pipeLayer);
         Subsystems.Get<PipeSystem>().AddCoreGasses(otherOutputPosition, molesToTransfer * (int4)!filterCoreGasses, _pipeLayer);
-        Subsystems.Get<PipeSystem>().RemoveCoreGasses(otherOutputPosition, molesToTransfer, _pipeLayer);
+        Subsystems.Get<PipeSystem>().RemoveCoreGasses(inputPosition, molesToTransfer, _pipeLayer);
     }
 
     private void FilterInteract(InteractionEvent interactionEvent, InteractionReference arg2)

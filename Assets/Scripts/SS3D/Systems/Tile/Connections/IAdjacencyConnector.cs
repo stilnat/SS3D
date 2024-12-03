@@ -40,5 +40,7 @@ namespace SS3D.Systems.Tile.Connections
         /// linked to this connector will not necessarily be connected with its neighbour.
         /// </summary>
         List<PlacedTileObject> GetNeighbours();
+
+        List<PlacedTileObject> GetConnectedNeighbours();
     }
 }

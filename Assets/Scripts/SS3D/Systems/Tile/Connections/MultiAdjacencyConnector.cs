@@ -33,6 +33,11 @@ namespace SS3D.Systems.Tile.Connections
             return neighbours;
         }
 
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
+        }
+
         /// <summary>
         /// If any of the connectors is connected, return true, else return false.
         /// </summary>

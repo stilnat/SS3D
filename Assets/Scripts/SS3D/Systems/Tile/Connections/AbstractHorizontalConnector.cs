@@ -222,5 +222,10 @@ namespace SS3D.Systems.Tile.Connections
             neighbours.RemoveAll(x => x == null);
             return neighbours;
         }
+
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
+        }
     }
 }

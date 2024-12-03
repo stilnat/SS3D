@@ -326,5 +326,25 @@ namespace SS3D.Systems.Tile
 
             return true;
         }
+
+
+        public bool IsCardinalNeighbour(PlacedTileObject other)
+        {
+            bool isCardinalNeighbour = false;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            Vector2Int coordinateDifference = other.WorldOrigin - WorldOrigin;
+
+            isCardinalNeighbour |= coordinateDifference == Vector2Int.up;
+            isCardinalNeighbour |= coordinateDifference == Vector2Int.down;
+            isCardinalNeighbour |= coordinateDifference == Vector2Int.left;
+            isCardinalNeighbour |= coordinateDifference == Vector2Int.right;
+
+            return isCardinalNeighbour;
+        }
     }
 }

@@ -25,6 +25,11 @@ namespace SS3D.Systems.Tile.Connections
             }
         }
 
+        public List<PlacedTileObject> GetConnectedNeighbours()
+        {
+            return GetNeighbours().Where(IsConnected).ToList();
+        }
+
         public List<PlacedTileObject> GetNeighbours()
         {
             Setup();
