@@ -57,10 +57,10 @@ namespace SS3D.Engine.AtmosphericsRework
             // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
             // it's written like that to avoid using conditions branching for Burst.
             // It works okay even if a neighbour is not present as the amount of moles to transfer will be zero.
-            molesToTransfer[0] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[1] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[2] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[3] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[0] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[1] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[2] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[3] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
 
             MoleTransferToNeighbours moleTransferToNeighbours = new(
                 atmosIndex, molesToTransfer[0], molesToTransfer[1], molesToTransfer[2],molesToTransfer[3]);
@@ -103,16 +103,12 @@ namespace SS3D.Engine.AtmosphericsRework
             {
                 return new(0);
             }
-            
-            // TODO : currently does transfer even with extremely small pressure differences.
-            // We can't just say to stop transfer under a given pressure difference with neighbours because it creates "pressure plugs".
-            // Instead, under a given pressure difference it should just fully equalize pressure.
 
             // Use partial pressures to determine how much of each gas to move.
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles to transfer.
-            return partialPressureDifference * 5;
+            return (1 + 0.1f * math.max(0,enteringVelocity - neighbourOppositeVelocity)) * partialPressureDifference * 5;
         }
 
         private static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
