@@ -413,6 +413,10 @@ MonoBehaviour:
     m_Address: Assets/Content/WorldObjects/Furniture/Machines/Atmospherics/FilterR.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 8c283d2cd4e5694418ce0a33cd23c85b
+    m_Address: Assets/Content/WorldObjects/Furniture/Machines/Atmospherics/MixerL.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: ddc57d0f5f9fb874e8a26db0c5b215e0, type: 2}
   m_SchemaSet:

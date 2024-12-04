@@ -49,7 +49,7 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
     }
 
 
-    public void SetActive(bool filterActive)
+    public void SetFilterActive(bool filterActive)
     {
         _filterActive = filterActive;
     }

@@ -60,12 +60,12 @@ namespace SS3D.Content.Systems.Interactions
 
         public bool Update(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

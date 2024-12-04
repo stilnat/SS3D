@@ -104,6 +104,7 @@ namespace SS3D.Data.Generated
         public static DatabaseAsset HeadsetSecurityRight = new DatabaseAsset("HeadsetSecurityRight", "Items");
         public static DatabaseAsset ValveManual = new DatabaseAsset("ValveManual", "Items");
         public static DatabaseAsset FilterR = new DatabaseAsset("FilterR", "Items");
+        public static DatabaseAsset MixerL = new DatabaseAsset("MixerL", "Items");
     }
 }
 

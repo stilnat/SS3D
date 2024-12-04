@@ -39,7 +39,7 @@ public class FilterView : Actor
         _filterNitrogen.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.Nitrogen);
         _filterCarbonDioxyde.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.CarbonDioxide);
         _filterPlasma.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.Plasma);
-        _turnOn.Switch += isOn => _filterAtmosObject.SetActive(isOn);
+        _turnOn.Switch += isOn => _filterAtmosObject.SetFilterActive(isOn);
         _slider.onValueChanged.AddListener(value => _filterAtmosObject.SetFlux(value));
         
         _filterAtmosObject.UpdateFilterGas += UpdateFilterGas;
