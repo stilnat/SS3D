@@ -1,6 +1,7 @@
-using SS3D.Core.Behaviours;
+using Coimbra;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ using UnityMvvmToolkit.Core;
 using UnityMvvmToolkit.Core.Converters.PropertyValueConverters;
 using UnityMvvmToolkit.Core.Interfaces;
 using UnityMvvmToolkit.UGUI;
+using Actor = SS3D.Core.Behaviours.Actor;
 
 public class FilterView : Actor
 {
@@ -30,7 +32,13 @@ public class FilterView : Actor
     private SwitchButton _filterPlasma;
 
     [SerializeField]
-    private Slider _slider;
+    private SpaceSlider _volumeSlider;
+
+    [SerializeField]
+    private TextMeshProUGUI _volumeLabel;
+
+    [SerializeField]
+    private Button _closeUI;
 
     public void Initialize(FilterAtmosObject filterAtmosObject)
     {
@@ -40,9 +48,40 @@ public class FilterView : Actor
         _filterCarbonDioxyde.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.CarbonDioxide);
         _filterPlasma.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.Plasma);
         _turnOn.Switch += isOn => _filterAtmosObject.SetFilterActive(isOn);
-        _slider.onValueChanged.AddListener(value => _filterAtmosObject.SetFlux(value));
+        _volumeSlider.ValueTickUpdated += UpdateVolumeTransferred;
+        _closeUI.onClick.AddListener(Destroy);
         
         _filterAtmosObject.UpdateFilterGas += UpdateFilterGas;
+
+        _filterOxygen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Oxygen));
+        _filterNitrogen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Nitrogen));
+        _filterCarbonDioxyde.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.CarbonDioxide));
+        _filterPlasma.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Plasma));
+        _turnOn.SetState(_filterAtmosObject.FilterActive);
+        _volumeSlider.value = _filterAtmosObject.LitersPerSecond;
+        _volumeLabel.text = _filterAtmosObject.LitersPerSecond.ToString();
+    }
+
+    private void UpdateVolumeTransferred(float volume)
+    {
+        _filterAtmosObject.SetFlux(volume);
+        UpdateVolumeTransferredVisuals(volume, true);
+    }
+
+    private void UpdateVolumeTransferredVisuals(float volume, bool fromUI)
+    {
+        if (!fromUI && _volumeSlider.Pressed)
+        {
+            return;
+        }
+
+        _volumeLabel.text = volume.ToString();
+        _volumeSlider.value = volume;
+    }
+
+    private void Destroy()
+    {
+       gameObject.Dispose(true);
     }
 
     private void UpdateFilterGas(bool isFiltering, CoreAtmosGasses gas)

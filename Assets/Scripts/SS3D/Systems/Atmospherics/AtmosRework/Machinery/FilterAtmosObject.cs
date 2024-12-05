@@ -42,11 +42,14 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 
     public Action<bool, CoreAtmosGasses> UpdateFilterGas;
 
+    public bool FilterActive => _filterActive;
+
+    public float LitersPerSecond => _litersPerSecond;
+
     public void SetFlux(float litersPerSecond)
     {
         _litersPerSecond = litersPerSecond;
     }
-
 
     public void SetFilterActive(bool filterActive)
     {
@@ -115,6 +118,23 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
     public void FilterGas(bool isFiltering, CoreAtmosGasses gas)
     {
         RpcFilterGas(isFiltering, gas);
+    }
+
+    public bool IsFiltering(CoreAtmosGasses gas)
+    {
+        switch (gas)
+        {
+            case CoreAtmosGasses.Nitrogen:
+                return _filterNitrogen;
+            case CoreAtmosGasses.Oxygen:
+                return _filterOxygen;
+            case CoreAtmosGasses.CarbonDioxide:
+                return _filterCarbonDioxyde;
+            case CoreAtmosGasses.Plasma:
+                return _filterPlasma;
+        }
+
+        return false;
     }
 
     [ServerRpc(RequireOwnership = false)]
