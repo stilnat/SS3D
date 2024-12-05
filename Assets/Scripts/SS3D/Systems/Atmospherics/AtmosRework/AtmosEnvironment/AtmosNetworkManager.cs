@@ -21,6 +21,9 @@ using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// The atmos network manager handle sending visible gas data to clients, a few chunks around them.
+    /// </summary>
     public class AtmosNetworkManager : NetworkSystem
     {
         private struct PreviousValuesChunkCentered
@@ -59,27 +62,40 @@ namespace SS3D.Engine.AtmosphericsRework
             _atmosManager.AtmosTick += HandleAtmosTick;
         }
 
+
+        /// <summary>
+        /// For each observing entities, we want to send the data necessary to visualise visible gas. 
+        /// </summary>
         [Server]
         private void HandleAtmosTick(float dt)
         {
             foreach (Entity player in _playersEntities)
             { 
                 AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(player.Position);
+
+                if (atmosTile == null)
+                {
+                    return;
+                }
+
                 AtmosChunk chunk = atmosTile.Map.GetChunk(player.Position);
 
                 if (chunk == null)
                 {
                     return;
                 }
+
                 Vector2Int key = chunk.GetKey();
 
                 byte[] data = RetrieveGasData(player.Position);
                 
+                // if we had already values for the chunk, use delta compress for better compression
                 if (key == _previousValuesChunkCenteredPlayers[player.Owner].ChunkKey)
                 {
                     byte[] deltaCompressedData = DeltaCompress(data, _previousValuesChunkCenteredPlayers[player.Owner].PreviousConcentrationValues);
                     RpcDeltaAtmosData(player.Owner, deltaCompressedData);
                 }
+                // If we don't have previous values, just compress the raw data.
                 else
                 {
                     PreviousValuesChunkCentered previousValuesChunkCentered = _previousValuesChunkCenteredPlayers[player.Owner];
@@ -109,6 +125,12 @@ namespace SS3D.Engine.AtmosphericsRework
             _previousConcentrationValues = decompressed;
         }
 
+        /// <summary>
+        /// Transform gas concentration value (a float) into a simple array byte for a bunch of chunks around a given position.
+        /// Each byte represent some concentration which can vary between 0 and {ConcentrationRange}.
+        /// </summary>
+        /// <param name="position"> The center position of the entity we want to know gas concentration for.</param>
+        /// <returns></returns>
         private byte[] RetrieveGasData(Vector3 position)
         {
             AtmosContainer atmosTile = _atmosManager.GetAtmosContainer(position);
@@ -132,6 +154,10 @@ namespace SS3D.Engine.AtmosphericsRework
             return chunkBytesList.ToArray();
         }
 
+        /// <summary>
+        /// Instead of sending the raw data, we can send the difference between the current value and the previous one. This usually should increase repetitivity of the data and therefore allow for
+        /// better compression. e.g. you have the data {1,2,3,4,5} and previously it was {0,1,2,3,4} now you got {1,1,1,1,1} which is more compressable.
+        /// </summary>
         [Server]
         private byte[] DeltaCompress(byte[] toCompress, byte[] previousValues)
         {
