@@ -83,6 +83,10 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public AtmosContainer GetAtmosContainer(Vector3 worldPosition)
         {
+            if (atmosMaps == null)
+            {
+                return null;
+            }
             foreach (AtmosMap map in atmosMaps)
             {
                 AtmosContainer atmos = map.GetTileAtmosObject(worldPosition);

@@ -5,15 +5,12 @@ using SS3D.Core;
 using SS3D.Engine.AtmosphericsRework;
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Atmospherics.AtmosRework.Machinery;
 using SS3D.Systems.Tile;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
+public class FilterAtmosObject : TrinaryAtmosDevice
 {
     private const float MaxPressure = 4500f;
 
@@ -57,29 +54,19 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
     [Server]
     public override void StepAtmos(float dt)
     {
-        if (!_filterActive)
+        base.StepAtmos(dt);
+        if (!_filterActive || !AllPipesConnected)
         {
             return;
         }
 
-        Vector3 otherOutputPosition = transform.position + transform.forward;
-        Vector3 filterOutputPosition = transform.position + transform.right;
-        Vector3 inputPosition = transform.position - transform.forward;
-        
-        if (!Subsystems.Get<PipeSystem>().TryGetAtmosPipe(otherOutputPosition, _pipeLayer, out IAtmosPipe outputOther)
-        || !Subsystems.Get<PipeSystem>().TryGetAtmosPipe(filterOutputPosition, _pipeLayer, out IAtmosPipe outputFiltered)
-        || !Subsystems.Get<PipeSystem>().TryGetAtmosPipe(inputPosition, _pipeLayer, out IAtmosPipe input))
-        {
-            return;
-        }
-        
         // Both outputs must not be blocked
-        if (outputFiltered.AtmosObject.Pressure > MaxPressure && outputOther.AtmosObject.Pressure > MaxPressure)
+        if (SidePipe.AtmosObject.Pressure > MaxPressure && FrontPipe.AtmosObject.Pressure > MaxPressure)
         {
             return;
         }
 
-        AtmosObject atmosInput = input.AtmosObject;
+        AtmosObject atmosInput = BackPipe.AtmosObject;
         float maxMolesToTransfer = (atmosInput.Pressure * _litersPerSecond * dt) / (GasConstants.gasConstant * atmosInput.Temperature);
         float4 molesToTransfer = atmosInput.CoreGassesProportions * math.max(maxMolesToTransfer, atmosInput.TotalMoles);
 
@@ -90,9 +77,9 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 
 
         bool4 filterCoreGasses= new bool4(_filterOxygen, _filterNitrogen, _filterCarbonDioxyde, _filterPlasma);
-        Subsystems.Get<PipeSystem>().AddCoreGasses(filterOutputPosition, molesToTransfer * (int4)filterCoreGasses, _pipeLayer);
-        Subsystems.Get<PipeSystem>().AddCoreGasses(otherOutputPosition, molesToTransfer * (int4)!filterCoreGasses, _pipeLayer);
-        Subsystems.Get<PipeSystem>().RemoveCoreGasses(inputPosition, molesToTransfer, _pipeLayer);
+        Subsystems.Get<PipeSystem>().AddCoreGasses(SidePipePosition, molesToTransfer * (int4)filterCoreGasses, _pipeLayer);
+        Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesToTransfer * (int4)!filterCoreGasses, _pipeLayer);
+        Subsystems.Get<PipeSystem>().RemoveCoreGasses(BackPipePosition, molesToTransfer, _pipeLayer);
     }
 
     private void FilterInteract(InteractionEvent interactionEvent, InteractionReference arg2)
@@ -101,7 +88,7 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
         filterView.GetComponent<FilterView>().Initialize(this);
     }
 
-    public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+    public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
     {
         return new IInteraction[]
         {

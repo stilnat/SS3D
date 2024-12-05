@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
+public class MixerAtmosObject : TrinaryAtmosDevice
 {
         
         private const float MaxPressure = 4500f;
@@ -26,8 +26,6 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
 
         [SyncVar(OnChange = nameof(SyncTargetPressure))]
         private float _targetPressure = 101f;
-
-        private TileLayer _pipeLayer = TileLayer.PipeLeft;
 
         [ServerRpc(RequireOwnership = false)] public void SetMixerActive(bool mixerActive) => _mixerActive = mixerActive;
 
@@ -42,7 +40,7 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
         public GameObject MixerViewPrefab;
 
 
-        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+        public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         { 
             return new IInteraction[]
             {
@@ -55,40 +53,31 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
 
         public override void StepAtmos(float dt)
         {
-            if (!_mixerActive)
+            base.StepAtmos(dt);
+
+            if (!_mixerActive || !AllPipesConnected)
             {
                 return;
             }
-
-            Vector3 outputPosition = transform.position + transform.forward;
-            Vector3 secondInputPosition = transform.position + transform.right;
-            Vector3 firstInputPosition = transform.position - transform.forward;
-        
-            if (!Subsystems.Get<PipeSystem>().TryGetAtmosPipe(outputPosition, _pipeLayer, out IAtmosPipe output)
-                || !Subsystems.Get<PipeSystem>().TryGetAtmosPipe(secondInputPosition, _pipeLayer, out IAtmosPipe secondInput)
-                || !Subsystems.Get<PipeSystem>().TryGetAtmosPipe(firstInputPosition, _pipeLayer, out IAtmosPipe firstInput))
-            {
-                return;
-            }
-
+            
             float ratioOnetoTwo = _inputOneAmount / 100f;
 
-            if (firstInput.AtmosObject.TotalMoles <= 1f || secondInput.AtmosObject.TotalMoles <= 1f ||output.AtmosObject.Pressure >= _targetPressure || output.AtmosObject.Pressure >= MaxPressure)
+            if (BackPipe.AtmosObject.TotalMoles <= 1f || SidePipe.AtmosObject.TotalMoles <= 1f || FrontPipe.AtmosObject.Pressure >= _targetPressure || FrontPipe.AtmosObject.Pressure >= MaxPressure)
             {
                 return;
             }
 
             // Calculate necessary moles to transfer using PV=nRT
-            float pressureDifference = _targetPressure - output.AtmosObject.Pressure;
-            float transferMoles = dt * pressureDifference * 1000 * output.AtmosObject.Volume / (output.AtmosObject.Temperature * GasConstants.gasConstant);
+            float pressureDifference = _targetPressure - FrontPipe.AtmosObject.Pressure;
+            float transferMoles = dt * pressureDifference * 1000 * FrontPipe.AtmosObject.Volume / (FrontPipe.AtmosObject.Temperature * GasConstants.gasConstant);
 
             float transferMoles1 = ratioOnetoTwo * transferMoles;
             float transferMoles2 = (1f - ratioOnetoTwo) * transferMoles;
 
 
             // We can't transfer more moles than there are
-            float firstInputTotalMoles = firstInput.AtmosObject.TotalMoles;
-            float secondInputTotalMoles = secondInput.AtmosObject.TotalMoles;
+            float firstInputTotalMoles = BackPipe.AtmosObject.TotalMoles;
+            float secondInputTotalMoles = SidePipe.AtmosObject.TotalMoles;
 
             // If one of the inputs didn't contain enough gas, scale the other down
             if (transferMoles1 > firstInputTotalMoles)
@@ -103,13 +92,13 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
                 transferMoles2 = secondInputTotalMoles;
             }
 
-            float4 molesFirstToTransfer = firstInput.AtmosObject.CoreGassesProportions * transferMoles1;
-            float4 molesSecondToTransfer = firstInput.AtmosObject.CoreGassesProportions * transferMoles2;
+            float4 molesFirstToTransfer = BackPipe.AtmosObject.CoreGassesProportions * transferMoles1;
+            float4 molesSecondToTransfer = BackPipe.AtmosObject.CoreGassesProportions * transferMoles2;
 
-            Subsystems.Get<PipeSystem>().RemoveCoreGasses(firstInputPosition, molesFirstToTransfer, _pipeLayer);
-            Subsystems.Get<PipeSystem>().RemoveCoreGasses(secondInputPosition, molesSecondToTransfer, _pipeLayer);
-            Subsystems.Get<PipeSystem>().AddCoreGasses(outputPosition, molesFirstToTransfer, _pipeLayer);
-            Subsystems.Get<PipeSystem>().AddCoreGasses(outputPosition, molesSecondToTransfer, _pipeLayer);
+            Subsystems.Get<PipeSystem>().RemoveCoreGasses(BackPipePosition, molesFirstToTransfer, Pipelayer);
+            Subsystems.Get<PipeSystem>().RemoveCoreGasses(SidePipePosition, molesSecondToTransfer, Pipelayer);
+            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesFirstToTransfer, Pipelayer);
+            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesSecondToTransfer, Pipelayer);
         }
 
         private void MixerInteract(InteractionEvent interactionEvent, InteractionReference arg2)
