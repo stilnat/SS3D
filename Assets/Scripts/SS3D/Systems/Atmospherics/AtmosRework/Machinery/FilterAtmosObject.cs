@@ -17,7 +17,6 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 {
     private const float MaxPressure = 4500f;
 
-
     [SyncVar]
     private float _litersPerSecond = 1f;
     

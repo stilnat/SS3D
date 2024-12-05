@@ -16,50 +16,31 @@ using UnityEngine;
 public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
 {
         
-        public float MaxPressure = 4500f;
+        private const float MaxPressure = 4500f;
         
         [SyncVar(OnChange = nameof(SyncFirstInputAmount))]
         private float _inputOneAmount = 50f;
 
-        [SyncVar]
+        [SyncVar(OnChange = nameof(SyncMixerActive))]
         private bool _mixerActive = false;
 
+        [SyncVar(OnChange = nameof(SyncTargetPressure))]
         private float _targetPressure = 101f;
 
         private TileLayer _pipeLayer = TileLayer.PipeLeft;
 
+        [ServerRpc(RequireOwnership = false)] public void SetMixerActive(bool mixerActive) => _mixerActive = mixerActive;
+
+        [ServerRpc(RequireOwnership = false)] public void SetTargetPressure(float targetPressure) => _targetPressure = targetPressure;
+
+        [ServerRpc(RequireOwnership = false)] public void SetFirstInput(float value) => _inputOneAmount = value;
+
         public Action<float> UpdateMixerFirstInputAmount;
+        public Action<bool> UpdateMixerActive;
+        public Action<float> UpdateTargetPressure;
 
         public GameObject MixerViewPrefab;
 
-        public void SetMixerActive(bool mixerActive)
-        {
-            _mixerActive = mixerActive;
-        }
-
-        [Client]
-        public void SetFirstInput(float value)
-        {
-            RpcSetFirstInput(value);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void RpcSetFirstInput(float value)
-        {
-            _inputOneAmount = value;
-        }
-
-        public void SyncFirstInputAmount(float oldValue, float newValue, bool asServer)
-        {
-            UpdateMixerFirstInputAmount?.Invoke(newValue);
-        }
-
-
-        private void MixerInteract(InteractionEvent interactionEvent, InteractionReference arg2)
-        {
-            GameObject mixerView = Instantiate(MixerViewPrefab);
-            mixerView.GetComponent<MixerView>().Initialize(this);
-        }
 
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         { 
@@ -92,13 +73,7 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
 
             float ratioOnetoTwo = _inputOneAmount / 100f;
 
-
-            if (firstInput.AtmosObject.TotalMoles <= 1f || secondInput.AtmosObject.TotalMoles <= 1f)
-            {
-                return;
-            }
-
-            if (output.AtmosObject.Pressure >= _targetPressure)
+            if (firstInput.AtmosObject.TotalMoles <= 1f || secondInput.AtmosObject.TotalMoles <= 1f ||output.AtmosObject.Pressure >= _targetPressure || output.AtmosObject.Pressure >= MaxPressure)
             {
                 return;
             }
@@ -136,4 +111,26 @@ public class MixerAtmosObject : BasicAtmosDevice, IInteractionTarget
             Subsystems.Get<PipeSystem>().AddCoreGasses(outputPosition, molesFirstToTransfer, _pipeLayer);
             Subsystems.Get<PipeSystem>().AddCoreGasses(outputPosition, molesSecondToTransfer, _pipeLayer);
         }
+
+        private void MixerInteract(InteractionEvent interactionEvent, InteractionReference arg2)
+        {
+            GameObject mixerView = Instantiate(MixerViewPrefab);
+            mixerView.GetComponent<MixerView>().Initialize(this);
+        }
+
+        private void SyncFirstInputAmount(float oldValue, float newValue, bool asServer)
+        {
+            UpdateMixerFirstInputAmount?.Invoke(newValue);
+        }
+
+        private void SyncTargetPressure(float oldValue, float newValue, bool asServer)
+        {
+            UpdateTargetPressure?.Invoke(newValue);
+        }
+
+        private void SyncMixerActive(bool oldValue, bool newValue, bool asServer)
+        {
+            UpdateMixerActive?.Invoke(newValue);
+        }
+
 }
