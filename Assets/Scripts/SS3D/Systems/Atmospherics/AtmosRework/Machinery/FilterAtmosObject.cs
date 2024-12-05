@@ -17,12 +17,11 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 {
     private const float MaxPressure = 4500f;
 
-    [SyncVar]
+    [SyncVar(OnChange = nameof(SyncFlux))]
     private float _litersPerSecond = 1f;
     
+    [SyncVar(OnChange = nameof(SyncFilterActive))]
     private bool _filterActive = false;
-
-    private float _targetPressure;
 
     [SyncVar(OnChange = nameof(SyncFilterOxygen))]
     private bool _filterOxygen;
@@ -42,19 +41,18 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
 
     public Action<bool, CoreAtmosGasses> UpdateFilterGas;
 
+    public Action<bool> UpdateActive;
+
+    public Action<float> UpdateFlux;
+
     public bool FilterActive => _filterActive;
 
     public float LitersPerSecond => _litersPerSecond;
 
-    public void SetFlux(float litersPerSecond)
-    {
-        _litersPerSecond = litersPerSecond;
-    }
+    [ServerRpc(RequireOwnership = false)] public void SetFilterActive(bool filterActive) =>  _filterActive = filterActive;
 
-    public void SetFilterActive(bool filterActive)
-    {
-        _filterActive = filterActive;
-    }
+    [ServerRpc(RequireOwnership = false)] public void SetFlux(float litersPerSecond) => _litersPerSecond = litersPerSecond;
+
     
     [Server]
     public override void StepAtmos(float dt)
@@ -175,5 +173,15 @@ public class FilterAtmosObject : BasicAtmosDevice, IInteractionTarget
     private void SyncFilterCarbonDioxyde(bool oldValue, bool newValue, bool asServer)
     {
         UpdateFilterGas?.Invoke(newValue, CoreAtmosGasses.CarbonDioxide);
+    }
+
+    private void SyncFilterActive(bool oldValue, bool newValue, bool asServer)
+    {
+        UpdateActive?.Invoke(newValue);
+    }
+
+    private void SyncFlux(float oldValue, float newValue, bool asServer)
+    {
+        UpdateFlux?.Invoke(newValue);
     }
 }

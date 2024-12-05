@@ -43,6 +43,7 @@ public class FilterView : Actor
     public void Initialize(FilterAtmosObject filterAtmosObject)
     {
         _filterAtmosObject = filterAtmosObject;
+
         _filterOxygen.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.Oxygen);
         _filterNitrogen.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.Nitrogen);
         _filterCarbonDioxyde.Switch += filter => _filterAtmosObject.FilterGas(filter, CoreAtmosGasses.CarbonDioxide);
@@ -51,7 +52,11 @@ public class FilterView : Actor
         _volumeSlider.ValueTickUpdated += UpdateVolumeTransferred;
         _closeUI.onClick.AddListener(Destroy);
         
-        _filterAtmosObject.UpdateFilterGas += UpdateFilterGas;
+        _filterAtmosObject.UpdateFilterGas += UpdateFilterGasVisuals;
+        _filterAtmosObject.UpdateActive += active => _turnOn.SetState(active, true);
+        _filterAtmosObject.UpdateFlux += flux => UpdateVolumeTransferredVisuals(flux, false);
+
+
 
         _filterOxygen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Oxygen));
         _filterNitrogen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Nitrogen));
@@ -84,7 +89,7 @@ public class FilterView : Actor
        gameObject.Dispose(true);
     }
 
-    private void UpdateFilterGas(bool isFiltering, CoreAtmosGasses gas)
+    private void UpdateFilterGasVisuals(bool isFiltering, CoreAtmosGasses gas)
     {
         switch (gas)
         {
