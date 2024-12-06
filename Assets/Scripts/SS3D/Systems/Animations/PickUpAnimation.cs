@@ -60,7 +60,7 @@ namespace SS3D.Systems.Animations
         [Client]
         private void SetUpPickup(bool withTwoHands)
         {
-            Controller.HoldController.SetItemConstraintPositionAndRotation(_mainHand, _holdable);
+            Controller.HoldController.UpdateItemPositionConstraintAndRotation(_mainHand, _holdable, 0f);
 
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             _mainHand.Hold.ItemPositionConstraint.weight = 1f;

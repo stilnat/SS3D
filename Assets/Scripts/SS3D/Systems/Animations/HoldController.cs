@@ -129,7 +129,7 @@ namespace SS3D.Systems.Animations
 
         protected override void OnAwake()
         {
-            _itemsInHands.OnChange += HandleItemsInHandsChanged;
+            _itemsInHands.OnChange += SyncItemsInHandsChanged;
             _intents.OnIntentChange += HandleIntentChange;
             _aimController.OnAim += HandleAimChange;
 
@@ -151,20 +151,6 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
         }
 
-        public void SetItemConstraintPositionAndRotation(Hand hand, AbstractHoldable item)
-        {
-            bool toThrow = _aimController.IsAimingToThrow;
-            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
-
-            // Fetch how the item should be held
-            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
-
-            // The position where the item should be, given its hold type
-            Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-
-            hand.Hold.ItemPositionConstraint.data.offset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-            hand.Hold.ItemPositionConstraint.data.constrainedObject.localRotation = hold.localRotation;
-        }
 
         /// <summary>
         /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place. 
@@ -174,7 +160,7 @@ namespace SS3D.Systems.Animations
         /// <param name="withTwoHands"> If the item should be held with two hands </param>
         /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
         /// <param name="toThrow"> True the item should be in a ready to throw position</param>
-        private void UpdateItemPositionConstraintAndRotation(
+        public void UpdateItemPositionConstraintAndRotation(
             Hand hand, AbstractHoldable item, float duration)
         {
             if (item == null)
@@ -204,7 +190,7 @@ namespace SS3D.Systems.Animations
         /// <summary>
         /// This method is necessary to sync between clients items held in hand, for instance for late joining client, or simply client far away on the map.
         /// </summary>
-        private void HandleItemsInHandsChanged(SyncListOperation op, int index, HandItem oldItem, HandItem newItem, bool asServer)
+        private void SyncItemsInHandsChanged(SyncListOperation op, int index, HandItem oldItem, HandItem newItem, bool asServer)
         {
             if (asServer)
             {
@@ -222,6 +208,7 @@ namespace SS3D.Systems.Animations
             }
         }
 
+        [Client]
         private void RemoveItem(Hand hand)
         {
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemInHand.Holdable.CanHoldTwoHand)
@@ -232,6 +219,7 @@ namespace SS3D.Systems.Animations
             }
         }
 
+        [Client]
         private void AddItem(Hand hand, AbstractHoldable holdable)
         {
             // Put the holdable on the hand item position target locker and constrain it
@@ -260,11 +248,11 @@ namespace SS3D.Systems.Animations
             {
                 if (handIndex == -1)
                 {
-                    _itemsInHands.Add(new HandItem(hand, newitem.Holdable));
+                    _itemsInHands.Add(new(hand, newitem.Holdable));
                 }
                 else
                 {
-                    _itemsInHands[handIndex] = new HandItem(hand, newitem.Holdable);
+                    _itemsInHands[handIndex] = new(hand, newitem.Holdable);
                 }
             }
 
@@ -329,6 +317,7 @@ namespace SS3D.Systems.Animations
             return selected.localPosition;
         }
 
+        [Server]
         private void HandleRagdoll(bool isRagdolled)
         {
             if (isRagdolled)
