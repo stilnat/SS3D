@@ -200,18 +200,6 @@ namespace SS3D.Systems.Animations
             hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
         }
 
-        /// <summary>
-        /// For a given hand, move its pickup and hold target lockers at the right place on the item.
-        /// </summary>
-        /// <param name="hand"> The hand for which we want to set picking and holding </param>
-        /// <param name="secondary"> Is it the hand with the primary hold on the item, or is it just there in support of the first one ? </param>
-        /// <param name="holdProvider"> The item we want to hold, and onto which we're going to move the targets.</param>
-        public void MovePickupAndHoldTargetLocker(Hand hand, bool secondary, AbstractHoldable holdProvider)
-        {
-            Transform parent = holdProvider.GetHold(!secondary, hand.HandType);
-
-            hand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, parent);
-        }
 
         /// <summary>
         /// This method is necessary to sync between clients items held in hand, for instance for late joining client, or simply client far away on the map.
@@ -240,7 +228,7 @@ namespace SS3D.Systems.Animations
             {
                 UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
                 hand.Hold.HoldIkConstraint.weight = 1f;
-                MovePickupAndHoldTargetLocker(hand, true, oppositeHand.ItemInHand.Holdable);
+                hand.Hold.ParentHandIkTargetOnHold(true, oppositeHand.ItemInHand.Holdable);
             }
         }
 
@@ -254,8 +242,7 @@ namespace SS3D.Systems.Animations
 
             // enable the hold constraint as well
             hand.Hold.HoldIkConstraint.weight = 1f;
-
-            MovePickupAndHoldTargetLocker(hand, false, holdable);
+            hand.Hold.ParentHandIkTargetOnHold(false, holdable);
             UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
@@ -264,6 +251,7 @@ namespace SS3D.Systems.Animations
             }
         }
 
+        [Server]
         private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)
         {
             int handIndex = _itemsInHands.FindIndex(x => x.Hand = hand);

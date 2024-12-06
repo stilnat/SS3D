@@ -71,7 +71,7 @@ namespace SS3D.Systems.Animations
 
         private void SetUpGrab(bool withTwoHands)
         {
-            _mainHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, _grabbedObject.transform);
+            _mainHand.Hold.ParentHandIkTarget(_grabbedObject.transform);
 
             // Needed if this has been changed elsewhere
             _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
@@ -79,7 +79,7 @@ namespace SS3D.Systems.Animations
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                _secondaryHand.Hold.SetParentTransformTargetLocker(TargetLockerType.Pickup, _grabbedObject.transform);
+                _secondaryHand.Hold.ParentHandIkTarget(_grabbedObject.transform);
                 _secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
             }
 

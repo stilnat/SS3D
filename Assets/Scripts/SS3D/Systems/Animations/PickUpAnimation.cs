@@ -70,7 +70,7 @@ namespace SS3D.Systems.Animations
             OrientTargetForHandRotation(_mainHand);
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            Controller.HoldController.MovePickupAndHoldTargetLocker(_mainHand, false, _holdable);
+            _mainHand.Hold.ParentHandIkTargetOnHold(false, _holdable);
 
             // Needed if this has been changed elsewhere
             _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
@@ -83,7 +83,7 @@ namespace SS3D.Systems.Animations
             if (withTwoHands)
             {
                 OrientTargetForHandRotation(_secondaryHand);
-                Controller.HoldController.MovePickupAndHoldTargetLocker(_secondaryHand, true, _holdable);
+                _secondaryHand.Hold.ParentHandIkTargetOnHold(true, _holdable);
                 _secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
                 _secondaryHand.Hold.HoldIkConstraint.data.targetRotationWeight = 0f;
             }

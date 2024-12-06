@@ -81,37 +81,21 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Transform InteractionPoint { get; private set; }
 
-        /// <summary>
-        /// Return the wanted IK target for this hand.
-        /// </summary>
-        private Transform ChooseTargetLocker(TargetLockerType type)
-        {
-            Transform targetToSet = type switch
-            {
-                TargetLockerType.Pickup => HandIkTarget,
-                TargetLockerType.ItemPosition => ItemPositionTargetLocker,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-            };
 
-            return targetToSet;
+        public void ParentHandIkTargetOnHold(bool secondary, AbstractHoldable holdProvider)
+        {
+            Transform parent = holdProvider.GetHold(!secondary, Hand.HandType);
+            ParentHandIkTarget(parent);
         }
 
         /// <summary>
         /// Put the right IK target as a child of another transform, setting its position to zero and its rotation to be the same as the parent one (or optionnally not doing it).
         /// </summary>
-        public void SetParentTransformTargetLocker(TargetLockerType type, Transform parent, bool resetPosition = true, bool resetRotation = true)
+        public void ParentHandIkTarget(Transform parent)
         {
-            Transform targetToSet = ChooseTargetLocker(type);
-            targetToSet.parent = parent;
-            if (resetPosition)
-            {
-                targetToSet.localPosition = Vector3.zero;
-            }
-
-            if (resetRotation)
-            {
-                targetToSet.localRotation = Quaternion.identity;
-            }
+            HandIkTarget.transform.parent = parent;
+            HandIkTarget.localPosition = Vector3.zero;
+            HandIkTarget.localRotation = Quaternion.identity;
         }
 
         /// <summary>
