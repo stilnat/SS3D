@@ -1,10 +1,12 @@
 using SS3D.Engine.AtmosphericsRework;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
+[BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
 public struct TransferHeatJob : IJob
 {
         [ReadOnly]

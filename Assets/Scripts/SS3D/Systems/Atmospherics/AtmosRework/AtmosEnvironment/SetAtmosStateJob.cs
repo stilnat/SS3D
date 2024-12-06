@@ -94,13 +94,13 @@ namespace SS3D.Engine.AtmosphericsRework
                 return false;
             } 
 
-            if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.pressureEpsilon)
+            if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.PressureEpsilon)
             {
                 return new(true, false);
             }
             
-            float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
-            if (math.any(molesToTransfer > GasConstants.fluxEpsilon))
+            float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.GasDiffusionRate;
+            if (math.any(molesToTransfer > GasConstants.DiffusionEpsilon))
             {
                 return new(false, true);
             }

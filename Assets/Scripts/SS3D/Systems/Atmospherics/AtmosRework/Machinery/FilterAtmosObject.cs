@@ -67,7 +67,7 @@ public class FilterAtmosObject : TrinaryAtmosDevice
         }
 
         AtmosObject atmosInput = BackPipe.AtmosObject;
-        float maxMolesToTransfer = (atmosInput.Pressure * _litersPerSecond * dt) / (GasConstants.gasConstant * atmosInput.Temperature);
+        float maxMolesToTransfer = (atmosInput.Pressure * _litersPerSecond * dt) / (GasConstants.GasConstant * atmosInput.Temperature);
         float4 molesToTransfer = atmosInput.CoreGassesProportions * math.max(maxMolesToTransfer, atmosInput.TotalMoles);
 
         if (math.all(molesToTransfer == 0))

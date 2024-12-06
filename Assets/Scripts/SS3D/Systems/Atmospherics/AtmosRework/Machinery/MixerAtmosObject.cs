@@ -69,7 +69,7 @@ public class MixerAtmosObject : TrinaryAtmosDevice
 
             // Calculate necessary moles to transfer using PV=nRT
             float pressureDifference = _targetPressure - FrontPipe.AtmosObject.Pressure;
-            float transferMoles = dt * pressureDifference * 1000 * FrontPipe.AtmosObject.Volume / (FrontPipe.AtmosObject.Temperature * GasConstants.gasConstant);
+            float transferMoles = dt * pressureDifference * 1000 * FrontPipe.AtmosObject.Volume / (FrontPipe.AtmosObject.Temperature * GasConstants.GasConstant);
 
             float transferMoles1 = ratioOnetoTwo * transferMoles;
             float transferMoles2 = (1f - ratioOnetoTwo) * transferMoles;

@@ -57,11 +57,13 @@ namespace SS3D.Engine.AtmosphericsRework
             // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
             // it's written like that to avoid using conditions branching for Burst.
             // It works okay even if a neighbour is not present as the amount of moles to transfer will be zero.
-            // Multiplication by 0.8f allows to stabilize the simulation a lot more, this way we never fully transfer all the gas from one tile to another.
-            molesToTransfer[0] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[1] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[2] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
-            molesToTransfer[3] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[0] *=  totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[1] *=  totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[2] *=  totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+            molesToTransfer[3] *= totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
+
+            // Multiplication by a value smaller than one allows to stabilize a bit the simulation, this way we never fully transfer all the gas from one tile to another.
+            molesToTransfer *= GasConstants.Drag;
 
             MoleTransferToNeighbours moleTransferToNeighbours = new(
                 atmosIndex, molesToTransfer[0], molesToTransfer[1], molesToTransfer[2],molesToTransfer[3]);
@@ -81,7 +83,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             molesToTransfer = activeFlux ? ComputeActiveFluxMoles(atmos, neighbour, enteringVelocity, neighbourOppositeVelocity) : ComputeDiffusionMoles(ref atmos, neighbour);
 
-            molesToTransfer *= dt * GasConstants.simSpeed;
+            molesToTransfer *= dt * GasConstants.SimSpeed;
 
             // We only care about what we transfer here, not what we receive
             molesToTransfer = math.max(0f, molesToTransfer);
@@ -95,12 +97,12 @@ namespace SS3D.Engine.AtmosphericsRework
             float absolutePressureDif = math.abs(atmos.Pressure - neighbourPressure);
 
             // when adjacent to an almost empty neighbour and atmos being itself almost empty, don't transfer.
-            if (absolutePressureDif <= GasConstants.pressureEpsilon && neighbourPressure <= GasConstants.pressureEpsilon)
+            if (absolutePressureDif <= GasConstants.PressureEpsilon && neighbourPressure <= GasConstants.PressureEpsilon)
             {
                 return new(0);
             }
             
-            if (absolutePressureDif <= GasConstants.fluxEpsilon)
+            if (absolutePressureDif <= GasConstants.DiffusionEpsilon)
             {
                 return new(0);
             }
@@ -109,13 +111,13 @@ namespace SS3D.Engine.AtmosphericsRework
             float4 partialPressureDifference = atmos.GetAllPartialPressures() - neighbour.GetAllPartialPressures();
 
             // Determine the amount of moles to transfer.
-            return (1 + 0.1f * math.max(0,enteringVelocity - neighbourOppositeVelocity)) * partialPressureDifference * 5;
+            return (1 + GasConstants.WindFactor * math.max(0,enteringVelocity - neighbourOppositeVelocity)) * partialPressureDifference * GasConstants.ActiveFluxFactor;
         }
 
         private static float4 ComputeDiffusionMoles(ref AtmosObject atmos, AtmosObject neighbour)
         {
-            float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.gasDiffusionRate;
-            if (math.any(molesToTransfer > GasConstants.fluxEpsilon))
+            float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.GasDiffusionRate;
+            if (math.any(molesToTransfer > GasConstants.DiffusionEpsilon))
             {
                 return molesToTransfer;
             }
@@ -144,12 +146,12 @@ namespace SS3D.Engine.AtmosphericsRework
                 heatToTransfer[3] = HeatToTransfer(atmos, westNeighbour, dt);
             }
 
-            return new HeatTransferToNeighbours(atmosIndex, heatToTransfer);
+            return new(atmosIndex, heatToTransfer);
         }
 
         private static float HeatToTransfer(AtmosObject atmos, AtmosObject neighbour, float dt)
         {
-            float temperatureFlux = (atmos.Temperature - neighbour.Temperature) * GasConstants.thermalBase * atmos.Volume * dt;
+            float temperatureFlux = (atmos.Temperature - neighbour.Temperature) * GasConstants.ThermalBase * atmos.Volume * dt;
 
             return math.max(0, temperatureFlux);
         }

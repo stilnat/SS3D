@@ -13,6 +13,9 @@ namespace SS3D.Engine.AtmosphericsRework
     public struct AtmosJobPersistentData
     {
 
+        /// <summary>
+        /// The type of changes for the TileChanges struct.
+        /// </summary>
         private enum ChangeType
         {
             AddGas,
@@ -22,6 +25,9 @@ namespace SS3D.Engine.AtmosphericsRework
             StateChange,
         }
 
+        /// <summary>
+        /// Structure used to track changes occuring between two atmos ticks.
+        /// </summary>
         private struct TileChanges
         {
             public ChangeType ChangeType;
@@ -63,8 +69,10 @@ namespace SS3D.Engine.AtmosphericsRework
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
         
+        // Keeps track of array elements for which pressure is different from its neighbours.
         public NativeList<int> ActiveEnvironmentIndexes;
 
+        // Keeps track of array elements for which pressure is equalized but still has some difference in the type of gas with its neighbours.
         public NativeList<int> SemiActiveEnvironmentIndexes;
 
         // Keeps track of changed atmos objects 
@@ -75,6 +83,7 @@ namespace SS3D.Engine.AtmosphericsRework
             Map = map;
             AtmosTiles = atmosTiles;
 
+            // Allocate arrays the same size as the number of atmos tiles on the map.
             NativeAtmosTiles = new(atmosTiles.Count, Allocator.Persistent);
             MoleTransferArray = new(atmosTiles.Count, Allocator.Persistent);
             NeighbourTileIndexes = new(atmosTiles.Count, Allocator.Persistent);
@@ -192,6 +201,9 @@ namespace SS3D.Engine.AtmosphericsRework
             _atmosObjectsToChange.Add(tileChanges);
         }
 
+        /// <summary>
+        /// Add a random amount between 0 and max amount of all gasses, on all unblocked tiles.
+        /// </summary>
         public void RandomizeAllGasses(float maxAmount)
         {
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
@@ -199,6 +211,12 @@ namespace SS3D.Engine.AtmosphericsRework
                 foreach (AtmosContainer tile in atmosChunk.GetAllTileAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
+
+                    if (atmosObject.State == AtmosState.Blocked)
+                    {
+                        continue;
+                    }
+
                     float4 moles = UnityEngine.Random.Range(0, maxAmount);
 
                     TileChanges tileChanges = new()
@@ -215,6 +233,9 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
+        /// <summary>
+        /// Remove gasses from all unblocked tiles.
+        /// </summary>
         public void ClearAllGasses()
         {
             foreach (AtmosChunk atmosChunk in Map.GetAtmosChunks())
@@ -222,6 +243,11 @@ namespace SS3D.Engine.AtmosphericsRework
                 foreach (AtmosContainer tile in atmosChunk.GetAllAtmosObjects())
                 {
                     AtmosObject atmosObject = tile.AtmosObject;
+
+                    if (atmosObject.State == AtmosState.Blocked)
+                    {
+                        continue;
+                    }
                     
                     TileChanges tileChanges = new()
                     {
@@ -238,7 +264,7 @@ namespace SS3D.Engine.AtmosphericsRework
         }
 
         /// <summary>
-        /// Refreshes the calculation array. Must be called when gas is added/removed from the system.
+        /// Refreshes the atmos containers arrays each atmos tick. Also apply all changes done between this tick and the previous one.
         /// </summary>
         public void Refresh()
         {
@@ -275,7 +301,6 @@ namespace SS3D.Engine.AtmosphericsRework
                          atmosObject.State = change.State;
                          break;
                 }
-
                 
                     
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
@@ -319,6 +344,10 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
+        /// <summary>
+        /// Given a chunk key and a position in the chunk, return the position in the flat 1D array.
+        /// Return -1 if the position is not found.
+        /// </summary>
         private int IndexOfTileAtmosObject(int2 chunkKey, int x, int y)
         {
             if (!ChunkKeyHashMap.TryGetValue(chunkKey, out int indexChunk))
@@ -326,7 +355,7 @@ namespace SS3D.Engine.AtmosphericsRework
                 return -1;
             }
 
-            return (indexChunk * 16 * 16) + x + (16 * y);
+            return (indexChunk * AtmosMap.CHUNK_SIZE * AtmosMap.CHUNK_SIZE) + x + (AtmosMap.CHUNK_SIZE * y);
         }
     }
 
