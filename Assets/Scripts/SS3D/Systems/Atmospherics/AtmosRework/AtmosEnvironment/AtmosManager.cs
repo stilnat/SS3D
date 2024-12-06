@@ -125,6 +125,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
         }
 
+
         public void RandomizeAllGasses(float maxAmount)
         {
             atmosJobs.ForEach(job => job.RandomizeAllGasses(maxAmount));
@@ -151,10 +152,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             if (tile != null)
             {
-                // Update the gas amount. Keep in mind that this is a value type.
-                AtmosObject atmosObject = tile.AtmosObject;
-                atmosObject.AddHeat(amount);
-                tile.AtmosObject = atmosObject;
+                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddHeat(tile, amount);
             }
         }
 
@@ -164,10 +162,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             if (tile != null)
             {
-                // Update the gas amount. Keep in mind that this is a value type.
-                AtmosObject atmosObject = tile.AtmosObject;
-                atmosObject.RemoveHeat(amount);
-                tile.AtmosObject = atmosObject;
+                atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveHeat(tile, amount);
             }
         }
 
@@ -264,6 +259,11 @@ namespace SS3D.Engine.AtmosphericsRework
 
             ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
+            ComputeHeatTransferJob computeHeatJob = new(atmosJob.NativeAtmosTiles, atmosJob.HeatTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime);
+            TransferHeatJob transferHeatJob = new(atmosJob.HeatTransferArray, atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
+
+
             if (_usesParallelComputation)
             {
                 JobHandle computeIndexesHandle = computeIndexesJob.Schedule(atmosJob.AtmosTiles.Count, 64);
@@ -275,6 +275,9 @@ namespace SS3D.Engine.AtmosphericsRework
                 JobHandle activeFluxHandle = activeFluxesJob.Schedule(atmosJob.ActiveEnvironmentIndexes.Length, 64, transferDiffusionFluxHandle);
                 JobHandle transferActiveFluxHandle = transferActiveFluxesJob.Schedule(activeFluxHandle);
                 JobHandle computeVelocityHandle = velocityJob.Schedule(atmosJob.ActiveEnvironmentIndexes.Length, 64, transferActiveFluxHandle);
+
+                JobHandle computeHeatJobHandle = computeHeatJob.Schedule(atmosJob.ActiveEnvironmentIndexes.Length, 64, computeVelocityHandle);
+                JobHandle transferHeatJobHandle = transferHeatJob.Schedule(computeHeatJobHandle);
 
 
                 _jobHandles.Add(computeIndexesHandle);
@@ -294,6 +297,8 @@ namespace SS3D.Engine.AtmosphericsRework
                 activeFluxesJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
                 transferActiveFluxesJob.Run();
                 velocityJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
+                computeHeatJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
+                transferHeatJob.Run();
             }
             Debug.Log($"Active count : {atmosJob.ActiveEnvironmentIndexes.Length}, SemiActive count : {atmosJob.SemiActiveEnvironmentIndexes.Length}, "
                 + $"Inactive count : {atmosJob.NativeAtmosTiles.Length - atmosJob.ActiveEnvironmentIndexes.Length - atmosJob.SemiActiveEnvironmentIndexes.Length}");

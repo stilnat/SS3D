@@ -57,6 +57,7 @@ namespace SS3D.Engine.AtmosphericsRework
             // Otherwise, adapt the transferred amount so that it transfer to neighbours no more that the amount present in container.
             // it's written like that to avoid using conditions branching for Burst.
             // It works okay even if a neighbour is not present as the amount of moles to transfer will be zero.
+            // Multiplication by 0.8f allows to stabilize the simulation a lot more, this way we never fully transfer all the gas from one tile to another.
             molesToTransfer[0] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
             molesToTransfer[1] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
             molesToTransfer[2] *= 0.8f * totalMolesInContainer / math.max(totalMolesToTransfer, totalMolesInContainer);
@@ -122,36 +123,35 @@ namespace SS3D.Engine.AtmosphericsRework
             return new(0);
         }
 
-        private static AtmosObject SimulateTemperature(AtmosObject atmos, float dt, AtmosObject[] neighbours)
+        public static HeatTransferToNeighbours SimulateTemperature(AtmosObject atmos, int atmosIndex, AtmosObject northNeighbour, AtmosObject southNeighbour,
+            AtmosObject eastNeighbour, AtmosObject westNeighbour, float dt, bool4 hasNeighbour)
         {
-            float4 temperatureFlux = 0f;
-            int neighbourCount = neighbours.Length; 
-            for (int i = 0; i < neighbourCount; i++)
+            float4 heatToTransfer = 0;
+            if (hasNeighbour[0])
             {
-                if (!atmos.ActiveDirection[i])
-                {
-                    continue;
-                }
+                heatToTransfer[0] = HeatToTransfer(atmos, northNeighbour, dt);
+            }
+            if (hasNeighbour[1])
+            {
+                heatToTransfer[1] = HeatToTransfer(atmos, southNeighbour, dt);
+            }
+            if (hasNeighbour[2])
+            {
+                heatToTransfer[2] = HeatToTransfer(atmos, eastNeighbour, dt);
+            }
+            if (hasNeighbour[3])
+            {
+                heatToTransfer[3] = HeatToTransfer(atmos, westNeighbour, dt);
+            }
 
-                float difference = atmos.Temperature - neighbours[i].Temperature;
+            return new HeatTransferToNeighbours(atmosIndex, heatToTransfer);
+        }
 
-                if (difference <= GasConstants.thermalEpsilon)
-                {
-                    continue;
-                }
+        private static float HeatToTransfer(AtmosObject atmos, AtmosObject neighbour, float dt)
+        {
+            float temperatureFlux = (atmos.Temperature - neighbour.Temperature) * GasConstants.thermalBase * atmos.Volume * dt;
 
-                temperatureFlux[i] = (atmos.Temperature - neighbours[i].Temperature) *
-                    GasConstants.thermalBase * atmos.Volume;
-
-                // Set neighbour
-                neighbours[i].SetTemperature(neighbours[i].Temperature + temperatureFlux[i]);
-
-                // Set self
-                atmos.SetTemperature(atmos.Temperature - temperatureFlux[i]);
-                atmos.TemperatureSetting = true;
-            }   
-            
-            return atmos;
+            return math.max(0, temperatureFlux);
         }
     }
 }

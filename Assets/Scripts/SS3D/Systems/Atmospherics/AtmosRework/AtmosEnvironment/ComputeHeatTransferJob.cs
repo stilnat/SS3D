@@ -1,17 +1,13 @@
+using SS3D.Engine.AtmosphericsRework;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace SS3D.Engine.AtmosphericsRework
+public struct ComputeHeatTransferJob : IJobParallelFor
 {
-    [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    struct ComputeFluxesJob : IJobParallelFor
-    {
-
         [ReadOnly]
         private readonly NativeArray<AtmosObject> _tileObjectBuffer;
 
@@ -23,21 +19,16 @@ namespace SS3D.Engine.AtmosphericsRework
 
         [NativeDisableParallelForRestriction]
         [WriteOnly]
-        private NativeArray<MoleTransferToNeighbours> _moleTransfers;
+        private NativeArray<HeatTransferToNeighbours> _heatTransfers;
 
         private readonly float _deltaTime;
 
-        private readonly bool _activeFlux;
-
-
-
-        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<MoleTransferToNeighbours> moleTransfers,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, float deltaTime, bool activeFlux)
+        public ComputeHeatTransferJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<HeatTransferToNeighbours> heatTransfers,
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, float deltaTime)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _deltaTime = deltaTime;
-            _moleTransfers = moleTransfers;
-            _activeFlux = activeFlux;
+            _heatTransfers = heatTransfers;
             _neighboursIndexes = neighboursIndexes;
             _activeIndexes = activeIndexes;
         }
@@ -58,17 +49,15 @@ namespace SS3D.Engine.AtmosphericsRework
                 _neighboursIndexes[activeIndex].EastNeighbour != -1,
             _neighboursIndexes[activeIndex].WestNeighbour != -1);
 
-            // Do actual work
-            _moleTransfers[activeIndex] = AtmosCalculator.SimulateGasTransfers(
+
+            _heatTransfers[activeIndex] = AtmosCalculator.SimulateTemperature(
                 _tileObjectBuffer[activeIndex], 
                 activeIndex,
                 northNeighbour,
                 southNeighbour, 
                 eastNeighbour,
                 westNeighbour,
-                _deltaTime, 
-                _activeFlux,
+                _deltaTime,
                 hasNeighbours);
         }
-    }
 }

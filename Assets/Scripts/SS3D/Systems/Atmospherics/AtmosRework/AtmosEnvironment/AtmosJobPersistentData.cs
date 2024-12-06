@@ -15,8 +15,10 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private enum ChangeType
         {
-            Add,
-            Remove,
+            AddGas,
+            RemoveGas,
+            AddHeat,
+            RemoveHeat,
             StateChange,
         }
 
@@ -28,6 +30,7 @@ namespace SS3D.Engine.AtmosphericsRework
             public int2 ChunkKey;
             public float4 Moles;
             public AtmosState State;
+            public float Heat;
         }
         
         public readonly AtmosMap Map;
@@ -48,6 +51,11 @@ namespace SS3D.Engine.AtmosphericsRework
         /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much moles they give to their neighbours.
         /// </summary>
         public NativeArray<MoleTransferToNeighbours> MoleTransferArray;
+
+        /// <summary>
+        /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much heat they give to their neighbours.
+        /// </summary>
+        public NativeArray<HeatTransferToNeighbours> HeatTransferArray;
         
         /// <summary>
         /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
@@ -72,6 +80,7 @@ namespace SS3D.Engine.AtmosphericsRework
             NeighbourTileIndexes = new(atmosTiles.Count, Allocator.Persistent);
             ActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
             SemiActiveEnvironmentIndexes = new(atmosTiles.Count, Allocator.Persistent);
+            HeatTransferArray = new(atmosTiles.Count, Allocator.Persistent);
 
             // Fill the chunk key hash map in order of chunks created in the map
             List<int2> chunkKeyBuffer = Map.GetAtmosChunks().Select(x => new int2(x.GetKey().x, x.GetKey().y)).ToList();
@@ -113,7 +122,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
             TileChanges tileChanges = new()
             {
-                ChangeType = ChangeType.Remove,
+                ChangeType = ChangeType.RemoveGas,
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
@@ -134,11 +143,51 @@ namespace SS3D.Engine.AtmosphericsRework
 
             TileChanges tileChanges = new()
             {
-                ChangeType = ChangeType.Add,
+                ChangeType = ChangeType.AddGas,
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
                 Moles = amount, 
+            };
+            _atmosObjectsToChange.Add(tileChanges);
+        }
+
+        public void AddHeat(AtmosContainer tile, float heat)
+        {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+            
+            AtmosObject atmosObject = tile.AtmosObject;
+
+            TileChanges tileChanges = new()
+            {
+                ChangeType = ChangeType.AddHeat,
+                X = tile.X,
+                Y = tile.Y,
+                ChunkKey = atmosObject.ChunkKey,
+                Heat = heat,
+            };
+            _atmosObjectsToChange.Add(tileChanges);
+        }
+
+        public void RemoveHeat(AtmosContainer tile, float heat)
+        {
+            if (tile.AtmosObject.State == AtmosState.Blocked)
+            {
+                return;
+            }
+            
+            AtmosObject atmosObject = tile.AtmosObject;
+
+            TileChanges tileChanges = new()
+            {
+                ChangeType = ChangeType.RemoveHeat,
+                X = tile.X,
+                Y = tile.Y,
+                ChunkKey = atmosObject.ChunkKey,
+                Heat = heat,
             };
             _atmosObjectsToChange.Add(tileChanges);
         }
@@ -154,7 +203,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
                     TileChanges tileChanges = new()
                     {
-                        ChangeType = ChangeType.Add,
+                        ChangeType = ChangeType.AddGas,
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
@@ -176,7 +225,7 @@ namespace SS3D.Engine.AtmosphericsRework
                     
                     TileChanges tileChanges = new()
                     {
-                        ChangeType = ChangeType.Remove,
+                        ChangeType = ChangeType.RemoveGas,
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
@@ -206,12 +255,20 @@ namespace SS3D.Engine.AtmosphericsRework
 
                 switch (change.ChangeType)
                 {
-                     case ChangeType.Add:
+                     case ChangeType.AddGas:
                          atmosObject.AddCoreGasses(change.Moles);
                          atmosObject.State = AtmosState.Active;
                          break;
-                     case ChangeType.Remove:
+                     case ChangeType.RemoveGas:
                          atmosObject.RemoveCoreGasses(change.Moles);
+                         atmosObject.State = AtmosState.Active;
+                         break;
+                     case ChangeType.AddHeat:
+                         atmosObject.AddHeat(change.Heat);
+                         atmosObject.State = AtmosState.Active;
+                         break;
+                     case ChangeType.RemoveHeat:
+                         atmosObject.RemoveHeat(change.Heat);
                          atmosObject.State = AtmosState.Active;
                          break;
                      case ChangeType.StateChange:
