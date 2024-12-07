@@ -128,11 +128,12 @@ namespace SS3D.Systems.Animations
                 _grabbedObject.transform.position = _mainHand.Hold.HoldTransform.position; 
                 grabbedRb.velocity = Vector3.zero;
                 grabbedRb.position = _mainHand.Hold.HoldTransform.position;
+                grabbedRb.detectCollisions = false;
             }
 
-            grabbedRb.detectCollisions = false;
+            
 
-            _fixedJoint = _mainHand.HandBone.gameObject.AddComponent<FixedJoint>();
+            _fixedJoint = Controller.GameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;
             _fixedJoint.breakForce = _jointBreakForce;
         }
