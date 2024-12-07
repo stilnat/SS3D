@@ -18,7 +18,7 @@ namespace SS3D.Systems.Animations
     {
 
         [field: SerializeField]
-        public Transform LookAtTargetLocker { get; private set; }
+        public TargetFollow LookAtTargetLocker { get; private set; }
 
         [field: SerializeField]
         public HoldController HoldController { get; private set; }

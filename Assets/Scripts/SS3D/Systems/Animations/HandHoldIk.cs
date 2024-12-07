@@ -87,13 +87,6 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Transform InteractionPoint { get; private set; }
 
-
-        public bool ParentIsHandBone(AbstractHoldable holdProvider)
-        {
-            return holdProvider.transform.parent == HoldTransform;
-        }
-
-
         public void ParentHandIkTargetOnHold(bool secondary, AbstractHoldable holdProvider)
         {
             Transform parent = holdProvider.GetHold(!secondary, Hand.HandType);
@@ -105,9 +98,7 @@ namespace SS3D.Systems.Animations
         /// </summary>
         public void ParentHandIkTarget(Transform parent)
         {
-            HandIkTarget.transform.parent = parent;
-            HandIkTarget.localPosition = Vector3.zero;
-            HandIkTarget.localRotation = Quaternion.identity;
+            HandIkTarget.GetComponent<TargetFollow>().Followed = parent;
         }
 
         /// <summary>

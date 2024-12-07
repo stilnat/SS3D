@@ -84,7 +84,7 @@ namespace SS3D.Systems.Animations
             InteractionSequence.OnStart(() =>
             {
                 AdaptPosition(Controller.PositionController, _mainHand, _targetHitPosition);
-                Controller.LookAtTargetLocker.position = _targetHitPosition;
+                Controller.LookAtTargetLocker.transform.position = _targetHitPosition;
                 Controller.LookAtTargetLocker.transform.parent = null;
                 Controller.LookAtConstraint.weight = 1;
             }); 

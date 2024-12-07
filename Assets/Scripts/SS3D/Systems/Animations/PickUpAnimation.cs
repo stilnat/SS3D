@@ -88,9 +88,7 @@ namespace SS3D.Systems.Animations
             }
 
             // Set up the look at target locker on the item to pick up.
-            Controller.LookAtTargetLocker.transform.parent = _holdable.transform;
-            Controller.LookAtTargetLocker.localPosition = Vector3.zero;
-            Controller.LookAtTargetLocker.localRotation = Quaternion.identity;
+            Controller.LookAtTargetLocker.Followed = _holdable.transform;
         }
 
         [Client]

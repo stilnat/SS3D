@@ -3888,6 +3888,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4607633442489985284}
+  - component: {fileID: 3508734106865730389}
   m_Layer: 0
   m_Name: RightHandTarget
   m_TagString: Untagged
@@ -3910,6 +3911,18 @@ Transform:
   m_Father: {fileID: 2651312618134243821}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
+--- !u!114 &3508734106865730389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762097312483231637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40f0423afd9381244b723760a5e212e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2829612845544247239
 GameObject:
   m_ObjectHideFlags: 0
@@ -7601,7 +7614,7 @@ MonoBehaviour:
   _componentIndexCache: 15
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  <LookAtTargetLocker>k__BackingField: {fileID: 5358384094254398678}
+  <LookAtTargetLocker>k__BackingField: {fileID: 6957243834837216624}
   <HoldController>k__BackingField: {fileID: 5029722283718734781}
   <LookAtConstraint>k__BackingField: {fileID: 2851688491558728783}
   <PositionController>k__BackingField: {fileID: 7568747683536695618}
@@ -9035,6 +9048,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5358384094254398678}
+  - component: {fileID: 6957243834837216624}
   m_Layer: 0
   m_Name: LookAtTarget
   m_TagString: Untagged
@@ -9057,6 +9071,18 @@ Transform:
   m_Father: {fileID: 3162762470123075684}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6957243834837216624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5215700069147803769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40f0423afd9381244b723760a5e212e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5269329783519768355
 GameObject:
   m_ObjectHideFlags: 0
@@ -9067,6 +9093,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6305849888995174770}
   - component: {fileID: 2142891004495607562}
+  - component: {fileID: 8057977728555779585}
   m_Layer: 0
   m_Name: RightHandTwoBonesConstraint
   m_TagString: Untagged
@@ -9113,6 +9140,57 @@ MonoBehaviour:
     m_HintWeight: 1
     m_MaintainTargetPositionOffset: 0
     m_MaintainTargetRotationOffset: 0
+--- !u!114 &8057977728555779585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5269329783519768355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8935e03361a14ec4b8edc872f76bc822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 1
+  m_Data:
+    m_ConstrainedObject: {fileID: 4607633442489985284}
+    m_SourceObjects:
+      m_Length: 0
+      m_Item0:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_ConstrainedPositionAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_ConstrainedRotationAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_MaintainPositionOffset: 0
+    m_MaintainRotationOffset: 0
 --- !u!1 &5359021026460437030
 GameObject:
   m_ObjectHideFlags: 0
@@ -11156,6 +11234,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7988154616977013968}
   - component: {fileID: 3450567292757048057}
+  - component: {fileID: 7765676051134524716}
   m_Layer: 0
   m_Name: LeftHandTwoBonesConstraint
   m_TagString: Untagged
@@ -11202,6 +11281,57 @@ MonoBehaviour:
     m_HintWeight: 1
     m_MaintainTargetPositionOffset: 0
     m_MaintainTargetRotationOffset: 0
+--- !u!114 &7765676051134524716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7191851638178009200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8935e03361a14ec4b8edc872f76bc822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 1
+  m_Data:
+    m_ConstrainedObject: {fileID: 4846808082985781182}
+    m_SourceObjects:
+      m_Length: 0
+      m_Item0:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_ConstrainedPositionAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_ConstrainedRotationAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_MaintainPositionOffset: 0
+    m_MaintainRotationOffset: 0
 --- !u!1 &7228383804111640950
 GameObject:
   m_ObjectHideFlags: 0
@@ -11664,6 +11794,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4846808082985781182}
+  - component: {fileID: 2465664539402865949}
   m_Layer: 0
   m_Name: LeftHandTarget
   m_TagString: Untagged
@@ -11686,6 +11817,18 @@ Transform:
   m_Father: {fileID: 2651312618134243821}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2465664539402865949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525369335258594803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40f0423afd9381244b723760a5e212e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7556854409677953280
 GameObject:
   m_ObjectHideFlags: 0

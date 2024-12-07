@@ -60,7 +60,7 @@ namespace SS3D.Systems.Animations
 
             InteractionSequence.OnStart(() =>
             {
-                Controller.LookAtTargetLocker.position = _targetHitPosition;
+                Controller.LookAtTargetLocker.transform.position = _targetHitPosition;
                 AdaptPosition(Controller.PositionController, _mainHand, _targetHitPosition);
                 Controller.AnimatorController.MakeFist(true, _mainHand.HandType == HandType.RightHand);
             }); 

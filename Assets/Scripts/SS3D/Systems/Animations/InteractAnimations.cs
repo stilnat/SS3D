@@ -70,7 +70,7 @@ namespace SS3D.Systems.Animations
             // disable position constraint the time of the interaction
             mainHand.Hold.ItemPositionConstraint.weight = 0f;
             mainHand.Hold.PickupIkConstraint.weight = 1f;
-            Controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
+            Controller.LookAtTargetLocker.transform.position = tool.InteractionPoint.position;
             tool.GameObject.transform.parent = null;
         }
 

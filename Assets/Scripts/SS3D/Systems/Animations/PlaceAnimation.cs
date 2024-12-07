@@ -94,7 +94,7 @@ namespace SS3D.Systems.Animations
 
             // Place look at target at place item position
             Controller.LookAtTargetLocker.transform.parent = null;
-            Controller.LookAtTargetLocker.position = _placePosition;
+            Controller.LookAtTargetLocker.transform.position = _placePosition;
         }
 
         [Client]
