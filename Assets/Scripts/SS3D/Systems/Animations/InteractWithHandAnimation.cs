@@ -23,7 +23,7 @@ namespace SS3D.Systems.Animations
             : base(time, proceduralAnimationController)
         {
             _hand = mainHand;
-            _moveHandTime = time / 2;
+            _moveHandTime = time;
             _targetPosition = targetPosition;
             _interactionType = interactionType;
         }

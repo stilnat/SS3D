@@ -288,6 +288,7 @@ namespace SS3D.Systems.Animations
         private void AddItem(Hand hand, AbstractHoldable holdable)
         {
             StartCoroutine(CoroutineBringToHand(hand, holdable, 0f));
+            UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
             {
