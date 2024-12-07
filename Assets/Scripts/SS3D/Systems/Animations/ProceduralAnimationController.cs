@@ -36,6 +36,9 @@ namespace SS3D.Systems.Animations
         public HumanoidMovementController MovementController { get; private set; }
 
         [field: SerializeField]
+        public IntentController IntentController { get; private set; }
+
+        [field: SerializeField]
         public Hands Hands { get; private set; }
 
         // We can't have more than one procedural animation running at the same time per hand (maybe should store Source instead of hand).

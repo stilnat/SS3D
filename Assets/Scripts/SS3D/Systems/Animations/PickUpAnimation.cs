@@ -65,11 +65,10 @@ namespace SS3D.Systems.Animations
             // Needed to constrain item to position, in case the weight has been changed elsewhere
             _mainHand.Hold.ItemPositionConstraint.weight = 1f;
 
-
             // Orient hand in a natural position to reach for item.
             OrientTargetForHandRotation(_mainHand);
 
-            // Place pickup and hold target lockers on the item, at their respective position and rotation.
+            // Place hand ik target on the item, at their respective position and rotation.
             _mainHand.Hold.ParentHandIkTargetOnHold(false, _holdable);
 
             // Needed if this has been changed elsewhere

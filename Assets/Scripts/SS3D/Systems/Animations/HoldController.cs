@@ -9,6 +9,7 @@ using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -151,6 +152,69 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
         }
 
+        public void BringToHand(Hand hand, AbstractHoldable holdable, float duration)
+        {
+            StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
+        }
+
+
+        private IEnumerator CoroutineBringToHand(Hand hand, AbstractHoldable holdable, float duration)
+        {
+            Vector3 start = holdable.GameObject.transform.position;
+            
+
+            bool toThrow = _aimController.IsAimingToThrow;
+            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && holdable.CanHoldTwoHand && oppositeHand.Empty;
+
+            // Fetch how the item should be held
+            HandHoldType itemHoldType = holdable.GetHoldType(withTwoHands, _intents.Intent, toThrow);
+
+            Transform target = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+
+
+            // Smoothly move item toward the target position
+            for(float timePassed = 0f; timePassed < duration; timePassed += Time.deltaTime)
+            {
+                float factor = timePassed / duration;
+                factor = Mathf.SmoothStep(0, 1, factor);
+
+                holdable.GameObject.transform.position = Vector3.Lerp(start, target.position, factor);
+
+                yield return null;
+            }
+    
+            holdable.GameObject.transform.position = target.position;
+
+            if (itemHoldType == HandHoldType.SmallItem)
+            {
+                holdable.transform.SetParent(hand.Hold.Pivot.transform, false);
+
+                Transform holdTransform = holdable.GetHold(true, hand.HandType);
+
+                hand.Hold.Pivot.transform.localRotation = Quaternion.Euler(0, 0, 180) * holdTransform.localRotation;
+               
+                // Assign the relative position between the attachment point and the object
+                holdable.transform.localPosition = Vector3.zero;
+                holdable.transform.localRotation = Quaternion.identity;    
+
+                hand.Hold.HoldIkConstraint.weight = 0f;
+            }
+            else
+            {
+                holdable.transform.parent = hand.Hold.ItemPositionTargetLocker;
+                holdable.GameObject.transform.localRotation = Quaternion.identity;
+                holdable.GameObject.transform.localPosition = Vector3.zero;
+
+                hand.Hold.ItemPositionConstraint.weight = 1f;
+
+                // enable the hold constraint as well
+                hand.Hold.HoldIkConstraint.weight = 1f;
+                hand.Hold.ParentHandIkTargetOnHold(false, holdable);
+            }
+
+        }
+
+
 
         /// <summary>
         /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place. 
@@ -181,6 +245,7 @@ namespace SS3D.Systems.Animations
             Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
             DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
+            
 
             // Do the same with interpolating rotation.
             hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
@@ -222,16 +287,7 @@ namespace SS3D.Systems.Animations
         [Client]
         private void AddItem(Hand hand, AbstractHoldable holdable)
         {
-            // Put the holdable on the hand item position target locker and constrain it
-            holdable.GameObject.transform.parent = hand.Hold.ItemPositionTargetLocker;
-            holdable.GameObject.transform.localRotation = Quaternion.identity;
-            holdable.GameObject.transform.localPosition = Vector3.zero;
-            hand.Hold.ItemPositionConstraint.weight = 1f;
-
-            // enable the hold constraint as well
-            hand.Hold.HoldIkConstraint.weight = 1f;
-            hand.Hold.ParentHandIkTargetOnHold(false, holdable);
-            UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
+            StartCoroutine(CoroutineBringToHand(hand, holdable, 0f));
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
             {

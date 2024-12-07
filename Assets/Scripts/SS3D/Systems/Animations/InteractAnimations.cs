@@ -29,14 +29,17 @@ namespace SS3D.Systems.Animations
 
         private readonly Vector3 _targetPosition;
 
+        private readonly Transform _toolParent;
+
         public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkBehaviour target, InteractionType interactionType, Vector3 targetPosition)
             : base(time, proceduralAnimationController) 
         {
             _tool = target.GetComponent<IInteractiveTool>();
-            _moveToolTime = Mathf.Min(time, 0.5f);
+            _moveToolTime = Mathf.Min(time, 0.2f);
             _mainHand = mainHand;
             _interact = interactionType;
             _targetPosition = targetPosition;
+            _toolParent = _tool.GameObject.transform.parent;
             SetupInteract(mainHand, _tool);
         }
 
@@ -50,14 +53,16 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Kill();
 
             // Stop looking at item
-            DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime);
-
-            Controller.PositionController.TryToStandUp();
-            _tool.StopAnimation();
-            _tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime);
-            _tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime);
-            _mainHand.Hold.ItemPositionConstraint.weight = 1f;
-            _mainHand.Hold.PickupIkConstraint.weight = 0f;
+            DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime).OnStart(() =>
+            {
+                Controller.PositionController.TryToStandUp();
+                _tool.StopAnimation();
+                Controller.HoldController.BringToHand(_mainHand, _tool.GameObject.GetComponent<AbstractHoldable>(), _moveToolTime);
+            }).OnComplete(() =>
+            {
+                _mainHand.Hold.ItemPositionConstraint.weight = 1f;
+                _mainHand.Hold.PickupIkConstraint.weight = 0f;
+            });
         }
 
         private void SetupInteract(Hand mainHand, IInteractiveTool tool)
@@ -66,6 +71,7 @@ namespace SS3D.Systems.Animations
             mainHand.Hold.ItemPositionConstraint.weight = 0f;
             mainHand.Hold.PickupIkConstraint.weight = 1f;
             Controller.LookAtTargetLocker.position = tool.InteractionPoint.position;
+            tool.GameObject.transform.parent = null;
         }
 
         private void AlignToolWithShoulder(Vector3 interactionPoint, Hand mainHand, IInteractiveTool tool)
@@ -124,21 +130,20 @@ namespace SS3D.Systems.Animations
             InteractionSequence.AppendInterval(InteractionTime - _moveToolTime);
 
             // Stop looking at item
-            InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime));
-
-            // Rotate tool back to its hold rotation
-            InteractionSequence.Join(_tool.GameObject.transform.DOLocalRotate(Quaternion.identity.eulerAngles, _moveToolTime).OnStart(() =>
+            InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _moveToolTime).OnStart(() =>
             {
                 RestorePosition(Controller.PositionController);
                 _tool.StopAnimation();
+                Controller.HoldController.BringToHand(_mainHand, _tool.GameObject.GetComponent<AbstractHoldable>(), _moveToolTime);
             }));
-
-            InteractionSequence.Join(_tool.GameObject.transform.DOLocalMove(Vector3.zero, _moveToolTime));
 
             InteractionSequence.OnComplete(() =>
             {
                 _mainHand.Hold.PickupIkConstraint.weight = 0f;
                 _mainHand.Hold.ItemPositionConstraint.weight = 1f;
+                _tool.GameObject.transform.parent = _mainHand.Hold.HoldTransform;
+                _tool.GameObject.transform.localPosition = Vector3.zero;
+                _tool.GameObject.transform.localRotation = Quaternion.identity;
                 OnCompletion?.Invoke(this);
             });
         }

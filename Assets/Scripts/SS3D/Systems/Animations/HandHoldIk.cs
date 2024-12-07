@@ -1,6 +1,7 @@
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Core.Behaviours;
+using SS3D.Interactions;
 using SS3D.Systems.Crafting;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
@@ -69,6 +70,11 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Transform HoldTransform { get; private set; }
 
+
+        [field: SerializeField]
+        public Transform Pivot { get; private set; }
+
+
         [field: SerializeField]
         public Hands Hands { get; private set; }
 
@@ -80,6 +86,12 @@ namespace SS3D.Systems.Animations
 
         [field: SerializeField]
         public Transform InteractionPoint { get; private set; }
+
+
+        public bool ParentIsHandBone(AbstractHoldable holdProvider)
+        {
+            return holdProvider.transform.parent == HoldTransform;
+        }
 
 
         public void ParentHandIkTargetOnHold(bool secondary, AbstractHoldable holdProvider)

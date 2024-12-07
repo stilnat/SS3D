@@ -32,8 +32,9 @@ namespace SS3D.Systems.Animations
 
             _mainHand.Hold.ItemPositionConstraint.weight = 0f;
 
-           bool isRight = _mainHand.HandType == HandType.RightHand;
-           int deviationRightOrLeft = isRight ? 1 : -1;
+            /*
+            bool isRight = _mainHand.HandType == HandType.RightHand;
+            int deviationRightOrLeft = isRight ? 1 : -1;
 
             Vector3 initialPosition = _mainHand.Hold.ItemPositionTargetLocker.transform.position;
             Vector3 initialPositionInRoot = _rootTransform.InverseTransformPoint(initialPosition);
@@ -50,7 +51,8 @@ namespace SS3D.Systems.Animations
 
             // do a little back and forth path
             InteractionSequence.Join(_mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, InteractionTime/2)
-                .SetLoops(2, LoopType.Yoyo));  
+                .SetLoops(2, LoopType.Yoyo));
+            */ 
 
             InteractionSequence.OnComplete(() => { 
                 

@@ -78,6 +78,7 @@ public abstract class AbstractHoldable : NetworkActor
         }
     }
 
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -87,6 +88,12 @@ public abstract class AbstractHoldable : NetworkActor
                 return;
             }
 
+            DrawHands();
+
+        }
+
+        private void DrawHands()
+        {
             Mesh leftHandGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Entities/Humanoids/Human/HumanHandLeft.mesh", typeof(Mesh));
             Mesh rightHandGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Entities/Humanoids/Human/HumanHandRight.mesh", typeof(Mesh));
 
@@ -127,4 +134,5 @@ public abstract class AbstractHoldable : NetworkActor
             Gizmos.DrawMesh(model, position, rotation);
         }
 #endif
+
 }
