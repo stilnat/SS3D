@@ -157,6 +157,40 @@ namespace SS3D.Systems.Animations
             StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
         }
 
+        /// <summary>
+        /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place. 
+        /// </summary>
+        /// <param name="hand"> The main hand holding the item</param>
+        /// <param name="item"> The item held</param>
+        /// <param name="withTwoHands"> If the item should be held with two hands </param>
+        /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
+        /// <param name="toThrow"> True the item should be in a ready to throw position</param>
+        public void UpdateItemPositionConstraintAndRotation(
+            Hand hand, AbstractHoldable item, float duration)
+        {
+            if (item == null)
+            {
+                return;
+            }
+
+            bool toThrow = _aimController.IsAimingToThrow;
+            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
+
+            // Fetch how the item should be held
+            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
+
+            // The position where the item should be, given its hold type
+            Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+
+            // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
+            Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+
+            DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
+            
+
+            // Do the same with interpolating rotation.
+            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
+        }
 
         private IEnumerator CoroutineBringToHand(Hand hand, AbstractHoldable holdable, float duration)
         {
@@ -194,7 +228,7 @@ namespace SS3D.Systems.Animations
                 hand.Hold.Pivot.transform.localRotation = Quaternion.Euler(0, 0, 180) * holdTransform.localRotation;
                
                 // Assign the relative position between the attachment point and the object
-                holdable.transform.localPosition = Vector3.zero;
+                holdable.transform.localPosition = -holdTransform.localPosition;
                 holdable.transform.localRotation = Quaternion.identity;    
 
                 hand.Hold.HoldIkConstraint.weight = 0f;
@@ -212,43 +246,6 @@ namespace SS3D.Systems.Animations
                 hand.Hold.ParentHandIkTargetOnHold(false, holdable);
             }
 
-        }
-
-
-
-        /// <summary>
-        /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place. 
-        /// </summary>
-        /// <param name="hand"> The main hand holding the item</param>
-        /// <param name="item"> The item held</param>
-        /// <param name="withTwoHands"> If the item should be held with two hands </param>
-        /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
-        /// <param name="toThrow"> True the item should be in a ready to throw position</param>
-        public void UpdateItemPositionConstraintAndRotation(
-            Hand hand, AbstractHoldable item, float duration)
-        {
-            if (item == null)
-            {
-                return;
-            }
-
-            bool toThrow = _aimController.IsAimingToThrow;
-            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
-
-            // Fetch how the item should be held
-            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
-
-            // The position where the item should be, given its hold type
-            Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-
-            // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
-            Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-
-            DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
-            
-
-            // Do the same with interpolating rotation.
-            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
         }
 
 
@@ -287,7 +284,7 @@ namespace SS3D.Systems.Animations
         [Client]
         private void AddItem(Hand hand, AbstractHoldable holdable)
         {
-            StartCoroutine(CoroutineBringToHand(hand, holdable, 0f));
+            BringToHand(hand, holdable, 0f);
             UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
