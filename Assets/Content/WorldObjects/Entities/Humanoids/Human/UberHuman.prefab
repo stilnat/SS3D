@@ -7782,7 +7782,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _rb: {fileID: 8635375509376998503}
-  _movementSpeed: 40
+  _movementSpeed: 30
   _lerpMultiplier: 4
   _rotationLerpMultiplier: 8
   _movementTarget: {fileID: 5029736816765645950}
