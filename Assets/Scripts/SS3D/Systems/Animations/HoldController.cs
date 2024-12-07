@@ -2,6 +2,7 @@ using DG.Tweening;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Serializing;
+using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
@@ -166,13 +167,8 @@ namespace SS3D.Systems.Animations
         /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
         /// <param name="toThrow"> True the item should be in a ready to throw position</param>
         public void UpdateItemPositionConstraintAndRotation(
-            Hand hand, AbstractHoldable item, float duration)
+            [NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
         {
-            if (item == null)
-            {
-                return;
-            }
-
             bool toThrow = _aimController.IsAimingToThrow;
             bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
 
@@ -331,10 +327,16 @@ namespace SS3D.Systems.Animations
 
         private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand?.Holdable;
+            if (!_hands.SelectedHand.ItemInHand)
+            {
+                return;
+            }
+
+            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand.Holdable;
+            Gun gun = null;
 
             // handle aiming with shoulder aim
-            if (holdable.TryGetComponent(out Gun gun) && !toThrow && isAiming)
+            if (holdable && holdable.TryGetComponent(out gun) && !toThrow && isAiming)
             {
                 gun.transform.parent = _hands.SelectedHand.Hold.ShoulderWeaponPivot;
 
