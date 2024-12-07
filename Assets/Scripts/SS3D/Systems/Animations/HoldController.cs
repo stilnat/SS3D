@@ -223,12 +223,13 @@ namespace SS3D.Systems.Animations
             {
                 holdable.transform.SetParent(hand.Hold.Pivot.transform, false);
 
-                Transform holdTransform = holdable.GetHold(true, hand.HandType);
+                Transform holdOnItem = holdable.GetHold(true, hand.HandType);
 
-                hand.Hold.Pivot.transform.localRotation = Quaternion.Euler(0, 0, 180) * holdTransform.localRotation;
+                // multiply by inverse of hold transform to "remove" the hold parent rotation.
+                hand.Hold.Pivot.transform.localRotation = Quaternion.Inverse(hand.Hold.HoldTransform.localRotation) * Quaternion.Inverse(holdOnItem.localRotation);
                
                 // Assign the relative position between the attachment point and the object
-                holdable.transform.localPosition = -holdTransform.localPosition;
+                holdable.transform.localPosition = -holdOnItem.localPosition;
                 holdable.transform.localRotation = Quaternion.identity;    
 
                 hand.Hold.HoldIkConstraint.weight = 0f;
