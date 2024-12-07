@@ -66,7 +66,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 }
 
                 // check that our hand is empty
-                if (!hand.IsEmpty() && hand.ItemInHand != item)
+                if (!hand.IsEmpty())
                 {
                     return false;
                 }
