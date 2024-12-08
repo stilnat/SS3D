@@ -60,7 +60,7 @@ namespace SS3D.Systems.Animations
             // We start by setting the pickup IK target back on the item hold
             _mainHand.Hold.PickupIkConstraint.weight = 1;
             Transform parent = _holdable.GetHold(true, _mainHand.HandType);
-            _mainHand.Hold.ParentHandIkTarget(parent);
+            _mainHand.Hold.HandTargetFollowTransform(parent);
 
             // Compute the rotation of the player's root transform when looking at the hit position
             Vector3 directionFromTransformToTarget = _targetHitPosition - _rootTransform.position;

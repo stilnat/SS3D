@@ -237,7 +237,7 @@ namespace SS3D.Systems.Animations
 
                 // enable the hold constraint as well
                 hand.Hold.HoldIkConstraint.weight = 1f;
-                hand.Hold.ParentHandIkTargetOnHold(false, holdable);
+                hand.Hold.HandTargetFollowHold(false, holdable);
             }
 
         }
@@ -269,7 +269,7 @@ namespace SS3D.Systems.Animations
             {
                 UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
                 hand.Hold.HoldIkConstraint.weight = 1f;
-                hand.Hold.ParentHandIkTargetOnHold(true, oppositeHand.ItemInHand.Holdable);
+                hand.Hold.HandTargetFollowHold(true, oppositeHand.ItemInHand.Holdable);
             }
         }
 

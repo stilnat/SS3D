@@ -87,18 +87,25 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Transform InteractionPoint { get; private set; }
 
-        public void ParentHandIkTargetOnHold(bool secondary, AbstractHoldable holdProvider)
+        /// <summary>
+        /// The IK target for the chain IK constraint, allowing the player to bend to reach things.
+        /// </summary>
+        [field: SerializeField]
+        public TargetFollow HandTargetFollow { get; private set; }
+
+
+        public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider)
         {
             Transform parent = holdProvider.GetHold(!secondary, Hand.HandType);
-            ParentHandIkTarget(parent);
+            HandTargetFollowTransform(parent);
         }
 
         /// <summary>
         /// Put the right IK target as a child of another transform, setting its position to zero and its rotation to be the same as the parent one (or optionnally not doing it).
         /// </summary>
-        public void ParentHandIkTarget(Transform parent)
+        public void HandTargetFollowTransform(Transform parent)
         {
-            HandIkTarget.GetComponent<TargetFollow>().Followed = parent;
+            HandTargetFollow.Followed = parent;
         }
 
         /// <summary>

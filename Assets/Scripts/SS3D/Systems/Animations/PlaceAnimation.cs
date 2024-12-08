@@ -55,7 +55,7 @@ namespace SS3D.Systems.Animations
             _mainHand.Hold.ItemPositionConstraint.weight = 1f;
 
             // Place pickup and hold target lockers on the item, at their respective position and rotation.
-            _mainHand.Hold.ParentHandIkTargetOnHold(false, _placedObject);
+            _mainHand.Hold.HandTargetFollowHold(false, _placedObject);
 
             // Move and rotate item toward its constrained position.
             _placedObject.transform.parent = _mainHand.Hold.ItemPositionTargetLocker;
