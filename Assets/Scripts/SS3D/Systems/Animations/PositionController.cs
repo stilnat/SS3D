@@ -10,7 +10,7 @@ using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Animations
 {
-    public class PositionController : NetworkActor
+    public sealed class PositionController : NetworkActor
     {
 
         public Action<PositionType, float> ChangedPosition;
@@ -33,7 +33,7 @@ namespace SS3D.Systems.Animations
 
 
         [SyncVar(OnChange = nameof(SyncPosition))]
-        private PositionType _position;
+        private PositionType _positionType;
 
         [SyncVar(OnChange = nameof(SyncMovement))]
         private MovementType _movement;
@@ -58,17 +58,17 @@ namespace SS3D.Systems.Animations
 
         private const float DefaultTransitionDuration = 0.2f;
 
-        public PositionType Position => _position;
+        public PositionType PositionType => _positionType;
 
-        public PositionType PreviousPosition => _position;
+        public PositionType PreviousPositionType => _positionType;
 
         public MovementType Movement => _movement;
 
-        public bool CanGrab => _standingAbility && _movement == MovementType.Normal && _position != PositionType.Sitting;
+        public bool CanGrab => _standingAbility && _movement == MovementType.Normal && _positionType != PositionType.Sitting;
 
         public bool CanSit => _standingAbility;
 
-        public bool CanRotateWhileAiming => Movement == MovementType.Aiming && Position != PositionType.Sitting && Position != PositionType.Proning;
+        public bool CanRotateWhileAiming => Movement == MovementType.Aiming && PositionType != PositionType.Sitting && PositionType != PositionType.Proning;
 
         public AnimationClip GetRecoverFromRagdollClip()
         {
@@ -81,7 +81,7 @@ namespace SS3D.Systems.Animations
             _feetController.FeetHealthChanged += OnFeetHealthChanged;
             _ragdoll.OnRagdoll += HandleRagdoll;
             _standingAbility = true;
-            _position = PositionType.Standing;
+            _positionType = PositionType.Standing;
             _movement = MovementType.Normal;
             _previousPosition = PositionType.Standing;
             _previousMovement = MovementType.Normal;
@@ -109,7 +109,7 @@ namespace SS3D.Systems.Animations
         [ServerRpc]
         private void RpcDance()
         {
-            if (_standingAbility && _position == PositionType.Standing)
+            if (_standingAbility && _positionType == PositionType.Standing)
             {
                 _isDancing = !_isDancing;
             }
@@ -144,28 +144,28 @@ namespace SS3D.Systems.Animations
         [Client]
         public void TrySit()
         {
-            if(_position == PositionType.Ragdoll) return;
+            if(_positionType == PositionType.Ragdoll) return;
             RpcChangePosition(PositionType.Sitting);
         }
 
         [Client]
         public void Prone()
         {
-            if(_position == PositionType.Ragdoll) return;
+            if(_positionType == PositionType.Ragdoll) return;
             RpcChangePosition(PositionType.Proning);
         }
 
         [Client]
         public void TryCrouch()
         { 
-            if(_position == PositionType.Ragdoll) return;
+            if(_positionType == PositionType.Ragdoll) return;
             RpcChangePosition(_standingAbility ? PositionType.Crouching : PositionType.Proning);
         }
 
         [Client]
         public void TryToStandUp()
         {
-            if(_position == PositionType.Ragdoll) return;
+            if(_positionType == PositionType.Ragdoll) return;
             RpcChangePosition(_standingAbility ? PositionType.Standing : PositionType.Proning);
         }
 
@@ -176,7 +176,7 @@ namespace SS3D.Systems.Animations
             {
                 ChangePosition(PositionType.Ragdoll);
             }
-            else if(_position == PositionType.Ragdoll)
+            else if(_positionType == PositionType.Ragdoll)
             {
                 RpcChangePosition(PositionType.ResetBones);
                 Invoke(nameof(RagdollRecover), RagdollBoneResetTime);
@@ -212,8 +212,8 @@ namespace SS3D.Systems.Animations
         [Server]
         private void ChangePosition(PositionType position)
         {
-            _previousPosition = _position;
-            _position = position;
+            _previousPosition = _positionType;
+            _positionType = position;
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace SS3D.Systems.Animations
         private void HandleChangePosition(InputAction.CallbackContext obj)
         {
 
-            switch (_position)
+            switch (_positionType)
             {
                 case PositionType.Proning :
                     TryToStandUp();

@@ -5,6 +5,7 @@ using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SS3D.Systems.Animations
 {
@@ -16,7 +17,7 @@ namespace SS3D.Systems.Animations
 
         private LayerMask _grabbableLayer;
 
-        private readonly float _jointBreakForce = 25000f;
+        private const float JointBreakForce = 500f;
 
         private readonly float _itemReachDuration;
 
@@ -55,7 +56,7 @@ namespace SS3D.Systems.Animations
 
             if (_fixedJoint is not null)
             { 
-                MonoBehaviour.Destroy(_fixedJoint);
+                Object.Destroy(_fixedJoint);
             }
 
             Sequence stopSequence = DOTween.Sequence();
@@ -98,10 +99,8 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
-            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x =>  _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
-            {
-                HandleGrabbing();
-            }));
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x =>  _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration)
+                .OnComplete(HandleGrabbing));
 
             // Stop looking
             InteractionSequence.Append(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, _itemReachDuration));
@@ -135,7 +134,7 @@ namespace SS3D.Systems.Animations
 
             _fixedJoint = Controller.GameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;
-            _fixedJoint.breakForce = _jointBreakForce;
+            _fixedJoint.breakForce = JointBreakForce;
         }
     }
 }

@@ -194,8 +194,8 @@ namespace SS3D.Systems.Entities.Humanoid
              speed *= IsRunning ? RunFactor : 1;
              speed *= _positionController.Movement == MovementType.Aiming ? AimFactor : 1;
              speed *= _positionController.Movement == MovementType.Dragging ? DragFactor : 1;
-             speed *= GetComponent<PositionController>().Position == PositionType.Proning ? CrawlFactor : 1;
-             speed *= GetComponent<PositionController>().Position == PositionType.Crouching ? CrouchFactor : 1;
+             speed *= GetComponent<PositionController>().PositionType == PositionType.Proning ? CrawlFactor : 1;
+             speed *= GetComponent<PositionController>().PositionType == PositionType.Crouching ? CrouchFactor : 1;
 
              return speed;
         }

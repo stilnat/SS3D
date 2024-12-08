@@ -42,7 +42,7 @@ namespace SS3D.Systems.Animations
         public Hands Hands { get; private set; }
 
         // We can't have more than one procedural animation running at the same time per hand (maybe should store Source instead of hand).
-        private List<Tuple<Hand, IProceduralAnimation>> _animations = new();
+        private readonly List<Tuple<Hand, IProceduralAnimation>> _animations = new();
 
         [Server]
         public void PlayAnimation(InteractionType interactionType, Hand hand,  NetworkBehaviour target, Vector3 targetPosition, float time, float delay = 0f)
@@ -52,7 +52,7 @@ namespace SS3D.Systems.Animations
         }
 
         [ObserversRpc]
-        public void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, float time, float delay = 0f)
+        private void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkBehaviour target, Vector3 targetPosition, float time, float delay = 0f)
         {
             IProceduralAnimation proceduralAnimation;
             switch (interactionType)
@@ -106,9 +106,9 @@ namespace SS3D.Systems.Animations
             _animations.Remove(_animations.FirstOrDefault(x => x.Item1 == hand));
         }
 
-        private void RemoveAnimation(IProceduralAnimation animation)
+        private void RemoveAnimation(IProceduralAnimation proceduralAnimation)
         {
-            _animations.Remove(_animations.FirstOrDefault(x => x.Item2 == animation));
+            _animations.Remove(_animations.FirstOrDefault(x => x.Item2 == proceduralAnimation));
         }
 
 

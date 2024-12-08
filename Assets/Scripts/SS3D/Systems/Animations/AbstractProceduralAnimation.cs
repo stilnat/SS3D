@@ -1,6 +1,5 @@
 using DG.Tweening;
-using FishNet.Object;
-using SS3D.Systems.Interactions;
+using JetBrains.Annotations;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
 using System;
@@ -39,7 +38,7 @@ namespace SS3D.Systems.Animations
         /// </summary>
         protected void TryRotateTowardTargetPosition(Transform rootTransform, float rotateTime, Vector3 position)
         {
-            if (Controller.PositionController.Position != PositionType.Sitting)
+            if (Controller.PositionController.PositionType != PositionType.Sitting)
             {
                 InteractionSequence.Join(Controller.transform.DORotate(
                     QuaternionExtension.SameHeightPlaneLookRotation(position - rootTransform.position, Vector3.up).eulerAngles, rotateTime));
@@ -50,7 +49,7 @@ namespace SS3D.Systems.Animations
         /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
         /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
         /// </summary>
-        protected void OrientTargetForHandRotation(Hand hand)
+        protected void OrientTargetForHandRotation([NotNull] Hand hand)
         {
             Vector3 armTargetDirection = hand.Hold.HandIkTarget.position - hand.Hold.UpperArm.position;
 
@@ -64,11 +63,11 @@ namespace SS3D.Systems.Animations
         /// <summary>
         /// Adapt the position of the player interacting to make the animation look more natural, such as crouching when the interaction is too low.
         /// </summary>
-        protected void AdaptPosition(PositionController positionController, Hand mainHand, Vector3 targetPosition)
+        protected void AdaptPosition(PositionController positionController, [NotNull] Hand mainHand, Vector3 targetPosition)
         {
             if (mainHand.HandBone.transform.position.y - targetPosition.y > 0.3)
             {
-                _positionHasChanged = positionController.Position != PositionType.Crouching;
+                _positionHasChanged = positionController.PositionType != PositionType.Crouching;
                 positionController.TryCrouch();
             }
         }

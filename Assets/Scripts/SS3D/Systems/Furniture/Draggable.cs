@@ -1,18 +1,9 @@
-﻿using Coimbra.Services.Events;
-using Coimbra.Services.PlayerLoopEvents;
-using FishNet.Object.Synchronizing;
+﻿using FishNet.Object.Synchronizing;
+using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
-using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Furniture;
-using SS3D.Systems.Inventory.Interactions;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Put this script on things that can be dragged by a player, such as unbolted furnitures.
@@ -27,6 +18,7 @@ public abstract class Draggable : NetworkActor, IInteractionTarget
 
     public bool Dragged => _dragged;
 
+    [NotNull]
     public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
     {
         return new IInteraction[]

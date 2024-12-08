@@ -1,15 +1,12 @@
 using DG.Tweening;
 using FishNet.Object;
-using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Systems.Inventory.Items;
-using SS3D.Utils;
 using System;
 using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    public class PlaceAnimation : AbstractProceduralAnimation
+    public sealed class PlaceAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 

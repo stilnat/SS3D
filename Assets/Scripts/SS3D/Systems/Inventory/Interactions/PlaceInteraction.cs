@@ -1,9 +1,8 @@
-﻿using FishNet.Object;
+﻿using JetBrains.Annotations;
 using System;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
-using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
@@ -17,8 +16,6 @@ namespace SS3D.Systems.Inventory.Interactions
     [Serializable]
     public class PlaceInteraction : DelayedInteraction
     {
-        private bool _hasDroppedItem;
-
         public float TimeToMoveBackHand { get; private set; }
 
         public float TimeToReachDropPlace { get; private set; }
@@ -42,11 +39,13 @@ namespace SS3D.Systems.Inventory.Interactions
             Delay = TimeToReachDropPlace;
         }
 
+        [NotNull]
         public override string GetName(InteractionEvent interactionEvent)
         {
             return "Place";
         }
 
+        [NotNull]
         public override string GetGenericName() => "Place";
 
         public override Sprite GetIcon(InteractionEvent interactionEvent)
@@ -103,8 +102,8 @@ namespace SS3D.Systems.Inventory.Interactions
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             base.Start(interactionEvent, reference);
-
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+            if (!hand) { return true; }
             hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
                 InteractionType.Place, hand, hand.ItemInHand.GetComponent<AbstractHoldable>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
             
@@ -113,14 +112,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Debug.Log("attempting to cancel animation");
-            // We don't want to cancel the interaction if the item is already dropped
-            /*if (_hasDroppedItem)
-            {
-                return;
-            } */
-
-            if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand != null)
+            if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand is not null)
             {
                 hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
@@ -128,11 +120,8 @@ namespace SS3D.Systems.Inventory.Interactions
 
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            _hasDroppedItem = true;
-            IInteractionTarget target = interactionEvent.Target;
-            IInteractionSource source = interactionEvent.Source;
-
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+            if (!hand) { return; }
 
             Item item = hand.ItemInHand;
             item.Container.RemoveItem(item);

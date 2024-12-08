@@ -1,23 +1,20 @@
 using DG.Tweening;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
-using FishNet.Serializing;
 using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
-using SS3D.Utils;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Animations
 {
+
     /// <summary>
     /// Handle the state of holding items and hand positions
     /// </summary>
@@ -28,7 +25,7 @@ namespace SS3D.Systems.Animations
         /// </summary>
         private struct HandItem
         {
-            public AbstractHoldable Holdable;
+            public readonly AbstractHoldable Holdable;
             public Hand Hand;
 
             public HandItem(Hand hand, AbstractHoldable holdable)
@@ -117,6 +114,7 @@ namespace SS3D.Systems.Animations
 
 
 
+        
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -153,6 +151,7 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
         }
 
+        
         public void BringToHand(Hand hand, AbstractHoldable holdable, float duration)
         {
             StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
@@ -163,9 +162,7 @@ namespace SS3D.Systems.Animations
         /// </summary>
         /// <param name="hand"> The main hand holding the item</param>
         /// <param name="item"> The item held</param>
-        /// <param name="withTwoHands"> If the item should be held with two hands </param>
         /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
-        /// <param name="toThrow"> True the item should be in a ready to throw position</param>
         public void UpdateItemPositionConstraintAndRotation(
             [NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
         {
@@ -185,10 +182,10 @@ namespace SS3D.Systems.Animations
             
 
             // Do the same with interpolating rotation.
-            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration); ;
+            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration);
         }
 
-        private IEnumerator CoroutineBringToHand(Hand hand, AbstractHoldable holdable, float duration)
+        private IEnumerator CoroutineBringToHand([NotNull] Hand hand, [NotNull] AbstractHoldable holdable, float duration)
         {
             Vector3 start = holdable.GameObject.transform.position;
             
@@ -251,19 +248,17 @@ namespace SS3D.Systems.Animations
         /// </summary>
         private void SyncItemsInHandsChanged(SyncListOperation op, int index, HandItem oldItem, HandItem newItem, bool asServer)
         {
-            if (asServer)
-            {
-                return;
-            }
+            if (asServer) { return; }
 
-            if (op == SyncListOperation.Add || op == SyncListOperation.Insert || op == SyncListOperation.Set)
+            switch (op)
             {
-                AddItem(newItem.Hand, newItem.Holdable);
-            }
+                case SyncListOperation.Add or SyncListOperation.Insert or SyncListOperation.Set:
+                    AddItem(newItem.Hand, newItem.Holdable);
+                    break;
 
-            if (op == SyncListOperation.RemoveAt)
-            {
-                RemoveItem(oldItem.Hand);
+                case SyncListOperation.RemoveAt:
+                    RemoveItem(oldItem.Hand);
+                    break;
             }
         }
 
@@ -279,7 +274,7 @@ namespace SS3D.Systems.Animations
         }
 
         [Client]
-        private void AddItem(Hand hand, AbstractHoldable holdable)
+        private void AddItem([NotNull] Hand hand, [NotNull] AbstractHoldable holdable)
         {
             BringToHand(hand, holdable, 0f);
             UpdateItemPositionConstraintAndRotation(hand, holdable, 0f);
@@ -291,7 +286,7 @@ namespace SS3D.Systems.Animations
         }
 
         [Server]
-        private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)
+        private void HandleHandContentChanged(Hand hand, Item oldItem, Item newItem, ContainerChangeType type)
         {
             int handIndex = _itemsInHands.FindIndex(x => x.Hand = hand);
 
@@ -299,11 +294,11 @@ namespace SS3D.Systems.Animations
             {
                 if (handIndex == -1)
                 {
-                    _itemsInHands.Add(new(hand, newitem.Holdable));
+                    _itemsInHands.Add(new(hand, newItem.Holdable));
                 }
                 else
                 {
-                    _itemsInHands[handIndex] = new(hand, newitem.Holdable);
+                    _itemsInHands[handIndex] = new(hand, newItem.Holdable);
                 }
             }
 
@@ -375,14 +370,13 @@ namespace SS3D.Systems.Animations
         }
 
         [Server]
-        private void HandleRagdoll(bool isRagdolled)
+        private void HandleRagdoll(bool isRagdoll)
         {
-            if (isRagdolled)
+            if (!isRagdoll) { return; }
+
+            foreach (Hand hand in GetComponentsInChildren<Hand>())
             {
-                foreach (Hand hand in GetComponentsInChildren<Hand>())
-                {
-                    hand.DropHeldItem();
-                }
+                hand.DropHeldItem();
             }
         }
     }

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
@@ -15,34 +16,27 @@ namespace SS3D.Systems.Inventory.Interactions
 {
     public class ThrowInteraction : Interaction
     {
-        private float _secondPerMeterFactorDef = 0.3f;
+        private const float SecondPerMeterFactorDef = 0.3f;
 
-        private float _secondPerMeterFactorHarm = 0.15f;
+        private const float SecondPerMeterFactorHarm = 0.15f;
 
-        private float _maxForce = 20;
+        private const float MaxForce = 20;
 
-        public override string GetGenericName()
-        {
-            return "Throw";
-        }
+        [NotNull]
+        public override string GetGenericName() => "Throw";
 
         /// <summary>
         /// Gets the name when interacted with a source
         /// </summary>
         /// <param name="interactionEvent">The source used in the interaction</param>
         /// <returns>The display name of the interaction</returns>
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Throw";
-        }
+        [NotNull]
+        public override string GetName(InteractionEvent interactionEvent) => "Throw";
 
         /// <summary>
         /// Gets the interaction icon
         /// </summary>
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Take;;
-        }
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Take;
 
         /// <summary>
         /// Checks if this interaction can be executed
@@ -74,12 +68,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            if (hand.Empty)
-            {
-                return false;
-            }
-
-            return true;
+            return !hand.Empty;
         }
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
@@ -90,6 +79,7 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand; 
+            if(!hand) { return false; }
 
             HumanoidMovementController movementController = source.GameObject.GetComponentInParent<HumanoidMovementController>();
             IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
@@ -101,7 +91,7 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
-        private async Task ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)
+        private async void ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)
         {
             // remove client ownership so that server can take full control of item trajectory
             item.RemoveOwnership();
@@ -110,7 +100,7 @@ namespace SS3D.Systems.Inventory.Interactions
             Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), true);
 
             // wait roughly the time of animation on client before actually throwing
-            await Task.Delay((int)(time*1000));
+            await Task.Delay((int)(time * 1000));
  
             item.transform.parent = null;
             item.GetComponent<Rigidbody>().isKinematic = false;
@@ -141,20 +131,20 @@ namespace SS3D.Systems.Inventory.Interactions
 
             Vector3 initialVelocityInWorldCoordinate = playerRoot.TransformDirection(initialVelocityInRootCoordinate);
 
-            if (initialVelocityInWorldCoordinate.magnitude > _maxForce)
+            if (initialVelocityInWorldCoordinate.magnitude > MaxForce)
             {
-                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * _maxForce;
+                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * MaxForce;
             }
 
             item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
         }
 
-        private float ComputeTimeToReach(IntentType intent, Vector3 targetPosition, Transform playerRoot)
+        private static float ComputeTimeToReach(IntentType intent, Vector3 targetPosition, Transform playerRoot)
         {
             float distanceToTarget = Vector3.Distance(targetPosition, playerRoot.position);
 
             float timeToReach = intent == IntentType.Help ?
-                distanceToTarget * _secondPerMeterFactorDef : distanceToTarget * _secondPerMeterFactorHarm;
+                distanceToTarget * SecondPerMeterFactorDef : distanceToTarget * SecondPerMeterFactorHarm;
 
             return timeToReach;
         }
@@ -165,7 +155,7 @@ namespace SS3D.Systems.Inventory.Interactions
         /// player y and z local axis.
         /// return vector2 with components in order z and y, as z is forward and y upward.
         /// </summary>
-        private Vector2 ComputeTargetCoordinates(Vector3 targetPosition, Transform playerRoot)
+        private static Vector2 ComputeTargetCoordinates(Vector3 targetPosition, Transform playerRoot)
         {
             Vector3 rootRelativeTargetPosition = playerRoot.InverseTransformPoint(targetPosition);
 
@@ -177,14 +167,14 @@ namespace SS3D.Systems.Inventory.Interactions
             return new(rootRelativeTargetPosition.z, rootRelativeTargetPosition.y);
         }
 
-        private Vector2 ComputeItemInitialCoordinates(Vector3 itemPosition, Transform playerRoot)
+        private static Vector2 ComputeItemInitialCoordinates(Vector3 itemPosition, Transform playerRoot)
         {
             Vector3 rootRelativeItemPosition = playerRoot.InverseTransformPoint(itemPosition);
 
             return new Vector2(rootRelativeItemPosition.z, rootRelativeItemPosition.y);
         }
 
-        private Vector2 ComputeInitialVelocity(float timeToReachTarget, Vector2 targetCoordinates, float initialHeight, float initialHorizontalPosition)
+        private static Vector2 ComputeInitialVelocity(float timeToReachTarget, Vector2 targetCoordinates, float initialHeight, float initialHorizontalPosition)
         {
             // Those computations assume gravity is pulling in the same plane as the throw.
             // it works with any vertical gravity but not if there's a horizontal component to it.

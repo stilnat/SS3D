@@ -22,7 +22,11 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField] private PositionController _positionController;
 
-        private bool _isRagdolled;
+        private bool _isRagdoll;
+
+        private static readonly int AngleAimMove = Animator.StringToHash("AngleAimMove");
+        private static readonly int Aim = Animator.StringToHash("Aim");
+        private static readonly int TorsoGunAim = Animator.StringToHash("TorsoGunAim");
 
         protected override void OnStart()
         {
@@ -86,7 +90,7 @@ namespace SS3D.Systems.Entities.Humanoid
 
         private void HandleNetworkTick()
         {
-            _animator.SetFloat("AngleAimMove", (_movementController.InputAimAngle / 360f) + 0.5f);
+            _animator.SetFloat(AngleAimMove, (_movementController.InputAimAngle / 360f) + 0.5f);
         }
 
         private void SubscribeToEvents()
@@ -112,7 +116,7 @@ namespace SS3D.Systems.Entities.Humanoid
                     Grab();
                     break;
                 case MovementType.Normal:
-                    HandlePositionChanged(_positionController.Position);
+                    HandlePositionChanged(_positionController.PositionType);
                     break;
             }
         }
@@ -190,8 +194,8 @@ namespace SS3D.Systems.Entities.Humanoid
         {
 
             UnityEngine.Debug.Log("animator change aim");
-            _animator.SetBool("Aim", isAiming);
-            _animator.SetBool("TorsoGunAim", !toThrow);
+            _animator.SetBool(Aim, isAiming);
+            _animator.SetBool(TorsoGunAim, !toThrow);
 
             _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
@@ -216,10 +220,10 @@ namespace SS3D.Systems.Entities.Humanoid
             _movementController.OnSpeedChangeEvent -= UpdateSpeedParamater;
         }
 
-        private void ToggleAnimator(bool enabled)
+        private void ToggleAnimator(bool animatorEnabled)
         {
-            _animator.enabled = enabled;
-            _networkAnimator.enabled = enabled;
+            _animator.enabled = animatorEnabled;
+            _networkAnimator.enabled = animatorEnabled;
         }
 
     }

@@ -1,14 +1,10 @@
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Crafting;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Utils;
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {
@@ -29,8 +25,6 @@ namespace SS3D.Systems.Animations
 
         private readonly Vector3 _targetPosition;
 
-        private readonly Transform _toolParent;
-
         public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkBehaviour target, InteractionType interactionType, Vector3 targetPosition)
             : base(time, proceduralAnimationController) 
         {
@@ -39,7 +33,6 @@ namespace SS3D.Systems.Animations
             _mainHand = mainHand;
             _interact = interactionType;
             _targetPosition = targetPosition;
-            _toolParent = _tool.GameObject.transform.parent;
             SetupInteract(mainHand, _tool);
         }
 

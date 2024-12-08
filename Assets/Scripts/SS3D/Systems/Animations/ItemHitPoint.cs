@@ -1,5 +1,5 @@
+using JetBrains.Annotations;
 using NaughtyAttributes;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SS3D.Systems.Animations
@@ -36,17 +36,15 @@ namespace SS3D.Systems.Animations
         /// </summary>
         public Vector3 UpHit => _upHit;
 
-        private DropdownList<Vector3> GetDirectionValues()
+        [NotNull]
+        private DropdownList<Vector3> GetDirectionValues() => new()
         {
-            return new DropdownList<Vector3>()
-            {
-                { "Right",   Vector3.right },
-                { "Left",    Vector3.left },
-                { "Up",      Vector3.up },
-                { "Down",    Vector3.down },
-                { "Forward", Vector3.forward },
-                { "Back",    Vector3.back },
-            };
-        }
+            { "Right",   Vector3.right },
+            { "Left",    Vector3.left },
+            { "Up",      Vector3.up },
+            { "Down",    Vector3.down },
+            { "Forward", Vector3.forward },
+            { "Back",    Vector3.back },
+        };
     }
 }

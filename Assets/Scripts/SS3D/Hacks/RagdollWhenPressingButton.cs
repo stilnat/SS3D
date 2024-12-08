@@ -37,7 +37,7 @@ namespace SS3D.Hacks
 
         private void HandleKnockdown(InputAction.CallbackContext context)
         {
-            if (_positionController.Position != PositionType.Ragdoll)
+            if (_positionController.PositionType != PositionType.Ragdoll)
             {
                 RpcKnockDown();
             }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-    public class PickUpAnimation : AbstractProceduralAnimation
+    public sealed class PickUpAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
@@ -17,8 +17,6 @@ namespace SS3D.Systems.Animations
         private readonly float _itemReachDuration;
 
         private readonly AbstractHoldable _holdable;
-
-        public bool IsPicking { get; private set; }
 
         public PickUpAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, AbstractHoldable item)
             : base(time, proceduralAnimationController)
@@ -137,11 +135,9 @@ namespace SS3D.Systems.Animations
                 InteractionSequence.Join(DOTween.To(() => _secondaryHand.Hold.PickupIkConstraint.weight, x => _secondaryHand.Hold.PickupIkConstraint.weight = x, 0f, _itemReachDuration));
             }
 
-            InteractionSequence.OnStart(() => IsPicking = true);
             InteractionSequence.OnComplete(() =>
             {
                 OnCompletion?.Invoke(this);
-                IsPicking = false;
             });
         }
     }

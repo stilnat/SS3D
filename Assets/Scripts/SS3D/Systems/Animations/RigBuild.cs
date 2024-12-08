@@ -9,7 +9,7 @@ using UnityEngine.Animations.Rigging;
     /// out of the Human prefab, as they should not depend on the player movement, but also it's convenient to
     /// pack them in the human prefab.
     /// </summary>
-    public class RigBuild : MonoBehaviour 
+    public sealed class RigBuild : MonoBehaviour 
     {
         [SerializeField]
         private Transform _rightPickupTargetLocker;
@@ -21,7 +21,7 @@ using UnityEngine.Animations.Rigging;
         private Transform _lookAtTargetLocker;
 
         // Start is called before the first frame update
-        protected void Start()
+        private void Start()
         {
             _rightPickupTargetLocker.transform.parent = null;
             _leftPickupTargetLocker.transform.parent = null;

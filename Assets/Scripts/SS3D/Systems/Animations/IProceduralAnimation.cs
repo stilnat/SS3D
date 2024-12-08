@@ -1,9 +1,4 @@
-using FishNet.Object;
-using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
 using System;
-using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Animations
 {

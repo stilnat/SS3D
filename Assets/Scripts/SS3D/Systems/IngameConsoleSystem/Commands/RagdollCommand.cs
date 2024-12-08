@@ -32,7 +32,7 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands
 			}
 			else
 			{
-				if (positionController.Position == PositionType.Ragdoll)
+				if (positionController.PositionType == PositionType.Ragdoll)
 				{
                     ragdoll.Recover();
 				}

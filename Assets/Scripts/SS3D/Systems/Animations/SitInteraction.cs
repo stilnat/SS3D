@@ -12,15 +12,10 @@ namespace SS3D.Systems.Animations
     /// <summary>
     /// Interaction to allow sitting
     /// </summary>
-    public class SitInteraction : Interaction
+    public sealed class SitInteraction : Interaction
     {
 
         public float TimeToSit{ get; private set; }
-
-        /// <summary>
-        /// Only raycast the default layer for seeing if we are vision blocked
-        /// </summary>
-        private LayerMask _defaultMask = LayerMask.GetMask("Default");
 
         public override InteractionType InteractionType => InteractionType.Sit;
 
@@ -65,7 +60,7 @@ namespace SS3D.Systems.Animations
         {
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
-            if (interactionEvent.Target is not Sittable sit)
+            if (interactionEvent.Target is not Sittable sit || !hand)
             {
                 return false;
             }

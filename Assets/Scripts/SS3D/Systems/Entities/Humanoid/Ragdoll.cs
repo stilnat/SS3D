@@ -106,7 +106,7 @@ namespace SS3D.Systems.Entities.Humanoid
         [Server]
         private IEnumerator AlignToHips()
         {
-            while (_positionController.Position == PositionType.Ragdoll)
+            while (_positionController.PositionType == PositionType.Ragdoll)
             {
                 IsFacingDown = _hips.transform.forward.y < 0;
                 Vector3 originalHipsPosition = _hips.position;

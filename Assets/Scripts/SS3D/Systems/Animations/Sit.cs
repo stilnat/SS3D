@@ -17,7 +17,7 @@ namespace SS3D.Systems.Animations
     /// Simple animation allowing to place correctly the human before playing the sit animation.
     /// I'm not sure the sitting stuff really has its place here, maybe more in humanoid movement controller
     /// </summary>
-    public class Sit : AbstractProceduralAnimation
+    public sealed class Sit : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
@@ -31,7 +31,7 @@ namespace SS3D.Systems.Animations
 
         public override void ClientPlay()
         {
-            if (Controller.PositionController.Position == PositionType.Sitting)
+            if (Controller.PositionController.PositionType == PositionType.Sitting)
             {
                 StopSitting();
             }

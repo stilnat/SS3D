@@ -1,8 +1,5 @@
 using DG.Tweening;
-using FishNet.Object;
-using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
-using SS3D.Systems.Inventory.Items;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -77,9 +74,7 @@ namespace SS3D.Systems.Animations
             WaitToRestoreCollision();
         }
 
-
-
-        private async Task WaitToRestoreCollision()
+        private async void WaitToRestoreCollision()
         {
             await Task.Delay(300);
             // Allow back collision between thrown item and player
