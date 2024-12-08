@@ -49,9 +49,9 @@ namespace SS3D.Systems.Animations
         /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
         /// The rotation is such that it's Y axis is aligned with the line crossing through the character shoulder and IK target.
         /// </summary>
-        protected void OrientTargetForHandRotation([NotNull] Hand hand)
+        protected static void OrientTargetForHandRotation([NotNull] Hand hand, Vector3 targetPosition)
         {
-            Vector3 armTargetDirection = hand.Hold.HandIkTarget.position - hand.Hold.UpperArm.position;
+            Vector3 armTargetDirection = targetPosition - hand.Hold.UpperArm.position;
 
             Quaternion targetRotation = Quaternion.LookRotation(armTargetDirection.normalized, Vector3.down);
 

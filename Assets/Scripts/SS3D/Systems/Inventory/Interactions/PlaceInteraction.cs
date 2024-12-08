@@ -85,7 +85,6 @@ namespace SS3D.Systems.Inventory.Interactions
             
             // Consider if the surface is facing up
             float angle = Vector3.Angle(interactionEvent.Normal, Vector3.up);
-            // Debug.Log($"surface angle is {angle}, interaction norma is {interactionEvent.Normal}");
             if (angle > _maxSurfaceAngle)
             {
                 return false;

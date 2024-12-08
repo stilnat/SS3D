@@ -94,18 +94,18 @@ namespace SS3D.Systems.Animations
         public TargetFollow HandTargetFollow { get; private set; }
 
 
-        public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider)
+        public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider, bool simulateRotation = true, float timeToReachRotation = 0f)
         {
             Transform parent = holdProvider.GetHold(!secondary, Hand.HandType);
-            HandTargetFollowTransform(parent);
+            HandTargetFollowTransform(parent, simulateRotation, timeToReachRotation);
         }
 
         /// <summary>
         /// Put the right IK target as a child of another transform, setting its position to zero and its rotation to be the same as the parent one (or optionnally not doing it).
         /// </summary>
-        public void HandTargetFollowTransform(Transform parent)
+        public void HandTargetFollowTransform(Transform parent, bool simulateRotation = true, float timeToReachRotation = 0f)
         {
-            HandTargetFollow.Followed = parent;
+            HandTargetFollow.Follow(parent, simulateRotation, timeToReachRotation);
         }
 
         /// <summary>

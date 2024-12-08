@@ -85,8 +85,8 @@ namespace SS3D.Systems.Animations
             }
 
             // Set up the look at target locker on the item to pick up.
-            Controller.LookAtTargetLocker.Followed = _grabbedObject.transform;
-            OrientTargetForHandRotation(_mainHand);
+            Controller.LookAtTargetLocker.Follow(_grabbedObject.transform, true);
+            OrientTargetForHandRotation(_mainHand, _grabbedObject.transform.position);
         }
 
         private void GrabReach()
