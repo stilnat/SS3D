@@ -290,7 +290,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            attachedTo.RemoveItem(item);
+            attachedTo.RemoveItem(item); 
         }
 
 

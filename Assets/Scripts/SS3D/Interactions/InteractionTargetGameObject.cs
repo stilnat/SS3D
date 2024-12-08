@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS3D.Interactions.Extensions;
+using System;
 using SS3D.Interactions.Interfaces;
 using UnityEngine;
 
@@ -20,5 +21,8 @@ namespace SS3D.Interactions
         {
             return Array.Empty<IInteraction>();
         }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
+
     }
 }

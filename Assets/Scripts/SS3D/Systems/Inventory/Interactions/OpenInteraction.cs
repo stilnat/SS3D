@@ -3,25 +3,34 @@ using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
     [Serializable]
-    public class OpenInteraction : Interaction
+    public class OpenInteraction : DelayedInteraction
     {
         public event EventHandler<bool> OnOpenStateChanged;
         protected static readonly int OpenId = Animator.StringToHash("Open");
 
         private AttachedContainer _attachedContainer;
 
+        public override InteractionType InteractionType => InteractionType.Open;
+
         public OpenInteraction() { }
 
         public OpenInteraction(AttachedContainer attachedContainer)
         {
             _attachedContainer = attachedContainer;
+        }
+
+        public override string GetGenericName()
+        {
+            return "Open";
         }
 
         public override string GetName(InteractionEvent interactionEvent)
@@ -96,13 +105,38 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
+            base.Start(interactionEvent, reference);
+
+            Hand hand = interactionEvent.Source as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null)
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
+            }
+
+            return true;
+        }
+
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
             Debug.Log("in OpenInteraction, Start");
             GameObject target = ((IGameObjectProvider) interactionEvent.Target).GameObject;
             Animator animator = target.GetComponent<Animator>();
             bool open = animator.GetBool(OpenId);
             animator.SetBool(OpenId, !open);
             OnOpenStateChange(!open);
-            return false;
         }
 
         private void OnOpenStateChange(bool e)

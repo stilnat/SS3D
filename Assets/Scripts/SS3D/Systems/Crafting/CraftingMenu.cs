@@ -8,6 +8,7 @@ using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Tile;
 using SS3D.Systems.Tile.UI;
 using System.Collections.Generic;
@@ -114,7 +115,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [Server]
         public void DisplayMenu(List<CraftingInteraction> interactions, InteractionEvent interactionEvent, InteractionReference reference,
-            CraftingInteractionType craftingInteractionType)
+            InteractionType craftingInteractionType)
         {
             _interactionsForConnection.Remove(interactionEvent.Source.NetworkObject.Owner);
             _interactionsForConnection.Add(interactionEvent.Source.NetworkObject.Owner, interactions);
@@ -246,11 +247,11 @@ namespace SS3D.Systems.Crafting
                 Log.Error(this, "can't start selected interaction, it's null");
                 return;
             }
-            StartSelectedInteraction(_interaction.CraftingInteractionType);
+            StartSelectedInteraction(_interaction.InteractionType);
         }
 
         [Server]
-        private void StartSelectedInteraction(CraftingInteractionType type)
+        private void StartSelectedInteraction(InteractionType type)
         {
             if (_interaction == null || _interactionEvent == null) 
             {
@@ -261,7 +262,7 @@ namespace SS3D.Systems.Crafting
             InteractionReference reference = _interactionEvent.Source.Interact(_interactionEvent, _interaction);
             int index  = _interactionsForConnection[_interactionEvent.Source.NetworkObject.Owner].IndexOf(_interaction);
             RpcClientInteract(_interactionEvent.Source.NetworkObject.Owner, _interactionEvent.Target.GetGameObject(), 
-                _interactionEvent.Source.GameObject, reference.Id, index, _interaction.CraftingInteractionType);
+                _interactionEvent.Source.GameObject, reference.Id, index, _interaction.InteractionType);
         }
 
         /// <summary>
@@ -274,7 +275,7 @@ namespace SS3D.Systems.Crafting
         /// <param name="index"> Index of the interaction, upon creating available interaction from a given interaction event, and a crafting interaction type. </param>
         /// <param name="type"> Type of the chosen crafting interaction, used to retrieve potential interactions.</param>
         [TargetRpc]
-        private void RpcClientInteract(NetworkConnection conn, GameObject target, GameObject sourceObject, int referenceId, int index, CraftingInteractionType type)
+        private void RpcClientInteract(NetworkConnection conn, GameObject target, GameObject sourceObject, int referenceId, int index, InteractionType type)
         {
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             IInteractionSource source = sourceObject.GetComponent<IInteractionSource>();

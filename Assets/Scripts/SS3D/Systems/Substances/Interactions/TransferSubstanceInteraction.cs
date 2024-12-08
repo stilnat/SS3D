@@ -2,6 +2,7 @@ using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
 using SS3D.Substances;
+using SS3D.Systems.Interactions;
 using System;
 using UnityEngine;
 
@@ -9,6 +10,9 @@ namespace SS3D.Substances
 {
     public class TransferSubstanceInteraction : Interaction
     {
+
+        public override InteractionType InteractionType => InteractionType.None;
+
         /// <summary>
         /// Checks if the interaction should be possible
         /// </summary>

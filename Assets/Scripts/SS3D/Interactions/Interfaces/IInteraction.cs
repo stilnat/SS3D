@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SS3D.Systems.Interactions;
+using System;
 using UnityEngine;
 
 namespace SS3D.Interactions.Interfaces
@@ -26,6 +27,11 @@ namespace SS3D.Interactions.Interfaces
         /// </summary>
         /// <returns></returns>
         string GetGenericName();
+
+        /// <summary>
+        /// Type of the interaction, can be used to play specific animations, used in the crafting system too
+        /// </summary>
+        InteractionType InteractionType { get; }
 
         /// <summary>
         /// Gets the interaction icon

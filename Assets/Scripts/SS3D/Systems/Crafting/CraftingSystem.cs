@@ -23,6 +23,7 @@ using Hand = SS3D.Systems.Inventory.Containers.Hand;
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 
 namespace SS3D.Systems.Crafting
@@ -87,10 +88,15 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Get all potential recipes links.
         /// </summary>
-        private bool TryGetRecipeLinks(CraftingInteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
+        private bool TryGetRecipeLinks(InteractionType interactionType, GameObject target, out List<TaggedEdge<RecipeStep, RecipeStepLink>> links)
         {
             links = new();
-            
+
+            if (target is null)
+            {
+                return false;
+            }
+
             if (!target.TryGetComponent(out IWorldObjectAsset targetAssetReference)) return false;
 
             if (targetAssetReference.Asset is null)
@@ -253,7 +259,7 @@ namespace SS3D.Systems.Crafting
         /// Return a list of all available links, fulfilling all crafting conditions.
         /// </summary>
         /// <returns></returns>
-        public bool AvailableRecipeLinks(CraftingInteractionType interactionType, InteractionEvent interactionEvent,
+        public bool AvailableRecipeLinks(InteractionType interactionType, InteractionEvent interactionEvent,
             out List<TaggedEdge<RecipeStep, RecipeStepLink>> availableLinks)
         {
             availableLinks = new();
@@ -635,7 +641,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [ServerOrClient]
         [NotNull]
-        public List<CraftingInteraction> CreateInteractions(InteractionEvent interactionEvent, CraftingInteractionType craftingInteractionType)
+        public List<CraftingInteraction> CreateInteractions(InteractionEvent interactionEvent, InteractionType craftingInteractionType)
         {
             List<CraftingInteraction> craftingInteractions = new();
             if (!AvailableRecipeLinks(craftingInteractionType, interactionEvent, 
@@ -644,7 +650,7 @@ namespace SS3D.Systems.Crafting
             foreach (TaggedEdge<RecipeStep, RecipeStepLink> recipeLink in availableRecipes)
             {
                 CraftingInteraction interaction = new(recipeLink.Tag.ExecutionTime,
-                    interactionEvent.Source.GameObject.GetComponentInParent<HumanoidController>().transform, craftingInteractionType, recipeLink);
+                    interactionEvent.Source.GameObject.GetComponentInParent<HumanoidMovementController>().transform, craftingInteractionType, recipeLink);
                 
                 craftingInteractions.Add(interaction);
             }
@@ -653,4 +659,3 @@ namespace SS3D.Systems.Crafting
         }
     }
 }
-

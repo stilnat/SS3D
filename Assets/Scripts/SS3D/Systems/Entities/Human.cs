@@ -6,6 +6,7 @@ using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 using Coimbra;
 using SS3D.Core;
+using SS3D.Systems.Animations;
 
 namespace SS3D.Systems.Entities
 {
@@ -33,7 +34,7 @@ namespace SS3D.Systems.Entities
             RpcUpdateGhostPosition(originEntity, ghostEntity);
             if (TryGetComponent(out Ragdoll ragdoll))
             {
-                ragdoll.KnockdownTimeless();
+                ragdoll.KnockDown();
             }
             RpcDestroyComponents(originEntity);
         }
@@ -46,12 +47,11 @@ namespace SS3D.Systems.Entities
 		{
             // Instead of destroying components it should deactivate them.
 			GameObject originEntityGameObject = originEntity.gameObject;
-			originEntityGameObject.GetComponent<Hands>()?.Dispose(true);
-			originEntityGameObject.GetComponent<HumanInventory>()?.Dispose(true);
-			originEntityGameObject.GetComponent<InteractionController>()?.Dispose(true);
-			originEntityGameObject.GetComponent<StaminaController>()?.Dispose(true);
-			originEntityGameObject.GetComponent<HumanoidController>()?.Dispose(true);
-            originEntityGameObject.GetComponent<HumanoidLivingController>()?.Dispose(true);
+			originEntityGameObject.GetComponent<Hands>().enabled = false;
+			originEntityGameObject.GetComponent<HumanInventory>().enabled = false;
+			originEntityGameObject.GetComponent<InteractionController>().enabled = false;
+			originEntityGameObject.GetComponent<StaminaController>().enabled = false;
+			originEntityGameObject.GetComponent<HumanoidMovementController>().enabled = false;
             // TODO: Optimize these GetComponents, this is a temporary solution.
         }
 

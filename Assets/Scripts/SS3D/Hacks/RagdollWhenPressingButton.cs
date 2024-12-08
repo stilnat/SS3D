@@ -1,5 +1,7 @@
-﻿using SS3D.Core;
+﻿using FishNet.Object;
+using SS3D.Core;
 using SS3D.Core.Behaviours;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inputs;
 using UnityEngine;
@@ -14,10 +16,13 @@ namespace SS3D.Hacks
     public class RagdollWhenPressingButton : NetworkActor
     {
         [SerializeField]
-        private Ragdoll _ragdoll;
+        private PositionController _positionController;
 
         [SerializeField]
         private float _timeRagdolled;
+
+        [SerializeField]
+        private float _randomForce;
 
         private Controls.OtherActions _controls;
 
@@ -30,11 +35,31 @@ namespace SS3D.Hacks
             _controls.Ragdoll.performed += HandleKnockdown;
         }
 
-
         private void HandleKnockdown(InputAction.CallbackContext context)
         {
-            _ragdoll.Knockdown(_timeRagdolled);
+            if (_positionController.PositionType != PositionType.Ragdoll)
+            {
+                RpcKnockDown();
+            }
+            else
+            {
+                RpcRecover();
+            }
         }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RpcKnockDown()
+        {
+            GetComponent<Ragdoll>().KnockDown();
+            GetComponent<Ragdoll>().AddForceToAllParts(Random.insideUnitCircle * _randomForce);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RpcRecover()
+        {
+            GetComponent<Ragdoll>().Recover();
+        }
+
+
     }
 }
-

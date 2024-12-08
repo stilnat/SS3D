@@ -5,6 +5,7 @@ namespace SS3D.Interactions.Extensions
 {
     public static class InteractionExtensions
     {
+
         /// <summary>
         /// Check if position of player changed, if it did by a distance above tolerance, should return false;
         /// </summary>>

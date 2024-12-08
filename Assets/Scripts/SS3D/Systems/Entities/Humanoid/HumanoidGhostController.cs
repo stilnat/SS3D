@@ -11,34 +11,34 @@ namespace SS3D.Systems.Entities.Humanoid
     /// Controls the movement for ghost biped characters that use the same armature
     /// as the human model uses.
     /// </summary>
-    public class HumanoidGhostController : HumanoidController
+    public class HumanoidGhostController : NetworkActor
     {
-        /// <summary>
-        /// Executes the movement code and updates the IK targets
-        /// </summary>
-        protected override void ProcessCharacterMovement()
-        {
-            ProcessPlayerInput();
+        private float moveSpeed = 5f;      // Movement speed
+        private float rotationSpeed = 10f; // Rotation speed for smooth turning
 
-            if (Input.magnitude != 0)
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+
+            if (!IsOwner)
             {
-                MoveMovementTarget(Input);
-                RotatePlayerToMovement();
-                MovePlayer();
-            }
-            else
-            {
-                MovePlayer();
-                MoveMovementTarget(Vector2.zero, 5);
+                enabled = false;
             }
         }
-
-        /// <summary>
-        /// Moves the player to the target movement
-        /// </summary>
-        protected override void MovePlayer()
+        private void Update()
         {
-            transform.position += TargetMovement * ((_movementSpeed) * Time.deltaTime);
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");    
+
+            Vector3 movement = new Vector3(horizontal, 0, vertical).normalized;
+
+            transform.position += movement * (moveSpeed * Time.deltaTime);
+
+            if (movement != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(movement);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
         }
     }
 

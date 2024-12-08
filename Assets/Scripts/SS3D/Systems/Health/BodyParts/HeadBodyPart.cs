@@ -1,6 +1,7 @@
 ﻿using FishNet.Object;
 using SS3D.Core;
 using SS3D.Data.Generated;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Humanoid;
 using System.Collections;
@@ -54,7 +55,7 @@ namespace SS3D.Systems.Health
 
         protected override void AfterSpawningCopiedBodyPart()
         {
-            GetComponentInParent<Ragdoll>().KnockdownTimeless();
+            GetComponentInParent<Ragdoll>().KnockDown();
             GetComponentInParent<Human>()?.DeactivateComponents();
 
             // When detached, spawn a head and set player's mind to be in the head,

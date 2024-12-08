@@ -2,6 +2,7 @@
 using SS3D.Core;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
 using SS3D.Systems.Audio;
@@ -43,6 +44,8 @@ namespace SS3D.Systems.Furniture
         {
             DispenseProduct(productIndex);
         }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         /// <summary>
         /// Dispenses a specific vending machine product at the dispensing transform position with a random rotation.

@@ -26,6 +26,9 @@ namespace SS3D.Interactions
         /// <returns></returns>
         public bool IsInRange(Vector3 origin, Vector3 target)
         {
+
+            // todo : there's something fishy about the way range is computed. One thing that need to be taken into account for range when player is
+            // todo : is that they can crouch to reach lower, and bend to reach further in front. 
             bool isInVerticalRange = Mathf.Abs(target.y - origin.y) < Vertical;
             Vector2 vector2 = (new Vector2(target.x, target.z) - new Vector2(origin.x, origin.z));
             bool isInHorizontalRange = vector2.sqrMagnitude < Horizontal * Horizontal;

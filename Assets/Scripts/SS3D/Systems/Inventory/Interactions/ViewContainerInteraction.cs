@@ -18,6 +18,11 @@ namespace SS3D.Systems.Inventory.Interactions
             AttachedContainer = attachedContainer;
         }
 
+        public override string GetGenericName()
+        {
+            return "View Container";
+        }
+
         public override string GetName(InteractionEvent interactionEvent)
         {
             return "View " + AttachedContainer.ContainerName;

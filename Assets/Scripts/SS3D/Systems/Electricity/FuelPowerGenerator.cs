@@ -3,7 +3,9 @@ using FishNet.Object.Synchronizing;
 using SS3D.Core;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Audio;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Tile.Connections;
 using UnityEngine;
 using AudioType = SS3D.Systems.Audio.AudioType;
@@ -13,7 +15,7 @@ namespace System.Electricity
     /// <summary>
     /// Script for the pacman generator, handling light and noise when turning it on and off. 
     /// </summary>
-    public class FuelPowerGenerator : BasicElectricDevice, IPowerProducer
+    public class FuelPowerGenerator : BasicElectricDevice, IPowerProducer, IInteractionPointProvider
     {
         [SerializeField]
         private float _powerProduction = 10f;
@@ -28,6 +30,12 @@ namespace System.Electricity
         [SyncVar(OnChange = nameof(SyncGeneratorToggle))]
         private bool _enabled = false; // If the generator is working.
         private float _onPowerProduction = 10f;
+
+        [SerializeField]
+        private Transform _toggleOn;
+
+        [SerializeField]
+        private Transform _toggleOff;
 
         public override void OnStartClient()
         {
@@ -93,6 +101,13 @@ namespace System.Electricity
         private void HandlePowerGenerated(bool isEnabled)
         {
             _powerProduction = isEnabled ? _onPowerProduction : 0f; 
+        }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point)
+        {
+            point = _enabled ? _toggleOff.position : _toggleOn.position;
+
+            return true;
         }
     }
 }

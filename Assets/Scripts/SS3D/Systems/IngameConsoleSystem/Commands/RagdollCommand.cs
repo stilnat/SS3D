@@ -2,6 +2,7 @@
 using FishNet.Object;
 using SS3D.Core;
 using SS3D.Permissions;
+using SS3D.Systems.Animations;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.PlayerControl;
@@ -22,21 +23,22 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands
 		public override string Perform(string[] args, NetworkConnection conn = null)
 		{
             if (!ReceiveCheckResponse(args, out CheckArgsResponse response, out CalculatedValues values)) return response.InvalidArgs;
-			Ragdoll ragdoll = values.Entity.GetComponent<Ragdoll>();
+            Ragdoll ragdoll = values.Entity.GetComponent<Ragdoll>();
+            PositionController positionController  = values.Entity.GetComponent<PositionController>(); 
 
 			if (args.Length > 1)
 			{
-				ragdoll.Knockdown(values.Time);
+                ragdoll.KnockDown();
 			}
 			else
 			{
-				if (ragdoll.IsKnockedDown)
+				if (positionController.PositionType == PositionType.Ragdoll)
 				{
-					ragdoll.Recover();
+                    ragdoll.Recover();
 				}
 				else
 				{
-					ragdoll.KnockdownTimeless();
+                    ragdoll.KnockDown();
 				}
 			}
 			return "Player ragdolled";

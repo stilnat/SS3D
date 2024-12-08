@@ -4,13 +4,15 @@ using SS3D.Substances;
 using SS3D.Interactions.Interfaces;
 using UnityEngine;
 using SS3D.Core;
+using SS3D.Core.Behaviours;
+using SS3D.Interactions.Extensions;
 using SS3D.Systems.Screens;
 using static UnityEngine.GraphicsBuffer;
 
 namespace SS3D.Content.Furniture.Generic
 {
     // This handles dispensing substances into substance containers
-    public class SubstanceDispenser : InteractionTargetBehaviour
+    public class SubstanceDispenser : NetworkActor, IInteractionTarget
     {
         /// <summary>
         /// The name of the interaction
@@ -32,6 +34,8 @@ namespace SS3D.Content.Furniture.Generic
 
         private SubstancesSystem registry;
 
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -42,7 +46,7 @@ namespace SS3D.Content.Furniture.Generic
             }
         }
 
-        public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
+        public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             if (registry == null) return null;
 

@@ -24,10 +24,11 @@ namespace SS3D.Interactions
 
         public InteractionEvent(IInteractionSource source, IInteractionTarget target, Vector3 point = new(), Vector3 normal = new())
         {
+            
             Source = source;
             Target = target;
-            Point = point;
             Normal = normal;
+            Point = point;
         }
     }
 }

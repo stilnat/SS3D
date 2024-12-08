@@ -1,4 +1,5 @@
-﻿using SS3D.Data.Generated;
+﻿using JetBrains.Annotations;
+using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
@@ -17,15 +18,10 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Store in " + _attachedContainer.ContainerName;
-        }
+        [NotNull]
+        public override string GetName(InteractionEvent interactionEvent) => "Store in " + _attachedContainer.ContainerName;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Discard;
-        }
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Discard;
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {

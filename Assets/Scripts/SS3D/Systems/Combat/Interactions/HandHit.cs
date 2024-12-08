@@ -13,7 +13,7 @@ namespace SS3D.Systems.Combat.Interactions
 	{
 		public void GetSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> interactions)
 		{
-			var interaction = new HitInteraction();
+			var interaction = new HitInteraction(0.3f);
 
 			foreach (IInteractionTarget target in targets)
 			{

@@ -76,7 +76,8 @@ namespace SS3D.Systems.Inventory.Containers
                         return;
                     }
                     newBodyPart.gameObject.SetActive(true);
-                    renderer.sharedMesh = newItem.gameObject.GetComponentInChildren<MeshFilter>().sharedMesh;
+                    Mesh newClotheMesh = newItem.gameObject.GetComponent<MeshFilter>().sharedMesh;
+                    renderer.sharedMesh = newClotheMesh;
                     break;
 
                 // Stop displaying cloth on the player

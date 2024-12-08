@@ -4,6 +4,9 @@ using QuikGraph;
 using SS3D.Core;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
+using SS3D.Systems.Inventory.Containers;
 using System.Linq;
 using UnityEngine;
 
@@ -34,7 +37,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Type of this interaction, defines which recipe will be available.
         /// </summary>
-        private readonly CraftingInteractionType _type;
+        private readonly InteractionType _type;
 
         /// <summary>
         /// The start position of the source of the interaction, when the interaction begins.
@@ -44,7 +47,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Type of this interaction, defines which recipe will be available.
         /// </summary>
-        public CraftingInteractionType CraftingInteractionType => _type;
+        public InteractionType InteractionType => _type;
 
         /// <summary>
         /// The transform of the game object executing the crafting interaction, useful to check if the source moved
@@ -57,7 +60,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         public TaggedEdge<RecipeStep, RecipeStepLink> ChosenLink => _chosenLink;
 
-        public CraftingInteraction(float delay, Transform characterTransform, CraftingInteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
+        public CraftingInteraction(float delay, Transform characterTransform, InteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
         {
             _characterTransform = characterTransform;
             _startPosition = characterTransform.position;
@@ -88,6 +91,21 @@ namespace SS3D.Systems.Crafting
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
             ViewLocator.Get<CraftingMenu>().First().HideMenu();
+
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkBehaviour, point, Delay);
+            }
+            
             return true;
         }
 
@@ -110,6 +128,12 @@ namespace SS3D.Systems.Crafting
         {
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
+
+            if (interactionEvent.Source.GameObject.TryGetComponent(out IInteractiveTool tool) && interactionEvent.Source.GetRootSource() is Hand hand)
+            {
+                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
+            }
+
         }
     }
 }
