@@ -95,8 +95,9 @@ namespace SS3D.Systems.Inventory.Interactions
             {
                 return false;
             }
+            bool rangeCheck = InteractionExtensions.RangeCheck(interactionEvent);
 
-            return InteractionExtensions.RangeCheck(interactionEvent);
+            return rangeCheck;
         }
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)

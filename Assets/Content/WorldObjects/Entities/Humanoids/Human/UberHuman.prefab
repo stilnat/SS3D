@@ -3162,11 +3162,11 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   HandsController: {fileID: 3222345056416986628}
   Container: {fileID: 106693697180811514}
-  _interactionOrigin: {fileID: 5569489068996507518}
+  _interactionOrigin: {fileID: 7446386329022654784}
   _interactionPoint: {fileID: 4831511282220009542}
   _range:
-    Horizontal: 0.7
-    Vertical: 2
+    Horizontal: 0.8
+    Vertical: 1.5
   <HandType>k__BackingField: 0
   <HandBone>k__BackingField: {fileID: 8420821262611087137}
   <Hold>k__BackingField: {fileID: 8717143165064236720}
@@ -7486,7 +7486,7 @@ MonoBehaviour:
   _getUpFromFront: {fileID: -203655887218126122, guid: b45b348d9bf3bcd4f9c45e322acd2a50, type: 3}
   _getUpFromBack: {fileID: -203655887218126122, guid: 83207c9bf0069534487201e6d71c0de1, type: 3}
   _ragdoll: {fileID: 2768583506857238720}
-  _position: 0
+  _positionType: 0
   _movement: 0
   _previousMovement: 0
   _previousPosition: 0
@@ -13530,11 +13530,11 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   HandsController: {fileID: 3222345056416986628}
   Container: {fileID: 2264540800286188451}
-  _interactionOrigin: {fileID: 6456791731408993078}
+  _interactionOrigin: {fileID: 802911981376609306}
   _interactionPoint: {fileID: 7333641033910239129}
   _range:
-    Horizontal: 0.7
-    Vertical: 2
+    Horizontal: 0.8
+    Vertical: 1.5
   <HandType>k__BackingField: 1
   <HandBone>k__BackingField: {fileID: 6356800398579286298}
   <Hold>k__BackingField: {fileID: 4620722943463480390}

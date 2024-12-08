@@ -54,7 +54,7 @@ namespace SS3D.Systems.Inventory.Containers
         /// Horizontal and vertical max distance to interact with stuff.
         /// </summary>
         [SerializeField] 
-        private RangeLimit _range = new(0.5f, 2);
+        private RangeLimit _range = new(0.7f, 2);
 
         public bool Empty => Container.Empty;
 

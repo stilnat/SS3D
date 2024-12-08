@@ -17,7 +17,7 @@ namespace SS3D.Systems.Animations
 
         private LayerMask _grabbableLayer;
 
-        private const float JointBreakForce = 500f;
+        private const float JointBreakForce = 5000f;
 
         private readonly float _itemReachDuration;
 
