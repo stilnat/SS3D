@@ -2,6 +2,7 @@
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions.Extensions;
+using SS3D.Systems.Interactions;
 using UnityEngine;
 
 namespace SS3D.Substances
@@ -23,6 +24,8 @@ namespace SS3D.Substances
         /// If a range check should be automatically performed
         /// </summary>
         public bool RangeCheck { get; set; }
+
+        public InteractionType InteractionType => InteractionType.None;
 
         public virtual string GetGenericName()
         {

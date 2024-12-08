@@ -1,4 +1,5 @@
-﻿using SS3D.Data.Generated;
+﻿using JetBrains.Annotations;
+using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
@@ -17,15 +18,10 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Store in " + _attachedContainer.ContainerName;
-        }
+        [NotNull]
+        public override string GetName(InteractionEvent interactionEvent) => "Store in " + _attachedContainer.ContainerName;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Discard;
-        }
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Discard;
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {
@@ -35,17 +31,24 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             IInteractionSource source = interactionEvent.Source;
-
-            if(source is IGameObjectProvider sourceGameObjectProvider)
+            if (source is not IGameObjectProvider sourceGameObjectProvider)
             {
-                var hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
-                if (hands != null && _attachedContainer != null)
-                {
-                    return !hands.SelectedHand.IsEmpty() && CanStore(interactionEvent.Source.GetComponent<Item>(), _attachedContainer);
-                }
+                return false;
             }
 
-            return false;
+            Hands hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
+            if (!hands || !_attachedContainer)
+            {
+                return false;
+            }
+
+            Item item = interactionEvent.Source.GetComponent<Item>();
+            if (!item)
+            {
+                return false;
+            }
+            
+            return !hands.SelectedHand.IsEmpty() && CanStore(item, _attachedContainer);
         }
 
         private bool CanStore(Item item, AttachedContainer target)
@@ -58,10 +61,13 @@ namespace SS3D.Systems.Inventory.Interactions
             IInteractionSource source = interactionEvent.Source;
             if (source is IGameObjectProvider sourceGameObjectProvider)
             {
-                var hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
-                _attachedContainer.AddItem(hands.SelectedHand.ItemInHand);
-                return true;
+                Hands hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
+                Item item = hands.SelectedHand.ItemInHand;
+
+                hands.SelectedHand.Container.Dump();
+                _attachedContainer.AddItem(item);
             }
+
             return false;
         }
     }

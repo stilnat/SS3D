@@ -7,7 +7,6 @@ using SS3D.Core;
 using SS3D.Data;
 using SS3D.Data.Generated;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Audio
 {
@@ -73,9 +72,10 @@ namespace SS3D.Systems.Audio
         /// Volume, pitch, and ranges are optional.
         /// </summary>
         [Server]
-        public void PlayAudioSource(AudioType audioType, AudioClip audioClipId, Vector3 position, NetworkObject parent, float volume = 0.7f, float pitch = 1f, float minRange = 1f, float maxRange = 500f)
+        public void PlayAudioSource(AudioType audioType, AudioClip audioClipId, Vector3 position, NetworkObject parent,
+            bool isLooping = false, float volume = 0.7f, float pitch = 1f, float minRange = 1f, float maxRange = 500f)
         {
-            RpcPlayAudioSource(audioType, audioClipId.name, position, parent, volume, pitch, minRange, maxRange);
+            RpcPlayAudioSource(audioType, audioClipId.name, position, parent, isLooping, volume, pitch, minRange, maxRange);
         }
 
         [Server]
@@ -97,7 +97,8 @@ namespace SS3D.Systems.Audio
         }
 
         [ObserversRpc]
-        public void RpcPlayAudioSource(AudioType type, string audioClip, Vector3 position, NetworkObject parent, float volume = 0.7f, float pitch = 1f, float minRange = 1f, float maxRange = 500f)
+        public void RpcPlayAudioSource(AudioType type, string audioClip, Vector3 position, NetworkObject parent,
+            bool isLooping = false, float volume = 0.7f, float pitch = 1f, float minRange = 1f, float maxRange = 500f)
         {
             AudioSource audioSource = FindAvailableAudioSource(type);
 
@@ -112,13 +113,15 @@ namespace SS3D.Systems.Audio
             //This is useful for things that are obviously creating the sound, like a mouse's squeak
             //-- we don't want the mouse to leave the squeak behind as it travels, but a flying soda can making a sound at the site of impact is probably fine.
             audioSource.transform.parent = parent == null ? null : parent.transform;
+            audioSource.loop = isLooping;
             audioSource.Play();
         }
 
         [ObserversRpc]
         public void RpcStopAudioSource(NetworkObject parent)
         {
-            parent.GetComponentInChildren<AudioSource>().Stop();
+            AudioSource audioSource = parent.GetComponentInChildren<AudioSource>();
+            audioSource?.Stop();
         }
 
         /// <summary>
@@ -129,6 +132,7 @@ namespace SS3D.Systems.Audio
             AudioSource validSource = null;
 
             AudioSourcesList audioSources = _audioSourcesLists.Find(x => x.AudioType == audioType);
+            audioSources.List.RemoveAll(source => source == null);
 
             //If there are no audio sources in our list, fix that.
             if (audioSources.List.Count == 0)
@@ -139,7 +143,7 @@ namespace SS3D.Systems.Audio
             //Check the list for an audio source that isn't being used.
             foreach (AudioSource source in audioSources.List)
             {
-                if (!source.isPlaying)
+                if (source != null && !source.isPlaying)
                 {
                     //If we found one, exit the foreach loop.
                     validSource = source;
@@ -149,7 +153,7 @@ namespace SS3D.Systems.Audio
             }
 
             //If we have gone through the list and there's no available ones...
-            if (validSource == null)
+            if (!validSource)
             {
                 audioSources.CreateNewAudioSource();
 
@@ -167,7 +171,8 @@ namespace SS3D.Systems.Audio
         {
             _audioSourcesLists = new List<AudioSourcesList>
             {
-                new AudioSourcesList(MaxSfxAudioSources, MinSfxAudioSources, AudioType.Sfx, SfxAudioSourcePrefab, GameObject), new AudioSourcesList(MaxMusicAudioSources, MinMusicAudioSources, AudioType.Music, MusicAudioSourcePrefab, GameObject)
+                new(MaxSfxAudioSources, MinSfxAudioSources, AudioType.Sfx, SfxAudioSourcePrefab, GameObject), 
+                new(MaxMusicAudioSources, MinMusicAudioSources, AudioType.Music, MusicAudioSourcePrefab, GameObject)
             };
         }
 
@@ -226,10 +231,10 @@ namespace SS3D.Systems.Audio
                 foreach (AudioSource source in List)
                 {
                     //Check that the audio source is idle, and we have more than our minimum number.
-                    if (!source.isPlaying && List.Count > MinAudioSources)
+                    if (source == null || (!source.isPlaying && List.Count > MinAudioSources))
                     {
                         List.Remove(source);
-                        source.gameObject.Dispose(true);
+                        source?.gameObject.Dispose(true);
                     }
                 }
             }

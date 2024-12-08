@@ -1,5 +1,4 @@
 ﻿using SS3D.Core.Behaviours;
-using SS3D.Systems.Entities.Data;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Silicon
@@ -31,7 +30,7 @@ namespace SS3D.Systems.Entities.Silicon
 
         private void UpdatePower(bool power)
         {
-            _animator.SetBool(Animations.Silicon.Power, power);
+            _animator.SetBool(SS3D.Systems.Entities.Data.Animations.Silicon.Power, power);
         }
 
         private void UnsubscribeFromEvents()
@@ -43,11 +42,11 @@ namespace SS3D.Systems.Entities.Silicon
         private void UpdateMovement(float speed)
         {
             bool isMoving = speed != 0;
-            float currentSpeed = _animator.GetFloat(Animations.Humanoid.MovementSpeed);
+            float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
             
-            _animator.SetFloat(Animations.Humanoid.MovementSpeed, speed);
+            _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
         }
     }
 }

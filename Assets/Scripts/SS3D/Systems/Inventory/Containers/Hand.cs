@@ -1,9 +1,20 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 using SS3D.Systems.Inventory.Items;
 using System.Linq;
 using SS3D.Interactions.Interfaces;
 using SS3D.Interactions;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using SS3D.Systems.Animations;
+using SS3D.Systems.Crafting;
+using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Furniture;
+using SS3D.Systems.Interactions;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Animations.Rigging;
 
 namespace SS3D.Systems.Inventory.Containers
 {
@@ -12,39 +23,97 @@ namespace SS3D.Systems.Inventory.Containers
     /// </summary>
     public class Hand : InteractionSource, IInteractionRangeLimit, IInteractionOriginProvider
     {
-        /// <summary>
-        /// Container linked to this hand, necessary to hold stuff.
-        /// </summary>
-        public AttachedContainer Container;
+        public delegate void HandEventHandler(Hand hand);
 
-        /// <summary>
-        /// Horizontal and vertical max distance to interact with stuff.
-        /// </summary>
-        [SerializeField] private RangeLimit _range = new(1.5f, 2);
+        public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
 
-        // pickup icon that this hand uses when there's a pickup interaction
-        // TODO: When AssetData is on, we should update this to not use this
-        [SerializeField] private Sprite _pickupIcon;
+        public event HandEventHandler OnHandDisabled;
 
-        /// <summary>
-        /// The item held in this hand, if it exists
-        /// </summary>
-        public Item ItemInHand => Container.Items.FirstOrDefault();
-
-        /// <summary>
-        /// Point from where distances for interaction is computed.
-        /// </summary>
-        [SerializeField] private Transform _interactionOrigin;
+        public event HandContentsHandler OnContentsChanged;
 
         /// <summary>
         /// the hands script controlling this hand.
         /// </summary>
         public Hands HandsController;
 
+        /// <summary>
+        /// Container linked to this hand, necessary to hold stuff.
+        /// </summary>
+        public AttachedContainer Container;
+
+        /// <summary>
+        /// Point from where distances for interaction is computed.
+        /// </summary>
+        [SerializeField] 
+        private Transform _interactionOrigin;
+
+        [SerializeField]
+        private Transform _interactionPoint;
+
+        /// <summary>
+        /// Horizontal and vertical max distance to interact with stuff.
+        /// </summary>
+        [SerializeField] 
+        private RangeLimit _range = new(0.7f, 2);
+
+        public bool Empty => Container.Empty;
+
+        public bool Full => !Container.Empty;
+
+        /// <summary>
+        /// The item held in this hand, if it exists
+        /// </summary>
+        public Item ItemInHand => Container.Items.FirstOrDefault();
+
         public Vector3 InteractionOrigin => _interactionOrigin.position;
 
-        public delegate void HandEventHandler(Hand hand);
-        public event HandEventHandler OnHandDisabled;
+
+        [field: SerializeField]
+        public HandType HandType { get; private set; }
+
+        [field:SerializeField]
+        public Transform HandBone { get; private set; }
+
+        [field:SerializeField]
+        public HandHoldIk Hold { get; private set; }
+
+
+        public void Awake()
+        {
+            // should only be called on server, however it's too late if listening in OnStartServer (again, issue with initialization timing of our systems...)
+            Container.OnContentsChanged += ContainerOnOnContentsChanged;
+        }
+
+        public override void CreateSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> entries)
+        {
+            // todo : hands should not handle sit interactions, ass should, but the interaction controller needs some changes to handle interaction sources other than hands
+            base.CreateSourceInteractions(targets, entries);
+            IInteractionTarget target = targets.FirstOrDefault(x => x?.GameObject.GetComponent<Sittable>());
+
+            if (target is Sittable)
+            {
+                entries.Add(new InteractionEntry(target, new SitInteraction(1f)));
+            }
+            
+        }
+
+        private void ContainerOnOnContentsChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
+        {
+            if (type == ContainerChangeType.Remove && olditem != null)
+            {
+                GetComponentInParent<HumanoidAnimatorController>()?.RemoveHandHolding(this, olditem.Holdable);
+                StopHolding(olditem);
+            }
+
+            if (type == ContainerChangeType.Add && newitem.Holdable != null)
+            {
+                GetComponentInParent<HumanoidAnimatorController>()?.AddHandHolding(this, newitem.Holdable);
+            }
+
+            OnContentsChanged?.Invoke(this, olditem, newitem, type);
+        }
+
+
 
         protected override void OnDisabled()
         {
@@ -87,50 +156,22 @@ namespace SS3D.Systems.Inventory.Containers
             return _range;
         }
 
-        [Server]
-        public void Pickup(Item item)
-        {
-            item.GiveOwnership(Owner);
-            if (!IsEmpty())
-            {
-                return;
-            }
-
-			if (item.Container != null && item.Container != Container)
-			{
-				item.Container.RemoveItem(item);
-			}
-
-			Container.AddItem(item);
-		}
-
         [ServerRpc]
         public void CmdDropHeldItem()
         {
-            if (IsEmpty())
-            {
-                return;
-            }
+            DropHeldItem();
+        }
 
-			Container.Dump();
-            ItemInHand?.GiveOwnership(null);
-		}
-
-
-        /// <summary>
-        /// Place item on the floor, or on any other surface, place it out of its container.
-        /// </summary>
         [Server]
-        public void PlaceHeldItemOutOfHand(Vector3 position, Quaternion rotation)
+        public void DropHeldItem()
         {
-            if (IsEmpty())
-            {
-                return;
-            }
-            ItemInHand.GiveOwnership(null);
-            Item item = ItemInHand;
-            item.Container.RemoveItem(item);
-            ItemUtility.Place(item, position, rotation, transform);
+            Container.Dump();
+        }
+
+        private void StopHolding(Item item)
+        {
+            item.transform.parent = null;
+            Hold?.StopHolding(item);
         }
 
         /// <summary>
@@ -141,5 +182,6 @@ namespace SS3D.Systems.Inventory.Containers
         {
             return GetInteractionRange().IsInRange(InteractionOrigin, otherObject.transform.position);
         }
+        public Transform InteractionPoint => _interactionPoint;
     }
 }

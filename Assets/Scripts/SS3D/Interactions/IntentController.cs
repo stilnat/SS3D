@@ -1,49 +1,80 @@
-﻿using SS3D.Core.Behaviours;
+﻿using Coimbra.Services.Events;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using SS3D.Core.Behaviours;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace SS3D.Interactions
 {
     /// <summary>
-    /// Basically a copy of HumanoidBodyPartTargetSelector.cs
     /// This manages intent and it's done to easily support other intents
     /// </summary>
-    public class IntentController : Actor
+    public class IntentController : NetworkActor
     {
-        private IntentType _selectedIntent;
+        public event EventHandler<IntentType> OnIntentChange;
 
-        private Image _intentImage;
+        [SyncVar(OnChange = nameof(SyncIntent))]
+        private IntentType _intent = IntentType.Help;
 
-        private Sprite _spriteHelp;
-        private Sprite _spriteHarm;
+        public IntentType Intent => _intent;
 
-        private Color _colorHarm;
-        private Color _colorHelp;
-
-        private Button _intentButton;
-
-        protected override void OnStart()
+        public override void OnStartServer()
         {
-            base.OnStart();
-
-            _intentButton = GetComponent<Button>();
-            _intentButton.onClick.AddListener(HandleIntentButtonPressed);
+            base.OnStartServer();
+            _intent = IntentType.Help;
         }
+
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!GetComponent<NetworkObject>().IsOwner)
+            {
+                enabled = false;
+            }
+            AddHandle(IntentChanged.AddListener(HandleRoundStateUpdated));
+        }
+
+        private void HandleRoundStateUpdated(ref EventContext context, in IntentChanged e)
+        {
+            UpdateIntent();
+        }
+
+        // Update is called once per frame
+        protected void Update()
+        {
+            if (!Input.GetKeyDown(KeyCode.Space))
+            {
+                return;
+            }
+
+            UpdateIntent();
+        }
+
+        [ServerRpc]
+        private void UpdateIntent()
+        {
+            _intent = _intent == IntentType.Help ? IntentType.Harm : IntentType.Help;
+        }
+
+        private void SyncIntent(IntentType prev, IntentType next, bool asServer)
+        {
+            Debug.Log($"Selected intent of {Owner} is {_intent}");
+
+            if (asServer)
+            {
+                return;
+            }
+
+            OnIntentChange?.Invoke(this, _intent);
+        }
+
 
         public void HandleIntentButtonPressed()
         {
-            SelectIntent();
-        }
-
-        /// <summary>
-        /// Switches between Help and Harm intent
-        /// </summary>
-        public void SelectIntent()
-        {
-            bool harm = _selectedIntent == IntentType.Harm;
-            _selectedIntent = harm ? IntentType.Help : IntentType.Harm;
-            _intentImage.sprite = harm ? _spriteHelp : _spriteHarm;
-            _intentImage.color = harm ? _colorHelp : _colorHarm;
+            UpdateIntent();
         }
     }
 }

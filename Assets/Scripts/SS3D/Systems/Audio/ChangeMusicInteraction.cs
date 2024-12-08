@@ -1,6 +1,9 @@
 ﻿using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
+using SS3D.Systems.Inventory.Containers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,14 +13,22 @@ namespace SS3D.Systems.Audio
     /// <summary>
     /// Interaction to change music on Jukeboxes and boomboxes.
     /// </summary>
-    public class ChangeMusicInteraction : Interaction
+    public class ChangeMusicInteraction : DelayedInteraction
     {
+    
+        public override InteractionType InteractionType => InteractionType.Press;
+
         public override IClientInteraction CreateClient(InteractionEvent interactionEvent)
         {
             return null;
         }
 
         public override string GetName(InteractionEvent interactionEvent)
+        {
+            return "Change Music";
+        }
+
+        public override string GetGenericName()
         {
             return "Change Music";
         }
@@ -37,7 +48,7 @@ namespace SS3D.Systems.Audio
                 {
                     return false;
                 }
-                return boom.RadioOn;
+                return boom.AudioOn;
             }
 
             return false;
@@ -45,21 +56,36 @@ namespace SS3D.Systems.Audio
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            if (interactionEvent.Target is Boombox boom)
-            {
-                boom.ChangeCurrentMusic();
-            }
-            return false;
-        }
+            StartCounter();
 
-        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            throw new System.NotImplementedException();
+            Hand hand = interactionEvent.Source as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null)
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
+            }
+            
+            return true;
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            throw new System.NotImplementedException();
+            
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            if (interactionEvent.Target is Boombox boom)
+            {
+                boom.ChangeCurrentMusic();
+            }
         }
     }
 }

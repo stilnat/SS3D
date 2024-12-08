@@ -1,5 +1,6 @@
 ﻿using System;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Interactions;
 using UnityEngine;
 
 namespace SS3D.Interactions
@@ -7,8 +8,9 @@ namespace SS3D.Interactions
     /// <summary>
     /// Represents an interaction that can be performed
     /// </summary>
-    public class Interaction : IInteraction
+    public abstract class Interaction : IInteraction
     {
+        public string Name;
         public Sprite Icon;
 
         /// <summary>
@@ -23,6 +25,8 @@ namespace SS3D.Interactions
         {
             throw new NotImplementedException();
         }
+
+        public virtual InteractionType InteractionType => InteractionType.None;
 
         /// <summary>
         /// Gets the name when interacted with a source

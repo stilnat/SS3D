@@ -13,9 +13,20 @@ namespace SS3D.Systems.Inventory.Interactions
     {
         private readonly AttachedContainer _attachedContainer;
 
-        public TakeFirstInteraction(AttachedContainer attachedContainer)
+        public float TimeToMoveBackItem { get; private set; }
+
+        public float TimeToReachItem { get; private set; }
+
+        public TakeFirstInteraction(AttachedContainer attachedContainer, float timeToMoveBackItem, float timeToReachItem)
         {
+            TimeToMoveBackItem = timeToMoveBackItem;
+            TimeToReachItem = timeToReachItem;
             _attachedContainer = attachedContainer;
+        }
+
+        public override string GetGenericName()
+        {
+            return "Take";
         }
 
         public override string GetName(InteractionEvent interactionEvent)
@@ -52,7 +63,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (pickupItem != null)
             {
-                hand.Pickup(pickupItem);
+                //hand.Pickup(pickupItem, TimeToMoveBackItem, TimeToReachItem);
             }
 
             return false;

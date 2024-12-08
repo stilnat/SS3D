@@ -89,6 +89,8 @@ namespace SS3D.Core.Behaviours
         /// <inheritdoc/>
         public Matrix4x4 WorldToLocalMatrix => Transform.worldToLocalMatrix;
 
+        public NetworkBehaviour NetworkBehaviour => this;
+
         /// <inheritdoc/>
         public Vector3 Position
         {
@@ -193,7 +195,6 @@ namespace SS3D.Core.Behaviours
         protected void OnDestroy()
         {
             RemoveEventListeners();
-
             OnDestroyed();
         }
 

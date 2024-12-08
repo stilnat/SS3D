@@ -8,16 +8,18 @@ using FishNet.Object.Synchronizing;
 using SS3D.Attributes;
 using SS3D.Data.AssetDatabases;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Interactions;
 using SS3D.Systems.Selection;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 #if UNITY_EDITOR
-using UnityEditor;
 using AssetDatabase = UnityEditor.AssetDatabase;
+using UnityEditor;
 #endif
 
 namespace SS3D.Systems.Inventory.Items
@@ -54,37 +56,57 @@ namespace SS3D.Systems.Inventory.Items
 
         private Sprite _sprite;
 
-        [Header("Attachment settings")]
-
-        [Tooltip("a point we use to know how the item should be oriented when held in a hand")]
-        public Transform AttachmentPoint;
-
-        [Tooltip("same point but for the left hand, in cases where it's needed")]
-        public Transform AttachmentPointAlt;
-
         /// <summary>
         /// The list of characteristics this Item has
         /// </summary>
         [SyncObject]
         private readonly SyncList<Trait> _traits = new();
 
+        /// <summary>
+        /// Where the item is stored
+        /// </summary>
         [SyncVar]
         private AttachedContainer _container;
 
         public string Name => _name;
 
+        public AbstractHoldable Holdable { get; private set; }
+
         public ReadOnlyCollection<Trait> Traits => ((List<Trait>) _traits.Collection).AsReadOnly();
 
+        /// <summary>
+        /// Where the item is stored
+        /// </summary>
         public AttachedContainer Container => _container;
 
         private bool _initialised = false;
+        
+        /// <summary>
+        /// All colliders, related to the item, except of colliders, related to stored items
+        /// </summary>
+        private Collider[] _nativeColliders;
+        /// <summary>
+        /// All colliders, related to the item, except of colliders, related to stored items
+        /// </summary>
+        public Collider[] NativeColliders
+        {
+            get
+            {
+                if (_nativeColliders == null)
+                {
+                    _nativeColliders = GetNativeColliders();
+                }
+                return _nativeColliders;
+            }
+            set => _nativeColliders = value;
+        }
 
         public WorldObjectAssetReference Asset
         {
             get => _asset;
             set
             {
-                if (Application.isPlaying)
+                if (UnityEngine.Application.isPlaying)
                 {
                     Serilog.Log.Warning($"Field {nameof(Asset)} is being modified in runtime. This should not happen in normal conditions.");
                 }
@@ -93,6 +115,8 @@ namespace SS3D.Systems.Inventory.Items
         }
 
         public Item Prefab => Asset.Get<Item>();
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         /// <summary>
         /// Initialise this item fields. Can only be called once.
@@ -118,14 +142,21 @@ namespace SS3D.Systems.Inventory.Items
             get => InventorySprite();
             set => _sprite = value;
         }
-
+        
         protected override void OnStart()
         {
             base.OnStart();
 
+            Holdable = GetComponent<AbstractHoldable>();
+
+            if (Holdable == null)
+            {
+                Holdable = gameObject.AddComponent<DefaultHoldable>();
+            }
+
             foreach (Animator animator in GetComponents<Animator>())
             {
-                animator.keepAnimatorControllerStateOnDisable = true;
+                animator.keepAnimatorStateOnDisable = true;
             }
 
             // Clients don't need to calculate physics for rigidbodies as this is handled by the server
@@ -133,6 +164,23 @@ namespace SS3D.Systems.Inventory.Items
             {
                 _rigidbody.isKinematic = true;
             }
+
+            _nativeColliders ??= GetNativeColliders();
+            Debug.Log("Start " + name);
+        }
+
+        /// <summary>
+        /// Get all colliders, related to the item, except of colliders, related to stored items
+        /// </summary>
+        private Collider[] GetNativeColliders()
+        {
+            List<Collider> collidersToExcept = new();
+            AttachedContainer[] containers = GetComponentsInChildren<AttachedContainer>();
+            foreach (Item item in containers.SelectMany(container => container.Items))
+            {
+                collidersToExcept.AddRange(item.GetComponentsInChildren<Collider>());
+            }
+            return GetComponentsInChildren<Collider>().Except(collidersToExcept).ToArray();
         }
 
         public override void OnStartServer()
@@ -176,11 +224,7 @@ namespace SS3D.Systems.Inventory.Items
             {
                 _rigidbody.isKinematic = true;
             }
-            var itemCollider = GetComponent<Collider>();
-            if (itemCollider != null)
-            {
-                itemCollider.enabled = false;
-            }
+            ToggleCollider(false);
         }
 
         /// <summary>
@@ -194,13 +238,21 @@ namespace SS3D.Systems.Inventory.Items
                 if (IsServer)
                     _rigidbody.isKinematic = false;
             }
-            var itemCollider = GetComponent<Collider>();
-            if (itemCollider != null)
-            {
-                itemCollider.enabled = true;
-            }
+            ToggleCollider(true);
         }
         
+        /// <summary>
+        /// Enable or disable all colliders related to the item. Does not touch any colliders that would belong to stored items (if there are any).
+        /// TODO : might want to replace GetComponentsInChildren with a manual setup of the container list.
+        /// </summary>
+        [ServerOrClient]
+        protected virtual void ToggleCollider(bool isEnable)
+        {
+            foreach (Collider collider in NativeColliders) 
+            { 
+                collider.enabled = isEnable;
+            }
+        }
         
         /// <param name="visible">Should the item be visible</param>
         [ServerOrClient]
@@ -223,7 +275,7 @@ namespace SS3D.Systems.Inventory.Items
 
         public virtual IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
-            return new IInteraction[] { new PickupInteraction { Icon = null } };
+            return new IInteraction[] { new PickupInteraction(Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime) { Icon = null } };
         }
 
         // this creates the base interactions for an item, in this case, the drop interaction
@@ -231,8 +283,12 @@ namespace SS3D.Systems.Inventory.Items
         {
             base.CreateSourceInteractions(targets, interactions);
             DropInteraction dropInteraction = new();
+            PlaceInteraction placeInteraction = new(Entities.Data.Animations.Humanoid.PickupMoveItemTime, Entities.Data.Animations.Humanoid.PickupReachTime);
+            ThrowInteraction throwInteraction = new();
 
-            interactions.Add(new InteractionEntry(null, dropInteraction));
+            interactions.Add(new(null, dropInteraction));
+            interactions.Add(new(null, placeInteraction));
+            interactions.Add(new(null, throwInteraction));
         }
 
         /// <summary>
@@ -252,7 +308,7 @@ namespace SS3D.Systems.Inventory.Items
         public string Describe()
         {
             string traits = "";
-            foreach (var trait in _traits)
+            foreach (Trait trait in _traits)
             {
                 traits += trait.Name + " ";
             }
@@ -274,12 +330,10 @@ namespace SS3D.Systems.Inventory.Items
         [Server]
         public void SetContainer(AttachedContainer newContainer)
         {
-            if (_container == newContainer)
-            {
-                return;
-            }
             _container = newContainer;
         }
+
+       
 
         // Generate preview of the same object, but without stored items.
         [ServerOrClient]
@@ -358,52 +412,5 @@ namespace SS3D.Systems.Inventory.Items
 
         #endregion
 
-        #region Editor
-#if UNITY_EDITOR
-        private void OnDrawGizmos()
-        {
-            // Make sure gizmo only draws in prefab mode
-            if (EditorApplication.isPlaying || UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
-            {
-                return;
-            }
-
-            Mesh handGuide = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Models/Other/HoldGizmo.fbx", typeof(Mesh));
-
-            // Don't even have to check without attachment
-            if (AttachmentPoint != null)
-            {
-                Gizmos.color = new Color32(255, 120, 20, 170);
-                Quaternion localRotation = AttachmentPoint.localRotation;
-                Vector3 eulerAngles = localRotation.eulerAngles;
-                Vector3 parentPosition = AttachmentPoint.parent.position;
-                Vector3 position = AttachmentPoint.localPosition;
-                // Draw a wire mesh of the rotated model
-                Vector3 rotatedPoint = RotatePointAround(parentPosition, position, eulerAngles);
-                rotatedPoint += new Vector3(0, position.z, position.y);
-                Gizmos.DrawWireMesh(handGuide, AttachmentPoint.position, localRotation);
-            }
-
-            // Same for the Left Hand
-            if (AttachmentPointAlt != null)
-            {
-                Gizmos.color = new Color32(255, 120, 20, 170);
-                Quaternion localRotation = AttachmentPointAlt.localRotation;
-                Vector3 eulerAngles = localRotation.eulerAngles;
-                Vector3 parentPosition = AttachmentPointAlt.parent.position;
-                Vector3 position = AttachmentPointAlt.localPosition;
-                // Draw a wire mesh of the rotated model
-                Vector3 rotatedPoint = RotatePointAround(parentPosition, position, eulerAngles);
-                rotatedPoint += new Vector3(0, position.z, position.y);
-                Gizmos.DrawWireMesh(handGuide, AttachmentPointAlt.position, localRotation);
-            }
-        }
-
-        private static Vector3 RotatePointAround(Vector3 point, Vector3 pivot, Vector3 angles)
-        {
-            return Quaternion.Euler(angles) * (point - pivot);
-        }
-#endif
-        #endregion
     }
 }

@@ -23,7 +23,7 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         private Item[] _displayedItems;
 
-        public void Start()
+        public void Awake()
         {
             Assert.IsNotNull(attachedContainer);
             
@@ -57,42 +57,9 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             Transform itemTransform = item.transform;
-
-            // Check if a custom attachment point should be used
-            Transform attachmentPoint = item.AttachmentPoint;
-            if (Mirrored && item.AttachmentPointAlt != null)
-            {
-                attachmentPoint = item.AttachmentPointAlt;
-            }
-
-            if (attachmentPoint != null)
-            {
-                // Create new (temporary) point
-                // HACK: Required because rotation pivot can be different
-                GameObject temporaryPoint = new GameObject("TempPivotPoint");
-
-                temporaryPoint.transform.SetParent(attachedContainer.Displays[index].transform, false);
-                temporaryPoint.transform.localPosition = Vector3.zero;
-
-                // Assign parent
-                itemTransform.SetParent(temporaryPoint.transform, false);
-
-                // Very sketchy, as the root is not reliable to be things we want them to be.
-                // Maybe we can tweak this in the future
-                temporaryPoint.transform.rotation = attachmentPoint.root.rotation * attachmentPoint.localRotation;
-               
-                // Assign the relative position between the attachment point and the object
-                itemTransform.localPosition = -attachmentPoint.localPosition;
-                itemTransform.localRotation = Quaternion.identity;
-            }
-            else
-            {
-                itemTransform.SetParent(attachedContainer.Displays[index].transform, false);
-                itemTransform.localPosition = new Vector3();
-                itemTransform.localRotation = new Quaternion();
-            }
-
-            _displayedItems[index] = item;
+            itemTransform.SetParent(attachedContainer.Displays[index].transform, false);
+            itemTransform.localPosition = Vector3.zero;
+            itemTransform.localRotation = Quaternion.identity;
         }
 
         private void ContainerOnItemDetached(object sender, Item item)

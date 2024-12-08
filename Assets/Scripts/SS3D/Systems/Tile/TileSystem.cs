@@ -87,7 +87,7 @@ namespace SS3D.Systems.Tile
 	        switch (genericObjectSo)
 	        {
 		        case TileObjectSo so:
-			        return _currentMap.PlaceTileObject(so, placePosition, dir, false, replaceExisting, false);
+			        return _currentMap.PlaceTileObject(so, placePosition, dir, false, replaceExisting, false, out GameObject placedObject);
 		        case ItemObjectSo so:
 			        _currentMap.PlaceItemObject(placePosition, Quaternion.Euler(0, TileHelper.GetRotationAngle(dir), 0), so);
 			        break;
@@ -136,7 +136,7 @@ namespace SS3D.Systems.Tile
 
             SavedTileMap mapSave = _currentMap.Save();
 												    
-            SaveSystem.SaveObject(SavePath + "/" + mapName, mapSave, overwrite);
+            LocalStorage.SaveObject(SavePath + "/" + mapName, mapSave, overwrite);
         }
 
         [Server]
@@ -144,7 +144,7 @@ namespace SS3D.Systems.Tile
         {
             Log.Information(this, "Loading most recent tilemap");
             
-	        SavedTileMap mapSave = SaveSystem.LoadMostRecentObject<SavedTileMap>(SavePath);
+	        SavedTileMap mapSave = LocalStorage.LoadMostRecentObject<SavedTileMap>(SavePath);
 
             _currentMap.Load(mapSave);
         }
@@ -154,7 +154,7 @@ namespace SS3D.Systems.Tile
         {
             Log.Information(this, "Loading most recent tilemap");
 
-            SavedTileMap mapSave = SaveSystem.LoadObject<SavedTileMap>(mapName);
+            SavedTileMap mapSave = LocalStorage.LoadObject<SavedTileMap>(mapName);
 
             _currentMap.Load(mapSave);
         }
@@ -169,7 +169,7 @@ namespace SS3D.Systems.Tile
 
         public bool MapNameAlreadyExist(string name)
         {
-            return SaveSystem.FolderAlreadyContainsName(savePath, name);
+            return LocalStorage.FolderAlreadyContainsName(savePath, name);
         }
     }
 }

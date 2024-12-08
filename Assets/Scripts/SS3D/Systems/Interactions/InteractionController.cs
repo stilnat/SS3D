@@ -84,8 +84,6 @@ namespace SS3D.Systems.Interactions
         [Client]
         public void HandleRunPrimary(InputAction.CallbackContext callbackContext)
         {
-            
-            Debug.Log("run primary : " + Mouse.current.position.ReadValue());
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 return;
@@ -98,11 +96,31 @@ namespace SS3D.Systems.Interactions
                 return;
             }
 
-            InteractionEntry interaction = viableInteractions[0];
+            InteractionEntry interaction = ChooseMostImportantInteraction(viableInteractions);
             string interactionName = interaction.Interaction.GetName(interactionEvent);
             interactionEvent.Target = interaction.Target;
 
             CmdRunInteraction(ray, interactionName);
+        }
+
+        /// <summary>
+        /// Among the viable interaction, choose the most important one (powered by spaghetti logic)
+        /// </summary>
+        private InteractionEntry ChooseMostImportantInteraction(List<InteractionEntry> viableInteractions)
+        {
+            InteractionEntry throwInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Throw");
+            if (throwInteraction.Interaction != null)
+            {
+                return throwInteraction;
+            }
+
+            InteractionEntry hitInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Hit");
+            if (hitInteraction.Interaction != null)
+            {
+                return hitInteraction;
+            }
+
+            return viableInteractions[0];
         }
 
         [Client]
@@ -177,7 +195,7 @@ namespace SS3D.Systems.Interactions
                 return;
             }
 
-            InteractionEvent interactionEvent = new(source, null);
+            InteractionEvent interactionEvent = new(source, null, source.GameObject.transform.position);
 
             List<IInteractionTarget> targets = GetTargetsFromGameObject(source, target);
             List<InteractionEntry> entries = GetInteractionsFromTargets(source, targets, interactionEvent);
@@ -277,15 +295,17 @@ namespace SS3D.Systems.Interactions
 
             // Raycast to find target game object
             Vector3 point = Vector3.zero;
-            bool raycast = Physics.Raycast(ray, out RaycastHit hit, float.PositiveInfinity, _selectionMask, QueryTriggerInteraction.Ignore);
+            Vector3 normal = Vector3.zero;
+            bool raycast = Physics.Raycast(ray, out RaycastHit hit, float.PositiveInfinity, _selectionMask);
             if (raycast)
             {
                 point = hit.point;
+                normal = hit.normal;
                 GameObject target = hit.transform.gameObject;
                 targets = GetTargetsFromGameObject(source, target);
             }
 
-            interactionEvent = new InteractionEvent(source, targets[0], point);
+            interactionEvent = new InteractionEvent(source, targets[0], point, normal);
 
             return GetInteractionsFromTargets(source, targets, interactionEvent);
         }
@@ -365,11 +385,12 @@ namespace SS3D.Systems.Interactions
         }
 
         [ServerRpc]
-        private void CmdRunInventoryInteraction(GameObject target, GameObject sourceObject, int index, string interactionName)
+        private void CmdRunInventoryInteraction(GameObject target, GameObject sourceObject,  int index, string interactionName)
         {
             IInteractionSource source = sourceObject.GetComponent<IInteractionSource>();
             List<IInteractionTarget> targets = GetTargetsFromGameObject(source, target);
-            InteractionEvent interactionEvent = new(source, null);
+            InteractionEvent interactionEvent = new(source, null, source.GameObject.transform.position);
+
             List<InteractionEntry> entries = GetInteractionsFromTargets(source, targets, interactionEvent);
 
             // TODO: Validate access to inventory
