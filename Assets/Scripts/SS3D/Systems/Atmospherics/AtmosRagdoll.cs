@@ -1,13 +1,9 @@
 ﻿using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Engine.AtmosphericsRework;
 using SS3D.Systems.Entities.Humanoid;
-using SS3D.Systems.Tile;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 
-namespace SS3D.Engine.Atmospherics
+namespace SS3D.Systems.Atmospherics
 {
     
     // This handles ragdolling by atmos wind, which I think should be moved elsewhere
@@ -24,14 +20,14 @@ namespace SS3D.Engine.Atmospherics
 
         private float lastCheck;
 
-        private AtmosManager atmosSystem;
+        private AtmosEnvironmentSystem atmosSystem;
 
 
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            atmosSystem = Subsystems.Get<AtmosManager>();
+            atmosSystem = Subsystems.Get<AtmosEnvironmentSystem>();
         }
 
         public void Update()
