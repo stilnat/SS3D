@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Lil struct containing the atmos indexes of the 4 neighbours of a given atmos tile.
+/// </summary>
 public struct AtmosObjectNeighboursIndexes
 {
     public int NorthNeighbour { get; }

@@ -6,17 +6,26 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
+/// <summary>
+/// Compute how much heat should be transferred each atmos tick to each neighbour.
+/// </summary>
 public struct ComputeHeatTransferJob : IJobParallelFor
 {
+
+
+        // Array containing all atmos tiles of the map.
         [ReadOnly]
         private readonly NativeArray<AtmosObject> _tileObjectBuffer;
 
+        // Array containing the neighbour indexes of all atmos tiles of the map. At index i, contains the neighbour of atmos tile at index i in _nativeAtmosTiles array.
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
+        // Array containing the indexes of all active atmos tiles.
         [ReadOnly]
         private readonly NativeArray<int> _activeIndexes;
 
+        // Array of all heat transfer to neighbours
         [NativeDisableParallelForRestriction]
         [WriteOnly]
         private NativeArray<HeatTransferToNeighbours> _heatTransfers;

@@ -9,6 +9,10 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// Jobs running each atmos tick to decide which tile should be active, inactive, semiactive.
+    /// Has to go through each tile on the map. Ideally should run in a IJobParallelFor Job, but it's kinda hard
+    /// </summary>
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct SetAtmosStateJob : IJob
     {

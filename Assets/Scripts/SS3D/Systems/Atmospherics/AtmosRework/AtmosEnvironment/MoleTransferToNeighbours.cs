@@ -9,9 +9,17 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// Small struct to keep track of how much moles of each gas to transfer to each neighbour
+    /// </summary>
     public readonly struct MoleTransferToNeighbours
     {
+        /// <summary>
+        /// Index of the atmos container from which to transfer, from the NativeArray NativeAtmosTiles in the AtmosJobPersistentData struct. 
+        /// </summary>
         public readonly int IndexFrom;
+
+        // gas transfer in moles to each neighbours.
         public readonly float4 TransferMolesNorth;
         public readonly float4 TransferMolesSouth;
         public readonly float4 TransferMolesEast;

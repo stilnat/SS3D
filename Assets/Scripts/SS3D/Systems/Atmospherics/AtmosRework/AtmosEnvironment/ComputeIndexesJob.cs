@@ -1,28 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// Jobs computing the indexes of each neighbour, given some atmos tile. Could be run only once, or each time new chunks are created if that's a thing.
+    /// Precomputing neighbours saves a lot of computing power in the next atmos jobs running.
+    /// </summary>
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct ComputeIndexesJob : IJobParallelFor
     {
+
+        // Array containing the neighbour indexes of all atmos tiles of the map. At index i, contains the neighbour of atmos tile at index i in _nativeAtmosTiles array.
         private NativeArray<AtmosObjectNeighboursIndexes> _neighbourIndexes;
 
+        // Array containing all atmos tiles of the map.
         [ReadOnly]
         private NativeArray<AtmosObject> _nativeAtmosTiles;
 
-        /// <summary>
-        /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
-        /// </summary>
+        // Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
         [ReadOnly]
         private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
 
-        private int _chunkSize;
+        private readonly int _chunkSize;
 
         public ComputeIndexesJob(NativeArray<AtmosObjectNeighboursIndexes> neighbourIndexes, NativeArray<AtmosObject> nativeAtmosTiles, NativeHashMap<int2, int> chunkKeyHashMap, int chunkSize)
         {
@@ -150,14 +152,12 @@ namespace SS3D.Engine.AtmosphericsRework
         {
             offsetChunkKey = default;
 
-            if (!_chunkKeyHashMap.TryGetValue(chunkKey + new int2(xOffset, yOffset), out int index))
+            if (!_chunkKeyHashMap.TryGetValue(chunkKey + new int2(xOffset, yOffset), out int _))
                 return false;
 
             offsetChunkKey = new int2(chunkKey.x + xOffset, chunkKey.y + yOffset);
-            ;
 
             return true;
-
         }
 
         private bool TryGetSouthChunkKey(int2 chunkKey, out int2 southChunkKey) => TryGetChunkKey(chunkKey, out southChunkKey, 0, -1);

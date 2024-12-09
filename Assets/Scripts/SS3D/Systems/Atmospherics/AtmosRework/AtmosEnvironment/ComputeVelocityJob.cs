@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// Compute space winds.
+    /// </summary>
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct ComputeVelocityJob : IJobParallelFor
     {
@@ -30,12 +33,15 @@ namespace SS3D.Engine.AtmosphericsRework
 
         public void Execute(int index)
         {
+            // only compute winds for active tiles
             int activeIndex = _activeIndexes[index];
             AtmosObject atmosObject = _tileObjectBuffer[activeIndex];
-            atmosObject.VelocityNorth = _moleTransfers[activeIndex].TransferMolesNorth;
-            atmosObject.VelocitySouth = _moleTransfers[activeIndex].TransferMolesSouth;
-            atmosObject.VelocityEast = _moleTransfers[activeIndex].TransferMolesEast;
-            atmosObject.VelocityWest = _moleTransfers[activeIndex].TransferMolesWest;
+
+            // Currently velocity is simply the amount of moles transferred to each neighbour.
+            atmosObject.VelocityNorth =  _moleTransfers[activeIndex].TransferMolesNorth;
+            atmosObject.VelocitySouth =  _moleTransfers[activeIndex].TransferMolesSouth;
+            atmosObject.VelocityEast =  _moleTransfers[activeIndex].TransferMolesEast;
+            atmosObject.VelocityWest =  _moleTransfers[activeIndex].TransferMolesWest;
             _tileObjectBuffer[activeIndex] = atmosObject;
         }
     }

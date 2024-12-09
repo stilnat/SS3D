@@ -8,16 +8,23 @@ using UnityEngine;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
+    /// <summary>
+    /// Job to compute both active and diffuse fluxes. Active fluxes are flux happening with pressure difference.
+    /// Diffuse fluxes are fluxes happening when there's no pressure differences, but there's differences in moles.
+    /// </summary>
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     struct ComputeFluxesJob : IJobParallelFor
     {
 
+        // Array containing all atmos tiles of the map.
         [ReadOnly]
         private readonly NativeArray<AtmosObject> _tileObjectBuffer;
 
+        // Array containing the neighbour indexes of all atmos tiles of the map. At index i, contains the neighbour of atmos tile at index i in _nativeAtmosTiles array.
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
 
+        // Array containing all active (when the job compute active fluxes) or semi active (when the job computes semi active fluxes) atmos tiles of the map.
         [ReadOnly]
         private readonly NativeArray<int> _activeIndexes;
 
@@ -27,6 +34,7 @@ namespace SS3D.Engine.AtmosphericsRework
 
         private readonly float _deltaTime;
 
+        // If the fluxes computed should be active fluxes or diffuse fluxes.
         private readonly bool _activeFlux;
 
 
