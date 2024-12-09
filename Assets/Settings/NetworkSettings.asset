@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _preload: 1
   _type: 2
-  NetworkType: 0
+  NetworkType: 2
   _ckey: unknown
   ServerAddress: 127.0.0.1
   ServerPort: 2222

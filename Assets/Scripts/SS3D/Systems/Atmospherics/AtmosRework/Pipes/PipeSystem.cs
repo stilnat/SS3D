@@ -71,6 +71,7 @@ public class PipeSystem : NetworkSystem
     
     public void RemovePipe(IAtmosPipe pipe)
     {
+        if(_netPipes is null) { return; }
         _netPipes[pipe.PipeNetIndex].RemovePipe(pipe);
         _pipesGraph.RemoveVertex(new((short)pipe.WorldOrigin.x, (short)pipe.WorldOrigin.y, (byte)pipe.TileLayer));
         _pipesGraphIsDirty = true;

@@ -342,6 +342,7 @@ namespace SS3D.Engine.AtmosphericsRework
             }
 
             atmosJobs.Clear();
+            _jobHandles.Dispose();
         }
     }
 }

@@ -1,14 +1,13 @@
-using SS3D.Systems.Tile;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine.Serialization;
 
 namespace SS3D.Engine.AtmosphericsRework
 {
     /// <summary>
-    /// Structure used to interface between the atmos map, and the jobs that do the computation for the simulation.
+    /// Structure used to interface between the atmos map, and the jobs that do the computation for the simulation. Contained a bunch of unmanaged collections
+    /// tracking the state of the environment atmos tiles.
     /// </summary>
     public struct AtmosJobPersistentData
     {
@@ -102,6 +101,7 @@ namespace SS3D.Engine.AtmosphericsRework
             _atmosObjectsToChange = new();
             LoadNativeArrays();
         }
+
 
         public void ChangeState(AtmosContainer tile, AtmosState state)
         {
@@ -324,6 +324,10 @@ namespace SS3D.Engine.AtmosphericsRework
             NativeAtmosTiles.Dispose();
             NeighbourTileIndexes.Dispose();
             MoleTransferArray.Dispose();
+            HeatTransferArray.Dispose();
+            ChunkKeyHashMap.Dispose();
+            ActiveEnvironmentIndexes.Dispose();
+            SemiActiveEnvironmentIndexes.Dispose();
         }
 
         /// <summary>
