@@ -54,7 +54,7 @@ namespace SS3D.Engine.Atmospherics
         {
             if (velocity.sqrMagnitude > minVelocity * minVelocity)
             {
-                ragdoll.Knockdown(knockdownTime);
+               // ragdoll.Knockdown(knockdownTime);
             }
         }
     }

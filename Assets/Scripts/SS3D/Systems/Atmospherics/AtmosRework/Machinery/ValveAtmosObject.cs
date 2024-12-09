@@ -3,6 +3,7 @@ using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Engine.AtmosphericsRework;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Tile;
 using UnityEngine;
@@ -21,6 +22,8 @@ public class ValveAtmosObject : NetworkActor, IInteractionTarget, IAtmosPipe
     private bool _isEnabled = true;
     
     public PlacedTileObject PlacedTileObject => GetComponent<PlacedTileObject>(); 
+
+    public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
     public int PipeNetIndex { get; set; }
     
@@ -69,7 +72,7 @@ public class ValveAtmosObject : NetworkActor, IInteractionTarget, IAtmosPipe
             },
         };
     }
-        
+
     private void ValveInteract(InteractionEvent interactionEvent, InteractionReference arg2)
     {
         SetValve(!_isEnabled);

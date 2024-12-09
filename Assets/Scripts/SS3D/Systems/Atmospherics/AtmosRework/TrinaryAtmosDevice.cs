@@ -1,5 +1,6 @@
 using SS3D.Core;
 using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Atmospherics.AtmosRework.Machinery;
 using SS3D.Systems.Tile;
@@ -14,9 +15,10 @@ public abstract class TrinaryAtmosDevice : BasicAtmosDevice, IInteractionTarget
     protected IAtmosPipe FrontPipe;
     protected IAtmosPipe BackPipe; 
     protected IAtmosPipe SidePipe;
-    
 
     protected TileLayer Pipelayer = TileLayer.PipeLeft;
+
+    public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
     [SerializeField]
     private bool _sideOnRight;

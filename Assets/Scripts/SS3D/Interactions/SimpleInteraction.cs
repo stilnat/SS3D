@@ -3,6 +3,7 @@ using SS3D.Interactions;
 using UnityEngine;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Interactions;
 
 namespace SS3D.Content.Systems.Interactions
 {
@@ -37,6 +38,8 @@ namespace SS3D.Content.Systems.Interactions
         }
 
         public string GetGenericName() => Name;
+
+        public InteractionType InteractionType => InteractionType.None;
 
         public Sprite GetIcon(InteractionEvent interactionEvent)
         {

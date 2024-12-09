@@ -5,11 +5,6 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityMvvmToolkit.Common;
-using UnityMvvmToolkit.Core;
-using UnityMvvmToolkit.Core.Converters.PropertyValueConverters;
-using UnityMvvmToolkit.Core.Interfaces;
-using UnityMvvmToolkit.UGUI;
 using Actor = SS3D.Core.Behaviours.Actor;
 
 public class FilterView : Actor
