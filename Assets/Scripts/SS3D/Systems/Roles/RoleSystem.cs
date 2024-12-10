@@ -9,6 +9,7 @@ using SS3D.Systems.Inventory.Items;
 using SS3D.Systems.Inventory.Items.Generic;
 using SS3D.Systems.PlayerControl;
 using SS3D.Systems.PlayerControl.Events;
+using SS3D.Traits;
 using System;
 using System.Collections.Generic;
 using System.Linq;

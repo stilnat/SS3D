@@ -1,4 +1,6 @@
 using SS3D.Systems;
+using SS3D.Traits;
+
 namespace SS3D.Systems.Roles
 {
     /// <summary>

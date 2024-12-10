@@ -1,3 +1,4 @@
+using SS3D.Traits;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

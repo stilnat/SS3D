@@ -7,6 +7,7 @@ using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Inventory.Interactions;
+using SS3D.Traits;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

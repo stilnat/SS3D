@@ -1,6 +1,7 @@
 ﻿using SS3D.Permissions;
 using SS3D.Systems;
 using SS3D.Systems.Entities;
+using SS3D.Traits;
 using System;
 using UnityEngine;
 

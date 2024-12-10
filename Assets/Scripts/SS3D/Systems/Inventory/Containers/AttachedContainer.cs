@@ -9,6 +9,7 @@ using FishNet.Object.Synchronizing;
 using System.Linq;
 using FishNet.Object;
 using SS3D.Logging;
+using SS3D.Traits;
 using UnityEditor;
 
 namespace SS3D.Systems.Inventory.Containers

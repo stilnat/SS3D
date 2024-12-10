@@ -14,6 +14,7 @@ using SS3D.Logging;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Interactions;
 using SS3D.Systems.Selection;
+using SS3D.Traits;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -32,7 +33,7 @@ namespace SS3D.Systems.Inventory.Items
     [RequireComponent(typeof(NetworkTransform))]
     [RequireComponent(typeof(Selectable))]
     [RequiredLayer("Items")]
-    public class Item : InteractionSource, IInteractionTarget, IWorldObjectAsset
+    public class Item : InteractionSource, IInteractionTarget, IWorldObjectAsset, ITraitsHolder
     {
         [SerializeField]
 #if UNITY_EDITOR

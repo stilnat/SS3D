@@ -5,6 +5,7 @@ using SS3D.Systems;
 using SS3D.Systems.Inventory.Containers;
 using System.Linq;
 using SS3D.Systems.Inventory.Items;
+using SS3D.Traits;
 
 namespace EditorTests
 {
@@ -106,8 +107,8 @@ namespace EditorTests
             deniedTrait.Name = "Denied Trait";
 
             Filter filter = ScriptableObject.CreateInstance<Filter>();
-            filter.acceptedTraits = new List<Trait>() { acceptedTrait };
-            filter.deniedTraits = new List<Trait>() { deniedTrait };
+            filter.AcceptedTraits = new() { acceptedTrait };
+            filter.DeniedTraits = new() { deniedTrait };
 
 			AttachedContainer container = CreateContainer(new Vector2Int(10,10), filter);
             

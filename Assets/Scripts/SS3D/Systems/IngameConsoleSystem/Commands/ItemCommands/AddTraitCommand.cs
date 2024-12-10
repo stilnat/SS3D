@@ -3,6 +3,7 @@ using UnityEngine;
 using FishNet.Object;
 using FishNet.Connection;
 using SS3D.Permissions;
+using SS3D.Traits;
 
 namespace SS3D.Systems.IngameConsoleSystem.Commands
 {

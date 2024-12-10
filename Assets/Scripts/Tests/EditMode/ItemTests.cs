@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using SS3D.Systems;
 using SS3D.Systems.Inventory.Items;
+using SS3D.Traits;
 
 namespace EditorTests
 {

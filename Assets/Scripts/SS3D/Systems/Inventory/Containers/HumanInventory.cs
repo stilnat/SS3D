@@ -18,6 +18,7 @@ using FishNet.Object.Synchronizing;
 using System.ComponentModel;
 using static UnityEngine.GraphicsBuffer;
 using SS3D.Systems.Interactions;
+using SS3D.Traits;
 
 namespace SS3D.Systems.Inventory.Containers
 {

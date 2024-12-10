@@ -6,6 +6,7 @@ using SS3D.Systems.Roles;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 using FishNet.Object.Synchronizing;
+using SS3D.Traits;
 
 namespace SS3D.Systems.Inventory.Items.Generic
 {

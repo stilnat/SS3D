@@ -4,6 +4,7 @@ using UnityEngine;
 using SS3D.Systems.Inventory.Containers;
 using FishNet.Object;
 using SS3D.Systems;
+using SS3D.Traits;
 
 
 /// <summary>
@@ -386,7 +387,3 @@ public class AttachedContainerEditor : Editor
         }
     }
 }
-
-
-
-

@@ -9,6 +9,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using Coimbra;
 using SS3D.Logging;
+using SS3D.Traits;
 
 namespace SS3D.Systems.Inventory.Items.Generic
 {
