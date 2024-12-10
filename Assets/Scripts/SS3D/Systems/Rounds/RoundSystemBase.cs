@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -11,6 +9,8 @@ using SS3D.Permissions;
 using SS3D.Systems.PlayerControl;
 using SS3D.Systems.Rounds.Events;
 using SS3D.Systems.Rounds.Messages;
+using System;
+using System.Threading;
 using UnityEngine;
 using RoundStateUpdated = SS3D.Systems.Rounds.Events.RoundStateUpdated;
 using RoundTickUpdated = SS3D.Systems.Rounds.Events.RoundTickUpdated;
@@ -25,27 +25,34 @@ namespace SS3D.Systems.Rounds
     public class RoundSystemBase : NetworkSystem
     {
         /// <summary>
+        /// How many seconds of warmup.
+        /// </summary>
+        [Header("Warmup")]
+        [SyncVar]
+        [SerializeField]
+        private int _warmupSeconds = 5;
+
+        /// <summary>
         /// The current round state.
         /// </summary>
         [Header("Round Information")]
-        [SyncVar(OnChange = nameof(SyncRoundState))] [SerializeField] private RoundState _roundState;
+        [SyncVar(OnChange = nameof(SyncRoundState))]
+        [SerializeField]
+        private RoundState _roundState;
 
         /// <summary>
         /// How much time has passed.
         /// </summary>
-        [SyncVar(OnChange = nameof(SyncCurrentTimerSeconds))] [SerializeField] private int _currentTimerSeconds;
-
-        /// <summary>
-        /// How many seconds of warmup.
-        /// </summary>
-        [Header("Warmup")]
-        [SyncVar] [SerializeField]
-        protected int _warmupSeconds = 5;
+        [SyncVar(OnChange = nameof(SyncCurrentTimerSeconds))]
+        [SerializeField]
+        private int _currentTimerSeconds;
 
         /// <summary>
         /// The cancellation token for the round system, it cancels the tick count.
         /// </summary>
-        protected CancellationTokenSource TickCancellationToken;
+        protected CancellationTokenSource TickCancellationToken { get; set; }
+
+        protected int WarmupSeconds => _warmupSeconds;
 
         /// <summary>
         /// The current round state.
@@ -80,6 +87,36 @@ namespace SS3D.Systems.Rounds
             base.OnStartServer();
 
             ServerSubscribeToEvents();
+        }
+
+        [Server]
+        protected virtual async UniTask ProcessChangeRoundState(ChangeRoundStateMessage changeRoundStateMessage)
+        {
+            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
+        }
+
+        [Server]
+        protected virtual async UniTask ProcessEndRound()
+        {
+            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
+        }
+
+        [Server]
+        protected virtual async UniTask ProcessRoundTick()
+        {
+            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
+        }
+
+        [Server]
+        protected virtual async UniTask PrepareRound()
+        {
+            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
+        }
+
+        [Server]
+        protected virtual async UniTask StopRound()
+        {
+            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
         }
 
         /// <summary>
@@ -126,36 +163,6 @@ namespace SS3D.Systems.Rounds
                 ProcessChangeRoundState(m);
                 #pragma warning restore CS4014
             }
-        }
-
-        [Server]
-        protected virtual async UniTask ProcessChangeRoundState(ChangeRoundStateMessage changeRoundStateMessage)
-        {
-            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
-        }
-
-        [Server]
-        protected virtual async UniTask ProcessEndRound()
-        {
-            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
-        }
-
-        [Server]
-        protected virtual async UniTask ProcessRoundTick()
-        {
-            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
-        }
-
-        [Server]
-        protected virtual async UniTask PrepareRound()
-        {
-            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
-        }
-
-        [Server]
-        protected virtual async UniTask StopRound()
-        {
-            throw new NotImplementedException("Method is not implemented, please do, you moron 😘");
         }
 
         /// <summary>

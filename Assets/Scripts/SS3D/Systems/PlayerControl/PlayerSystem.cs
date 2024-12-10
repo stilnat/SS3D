@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Transporting;
+using JetBrains.Annotations;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Logging;
@@ -11,6 +10,8 @@ using SS3D.Permissions;
 using SS3D.Systems.Entities;
 using SS3D.Systems.PlayerControl.Events;
 using SS3D.Systems.PlayerControl.Messages;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Systems.PlayerControl
@@ -20,6 +21,12 @@ namespace SS3D.Systems.PlayerControl
     /// </summary>
     public sealed class PlayerSystem : NetworkSystem
     {
+        [SyncObject]
+        private readonly SyncDictionary<string, Player> _serverPlayers = new();
+
+        [SyncObject]
+        private readonly SyncDictionary<string, Player> _onlinePlayers = new();
+
         [Header("Settings")]
         [SerializeField]
         private NetworkObject _unauthorizedUserPrefab;
@@ -27,23 +34,9 @@ namespace SS3D.Systems.PlayerControl
         [SerializeField]
         private Player _playerPrefab;
 
-        [SyncObject]
-        private readonly SyncDictionary<string, Player> _serverPlayers = new();
-        [SyncObject]
-        private readonly SyncDictionary<string, Player> _onlinePlayers = new();
-
         public IEnumerable<Player> ServerPlayers => _serverPlayers.Values;
+
         public IEnumerable<Player> OnlinePlayers => _onlinePlayers.Values;
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-
-            LateSyncOnlinePlayers();
-            LateSyncServerPlayers();
-
-            AddEventListeners();
-        }
 
         public override void OnStartServer()
         {
@@ -53,6 +46,31 @@ namespace SS3D.Systems.PlayerControl
 
             SceneManager.OnClientLoadedStartScenes += HandleClientLoadedStartScenes;
             ServerManager.OnRemoteConnectionState += HandleRemoteConnectionState;
+        }
+
+        public string GetCkey(NetworkConnection conn)
+        {
+            return GetPlayer(conn).Ckey;
+        }
+
+        public Player GetPlayer(string ckey)
+        {
+            return ServerPlayers.ToList().Find(player => player.Ckey == ckey);
+        }
+
+        public Player GetPlayer(NetworkConnection conn)
+        {
+            return ServerPlayers.ToList().Find(player => player.Owner == conn);
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            LateSyncOnlinePlayers();
+            LateSyncServerPlayers();
+
+            AddEventListeners();
         }
 
         private void AddEventListeners()
@@ -83,18 +101,12 @@ namespace SS3D.Systems.PlayerControl
                 return;
             }
 
-            switch (op)
+            changeType = op switch
             {
-                case SyncDictionaryOperation.Add:
-                    changeType = ChangeType.Addition;
-                    break;
-                case SyncDictionaryOperation.Remove:
-                    changeType = ChangeType.Removal;
-                    break;
-                default:
-                    changeType = ChangeType.Addition;
-                    break;
-            }
+                SyncDictionaryOperation.Add => ChangeType.Addition,
+                SyncDictionaryOperation.Remove => ChangeType.Removal,
+                _ => ChangeType.Addition,
+            };
 
             OnlinePlayersChanged serverPlayersChanged = new(_onlinePlayers.Values.ToList(), changeType, value, key, asServer);
             serverPlayersChanged.Invoke(this);
@@ -115,14 +127,22 @@ namespace SS3D.Systems.PlayerControl
             switch (op)
             {
                 case SyncDictionaryOperation.Add:
+                {
                     changeType = ChangeType.Addition;
                     break;
+                }
+
                 case SyncDictionaryOperation.Remove:
+                {
                     changeType = ChangeType.Removal;
                     break;
+                }
+
                 default:
+                {
                     changeType = ChangeType.Addition;
                     break;
+                }
             }
 
             ServerPlayersChanged serverPlayersChanged = new(_serverPlayers.Values.ToList(), changeType, value);
@@ -210,35 +230,23 @@ namespace SS3D.Systems.PlayerControl
 
             foreach (NetworkObject networkIdentity in ownedObjects)
             {
-                Log.Information(this, "Client {connectionAddress}'s owned object: {networkIdentity}",
-                    Logs.ServerOnly, conn.GetAddress(), networkIdentity.name);
+                Log.Information(
+                    this,
+                    "Client {connectionAddress}'s owned object: {networkIdentity}",
+                    Logs.ServerOnly,
+                    conn.GetAddress(),
+                    networkIdentity.name);
 
-                Player player = networkIdentity.GetComponent<Player>();
-                if (player != null)
+                if (networkIdentity.TryGetComponent(out Player player))
                 {
                     _onlinePlayers.Remove(player.Ckey);
                     player.RemoveOwnership();
                     Log.Information(this, "Invoking the player server left event: {ckey}", Logs.ServerOnly, player.Ckey);
-
                     return;
                 }
+
                 networkIdentity.RemoveOwnership();
             }
-        }
-
-        public string GetCkey(NetworkConnection conn)
-        {
-            return ServerPlayers.ToList().Find(player => player.Owner == conn)?.Ckey;
-        }
-
-        public Player GetPlayer(string ckey)
-        {
-            return ServerPlayers.ToList().Find(player => player.Ckey == ckey);
-        }
-
-        public Player GetPlayer(NetworkConnection conn)
-        {
-            return ServerPlayers.ToList().Find(player => player.Owner == conn);
         }
     }
 }

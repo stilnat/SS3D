@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Coimbra.Services.Events;
+﻿using Coimbra.Services.Events;
+using System.Collections.Generic;
 
 namespace SS3D.Systems.Entities.Events
 {

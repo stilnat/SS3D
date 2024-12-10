@@ -1,17 +1,15 @@
 {
-    "name": "SS3D.Roles",
+    "name": "SS3D.Rounds",
     "rootNamespace": "",
     "references": [
         "GUID:eb242eaf9f292954eb8c6fbd63c46deb",
-        "GUID:eb124556ba20d60469be9771eb1f0360",
-        "GUID:ca7dfa56d1d490249a5fe56aee92a13c",
-        "GUID:4c7f3fb9e6d5040458fec84bce7ac111",
         "GUID:ee61973a336722c41acef2425d9de4f5",
-        "GUID:1476e4af5b8d89d4c9963efe314428b9",
-        "GUID:464244d81aa026b4caa46e2dbafa2694",
-        "GUID:7c88a4a7926ee5145ad2dfa06f454c67",
+        "GUID:8979f103c1228714eb0115e440b2b33a",
+        "GUID:eb124556ba20d60469be9771eb1f0360",
         "GUID:6aabbee860c32c64d9bbd52d0704ed2c",
         "GUID:d2bbca7254de5e746857b04cfb560876",
+        "GUID:7c88a4a7926ee5145ad2dfa06f454c67",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:b763ff73a93a62c4ea128e32ed2cd0d6"
     ],
     "includePlatforms": [],

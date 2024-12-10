@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using Coimbra.Services.Events;
-using FishNet.Broadcast;
-using FishNet.Object.Synchronizing;
+﻿using Coimbra.Services.Events;
 using SS3D.Systems.Entities;
+using System.Collections.Generic;
 
 namespace SS3D.Systems.Rounds.Events
 {
@@ -10,7 +8,7 @@ namespace SS3D.Systems.Rounds.Events
     {
         public readonly List<Player> ReadyPlayers;
 
-        public ReadyPlayersChanged(List<Player>readyPlayers)
+        public ReadyPlayersChanged(List<Player> readyPlayers)
         {
             ReadyPlayers = readyPlayers;
         }

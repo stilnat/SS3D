@@ -1,5 +1,5 @@
-using System;
 using FishNet.Broadcast;
+using System;
 
 namespace SS3D.Systems.PlayerControl.Messages
 {
@@ -12,7 +12,7 @@ namespace SS3D.Systems.PlayerControl.Messages
     {
         public readonly string Ckey;
 
-        public  UserAuthorizationMessage(string ckey)
+        public UserAuthorizationMessage(string ckey)
         {
             Ckey = ckey;
         }

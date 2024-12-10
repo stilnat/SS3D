@@ -1,5 +1,4 @@
 ﻿using FishNet.Broadcast;
-using SS3D.Systems.Entities;
 
 namespace SS3D.Systems.Rounds.Messages
 {
