@@ -1,4 +1,5 @@
-﻿using SS3D.Core;
+﻿using JetBrains.Annotations;
+using SS3D.Core;
 using SS3D.Core.Behaviours;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace SS3D.Systems.Examine
         /// Updates the hover text with the appropriate localized string.
         /// </summary>
         /// <param name="examinable">The object that is being examined</param>
-        private void UpdateHoverText(IExaminable examinable)
+        private void UpdateHoverText([CanBeNull] AbstractExaminable examinable)
         {
             string hoverTextToDisplay = string.Empty;
 

@@ -11,7 +11,8 @@
         "SS3D.Logging",
         "SS3D.Interactions",
         "SS3D.Tests.Common",
-        "SS3D.Traits"
+        "SS3D.Traits",
+        "SS3D.Selection"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,10 +1,7 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using SS3D.Core.Behaviours;
-using UnityEngine.UI;
-using UnityEngine.Experimental.Rendering;
-using System;
 
 namespace SS3D.Systems.Selection
 {
@@ -15,14 +12,16 @@ namespace SS3D.Systems.Selection
     /// the cursor; however, other Systems (e.g. Examine, Interaction) may make
     /// use of the results.
     /// </summary>
-    public class SelectionController
+    public sealed class SelectionController
     {
-        public event SelectableChangedHandler OnSelectableChanged;
-
         public delegate void SelectableChangedHandler();
 
+        public event SelectableChangedHandler OnSelectableChanged;
+
         private Dictionary<Color32, Selectable> _selectables;
-        private uint nextColour;
+
+        private uint _nextColour;
+
         private Selectable _current;
 
         public SelectionController()
@@ -38,9 +37,9 @@ namespace SS3D.Systems.Selection
         /// <returns>The color that the Selectable will be rendered in.</returns>
         public Color32 RegisterSelectable(Selectable selectable)
         {
-            Color32 col = UIntToColor(nextColour);
+            Color32 col = UIntToColor(_nextColour);
             _selectables.Add(col, selectable);
-            nextColour++;
+            _nextColour++;
             return col;
         }
 
@@ -66,17 +65,22 @@ namespace SS3D.Systems.Selection
         /// </summary>
         /// <typeparam name="T">The component type sought by the external system (e.g. IExaminable for Examine System)</typeparam>
         /// <returns>A component of type T attached to the currently hovered selectable or their nearest ancestor.</returns>
+        [CanBeNull]
         public T GetCurrentSelectable<T>()
+            where T : Component
         {
             // Return null if no selectables are under cursor.
-            if (_current == null) return default(T);
+            if (_current == null)
+            {
+                return default;
+            }
 
             // See if the desired selectable type is on the currently hovered gameobject.
             GameObject go = _current.gameObject;
             T returnValue = go.GetComponent<T>();
 
             // If not, search ancestors until we find the type, or there are no more ancestors.
-            while (returnValue == null && go?.transform?.parent != null)
+            while (returnValue is null && go && go.transform && go.transform.parent)
             {
                 go = go.transform.parent.gameObject;
                 returnValue = go.GetComponent<T>();
@@ -94,14 +98,15 @@ namespace SS3D.Systems.Selection
         /// <param name="index">The unsigned integer to cast.</param>
         /// <returns>A unique Color32 used by the Selection Shader to render the Selectable.</returns>
         /// <exception cref="Exception">Exception raised when too many Selectables have been registered.</exception>
-        private Color32 UIntToColor(uint index)
+        private static Color32 UIntToColor(uint index)
         {
             byte[] intBytes = BitConverter.GetBytes(index);
             Color32 col = new Color32(intBytes[0], intBytes[1], intBytes[2], 255);
             if (intBytes[3] > 0)
             {
-                throw new Exception($"Selection System has registered too many selectables. Misreads may occur!");
+                throw new Exception("Selection System has registered too many selectables. Misreads may occur!");
             }
+
             return col;
         }
 
@@ -112,9 +117,8 @@ namespace SS3D.Systems.Selection
         private void GenerateSelectableDictionary()
         {
             _selectables = new Dictionary<Color32, Selectable>();
-            nextColour = 0;
+            _nextColour = 0;
             RegisterSelectable(null);
         }
-
     }
 }

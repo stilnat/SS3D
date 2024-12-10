@@ -19,7 +19,7 @@ namespace SS3D.Systems.Examine
     {
         public event ExaminableChangedHandler OnExaminableChanged;
 
-        public delegate void ExaminableChangedHandler(IExaminable examinable);
+        public delegate void ExaminableChangedHandler(AbstractExaminable examinable);
         
         private SelectionSystem _selectionSystem;
         
@@ -52,7 +52,7 @@ namespace SS3D.Systems.Examine
         private void UpdateExaminable()
         {
             // Get the examinable under the cursor
-            IExaminable current = _selectionSystem.GetCurrentSelectable<IExaminable>();
+            AbstractExaminable current = _selectionSystem.GetCurrentSelectable<AbstractExaminable>();
             OnExaminableChanged?.Invoke(current);
         }
     }
