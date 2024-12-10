@@ -1,4 +1,4 @@
-using DebugDrawingExtension;
+//using DebugDrawingExtension;
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Interactions;
@@ -129,7 +129,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
+                //DebugExtension.DebugWireSphere(mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
             };
 
             tween.Pause();
@@ -201,13 +201,13 @@ namespace SS3D.Systems.Animations
             Vector3 middleFromShoulderToHit, Vector3 fromShoulderToHit, Vector3 trajectoryPeak, Hand mainHand)
         {
             // show the hit target position in the player referential
-            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
+            //DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the beginning of the animation
-            DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
+            //DebugExtension.DebugPoint((rootTransform.rotation * handTargetPositionRelativeToPlayer) + rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the middle of the two precedent points
-            DebugExtension.DebugPoint((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Color.green, 1f, 2f);
+            //DebugExtension.DebugPoint((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Color.green, 1f, 2f);
 
             Debug.DrawRay((rootTransform.rotation * middleFromShoulderToHit) + rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
 
@@ -215,7 +215,7 @@ namespace SS3D.Systems.Animations
             Debug.DrawRay(mainHand.Hold.UpperArm.position, fromShoulderToHit, Color.red, 2f);
 
             // show the trajectory point guiding the hand outside
-            DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
+            //DebugExtension.DebugPoint( (rootTransform.rotation * trajectoryPeak) + rootTransform.position, Color.cyan, 0.2f,2f);
         }
     }
 }

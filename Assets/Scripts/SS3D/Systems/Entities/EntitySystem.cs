@@ -31,6 +31,8 @@ namespace SS3D.Systems.Entities
         /// </summary>
         public Action OnClientSpawn;
 
+        public Action<Entity> EntitySpawned;
+
         /// <summary>
         /// The prefab used for the player object.
         /// </summary>
@@ -206,11 +208,10 @@ namespace SS3D.Systems.Entities
             createdMind.SetPlayer(player);
             entity.SetMind(createdMind);
 
-            Subsystems.Get<RoleSystem>().GiveRoleLoadoutToPlayer(entity);
-
             _spawnedPlayers.Add(entity);
 
             RpcInvokeClientSpawned(entity.Owner);
+            EntitySpawned?.Invoke(entity);
 
             Log.Information(this, "Spawning mind {createdMind} on {entity}", Logs.ServerOnly, createdMind.name, entity.name);
         }

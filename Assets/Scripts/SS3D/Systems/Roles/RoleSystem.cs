@@ -1,27 +1,30 @@
-﻿using FishNet.Object;
+﻿using Coimbra.Services.Events;
+using FishNet.Object;
+using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Systems.PlayerControl;
-using UnityEngine;
-using Coimbra.Services.Events;
-using SS3D.Systems.PlayerControl.Events;
 using SS3D.Logging;
-using System.Collections.Generic;
-using System.Linq;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
-using SS3D.Core;
 using SS3D.Systems.Inventory.Items.Generic;
+using SS3D.Systems.PlayerControl;
+using SS3D.Systems.PlayerControl.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace SS3D.Systems.Roles
 {
     public class RoleSystem : NetworkSystem
     {
-        [SerializeField] private RolesAvailable _rolesAvailable;
-        private List<RoleCounter> _roleCounters = new List<RoleCounter>();
-        private Dictionary<Player, RoleData> _rolePlayers = new Dictionary<Player, RoleData>();
+        private readonly List<RoleCounter> _roleCounters = new();
 
-        #region Setup
+        private readonly Dictionary<Player, RoleData> _rolePlayers = new();
+
+        [SerializeField]
+        private RolesAvailable _rolesAvailable;
+
         protected override void OnStart()
         {
             base.OnStart();
@@ -32,8 +35,32 @@ namespace SS3D.Systems.Roles
         private void Setup()
         {
             AddHandle(OnlinePlayersChanged.AddListener(HandleOnlinePlayersChanged));
-
+            Subsystems.Get<EntitySystem>().EntitySpawned += GiveRoleLoadoutToPlayer;
             GetAvailableRoles();
+        }
+
+        /// <summary>
+        /// Checks the role of the player and spawns his items
+        /// </summary>
+        /// <param name="entity">The player that will receive the items</param>
+        [ServerRpc(RequireOwnership = false)]
+        private void GiveRoleLoadoutToPlayer(Entity entity)
+        {
+            KeyValuePair<Player, RoleData>? rolePlayer =
+                _rolePlayers.FirstOrDefault(rp => rp.Key == entity.Mind.player);
+
+            if (rolePlayer != null)
+            {
+                RoleData roleData = rolePlayer.Value.Value;
+
+                Log.Information(this, entity.Ckey + " embarked with role " + roleData.Name);
+                SpawnIdentificationItems(entity, roleData);
+
+                if (roleData.Loadout != null)
+                {
+                    SpawnLoadoutItems(entity, roleData.Loadout);
+                }
+            }
         }
 
         /// <summary>
@@ -50,16 +77,11 @@ namespace SS3D.Systems.Roles
 
             foreach (RolesData role in _rolesAvailable.Roles)
             {
-                RoleCounter roleCounter = new RoleCounter();
-                roleCounter.Role = role.Data;
-                roleCounter.AvailableRoles = role.AvailableRoles;
-
+                RoleCounter roleCounter = new(role.Data, role.AvailableRoles);
                 _roleCounters.Add(roleCounter);
             }
         }
-        #endregion
 
-        #region Event Handlers
         [Server]
         private void HandleOnlinePlayersChanged(ref EventContext context, in OnlinePlayersChanged e)
         {
@@ -68,13 +90,22 @@ namespace SS3D.Systems.Roles
                 return;
             }
 
-            if (e.ChangeType == ChangeType.Addition)
+            switch (e.ChangeType)
             {
-                HandlePlayerJoined(e.ChangedPlayer);
-            } else 
-            if (e.ChangeType == ChangeType.Removal)
-            {
-                HandlePlayerLeft(e.ChangedPlayer);
+                case ChangeType.Addition:
+                {
+                    HandlePlayerJoined(e.ChangedPlayer);
+                    break;
+                }
+
+                case ChangeType.Removal:
+                {
+                    HandlePlayerLeft(e.ChangedPlayer);
+                    break;
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -89,7 +120,6 @@ namespace SS3D.Systems.Roles
         {
             RemovePlayerFromCounters(player);
         }
-        #endregion
 
         /// <summary>
         /// Assign a role to the player after joining the server
@@ -131,30 +161,6 @@ namespace SS3D.Systems.Roles
         }
 
         /// <summary>
-        /// Checks the role of the player and spawns his items
-        /// </summary>
-        /// <param name="entity">The player that will receive the items</param>
-        [ServerRpc(RequireOwnership = false)]
-        public void GiveRoleLoadoutToPlayer(Entity entity)
-        {
-            KeyValuePair<Player, RoleData>? rolePlayer =
-                _rolePlayers.FirstOrDefault(rp => rp.Key == entity.Mind.player);
-
-            if (rolePlayer != null)
-            {
-                RoleData roleData = rolePlayer.Value.Value;
-
-                Log.Information(this, entity.Ckey + " embarked with role " + roleData.Name);
-                SpawnIdentificationItems(entity, roleData);
-
-                if (roleData.Loadout != null)
-                {
-                    SpawnLoadoutItems(entity, roleData.Loadout);
-                }
-            }
-        }
-
-        /// <summary>
         /// Spawn the player's PDA and IDCard with the proper permissions
         /// </summary>
         /// <param name="entity"></param>
@@ -164,9 +170,12 @@ namespace SS3D.Systems.Roles
             ItemSystem itemSystem = Subsystems.Get<ItemSystem>();
             HumanInventory inventory = entity.GetComponent<HumanInventory>();
 
-            if (!inventory.TryGetTypeContainer(ContainerType.Identification, 0, out AttachedContainer container)) return;
+            if (!inventory.TryGetTypeContainer(ContainerType.Identification, 0, out AttachedContainer container))
+            {
+                return;
+            }
 
-            Item pdaItem = itemSystem.SpawnItemInContainer(role.PDAPrefab, container);
+            Item pdaItem = itemSystem.SpawnItemInContainer(role.PdaPrefab, container);
             Item idCardItem = itemSystem.SpawnItem(role.IDCardPrefab.name, Vector3.zero, Quaternion.identity);
 
             PDA pda = (PDA)pdaItem;
@@ -230,7 +239,6 @@ namespace SS3D.Systems.Roles
                 SpawnItemInSlot(loadout.HandRight, true, handContainers[1]);
             }
             
-
             inventory.TriggerInventorySetup();
         }
 

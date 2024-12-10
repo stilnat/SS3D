@@ -1,5 +1,5 @@
 using Coimbra;
-using DebugDrawingExtension;
+//using DebugDrawingExtension;
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Interactions;
@@ -160,7 +160,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                DebugExtension.DebugWireSphere(_mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
+                //DebugExtension.DebugWireSphere(_mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
             };
 
             tween.Pause();
@@ -205,13 +205,13 @@ namespace SS3D.Systems.Animations
             Vector3 trajectoryPeakBack = hitPositionRelativeToPlayer - (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
             // show the hit target position in the player referential
-            DebugExtension.DebugPoint((_rootTransform.rotation * hitPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
+            //DebugExtension.DebugPoint((_rootTransform.rotation * hitPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the beginning of the animation
-            DebugExtension.DebugPoint((_rootTransform.rotation * shoulderPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
+            //DebugExtension.DebugPoint((_rootTransform.rotation * shoulderPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the middle of the two precedent points
-            DebugExtension.DebugPoint((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Color.green, 1f, 2f);
+            //DebugExtension.DebugPoint((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Color.green, 1f, 2f);
 
             Debug.DrawRay((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
 
@@ -219,7 +219,7 @@ namespace SS3D.Systems.Animations
             Debug.DrawRay( _mainHand.HandBone.position, fromShoulderToHit, Color.red, 2f);
 
             // show the trajectory point guiding the hand outside
-            DebugExtension.DebugPoint( (_rootTransform.rotation * trajectoryPeak) + _rootTransform.position, Color.cyan, 0.2f,2f);
+            //DebugExtension.DebugPoint( (_rootTransform.rotation * trajectoryPeak) + _rootTransform.position, Color.cyan, 0.2f,2f);
 
             // Define the points for the trajectory in the player's root referential
             Vector3[] path = {
