@@ -1,6 +1,6 @@
+using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Interactions;
 using SS3D.Substances;
 using SS3D.Systems.Interactions;
 using System;
@@ -10,7 +10,6 @@ namespace SS3D.Substances
 {
     public class TransferSubstanceInteraction : Interaction
     {
-
         public override InteractionType InteractionType => InteractionType.None;
 
         /// <summary>
@@ -40,14 +39,8 @@ namespace SS3D.Substances
                 return false;
             }
 
-            IGameObjectProvider provider = interactionEvent.Source as IGameObjectProvider;
-            if (provider == null)
-            {
-                return false;
-            }
-
-            SubstanceContainer container = provider.GameObject.GetComponent<SubstanceContainer>();
-            if (container == null)
+            IGameObjectProvider provider = interactionEvent.Source;
+            if (provider is null || provider.GameObject.TryGetComponent(out SubstanceContainer container))
             {
                 return false;
             }
@@ -67,19 +60,17 @@ namespace SS3D.Substances
 
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            if (interactionEvent.Source is IGameObjectProvider provider)
+            if (interactionEvent.Source is not IGameObjectProvider provider || !provider.GameObject.TryGetComponent(out SubstanceContainer container))
             {
-                var container = provider.GameObject.GetComponent<SubstanceContainer>();
-                if (container != null)
-                {
-                    var targetContainer = interactionEvent.Target.GetComponent<SubstanceContainer>();
-                    container.TransferVolume(targetContainer, 25);
-                    container.SetDirty();
-                    targetContainer.SetDirty();
-                }
+                return false;
             }
 
+            SubstanceContainer targetContainer = interactionEvent.Target.GetComponent<SubstanceContainer>();
+            container.TransferVolume(targetContainer, 25);
+            container.SetDirty();
+            targetContainer.SetDirty();
+
             return false;
-        } 
+        }
     }
 }

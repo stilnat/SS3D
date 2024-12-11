@@ -12,7 +12,8 @@
         "SS3D.Interactions",
         "SS3D.Tests.Common",
         "SS3D.Traits",
-        "SS3D.Selection"
+        "SS3D.Selection",
+        "SS3D.Substances"
     ],
     "includePlatforms": [
         "Editor"
