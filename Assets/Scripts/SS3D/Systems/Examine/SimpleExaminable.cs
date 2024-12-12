@@ -9,7 +9,7 @@ namespace SS3D.Systems.Examine
     public class SimpleExaminable : AbstractExaminable
     {
         [FormerlySerializedAs("key")]
-        [SerializeField] 
+        [SerializeField]
         private ExamineData _key;
 
         public override ExamineData GetData()

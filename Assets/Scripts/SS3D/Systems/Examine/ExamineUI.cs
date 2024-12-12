@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Examine
 {
     public class ExamineUI : Actor
     {
-        [SerializeField] private TMP_Text HoverName;
+        [FormerlySerializedAs("HoverName")]
+        [SerializeField]
+        private TMP_Text _hoverName;
 
         private StringTable _currentStringTable;
 
@@ -35,7 +38,7 @@ namespace SS3D.Systems.Examine
         {
             string hoverTextToDisplay = string.Empty;
 
-            if (examinable?.GetData())
+            if (examinable && examinable.GetData())
             {
                 ExamineData data = examinable.GetData();
 
@@ -53,7 +56,7 @@ namespace SS3D.Systems.Examine
                 }
             }
 
-            HoverName.text = hoverTextToDisplay;
+            _hoverName.text = hoverTextToDisplay;
         }
     }
 }

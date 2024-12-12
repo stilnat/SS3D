@@ -1,12 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using SS3D.Core;
 using SS3D.Core.Behaviours;
-using UnityEngine.UI;
-using UnityEngine.Experimental.Rendering;
-using System;
 using SS3D.Systems.Selection;
-using SS3D.Core;
 
 namespace SS3D.Systems.Examine
 {
@@ -17,12 +11,12 @@ namespace SS3D.Systems.Examine
     /// </summary>
     public class ExamineSystem : NetworkSystem
     {
+        public delegate void ExaminableChangedHandler(AbstractExaminable examinable);
+
         public event ExaminableChangedHandler OnExaminableChanged;
 
-        public delegate void ExaminableChangedHandler(AbstractExaminable examinable);
-        
         private SelectionSystem _selectionSystem;
-        
+
         protected override void OnAwake()
         {
             base.OnAwake();
@@ -32,7 +26,6 @@ namespace SS3D.Systems.Examine
         protected override void OnEnabled()
         {
             base.OnEnabled();
-            
             if (_selectionSystem)
             {
                 _selectionSystem.OnSelectableChanged += UpdateExaminable;
@@ -42,7 +35,6 @@ namespace SS3D.Systems.Examine
         protected override void OnDisabled()
         {
             base.OnDisabled();
-            
             if (_selectionSystem)
             {
                 _selectionSystem.OnSelectableChanged -= UpdateExaminable;
