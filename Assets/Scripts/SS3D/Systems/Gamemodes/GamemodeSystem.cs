@@ -1,19 +1,19 @@
-using System.Collections.Generic;
-using SS3D.Core.Behaviours;
 using Coimbra.Services.Events;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using SS3D.Core;
+using SS3D.Core.Behaviours;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Events;
-using SS3D.Systems.GameModes.Modes;
 using SS3D.Systems.GameModes.Events;
+using SS3D.Systems.GameModes.Modes;
+using SS3D.Systems.PlayerControl;
 using SS3D.Systems.Rounds;
 using SS3D.Systems.Rounds.Events;
 using SS3D.Systems.Rounds.Messages;
+using System.Collections.Generic;
 using UnityEngine;
-using SS3D.Systems.PlayerControl;
 
 namespace SS3D.Systems.Gamemodes
 {
@@ -25,7 +25,7 @@ namespace SS3D.Systems.Gamemodes
         /// <summary>
         /// The gamemode that is being used.
         /// </summary>
-        [SyncVar] 
+        [SyncVar]
         [SerializeField]
         private Gamemode _gamemode;
 
@@ -34,17 +34,30 @@ namespace SS3D.Systems.Gamemodes
         /// </summary>
         public List<string> Antagonists => _gamemode.RoundAntagonists;
 
-        protected override void OnStart()
-        {
-            base.OnStart();
-            if (base.IsServer) Setup();
-        }
-
         public override void OnStartClient()
         {
             base.OnStartClient();
-
             CmdGetCurrentClientObjectives();
+        }
+
+        /// <summary>
+        /// Finishes the round.
+        /// </summary>
+        [Server]
+        public void EndRound()
+        {
+            ChangeRoundStateMessage message = new(false);
+            ClientManager.Broadcast(message);
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            if (IsServer)
+            {
+                Setup();
+            }
         }
 
         /// <summary>
@@ -52,7 +65,7 @@ namespace SS3D.Systems.Gamemodes
         /// </summary>
         [Server]
         private void Setup()
-        {   
+        {
             AddHandle(RoundStateUpdated.AddListener(HandleRoundStateUpdated));
             AddHandle(SpawnedPlayersUpdated.AddListener(HandleSpawnedPlayersChanged));
             AddHandle(InitialPlayersSpawned.AddListener(HandleInitialPlayersSpawned));
@@ -64,7 +77,7 @@ namespace SS3D.Systems.Gamemodes
         [Server]
         private void InitializeGamemode()
         {
-            // Creates an instance of the SO, to avoid using the file. 
+            // Creates an instance of the SO, to avoid using the file.
             _gamemode = Instantiate(_gamemode);
 
             // Subscribe to Gamemode events
@@ -87,7 +100,7 @@ namespace SS3D.Systems.Gamemodes
             _gamemode.InitializeGamemode(playerCkeys);
 
             // Add event listeners
-            foreach (var objective in _gamemode.RoundObjectives)
+            foreach (GamemodeObjective objective in _gamemode.RoundObjectives)
             {
                 objective.AddEventListeners();
             }
@@ -100,7 +113,6 @@ namespace SS3D.Systems.Gamemodes
             {
                 SendObjectiveToClients(gamemodeObjective);
             }
-
         }
 
         /// <summary>
@@ -117,22 +129,12 @@ namespace SS3D.Systems.Gamemodes
             _gamemode.OnInitialized -= HandleGamemodeInitialized;
             _gamemode.OnFinished -= HandleGamemodeFinalized;
             _gamemode.OnObjectiveUpdated -= HandleObjectiveUpdated;
-            
+
             _gamemode.FinalizeGamemode();
             _gamemode.ResetGamemode();
 
             // Removes the current gamemode.
             // _gamemode = null;
-        }
-
-        /// <summary>
-        /// Finishes the round.
-        /// </summary>
-        [Server]
-        public void EndRound()
-        {
-            ChangeRoundStateMessage message = new(false);
-            ClientManager.Broadcast(message);
         }
 
         /// <summary>
@@ -151,7 +153,8 @@ namespace SS3D.Systems.Gamemodes
             HashSet<NetworkConnection> receivers = new()
             {
                 author,
-                // TODO: Get admins or something 🥸
+
+                // TODO: Get admins or something
             };
 
             ServerManager.Broadcast(receivers, message);
@@ -185,12 +188,12 @@ namespace SS3D.Systems.Gamemodes
         }
 
         /// <summary>
-        /// Called whenever the ready players are spawned at the start of the round.          
+        /// Called whenever the ready players are spawned at the start of the round.
         /// </summary>
         [Server]
         private void HandleInitialPlayersSpawned(ref EventContext context, in InitialPlayersSpawned e)
         {
-            InitializeGamemode();   
+            InitializeGamemode();
         }
 
         /// <summary>
@@ -207,7 +210,7 @@ namespace SS3D.Systems.Gamemodes
 
             // Retrieve the Ckey of the newly spawned player.
             EntitySystem entitySystem = Subsystems.Get<EntitySystem>();
-            string newPlayerCkey = Subsystems.Get<PlayerSystem>()?.GetCkey(entitySystem.LastSpawned.Owner);
+            string newPlayerCkey = Subsystems.Get<PlayerSystem>().GetCkey(entitySystem.LastSpawned.Owner);
 
             // Assign late join objectives to the new player
             if (newPlayerCkey != null)
@@ -226,8 +229,10 @@ namespace SS3D.Systems.Gamemodes
             switch (e.RoundState)
             {
                 case RoundState.Ending:
+                {
                     FinalizeGamemode();
                     break;
+                }
             }
         }
 

@@ -13,7 +13,8 @@
         "SS3D.Tests.Common",
         "SS3D.Traits",
         "SS3D.Selection",
-        "SS3D.Substances"
+        "SS3D.Substances",
+        "SS3D.GameModes"
     ],
     "includePlatforms": [
         "Editor"

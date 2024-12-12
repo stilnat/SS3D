@@ -2,7 +2,6 @@
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.GameModes.Events;
 using UnityEngine;
 using SS3D.Data.Generated;
 using SS3D.Systems.Animations;

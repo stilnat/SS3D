@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using NUnit.Framework;
 using SS3D.Systems.Gamemodes;
 using SS3D.Systems.GameModes.Modes;
@@ -374,6 +375,7 @@ namespace EditorTests
         /// </summary>
         /// <param name="numberOfPlayers">The number of Ckeys to generate</param>
         /// <returns>A list containing unique Ckeys</returns>
+        [NotNull]
         private List<string> SampleCkeys(int numberOfPlayers)
         {
             // Keep number of players within reasonable bounds
@@ -402,22 +404,16 @@ namespace EditorTests
             return ckeys;
         }
 
+        [NotNull]
         private Gamemode CreateGamemodeWithSingleObjective(CollaborationType collaborationType, int maxAssigneesPerObjective = 1, int minAssigneesPerObjective = 1)
         {
-            Gamemode gamemode = new Gamemode();
-
             GamemodeObjective gamemodeObjective = ObjectiveFactory.Create("Sample Objective", collaborationType, Alignment.Any, minAssigneesPerObjective, maxAssigneesPerObjective);
 
-            GamemodeObjectiveCollectionEntry collectionEntry = new GamemodeObjectiveCollectionEntry();
-            collectionEntry.GamemodeObjective = gamemodeObjective;
-            collectionEntry.AssignmentProbability = 100f;
-            collectionEntry.RemainingAssignments = 1000;
+            GamemodeObjectiveCollectionEntry collectionEntry = GamemodeObjectiveCollectionEntry.CreateInstance(gamemodeObjective, 100f, 1000);
 
-            GamemodeObjectiveCollection collection = new GamemodeObjectiveCollection();
-            collection.Entries = new List<GamemodeObjectiveCollectionEntry>();
-            collection.Entries.Add(collectionEntry);
+            GamemodeObjectiveCollection collection = GamemodeObjectiveCollection.CreateInstance(new() { collectionEntry });
 
-            gamemode.PossibleObjectives = collection;
+            Gamemode gamemode = Gamemode.CreateInstance(collection);
 
             return gamemode;
         }
