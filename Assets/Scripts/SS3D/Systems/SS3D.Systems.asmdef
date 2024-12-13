@@ -2,6 +2,7 @@
     "name": "SS3D.Systems",
     "rootNamespace": "",
     "references": [
+        "GUID:137607592728bd9429ad9592e8494e6c",
         "GUID:eb242eaf9f292954eb8c6fbd63c46deb",
         "GUID:9a1080b2b38c7e741a8b9dfda7f5f683",
         "GUID:92a1e40b8cccf8645adbdd275ac6371a",
