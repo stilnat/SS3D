@@ -28,6 +28,14 @@ namespace SS3D.Systems.Crafting
     /// </summary>
     public class CraftingMenu : NetworkView, IPointerEnterHandler, IPointerExitHandler
     {
+        /// <summary>
+        /// Server only, don't try to access it on client. Hold a list of potential interactions for each client, when
+        /// they open the crafting menu.
+        /// </summary>
+        private readonly Dictionary<NetworkConnection, List<CraftingInteraction>> _interactionsForConnection = new();
+
+        private readonly Dictionary<NetworkConnection, InteractionEvent> _eventForConnection = new();
+
         private InputSystem _inputSystem;
 
         /// <summary>
@@ -53,7 +61,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         [SerializeField]
         private GameObject _pictureSlotArea;
-        
+
         /// <summary>
         /// Selected interaction.
         /// </summary>
@@ -65,20 +73,12 @@ namespace SS3D.Systems.Crafting
         private InteractionEvent _interactionEvent;
 
         /// <summary>
-        /// TMP field to display the selected recipe step's name. 
+        /// TMP field to display the selected recipe step's name.
         /// </summary>
         [SerializeField]
         private TextMeshProUGUI _objectTitle;
 
-        /// <summary>
-        /// Server only, don't try to access it on client. Hold a list of potential interactions for each client, when
-        /// they open the crafting menu.
-        /// </summary>
-        private readonly Dictionary<NetworkConnection, List<CraftingInteraction>> _interactionsForConnection = new();
-        
-        private readonly Dictionary<NetworkConnection, InteractionEvent> _eventForConnection = new();
-        
-        private bool _isPointerOnMenu = false;
+        private bool _isPointerOnMenu;
 
         public override void OnStartNetwork()
         {
@@ -105,17 +105,11 @@ namespace SS3D.Systems.Crafting
             _isPointerOnMenu = false;
         }
 
-        private void ShowUI(bool isShow)
-        {
-            gameObject.SetActive(isShow);
-        }
-
         /// <summary>
         /// Method called when the crafting menu is opened, normally only when multiple options are possible for crafting.
         /// </summary>
         [Server]
-        public void DisplayMenu(List<CraftingInteraction> interactions, InteractionEvent interactionEvent, InteractionReference reference,
-            InteractionType craftingInteractionType)
+        public void DisplayMenu(List<CraftingInteraction> interactions, InteractionEvent interactionEvent, InteractionReference reference, InteractionType craftingInteractionType)
         {
             _interactionsForConnection.Remove(interactionEvent.Source.NetworkObject.Owner);
             _interactionsForConnection.Add(interactionEvent.Source.NetworkObject.Owner, interactions);
@@ -131,7 +125,7 @@ namespace SS3D.Systems.Crafting
             }
             else
             {
-                List<string> stepNames = interactions.Select(x => x.ChosenLink.Target.Name).ToList();
+                List<string> stepNames = interactions.ConvertAll(x => x.ChosenLink.Target.Name);
                 TargetOpenCraftingMenu(interactionEvent.Source.NetworkObject.Owner, stepNames);
                 SetSelectedInteraction(0, interactionEvent.Source.NetworkObject.Owner);
             }
@@ -140,11 +134,34 @@ namespace SS3D.Systems.Crafting
         public void HideMenu()
         {
             ShowUI(false);
-            
             if (_isPointerOnMenu)
             {
                 _inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
             }
+        }
+
+        /// <summary>
+        /// Set up a given interaction, which will be called upon clicking on the build button.
+        /// </summary>
+        [ServerRpc(RequireOwnership = false)]
+        public void RpcSetSelectedInteraction(int index, [CanBeNull] NetworkConnection conn = null)
+        {
+            SetSelectedInteraction(index, conn);
+        }
+
+        /// <summary>
+        /// Trigger the selected crafting interaction.
+        /// </summary>
+        [Client]
+        public void OnBuildClick()
+        {
+            RpcStartSelectedInteraction();
+            ShowUI(false);
+        }
+
+        private void ShowUI(bool isShow)
+        {
+            gameObject.SetActive(isShow);
         }
 
         /// <summary>
@@ -171,43 +188,24 @@ namespace SS3D.Systems.Crafting
             }
         }
 
-        /// <summary>
-        /// Set up a given interaction, which will be called upon clicking on the build button.
-        /// </summary>
-        [ServerRpc(RequireOwnership = false)]
-        public void RpcSetSelectedInteraction(int index, [CanBeNull] NetworkConnection conn = null)
-        {
-            SetSelectedInteraction(index, conn);
-        }
-
         [Server]
         private void SetSelectedInteraction(int index, NetworkConnection conn = null)
         {
             _interaction = _interactionsForConnection[conn][index];
             _interactionEvent = _eventForConnection[conn];
             List<SecondaryResult> results = new();
-            
+
             if (_interaction.ChosenLink.Target.IsTerminal && _interaction.ChosenLink.Target.TryGetResult(out WorldObjectAssetReference result))
             {
-                results.Add(new (result, 1));
+                results.Add(new(result, 1));
             }
             else if (!_interaction.ChosenLink.Target.IsTerminal)
             {
-                results.Add(new (_interaction.ChosenLink.Target.Recipe.Target, 1));
+                results.Add(new(_interaction.ChosenLink.Target.Recipe.Target, 1));
             }
-            
+
             results.AddRange(_interaction.ChosenLink.Tag.SecondaryResults);
             TargetSetVisuals(conn, results, _interaction.ChosenLink.Target.Name);
-        }
-
-        /// <summary>
-        /// Trigger the selected crafting interaction.
-        /// </summary>
-        [Client]
-        public void OnBuildClick()
-        {
-            RpcStartSelectedInteraction();
-            ShowUI(false);
         }
 
         [TargetRpc]
@@ -247,22 +245,28 @@ namespace SS3D.Systems.Crafting
                 Log.Error(this, "can't start selected interaction, it's null");
                 return;
             }
+
             StartSelectedInteraction(_interaction.InteractionType);
         }
 
         [Server]
         private void StartSelectedInteraction(InteractionType type)
         {
-            if (_interaction == null || _interactionEvent == null) 
+            if (_interaction == null || _interactionEvent == null)
             {
                 Log.Error(this, "can't start selected interaction, it's null, or it's interactionEvent is null");
                 return;
             }
 
             InteractionReference reference = _interactionEvent.Source.Interact(_interactionEvent, _interaction);
-            int index  = _interactionsForConnection[_interactionEvent.Source.NetworkObject.Owner].IndexOf(_interaction);
-            RpcClientInteract(_interactionEvent.Source.NetworkObject.Owner, _interactionEvent.Target.GetGameObject(), 
-                _interactionEvent.Source.GameObject, reference.Id, index, _interaction.InteractionType);
+            int index = _interactionsForConnection[_interactionEvent.Source.NetworkObject.Owner].IndexOf(_interaction);
+            RpcClientInteract(
+                _interactionEvent.Source.NetworkObject.Owner,
+                _interactionEvent.Target.GetGameObject(),
+                _interactionEvent.Source.GameObject,
+                reference.Id,
+                index,
+                _interaction.InteractionType);
         }
 
         /// <summary>

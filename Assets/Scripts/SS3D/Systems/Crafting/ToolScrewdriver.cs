@@ -19,6 +19,7 @@ namespace SS3D.Systems.Crafting
         public GameObject GameObject => gameObject;
 
         public Transform InteractionPoint => _interactionPoint;
+
         public NetworkBehaviour NetworkBehaviour => this;
 
         public void PlayAnimation(InteractionType interactionType)

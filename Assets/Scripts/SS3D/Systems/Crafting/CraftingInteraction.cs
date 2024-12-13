@@ -30,14 +30,23 @@ namespace SS3D.Systems.Crafting
         private readonly Transform _characterTransform;
 
         /// <summary>
+        /// Type of this interaction, defines which recipe will be available.
+        /// </summary>
+        private readonly InteractionType _type;
+
+        /// <summary>
         /// The start position of the source of the interaction, when the interaction begins.
         /// </summary>
         private Vector3 _startPosition;
 
-        /// <summary>
-        /// Type of this interaction, defines which recipe will be available.
-        /// </summary>
-        private readonly InteractionType _type;
+        public CraftingInteraction(float delay, Transform characterTransform, InteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
+        {
+            _characterTransform = characterTransform;
+            _startPosition = characterTransform.position;
+            Delay = delay;
+            _type = type;
+            _chosenLink = link;
+        }
 
         /// <summary>
         /// The start position of the source of the interaction, when the interaction begins.
@@ -60,15 +69,6 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         public TaggedEdge<RecipeStep, RecipeStepLink> ChosenLink => _chosenLink;
 
-        public CraftingInteraction(float delay, Transform characterTransform, InteractionType type, TaggedEdge<RecipeStep, RecipeStepLink> link)
-        {
-            _characterTransform = characterTransform;
-            _startPosition = characterTransform.position;
-            Delay = delay;
-            _type = type;
-            _chosenLink = link;
-        }
-
         /// <summary>
         /// Check if the crafting can occur.
         /// TODO : Add more conditions, as they are more things, such as obstacles, that can prevent a crafting interaction to occur.
@@ -76,11 +76,12 @@ namespace SS3D.Systems.Crafting
         public override bool CanInteract(InteractionEvent interactionEvent)
         {
             // Check for movement once the interaction started.
-            if (HasStarted && !InteractionExtensions.CharacterMoveCheck(_startPosition, _characterTransform.position)) return false;
+            if (HasStarted && !InteractionExtensions.CharacterMoveCheck(_startPosition, _characterTransform.position))
+            {
+                return false;
+            }
 
-            if (!InteractionExtensions.RangeCheck(interactionEvent)) return false;
-
-            return true;
+            return InteractionExtensions.RangeCheck(interactionEvent);
         }
 
         [Server]
@@ -90,7 +91,7 @@ namespace SS3D.Systems.Crafting
             _startPosition = _characterTransform.position;
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
-            ViewLocator.Get<CraftingMenu>().First().HideMenu();
+            ViewLocator.Get<CraftingMenu>()[0].HideMenu();
 
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
@@ -105,17 +106,8 @@ namespace SS3D.Systems.Crafting
             {
                 interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkBehaviour, point, Delay);
             }
-            
-            return true;
-        }
 
-        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            if (Subsystems.TryGet(out CraftingSystem craftingSystem))
-            {
-                craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
-                craftingSystem.Craft(this, interactionEvent);
-            }
+            return true;
         }
 
         [NotNull]
@@ -133,7 +125,15 @@ namespace SS3D.Systems.Crafting
             {
                 hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
+        }
 
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            if (Subsystems.TryGet(out CraftingSystem craftingSystem))
+            {
+                craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
+                craftingSystem.Craft(this, interactionEvent);
+            }
         }
     }
 }

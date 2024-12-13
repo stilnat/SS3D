@@ -34,7 +34,6 @@ namespace SS3D.Systems.Crafting
             }
         }
 
-
         // Method to rotate the screwdriver around the pivot point
         private void RotateAroundPivot()
         {
@@ -46,20 +45,18 @@ namespace SS3D.Systems.Crafting
 
             // Use DoTween to rotate around the pivot by modifying the screwdriver's position
             _animation = DOTween.To(
-                    () => 0f,                  
-                    (x) => RotateScrewdriver(x), 
-                    25f,               
-                    0.5f                     
-                )
-                .SetLoops(-1, LoopType.Yoyo) 
-                .SetEase(Ease.InOutSine);    
+                    () => 0f,
+                    RotateScrewdriver,
+                    25f,
+                    0.5f)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetEase(Ease.InOutSine);
         }
 
         // This method updates both position and rotation based on the current rotation angle
         private void RotateScrewdriver(float currentRotation)
         {
-            transform.position = _positionAtAnimationStart;
-            transform.rotation = _rotationAtAnimationStart;
+            transform.SetPositionAndRotation(_positionAtAnimationStart, _rotationAtAnimationStart);
             transform.RotateAround(InteractionPoint.position, InteractionPoint.right, currentRotation);
         }
     }
