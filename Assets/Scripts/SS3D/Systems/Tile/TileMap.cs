@@ -19,8 +19,12 @@ namespace SS3D.Systems.Tile
     /// </summary>
     public class TileMap : NetworkBehaviour
     {
+        public event EventHandler OnMapLoaded;
+
         private Dictionary<Vector2Int, TileChunk> _chunks;
+
         private List<PlacedItemObject> _items;
+
         private string _mapName;
 
         public List<TileChunk> Chunks => _chunks.Values.ToList();
@@ -28,8 +32,6 @@ namespace SS3D.Systems.Tile
         public int ChunkCount => _chunks.Count;
 
         public string Name => _mapName;
-
-        public event EventHandler OnMapLoaded;
 
         public static TileMap Create(string name)
         {
@@ -46,14 +48,6 @@ namespace SS3D.Systems.Tile
             return map;
         }
 
-        private void Setup(string mapName)
-        {
-            _chunks = new Dictionary<Vector2Int, TileChunk>();
-            _items = new List<PlacedItemObject>();
-            name = mapName;
-            _mapName = mapName;
-        }
-
         /// <summary>
         /// Returns the chunk key to be used based on a world position.
         /// </summary>
@@ -67,51 +61,10 @@ namespace SS3D.Systems.Tile
             return new Vector2Int(x, y);
         }
 
-        /// <summary>
-        /// Create a new chunk. Internal use only
-        /// </summary>
-        /// <param name="chunkKey">Unique key to use</param>
-        /// <param name="origin">Origin position of the chunk</param>
-        /// <returns></returns>
-        private TileChunk CreateChunk(Vector2Int chunkKey, Vector3 origin)
-        {
-            TileChunk chunk = TileChunk.Create(chunkKey, origin);
-            chunk.transform.SetParent(transform);
-
-            return chunk;
-        }
-
-        /// <summary>
-        /// Returns chunk based the world position. Will create a new chunk if it doesn't exist.
-        /// </summary>
-        /// <param name="worldPosition"></param>
-        /// <returns></returns>
-        private TileChunk GetOrCreateChunk(Vector3 worldPosition)
-        {
-            TileChunk chunk = GetChunk(worldPosition);
-            if (chunk == null)
-            {
-                Vector2Int key = GetKey(worldPosition);
-                Vector3 origin = new Vector3 { x = key.x * TileChunk.ChunkSize, z = key.y * TileChunk.ChunkSize };
-                chunk = CreateChunk(key, origin);
-                _chunks[key] = chunk;
-            }
-
-            return chunk;
-        }
-
         public TileChunk GetChunk(Vector3 worldPosition)
         {
             Vector2Int key = GetKey(worldPosition);
-
-            if (_chunks.TryGetValue(key, out TileChunk _))
-            {
-                return _chunks[key];
-            }
-            else
-            {
-                return null;
-            }
+            return _chunks.TryGetValue(key, out TileChunk _) ? _chunks[key] : null;
         }
 
         public ITileLocation GetTileLocation(TileLayer layer, Vector3 worldPosition)
@@ -119,7 +72,6 @@ namespace SS3D.Systems.Tile
             TileChunk chunk = GetOrCreateChunk(worldPosition); // TODO: creates unnessary empty chunk when checking whether building can be done
             return chunk.GetTileObject(layer, worldPosition);
         }
-
 
         public ITileLocation[] GetTileLocations(Vector3 worldPosition)
         {
@@ -154,15 +106,15 @@ namespace SS3D.Systems.Tile
                 neighbourLocation.TryGetPlacedObject(out PlacedTileObject neighbourObject, TileHelper.GetOpposite(direction));
                 adjacentObjects[(int)direction] = neighbourObject;
             }
+
             return adjacentObjects;
         }
-
 
         public List<PlacedTileObject> GetCardinalNeighbourPlacedObjects(TileLayer layer, Vector3 worldPosition)
         {
             List<PlacedTileObject> adjacentObjects = new();
 
-            for (Direction direction = Direction.North; direction <= Direction.NorthWest; direction+= 2)
+            for (Direction direction = Direction.North; direction <= Direction.NorthWest; direction += 2)
             {
                 Tuple<int, int> vector = TileHelper.ToCardinalVector(direction);
                 adjacentObjects.AddRange(
@@ -171,7 +123,6 @@ namespace SS3D.Systems.Tile
 
             return adjacentObjects;
         }
-
 
         /// <summary>
         /// Returns whether the specified object can be successfully build for a given position and direction.
@@ -193,15 +144,26 @@ namespace SS3D.Systems.Tile
                 // Verify if we are allowed to build for this grid position
                 Vector3 gridPosition = new(placePosition.x + gridOffset.x, 0, placePosition.z + gridOffset.y);
 
-                canBuild &= BuildChecker.CanBuild(GetTileLocations(gridPosition), tileObjectSo, dir, gridPosition,
-                    GetNeighbourPlacedObjects(TileLayer.Turf, gridPosition), replaceExisting);
+                canBuild &= BuildChecker.CanBuild(
+                    GetTileLocations(gridPosition),
+                    tileObjectSo,
+                    dir,
+                    gridPosition,
+                    GetNeighbourPlacedObjects(TileLayer.Turf, gridPosition),
+                    replaceExisting);
             }
-            
+
             return canBuild;
         }
 
-        public bool PlaceTileObject(TileObjectSo tileObjectSo, Vector3 placePosition, Direction dir,
-            bool skipBuildCheck, bool replaceExisting, bool skipAdjacency, out GameObject placedObjectGo)
+        public bool PlaceTileObject(
+            TileObjectSo tileObjectSo,
+            Vector3 placePosition,
+            Direction dir,
+            bool skipBuildCheck,
+            bool replaceExisting,
+            bool skipAdjacency,
+            out GameObject placedObjectGo)
         {
             bool canBuild = CanBuild(tileObjectSo, placePosition, dir, replaceExisting);
             placedObjectGo = null;
@@ -220,14 +182,17 @@ namespace SS3D.Systems.Tile
 
                     // Remove an existing object if there
                     if (replaceExisting)
-                        ClearTileObject(gridPosition, tileObjectSo.layer, dir);
+                    {
+                        ClearTileObject(gridPosition, tileObjectSo.Layer, dir);
+                    }
 
                     // Place new object
-                    chunk.GetTileObject(tileObjectSo.layer, gridPosition).AddPlacedObject(placedObject, dir);
+                    chunk.GetTileObject(tileObjectSo.Layer, gridPosition).AddPlacedObject(placedObject, dir);
                 }
 
                 // Handle Adjacency connectors, can skip it particulary when loading the map.
-                if (!skipAdjacency){
+                if (!skipAdjacency)
+                {
                     placedObject.UpdateAdjacencies();
                 }
 
@@ -241,8 +206,7 @@ namespace SS3D.Systems.Tile
         {
             ITileLocation[] tileLocations = GetTileLocations(placePosition);
             ITileLocation tileLocation = tileLocations[(int)layer];
-            tileLocation.TryGetPlacedObject(out var placed, dir);
-
+            tileLocation.TryGetPlacedObject(out PlacedTileObject placed, dir);
 
             if (placed != null && placed.TryGetComponent(out IAdjacencyConnector connector))
             {
@@ -259,7 +223,7 @@ namespace SS3D.Systems.Tile
 
             foreach (ITileLocation clearLocation in toClearLocations)
             {
-                var allPlaced = clearLocation.GetAllPlacedObject();
+                List<PlacedTileObject> allPlaced = clearLocation.GetAllPlacedObject();
 
                 foreach (PlacedTileObject placedToClear in allPlaced)
                 {
@@ -271,32 +235,6 @@ namespace SS3D.Systems.Tile
                 }
 
                 clearLocation.ClearAllPlacedObject();
-            }
-        }
-
-        private void ResetAdjacencies(PlacedTileObject placed, ITileLocation location, List<PlacedTileObject> neighbours)
-        {
-            List<Direction> neighboursAtDirection= new List<Direction>();
-
-            // First get the directions of all neighbours, relative to this placed object.
-            // Direction is not always relevant (e.g disposal pipes with disposal furnitures)
-            // but it is in most cases. It's up to the connectors to choose what they do with this info.
-            foreach (PlacedTileObject neighbour in neighbours)
-            {
-               placed.NeighbourAtDirectionOf(neighbour, out var dir);
-               neighboursAtDirection.Add(dir);
-            }
-            // then destroy this placed object. It's important to do it here, before updating
-            // adjacencies, as some connectors might be looking for it.
-            location.ClearAllPlacedObject();
-
-            // Then update all neighbours, using their directions.
-            int i = 0;
-            foreach (PlacedTileObject neighbour in neighbours)
-            {
-                Direction dir = neighboursAtDirection[i];
-                neighbour?.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), null, false);
-                i++;
             }
         }
 
@@ -320,7 +258,11 @@ namespace SS3D.Systems.Tile
                 }
             }
 
-            toRemove?.DestroySelf();
+            if (toRemove)
+            {
+                toRemove.DestroySelf();
+            }
+
             _items.Remove(toRemove);
         }
 
@@ -360,12 +302,7 @@ namespace SS3D.Systems.Tile
                 itemSaveList.Add(item.Save());
             }
 
-            return new SavedTileMap
-            {
-                mapName = _mapName,
-                savedChunkList = chunkObjectSaveList.ToArray(),
-                savedItemList = itemSaveList.ToArray()
-            };
+            return new SavedTileMap(_mapName, chunkObjectSaveList.ToArray(), itemSaveList.ToArray());
         }
 
         public void Load([CanBeNull] SavedTileMap saveObject)
@@ -380,32 +317,105 @@ namespace SS3D.Systems.Tile
 
             TileSystem tileSystem = Subsystems.Get<TileSystem>();
 
-            foreach (SavedTileChunk savedChunk in saveObject.savedChunkList)
+            foreach (SavedTileChunk savedChunk in saveObject.SavedChunkList)
             {
-                TileChunk chunk = GetOrCreateChunk(savedChunk.originPosition);
-                ISavedTileLocation[] savedTiles = savedChunk.savedTiles;
+                TileChunk chunk = GetOrCreateChunk(savedChunk.OriginPosition);
+                ISavedTileLocation[] savedTiles = savedChunk.SavedTiles;
 
-                foreach (var savedTile in savedTiles)
+                foreach (ISavedTileLocation savedTile in savedTiles)
                 {
                     foreach (SavedPlacedTileObject savedObject in savedTile.GetPlacedObjects())
                     {
-                        TileObjectSo toBePlaced = (TileObjectSo)tileSystem.GetAsset(savedObject.tileObjectSOName);
+                        TileObjectSo toBePlaced = (TileObjectSo)tileSystem.GetAsset(savedObject.TileObjectSoName);
                         Vector3 placePosition = chunk.GetWorldPosition(savedTile.Location.x, savedTile.Location.y);
 
                         // Skipping build check here to allow loading tile objects in a non-valid order
-                        PlaceTileObject(toBePlaced, placePosition, savedObject.dir, true, false, true, out GameObject placedObject);
+                        PlaceTileObject(toBePlaced, placePosition, savedObject.Dir, true, false, true, out GameObject placedObject);
                     }
                 }
             }
 
-            foreach (SavedPlacedItemObject savedItem in saveObject.savedItemList)
+            foreach (SavedPlacedItemObject savedItem in saveObject.SavedItemList)
             {
-                ItemObjectSo toBePlaced = (ItemObjectSo)tileSystem.GetAsset(savedItem.itemName);
-                PlaceItemObject(savedItem.worldPosition, savedItem.rotation, toBePlaced);
+                ItemObjectSo toBePlaced = (ItemObjectSo)tileSystem.GetAsset(savedItem.ItemName);
+                PlaceItemObject(savedItem.WorldPosition, savedItem.Rotation, toBePlaced);
             }
 
             OnMapLoaded?.Invoke(this, EventArgs.Empty);
             UpdateAllAdjacencies();
+        }
+
+        private void Setup(string mapName)
+        {
+            _chunks = new Dictionary<Vector2Int, TileChunk>();
+            _items = new List<PlacedItemObject>();
+            name = mapName;
+            _mapName = mapName;
+        }
+
+        /// <summary>
+        /// Create a new chunk. Internal use only
+        /// </summary>
+        /// <param name="chunkKey">Unique key to use</param>
+        /// <param name="origin">Origin position of the chunk</param>
+        /// <returns></returns>
+        private TileChunk CreateChunk(Vector2Int chunkKey, Vector3 origin)
+        {
+            TileChunk chunk = TileChunk.Create(chunkKey, origin);
+            chunk.transform.SetParent(transform);
+
+            return chunk;
+        }
+
+        /// <summary>
+        /// Returns chunk based the world position. Will create a new chunk if it doesn't exist.
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        private TileChunk GetOrCreateChunk(Vector3 worldPosition)
+        {
+            TileChunk chunk = GetChunk(worldPosition);
+            if (chunk == null)
+            {
+                Vector2Int key = GetKey(worldPosition);
+                Vector3 origin = new Vector3 { x = key.x * TileChunk.ChunkSize, z = key.y * TileChunk.ChunkSize };
+                chunk = CreateChunk(key, origin);
+                _chunks[key] = chunk;
+            }
+
+            return chunk;
+        }
+
+        private void ResetAdjacencies(PlacedTileObject placed, ITileLocation location, List<PlacedTileObject> neighbours)
+        {
+            List<Direction> neighboursAtDirection = new List<Direction>();
+
+            // First get the directions of all neighbours, relative to this placed object.
+            // Direction is not always relevant (e.g disposal pipes with disposal furnitures)
+            // but it is in most cases. It's up to the connectors to choose what they do with this info.
+            foreach (PlacedTileObject neighbour in neighbours)
+            {
+               placed.NeighbourAtDirectionOf(neighbour, out Direction dir);
+               neighboursAtDirection.Add(dir);
+            }
+
+            // then destroy this placed object. It's important to do it here, before updating
+            // adjacencies, as some connectors might be looking for it.
+            location.ClearAllPlacedObject();
+
+            // Then update all neighbours, using their directions.
+            int i = 0;
+            foreach (PlacedTileObject neighbour in neighbours)
+            {
+                Direction dir = neighboursAtDirection[i];
+
+                if (neighbour)
+                {
+                    neighbour.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), null, false);
+                }
+
+                i++;
+            }
         }
 
         /// <summary>
@@ -413,13 +423,13 @@ namespace SS3D.Systems.Tile
         /// </summary>
         private void UpdateAllAdjacencies()
         {
-            foreach(TileChunk chunk in _chunks.Values)
+            foreach (TileChunk chunk in _chunks.Values)
             {
-                foreach(PlacedTileObject obj in chunk.GetAllTilePlacedObjects())
+                foreach (PlacedTileObject obj in chunk.GetAllTilePlacedObjects())
                 {
                     if (obj.HasAdjacencyConnector)
                     {
-                        var pos = chunk.GetWorldPosition(obj.Origin.x, obj.Origin.y);
+                        Vector3 pos = chunk.GetWorldPosition(obj.Origin.x, obj.Origin.y);
                         obj.UpdateAdjacencies();
                     }
                 }

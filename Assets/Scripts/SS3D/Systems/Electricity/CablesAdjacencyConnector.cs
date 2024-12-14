@@ -1,11 +1,13 @@
-﻿using SS3D.Logging;
+﻿using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using SS3D.Logging;
+using SS3D.Systems.Tile;
+using SS3D.Systems.Tile.Connections;
 using SS3D.Systems.Tile.Connections.AdjacencyTypes;
 using System.Collections.Generic;
 using UnityEngine;
-using FishNet.Object.Synchronizing;
-using FishNet.Object;
 
-namespace SS3D.Systems.Tile.Connections
+namespace System.Electricity
 {
     /// <summary>
     /// Cables have their own connector logic because they behave in a particular way. They can "connect" to any electric devices,
@@ -13,17 +15,16 @@ namespace SS3D.Systems.Tile.Connections
     /// </summary>
     public class CablesAdjacencyConnector : ElectricAdjacencyConnector
     {
-
         /// <summary>
         /// A structure containing data regarding connection of this PlacedTileObject with all 8
         /// adjacent neighbours (cardinal and diagonal connections).
         /// </summary>
-        protected AdjacencyMap AdjacencyMap;
+        private AdjacencyMap _adjacencyMap;
 
         /// <summary>
         /// The specific mesh this connectable has.
         /// </summary>
-        protected MeshFilter Filter;
+        private MeshFilter _filter;
 
         /// <summary>
         /// Script that help with resolving the specific mesh a connectable should take.
@@ -38,17 +39,6 @@ namespace SS3D.Systems.Tile.Connections
         private byte _syncedConnections;
 
         [Server]
-        protected override void Setup()
-        {
-            if (!Initialized)
-            {
-                base.Setup();
-                AdjacencyMap = new AdjacencyMap();
-                Filter = GetComponent<MeshFilter>();
-            }
-        }
-
-        [Server]
         public override void UpdateAllConnections()
         {
             Setup();
@@ -59,7 +49,10 @@ namespace SS3D.Systems.Tile.Connections
 
             foreach (PlacedTileObject neighbourObject in neighbourObjects)
             {
-                if (!NeighbourIsCable(neighbourObject)) continue;
+                if (!NeighbourIsCable(neighbourObject))
+                {
+                    continue;
+                }
 
                 PlacedObject.NeighbourAtDirectionOf(neighbourObject, out Direction dir);
                 changed |= UpdateSingleConnection(dir, neighbourObject, true);
@@ -77,24 +70,38 @@ namespace SS3D.Systems.Tile.Connections
             Setup();
 
             // should not return here if neighbour object is null, otherwise it would prevent update if a neighbour is removed.
-            if (neighbourObject != null && !NeighbourIsCable(neighbourObject)) return false;
+            if (neighbourObject != null && !NeighbourIsCable(neighbourObject))
+            {
+                return false;
+            }
 
             bool isConnected = IsConnected(neighbourObject);
 
-            bool isUpdated = AdjacencyMap.SetConnection(dir, new(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
+            bool isUpdated = _adjacencyMap.SetConnection(dir, new(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
 
-            if (isUpdated && updateNeighbour)
+            if (isUpdated && updateNeighbour && neighbourObject)
             {
-                neighbourObject?.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), PlacedObject, false);
+                neighbourObject.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), PlacedObject, false);
             }
 
-            if(isUpdated) 
+            if (isUpdated)
             {
-                _syncedConnections = AdjacencyMap.SerializeToByte();
-                UpdateMeshAndDirection(); 
+                _syncedConnections = _adjacencyMap.SerializeToByte();
+                UpdateMeshAndDirection();
             }
 
             return isUpdated;
+        }
+
+        [Server]
+        protected override void Setup()
+        {
+            if (!Initialized)
+            {
+                base.Setup();
+                _adjacencyMap = new AdjacencyMap();
+                _filter = GetComponent<MeshFilter>();
+            }
         }
 
         /// <summary>
@@ -104,14 +111,14 @@ namespace SS3D.Systems.Tile.Connections
         [ServerOrClient]
         protected virtual void UpdateMeshAndDirection()
         {
-            MeshDirectionInfo info = _adjacencyResolver.GetMeshAndDirection(AdjacencyMap);
+            MeshDirectionInfo info = _adjacencyResolver.GetMeshAndDirection(_adjacencyMap);
 
-            if (Filter == null)
+            if (_filter == null)
             {
                 Log.Warning(this, "Missing mesh {meshDirectionInfo}", Logs.Generic, info);
             }
 
-            Filter.mesh = info.Mesh;
+            _filter.mesh = info.Mesh;
 
             Quaternion localRotation = transform.localRotation;
             Vector3 eulerRotation = localRotation.eulerAngles;
@@ -130,7 +137,7 @@ namespace SS3D.Systems.Tile.Connections
             {
                 Setup();
 
-                AdjacencyMap.DeserializeFromByte(newValue);
+                _adjacencyMap.DeserializeFromByte(newValue);
                 UpdateMeshAndDirection();
             }
         }
@@ -144,6 +151,5 @@ namespace SS3D.Systems.Tile.Connections
         {
             return neighbour != null && neighbour.Connector is CablesAdjacencyConnector;
         }
-
     }
 }

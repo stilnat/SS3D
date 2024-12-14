@@ -26,10 +26,11 @@ namespace SS3D.Systems.Tile.Connections
         {
             List<PlacedTileObject> neighbours = new();
 
-            foreach (var connector in _connectors)
+            foreach (GameObject connector in _connectors)
             {
                 neighbours.AddRange(connector.GetComponent<IAdjacencyConnector>()?.GetNeighbours());
             }
+
             return neighbours;
         }
 
@@ -43,7 +44,7 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public bool IsConnected(PlacedTileObject neighbourObject)
         {
-            return _connectors.Any(x => (bool) x.GetComponent<IAdjacencyConnector>()?.IsConnected(neighbourObject));
+            return _connectors.Any(x => (bool)x.GetComponent<IAdjacencyConnector>()?.IsConnected(neighbourObject));
         }
 
         public void UpdateAllConnections()

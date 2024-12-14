@@ -19,20 +19,24 @@ namespace SS3D.Systems.Atmospherics
     {
         private enum OperatingMode
         {
-            Scrubbing,
-            Siphoning,
+            Scrubbing = 0,
+            Siphoning = 1,
         }
 
         private enum Range
         {
-            Normal,
-            Extended,
+            Normal = 0,
+            Extended = 1,
         }
-        
+
+        private const float RotationSpeedScrubbing = 1f;
+
+        private const float RotationSpeedSiphoning = 1.5f;
+
         private readonly float _molesRemovedPerSecond = 500f;
 
         private OperatingMode _mode = OperatingMode.Scrubbing;
-        
+
         private Range _range = Range.Normal;
 
         private bool4 _filterCoreGasses;
@@ -48,17 +52,13 @@ namespace SS3D.Systems.Atmospherics
 
         private TweenerCore<Quaternion, Vector3, QuaternionOptions> _rotationTween;
 
-        private const float RotationSpeedScrubbing = 1f;
-
-        private const float RotationSpeedSiphoning = 1.5f;
-
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         public override void OnStartServer()
         {
             base.OnStartServer();
             Vector3 position = transform.position;
-            _atmosNeighboursPositions = new[]
+            _atmosNeighboursPositions = new Vector3[]
             {
                 position,
                 position + Vector3.forward,
@@ -89,9 +89,9 @@ namespace SS3D.Systems.Atmospherics
         {
             if (!_deviceActive)
             {
-                return; 
+                return;
             }
-            
+
             if (!Subsystems.Get<PipeSystem>().TryGetAtmosPipe(transform.position, _pipeLayer, out IAtmosPipe pipe))
             {
                 return;
@@ -101,30 +101,25 @@ namespace SS3D.Systems.Atmospherics
             {
                 return;
             }
-            
-            int numOfTiles = 0;
-            
-            switch (_range)
+
+            int numOfTiles = _range switch
             {
-                case Range.Normal:
-                    numOfTiles = 1;
-                    break;
-                case Range.Extended:
-                    numOfTiles = 5;
-                    break;
-            }
+                Range.Normal => 1,
+                Range.Extended => 5,
+                _ => 0,
+            };
 
             // We loop 1 or 5 times based on the range setting
             for (int i = 0; i < numOfTiles; i++)
             {
                 AtmosObject atmos = Subsystems.Get<AtmosEnvironmentSystem>().GetAtmosContainer(_atmosNeighboursPositions[i]).AtmosObject;
                 float4 toSiphon = 0;
-                
+
                 if (_mode == OperatingMode.Siphoning)
                 {
                     toSiphon = atmos.CoreGassesProportions * math.min(atmos.TotalMoles, _molesRemovedPerSecond * dt);
                 }
-                
+
                 // If scrubbing, remove only filtered gas
                 else
                 {
@@ -168,14 +163,13 @@ namespace SS3D.Systems.Atmospherics
                 _rotationTween = null; // Reset the reference
             }
 
-            if(_deviceActive)
+            if (_deviceActive)
             {
                 float speed = _mode == OperatingMode.Scrubbing ? RotationSpeedScrubbing : RotationSpeedSiphoning;
                 _rotationTween = _fans.DORotate(Vector3.up * (speed * 360), 1f, RotateMode.WorldAxisAdd)
                     .SetEase(Ease.Linear) // Ensures constant speed
                     .SetLoops(-1, LoopType.Incremental);
             }
-          
         }
     }
 }

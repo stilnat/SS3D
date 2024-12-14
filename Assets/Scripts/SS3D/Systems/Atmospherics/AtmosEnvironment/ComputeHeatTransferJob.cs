@@ -9,8 +9,6 @@ namespace SS3D.Systems.Atmospherics
     /// </summary>
     public struct ComputeHeatTransferJob : IJobParallelFor
     {
-
-
             // Array containing all atmos tiles of the map.
             [ReadOnly]
             private readonly NativeArray<AtmosObject> _tileObjectBuffer;
@@ -23,15 +21,19 @@ namespace SS3D.Systems.Atmospherics
             [ReadOnly]
             private readonly NativeArray<int> _activeIndexes;
 
+            private readonly float _deltaTime;
+
             // Array of all heat transfer to neighbours
             [NativeDisableParallelForRestriction]
             [WriteOnly]
             private NativeArray<HeatTransferToNeighbours> _heatTransfers;
 
-            private readonly float _deltaTime;
-
-            public ComputeHeatTransferJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<HeatTransferToNeighbours> heatTransfers,
-                NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, float deltaTime)
+            public ComputeHeatTransferJob(
+                NativeArray<AtmosObject> tileObjectBuffer,
+                NativeArray<HeatTransferToNeighbours> heatTransfers,
+                NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
+                NativeArray<int> activeIndexes,
+                float deltaTime)
             {
                 _tileObjectBuffer = tileObjectBuffer;
                 _deltaTime = deltaTime;
@@ -47,21 +49,21 @@ namespace SS3D.Systems.Atmospherics
                 AtmosObject defaultAtmos = default;
 
                 AtmosObject northNeighbour = _neighboursIndexes[activeIndex].NorthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].NorthNeighbour];
-                AtmosObject southNeighbour = _neighboursIndexes[activeIndex].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].SouthNeighbour]; 
-                AtmosObject eastNeighbour = _neighboursIndexes[activeIndex].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].EastNeighbour]; 
-                AtmosObject westNeighbour = _neighboursIndexes[activeIndex].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].WestNeighbour]; 
+                AtmosObject southNeighbour = _neighboursIndexes[activeIndex].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].SouthNeighbour];
+                AtmosObject eastNeighbour = _neighboursIndexes[activeIndex].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].EastNeighbour];
+                AtmosObject westNeighbour = _neighboursIndexes[activeIndex].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].WestNeighbour];
 
-                bool4 hasNeighbours = new(_neighboursIndexes[activeIndex].NorthNeighbour != -1,
+                bool4 hasNeighbours = new(
+                    _neighboursIndexes[activeIndex].NorthNeighbour != -1,
                     _neighboursIndexes[activeIndex].SouthNeighbour != -1,
                     _neighboursIndexes[activeIndex].EastNeighbour != -1,
-                _neighboursIndexes[activeIndex].WestNeighbour != -1);
-
+                    _neighboursIndexes[activeIndex].WestNeighbour != -1);
 
                 _heatTransfers[activeIndex] = AtmosCalculator.SimulateTemperature(
-                    _tileObjectBuffer[activeIndex], 
+                    _tileObjectBuffer[activeIndex],
                     activeIndex,
                     northNeighbour,
-                    southNeighbour, 
+                    southNeighbour,
                     eastNeighbour,
                     westNeighbour,
                     _deltaTime,

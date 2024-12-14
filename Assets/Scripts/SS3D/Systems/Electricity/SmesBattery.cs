@@ -12,30 +12,35 @@ namespace System.Electricity
     /// </summary>
     public class SmesBattery : BasicBattery
     {
+        // Bunch of blend shape indexes.
+        private const int ChargeblendIndex = 0;
+
+        private const int BlendIndex = 12;
+
+        private const int OffBlendIndex = 13;
+
         [FormerlySerializedAs("SmesSkinnedMesh")]
         [SerializeField]
         private SkinnedMeshRenderer _smesSkinnedMesh;
 
-        // Bunch of blend shape indexes.
-        private const int ChargeblendIndex = 0;
-        private const int OnBlendIndex = 12;
-        private const int OffBlendIndex = 13;
-        private float _previousPowerStored = 0f;
-        private int _currentLightOutput = 0;
-        private int _lightOutputTarget = 0;
+        private float _previousPowerStored;
+
+        private int _currentLightOutput;
+
+        private int _lightOutputTarget;
 
         /// <summary>
         /// How much tick before updating the output lights.
         /// </summary>
         [SerializeField]
         private int _updateLightPeriod = 3;
-        private int _updateCount = 0;
+        private int _updateCount;
 
         public override void OnStartClient()
         {
             base.OnStartClient();
             GetComponent<GenericToggleInteractionTarget>().OnToggle += HandleBatteryToggle;
-            HandleBatteryToggle(_isOn);
+            HandleBatteryToggle(IsOn);
 
             Subsystems.Get<ElectricitySystem>().OnTick += HandleTick;
         }
@@ -44,6 +49,25 @@ namespace System.Electricity
         {
             base.OnDestroyed();
             Subsystems.Get<ElectricitySystem>().OnTick -= HandleTick;
+        }
+
+        protected override void HandleSyncEnabled(bool oldValue, bool newValue, bool asServer)
+        {
+            if (asServer)
+            {
+                return;
+            }
+
+            if (newValue)
+            {
+                _smesSkinnedMesh.SetBlendShapeWeight(BlendIndex, 100);
+                _smesSkinnedMesh.SetBlendShapeWeight(OffBlendIndex, 0);
+            }
+            else
+            {
+                _smesSkinnedMesh.SetBlendShapeWeight(BlendIndex, 0);
+                _smesSkinnedMesh.SetBlendShapeWeight(OffBlendIndex, 100);
+            }
         }
 
         [Client]
@@ -63,7 +87,7 @@ namespace System.Electricity
         private void AdjustBatteryLevel()
         {
             float chargeLevelNormalized = StoredPower / MaxCapacity;
-            _smesSkinnedMesh.SetBlendShapeWeight(ChargeblendIndex, chargeLevelNormalized*100);
+            _smesSkinnedMesh.SetBlendShapeWeight(ChargeblendIndex, chargeLevelNormalized * 100);
         }
 
         /// <summary>
@@ -74,14 +98,7 @@ namespace System.Electricity
         {
             float powerAdded = Mathf.Max(StoredPower - _previousPowerStored, 0f);
 
-            if(powerAdded > 0f)
-            {
-                _smesSkinnedMesh.SetBlendShapeWeight(11, 100f);
-            }
-            else
-            {
-                _smesSkinnedMesh.SetBlendShapeWeight(11, 0f);
-            }
+            _smesSkinnedMesh.SetBlendShapeWeight(11, powerAdded > 0f ? 100f : 0f);
         }
 
         /// <summary>
@@ -93,7 +110,10 @@ namespace System.Electricity
         {
             ComputeLightOutputTarget();
 
-            if (_updateCount != _updateLightPeriod) return;
+            if (_updateCount != _updateLightPeriod)
+            {
+                return;
+            }
 
             _updateCount = 0;
 
@@ -102,11 +122,11 @@ namespace System.Electricity
                 _currentLightOutput += 1;
                 _smesSkinnedMesh.SetBlendShapeWeight(_currentLightOutput, 100);
             }
-            else if(_currentLightOutput > _lightOutputTarget)
+            else if (_currentLightOutput > _lightOutputTarget)
             {
                 _smesSkinnedMesh.SetBlendShapeWeight(_currentLightOutput, 0);
                 _currentLightOutput -= 1;
-            }      
+            }
         }
 
         /// <summary>
@@ -119,7 +139,7 @@ namespace System.Electricity
             float powerRemoved = Mathf.Max(_previousPowerStored - StoredPower, 0f);
             float relativeRate = Mathf.Floor(10 * powerRemoved / MaxPowerRate);
 
-            _lightOutputTarget = (int)relativeRate; 
+            _lightOutputTarget = (int)relativeRate;
         }
 
         /// <summary>
@@ -128,23 +148,7 @@ namespace System.Electricity
         /// <param name="toggle"> True if the battery is on.</param>
         private void HandleBatteryToggle(bool toggle)
         {
-            _isOn = toggle;
-        }
-
-        protected override void HandleSyncEnabled(bool oldValue, bool newValue, bool asServer)
-        {
-            if (asServer) return;
-
-            if (newValue)
-            {
-                _smesSkinnedMesh.SetBlendShapeWeight(OnBlendIndex, 100);
-                _smesSkinnedMesh.SetBlendShapeWeight(OffBlendIndex, 0);
-            }
-            else
-            {
-                _smesSkinnedMesh.SetBlendShapeWeight(OnBlendIndex, 0);
-                _smesSkinnedMesh.SetBlendShapeWeight(OffBlendIndex, 100);
-            }
+            IsOn = toggle;
         }
     }
 }

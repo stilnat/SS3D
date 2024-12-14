@@ -17,32 +17,31 @@ namespace SS3D.Systems.Tile.TileMapCreator
     /// <summary>
     /// the tilemap menu is an in-game editor for placing and deleting items/objects in a tilemap, as well as loading
     /// and saving tilemaps.
-    /// This scripts orchestrate a bunch of other scripts related to making the menu work. 
+    /// This scripts orchestrate a bunch of other scripts related to making the menu work.
     /// </summary>
     public class TileMapMenu : NetworkSystem, IPointerEnterHandler, IPointerExitHandler
     {
         /// <summary>
-        /// Is the mouse over the menu UI
+        /// Enum to switch between tabs.
         /// </summary>
-        public bool MouseOverUI => _mouseOverUI;
-        private bool _mouseOverUI = false;
+        private enum TileMapMenuTab
+        {
+            Save = 0,
+            Load = 1,
+            Build = 2,
+        }
 
         /// <summary>
         /// Is the tilemap menu enabled
         /// </summary>
-        private bool _enabled = false;
-
-        /// <summary>
-        /// Are we deleting objects from the tilemap
-        /// </summary>
-        public bool IsDeleting => _tileMapBuildTab.IsDeleting;
+        private bool _enabled;
 
         private Controls.TileCreatorActions _controls;
 
         private InputSystem _inputSystem;
 
         private PanelTab _tab;
-        
+
         [SerializeField]
         private GameObject _menuRoot;
 
@@ -71,27 +70,26 @@ namespace SS3D.Systems.Tile.TileMapCreator
         private TileMapBuildTab _tileMapBuildTab;
 
         /// <summary>
-        /// Enum to switch between tabs.
-        /// </summary>
-        private enum TileMapMenuTab
-        {
-            Save,
-            Load,
-            Build,
-        }
-
-        /// <summary>
         /// Current selected tab in the menu.
         /// </summary>
         private TileMapMenuTab _currentTab;
 
+        /// <summary>
+        /// Is the mouse over the menu UI
+        /// </summary>
+        public bool MouseOverUI { get; private set; }
+
+        /// <summary>
+        /// Are we deleting objects from the tilemap
+        /// </summary>
+        public bool IsDeleting => _tileMapBuildTab.IsDeleting;
 
         /// <summary>
         /// Called when pointer enter the UI of the menu.
         /// </summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
-            _mouseOverUI = true;
+            MouseOverUI = true;
             _inputSystem.ToggleBinding("<Mouse>/scroll/y", false);
             if (!_hologramManager.IsDragging)
             {
@@ -104,61 +102,12 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// </summary>
         public void OnPointerExit(PointerEventData eventData)
         {
-            _mouseOverUI = false;
+            MouseOverUI = false;
             _inputSystem.ToggleBinding("<Mouse>/scroll/y", true);
             if (!_hologramManager.IsDragging)
             {
                 _inputSystem.ToggleAction(_controls.Place, true);
             }
-        }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-            _tab = PanelUtils.GetAssociatedTab(GetComponent<RectTransform>());
-            ShowUI(false);
-            _inputSystem = Subsystems.Get<InputSystem>();
-            _controls = _inputSystem.Inputs.TileCreator;
-            _inputSystem.ToggleAction(_controls.ToggleMenu, true);
-            _controls.ToggleMenu.performed += HandleToggleMenu;
-        }
-
-        /// <summary>
-        /// Method called when the control to open the tilemap menu is performed.
-        /// </summary>
-        private void HandleToggleMenu(InputAction.CallbackContext context)
-        {
-            if (_enabled)
-            {
-                _inputSystem.ToggleActionMap(_controls, false, new[] { _controls.ToggleMenu });
-                _inputSystem.ToggleCollisions(_controls, true);
-            }
-            else
-            {
-                _inputSystem.ToggleActionMap(_controls, true, new[] { _controls.ToggleMenu });
-                _inputSystem.ToggleCollisions(_controls, false);
-            }
-            _enabled = !_enabled;
-            ShowUI(_enabled);
-
-            _currentTab = TileMapMenuTab.Build;
-            ClearAllTab();
-            _tileMapBuildTab.Display();
-        }
-       
-        /// <summary>
-        /// Hide or show the tilemap menu.
-        /// </summary>
-        private void ShowUI(bool isShow)
-        {
-            if (!isShow)
-            {
-                // Detach the tab from a movable panel. It's necessary to prevent disabling all tabs in the panel.
-                _tab.Detach();
-                _hologramManager.DestroyHolograms();
-            }
-            _tab.Panel.gameObject.SetActive(isShow);
-            _menuRoot.SetActive(isShow);
         }
 
         /// <summary>
@@ -207,6 +156,57 @@ namespace SS3D.Systems.Tile.TileMapCreator
             _inputSystem.ToggleAllActions(true);
         }
 
+        protected override void OnStart()
+        {
+            base.OnStart();
+            _tab = PanelUtils.GetAssociatedTab(GetComponent<RectTransform>());
+            ShowUI(false);
+            _inputSystem = Subsystems.Get<InputSystem>();
+            _controls = _inputSystem.Inputs.TileCreator;
+            _inputSystem.ToggleAction(_controls.ToggleMenu, true);
+            _controls.ToggleMenu.performed += HandleToggleMenu;
+        }
+
+        /// <summary>
+        /// Method called when the control to open the tilemap menu is performed.
+        /// </summary>
+        private void HandleToggleMenu(InputAction.CallbackContext context)
+        {
+            if (_enabled)
+            {
+                _inputSystem.ToggleActionMap(_controls, false, new InputAction[] { _controls.ToggleMenu });
+                _inputSystem.ToggleCollisions(_controls, true);
+            }
+            else
+            {
+                _inputSystem.ToggleActionMap(_controls, true, new InputAction[] { _controls.ToggleMenu });
+                _inputSystem.ToggleCollisions(_controls, false);
+            }
+
+            _enabled = !_enabled;
+            ShowUI(_enabled);
+
+            _currentTab = TileMapMenuTab.Build;
+            ClearAllTab();
+            _tileMapBuildTab.Display();
+        }
+
+        /// <summary>
+        /// Hide or show the tilemap menu.
+        /// </summary>
+        private void ShowUI(bool isShow)
+        {
+            if (!isShow)
+            {
+                // Detach the tab from a movable panel. It's necessary to prevent disabling all tabs in the panel.
+                _tab.Detach();
+                _hologramManager.DestroyHolograms();
+            }
+
+            _tab.Panel.gameObject.SetActive(isShow);
+            _menuRoot.SetActive(isShow);
+        }
+
         /// <summary>
         /// Clear the content of the current selected tab.
         /// </summary>
@@ -216,14 +216,22 @@ namespace SS3D.Systems.Tile.TileMapCreator
             switch (_currentTab)
             {
                 case TileMapMenuTab.Build:
+                {
                     _tileMapBuildTab.Clear();
                     break;
+                }
+
                 case TileMapMenuTab.Load:
+                {
                     _tileMapLoadTab.Clear();
                     break;
+                }
+
                 case TileMapMenuTab.Save:
+                {
                     _tileMapSaveTab.Clear();
                     break;
+                }
             }
         }
 

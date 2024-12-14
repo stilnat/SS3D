@@ -14,7 +14,9 @@
         "SS3D.Traits",
         "SS3D.Selection",
         "SS3D.Substances",
-        "SS3D.GameModes"
+        "SS3D.GameModes",
+        "SS3D.Electricity",
+        "SS3D.Tiles"
     ],
     "includePlatforms": [
         "Editor"

@@ -18,11 +18,11 @@ namespace SS3D.Systems.Atmospherics.AtmosRework.Machinery
             }
         }
 
+        public abstract void StepAtmos(float dt);
+
         protected void OnDestroy()
         {
-            Subsystems.Get<PipeSystem>().RemoveAtmosDevice(this); 
+            Subsystems.Get<PipeSystem>().RemoveAtmosDevice(this);
         }
-
-        public abstract void StepAtmos(float dt);
     }
 }

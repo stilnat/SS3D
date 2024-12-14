@@ -12,19 +12,18 @@ namespace SS3D.Systems.Atmospherics
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct ComputeIndexesJob : IJobParallelFor
     {
-
-        // Array containing the neighbour indexes of all atmos tiles of the map. At index i, contains the neighbour of atmos tile at index i in _nativeAtmosTiles array.
-        private NativeArray<AtmosObjectNeighboursIndexes> _neighbourIndexes;
-
-        // Array containing all atmos tiles of the map.
-        [ReadOnly]
-        private NativeArray<AtmosObject> _nativeAtmosTiles;
-
         // Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
         [ReadOnly]
         private readonly NativeHashMap<int2, int> _chunkKeyHashMap;
 
+        // Array containing all atmos tiles of the map.
+        [ReadOnly]
+        private readonly NativeArray<AtmosObject> _nativeAtmosTiles;
+
         private readonly int _chunkSize;
+
+        // Array containing the neighbour indexes of all atmos tiles of the map. At index i, contains the neighbour of atmos tile at index i in _nativeAtmosTiles array.
+        private NativeArray<AtmosObjectNeighboursIndexes> _neighbourIndexes;
 
         public ComputeIndexesJob(NativeArray<AtmosObjectNeighboursIndexes> neighbourIndexes, NativeArray<AtmosObject> nativeAtmosTiles, NativeHashMap<int2, int> chunkKeyHashMap, int chunkSize)
         {
@@ -49,7 +48,7 @@ namespace SS3D.Systems.Atmospherics
         {
             int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
-            // case where element is not on first column 
+            // case where element is not on first column
             if (ownIndex % _chunkSize > 0)
             {
                 return ownIndex - 1;
@@ -73,7 +72,7 @@ namespace SS3D.Systems.Atmospherics
         {
             int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
-            // case where element is not on last column 
+            // case where element is not on last column
             if (ownIndex % _chunkSize < _chunkSize - 1)
             {
                 return ownIndex + 1;
@@ -97,7 +96,7 @@ namespace SS3D.Systems.Atmospherics
         {
             int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
-            // case where element is not on last row 
+            // case where element is not on last row
             if (ownIndex % (_chunkSize * _chunkSize) < _chunkSize * (_chunkSize - 1))
             {
                 return ownIndex + _chunkSize;
@@ -113,7 +112,7 @@ namespace SS3D.Systems.Atmospherics
             int northChunkFirstElementIndex = GetFirstElementIndexOfChunk(northChunkKey);
 
             // Return the element adjacent in north Chunk
-            return northChunkFirstElementIndex + positionInChunk - _chunkSize * (_chunkSize - 1);
+            return northChunkFirstElementIndex + positionInChunk - (_chunkSize * (_chunkSize - 1));
         }
 
         // Assumes first element of chunk is in the south-west corner, and last one in north east.
@@ -121,7 +120,7 @@ namespace SS3D.Systems.Atmospherics
         {
             int positionInChunk = ownIndex % (_chunkSize * _chunkSize);
 
-            // case where element is not on first row 
+            // case where element is not on first row
             if (ownIndex % (_chunkSize * _chunkSize) >= _chunkSize)
             {
                 return ownIndex - _chunkSize;
@@ -137,13 +136,15 @@ namespace SS3D.Systems.Atmospherics
             int southChunkFirstElementIndex = GetFirstElementIndexOfChunk(southChunkKey);
 
             // Return the element adjacent in south Chunk
-            return southChunkFirstElementIndex + _chunkSize * (_chunkSize - 1) + positionInChunk;
+            return southChunkFirstElementIndex + (_chunkSize * (_chunkSize - 1)) + positionInChunk;
         }
 
         private int GetFirstElementIndexOfChunk(int2 chunkKey)
         {
             if (!_chunkKeyHashMap.TryGetValue(chunkKey, out int index))
+            {
                 return -1;
+            }
 
             return _chunkSize * _chunkSize * index;
         }
@@ -153,7 +154,9 @@ namespace SS3D.Systems.Atmospherics
             offsetChunkKey = default;
 
             if (!_chunkKeyHashMap.TryGetValue(chunkKey + new int2(xOffset, yOffset), out int _))
+            {
                 return false;
+            }
 
             offsetChunkKey = new int2(chunkKey.x + xOffset, chunkKey.y + yOffset);
 

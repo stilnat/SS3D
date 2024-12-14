@@ -10,32 +10,42 @@ namespace SS3D.Systems.Atmospherics
 {
     public abstract class TrinaryAtmosDevice : BasicAtmosDevice, IInteractionTarget
     {
-        protected Vector3 FrontPipePosition;
-        protected Vector3 BackPipePosition;
-        protected Vector3 SidePipePosition;
-
-        protected IAtmosPipe FrontPipe;
-        protected IAtmosPipe BackPipe;
-        protected IAtmosPipe SidePipe;
-
-        protected TileLayer Pipelayer = TileLayer.PipeLeft;
-
-        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
-
         [SerializeField]
         private bool _sideOnRight;
 
+        protected Vector3 FrontPipePosition { get; private set; }
+
+        protected Vector3 BackPipePosition { get; private set; }
+
+        protected Vector3 SidePipePosition { get; private set; }
+
+        protected IAtmosPipe FrontPipe { get; private set; }
+
+        protected IAtmosPipe BackPipe { get; private set; }
+
+        protected IAtmosPipe SidePipe { get; private set; }
+
+        protected TileLayer PipeLayer { get; private set; } = TileLayer.PipeLeft;
+
         protected bool AllPipesConnected => FrontPipe != null && BackPipe != null && SidePipe != null;
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         public override void StepAtmos(float dt)
         {
-            FrontPipePosition = transform.position + transform.forward;
-            BackPipePosition = transform.position - transform.forward;
-            SidePipePosition = _sideOnRight ? transform.position + transform.right : transform.position - transform.right;
+            FrontPipePosition = Transform.position + Transform.forward;
+            BackPipePosition = Transform.position - Transform.forward;
+            SidePipePosition = _sideOnRight ? Transform.position + Transform.right : Transform.position - Transform.right;
 
-            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(FrontPipePosition, Pipelayer, out FrontPipe);
-            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(BackPipePosition, Pipelayer, out BackPipe);
-            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(SidePipePosition, Pipelayer, out SidePipe);
+            IAtmosPipe frontPipe;
+            IAtmosPipe backPipe;
+            IAtmosPipe sidePipe;
+            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(FrontPipePosition, PipeLayer, out frontPipe);
+            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(BackPipePosition, PipeLayer, out backPipe);
+            Subsystems.Get<PipeSystem>().TryGetAtmosPipe(SidePipePosition, PipeLayer, out sidePipe);
+            FrontPipe = frontPipe;
+            BackPipe = backPipe;
+            SidePipe = sidePipe;
         }
 
         public abstract IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent);

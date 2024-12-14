@@ -1,9 +1,9 @@
 ﻿using SS3D.Core;
+using SS3D.Systems.Tile;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using SS3D.Systems.Tile;
+using UnityEngine;
 
 namespace SS3D.Systems.Atmospherics
 {
@@ -12,27 +12,30 @@ namespace SS3D.Systems.Atmospherics
         /// <summary>
         /// Number of TileAtmosObjects that should go in a chunk. 16 x 16
         /// </summary>
-        public static readonly int CHUNK_SIZE = 16;
+        public static readonly int ChunkSize = 16;
 
         /// <summary>
         /// The size of each tile.
         /// </summary>
-        private const float TILE_SIZE = 1.0f;
+        private const float TileSize = 1.0f;
 
-        private Dictionary<Vector2Int, AtmosChunk> atmosChunks;
-        public int ChunkCount { get => atmosChunks.Count; }
+        private Dictionary<Vector2Int, AtmosChunk> _atmosChunks;
 
-        private TileMap tileMap;
-        private string mapName;
+        private TileMap _tileMap;
+
+        private string _mapName;
+
         private AtmosEnvironmentSystem _atmosEnvironmentSystem;
 
         public AtmosMap(TileMap tileMap, string name)
         {
-            atmosChunks = new Dictionary<Vector2Int, AtmosChunk>();
+            _atmosChunks = new Dictionary<Vector2Int, AtmosChunk>();
             _atmosEnvironmentSystem = Subsystems.Get<AtmosEnvironmentSystem>();
-            mapName = name;
-            this.tileMap = tileMap;
+            _mapName = name;
+            _tileMap = tileMap;
         }
+
+        public int ChunkCount { get => _atmosChunks.Count; }
 
         public AtmosContainer GetTileAtmosObject(Vector3 worldPosition)
         {
@@ -44,8 +47,7 @@ namespace SS3D.Systems.Atmospherics
             Vector2Int key = GetKey(worldPosition);
             AtmosChunk chunk;
 
-            // 
-            if (!atmosChunks.TryGetValue(key, out chunk))
+            if (!_atmosChunks.TryGetValue(key, out chunk))
             {
                 return null;
             }
@@ -55,22 +57,62 @@ namespace SS3D.Systems.Atmospherics
 
         public string GetName()
         {
-            return mapName;
+            return _mapName;
         }
 
         public void SetName(string name)
         {
-            mapName = name;
+            _mapName = name;
         }
 
         public void CreateChunkFromTileChunk(Vector2Int chunkKey, Vector3 origin)
         {
-            atmosChunks[chunkKey] = CreateChunk(chunkKey, origin);
+            _atmosChunks[chunkKey] = CreateChunk(chunkKey, origin);
         }
 
         public TileMap GetLinkedTileMap()
         {
-            return tileMap;
+            return _tileMap;
+        }
+
+        /// <summary>
+        /// Clears the entire map.
+        /// </summary>
+        public void Clear()
+        {
+            _atmosChunks.Clear();
+        }
+
+        public AtmosChunk GetChunk(Vector3 worldPosition)
+        {
+            Vector2Int key = GetKey(worldPosition);
+            if (!_atmosChunks.TryGetValue(key, out AtmosChunk chunk))
+            {
+                return null;
+            }
+
+            return chunk;
+        }
+
+        public AtmosChunk[] GetAtmosChunks()
+        {
+            return _atmosChunks?.Values.ToArray();
+        }
+
+        public AtmosChunk[] GetChunkAndEightNeighbours(Vector3 worldPosition)
+        {
+            AtmosChunk[] chunks = new AtmosChunk[9];
+            chunks[0] = GetChunk(worldPosition);                                                               // center
+            chunks[1] = GetChunk(worldPosition + (Vector3.forward * ChunkSize));                               // north chunk
+            chunks[2] = GetChunk(worldPosition + (Vector3.forward * ChunkSize) + (Vector3.right * ChunkSize)); // north east chunk
+            chunks[3] = GetChunk(worldPosition + (Vector3.right * ChunkSize));                                 // east chunk
+            chunks[4] = GetChunk(worldPosition - (Vector3.forward * ChunkSize) + (Vector3.right * ChunkSize)); // south east chunk
+            chunks[5] = GetChunk(worldPosition - (Vector3.forward * ChunkSize));                               // south chunk
+            chunks[6] = GetChunk(worldPosition - (Vector3.forward * ChunkSize) - (Vector3.right * ChunkSize)); // south west chunk
+            chunks[7] = GetChunk(worldPosition - (Vector3.right * ChunkSize));                                 // west chunk
+            chunks[8] = GetChunk(worldPosition + (Vector3.forward * ChunkSize) - (Vector3.right * ChunkSize)); // north west chunk
+
+            return chunks;
         }
 
         /// <summary>
@@ -81,17 +123,9 @@ namespace SS3D.Systems.Atmospherics
         /// <returns></returns>
         private AtmosChunk CreateChunk(Vector2Int chunkKey, Vector3 origin)
         {
-            AtmosChunk chunk = new(this, chunkKey, CHUNK_SIZE, CHUNK_SIZE, TILE_SIZE, origin);
+            AtmosChunk chunk = new(this, chunkKey, ChunkSize, ChunkSize, TileSize, origin);
 
             return chunk;
-        }
-
-        /// <summary>
-        /// Clears the entire map.
-        /// </summary>
-        public void Clear()
-        {
-            atmosChunks.Clear();
         }
 
         /// <summary>
@@ -112,10 +146,10 @@ namespace SS3D.Systems.Atmospherics
         /// <returns></returns>
         private Vector2Int GetKey(Vector3 worldPosition)
         {
-            int x = (int)Math.Floor(worldPosition.x / CHUNK_SIZE);
-            int y = (int)Math.Floor(worldPosition.z / CHUNK_SIZE);
+            int x = (int)Math.Floor(worldPosition.x / ChunkSize);
+            int y = (int)Math.Floor(worldPosition.z / ChunkSize);
 
-            return (GetKey(x, y));
+            return GetKey(x, y);
         }
 
         /// <summary>
@@ -129,45 +163,13 @@ namespace SS3D.Systems.Atmospherics
             AtmosChunk chunk;
 
             // Create a new chunk if there is none
-            if (!atmosChunks.TryGetValue(key, out chunk))
+            if (!_atmosChunks.TryGetValue(key, out chunk))
             {
-                Vector3 origin = new Vector3 { x = key.x * CHUNK_SIZE, z = key.y * CHUNK_SIZE };
-                atmosChunks[key] = CreateChunk(key, origin);
+                Vector3 origin = new Vector3 { x = key.x * ChunkSize, z = key.y * ChunkSize };
+                _atmosChunks[key] = CreateChunk(key, origin);
             }
 
-            return atmosChunks[key];
-        }
-
-        public AtmosChunk[] GetChunkAndEightNeighbours(Vector3 worldPosition)
-        {
-            AtmosChunk[] chunks = new AtmosChunk[9];
-            chunks[0] = GetChunk(worldPosition);                                                                 // center
-            chunks[1] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE));                                // north chunk
-            chunks[2] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE) + (Vector3.right * CHUNK_SIZE)); // north east chunk
-            chunks[3] = GetChunk(worldPosition + (Vector3.right * CHUNK_SIZE));                                  // east chunk
-            chunks[4] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE) + (Vector3.right * CHUNK_SIZE)); // south east chunk
-            chunks[5] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE));                                // south chunk
-            chunks[6] = GetChunk(worldPosition - (Vector3.forward * CHUNK_SIZE) - (Vector3.right * CHUNK_SIZE)); // south west chunk
-            chunks[7] = GetChunk(worldPosition - (Vector3.right * CHUNK_SIZE));                                  // west chunk
-            chunks[8] = GetChunk(worldPosition + (Vector3.forward * CHUNK_SIZE) - (Vector3.right * CHUNK_SIZE));  // north west chunk
-
-            return chunks;
-        }
-
-        public AtmosChunk GetChunk(Vector3 worldPosition)
-        {
-            Vector2Int key = GetKey(worldPosition);
-            if (!atmosChunks.TryGetValue(key, out AtmosChunk chunk))
-            {
-                return null;
-            }
-
-            return chunk;
-        }
-        
-        public AtmosChunk[] GetAtmosChunks()
-        {
-            return atmosChunks?.Values.ToArray();
+            return _atmosChunks[key];
         }
     }
 }

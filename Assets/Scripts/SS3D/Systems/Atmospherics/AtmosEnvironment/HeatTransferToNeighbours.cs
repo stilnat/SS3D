@@ -1,4 +1,3 @@
-
 using Unity.Mathematics;
 
 namespace SS3D.Systems.Atmospherics
@@ -9,7 +8,7 @@ namespace SS3D.Systems.Atmospherics
     public readonly struct HeatTransferToNeighbours
     {
         /// <summary>
-        /// Index of the atmos container from which to transfer, from the NativeArray NativeAtmosTiles in the AtmosJobPersistentData struct. 
+        /// Index of the atmos container from which to transfer, from the NativeArray NativeAtmosTiles in the AtmosJobPersistentData struct.
         /// </summary>
         public readonly int IndexFrom;
 

@@ -16,13 +16,11 @@ namespace SS3D.Systems.Atmospherics
         [SerializeField]
         private SpaceSlider _sliderTargetPressure;
 
-
         [SerializeField]
         private TextMeshProUGUI _displayFirstInput;
 
         [SerializeField]
         private TextMeshProUGUI _displayTargetPressure;
-
 
         public void Initialize(MixerAtmosObject mixerAtmosObject)
         {
@@ -30,8 +28,8 @@ namespace SS3D.Systems.Atmospherics
             _turnOn.Switch += isOn => _mixerAtmosObject.SetMixerActive(isOn);
             _sliderFirstInput.ValueTickUpdated += UpdateMixerFirstInputAmount;
             _sliderTargetPressure.ValueTickUpdated += UpdateMixerTargetPressure;
-            _mixerAtmosObject.UpdateMixerFirstInputAmount += amount => UpdateVisualFirstInputAmount(amount, false);
-            _mixerAtmosObject.UpdateTargetPressure += amount => UpdateVisualTargetPressure(amount, false);
+            _mixerAtmosObject.OnUpdateMixerFirstInputAmount += amount => UpdateVisualFirstInputAmount(amount, false);
+            _mixerAtmosObject.OnUpdateTargetPressure += amount => UpdateVisualTargetPressure(amount, false);
         }
 
         private void UpdateMixerFirstInputAmount(float amount)
@@ -67,6 +65,5 @@ namespace SS3D.Systems.Atmospherics
             _displayTargetPressure.text = amount.ToString();
             _sliderTargetPressure.value = amount;
         }
-
     }
 }

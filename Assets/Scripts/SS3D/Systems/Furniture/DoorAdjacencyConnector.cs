@@ -18,7 +18,7 @@ namespace SS3D.Systems.Tile.Connections
             Double
         };
 
-        public Direction DoorDirection => _placedObject.Direction;
+        public Direction DoorDirection => PlacedObject.Direction;
 
         protected override IMeshAndDirectionResolver AdjacencyResolver => null;
 
@@ -75,10 +75,10 @@ namespace SS3D.Systems.Tile.Connections
 
             Direction outFacing = TileHelper.GetNextCardinalDir(DoorDirection);
 
-            bool isPresent = _adjacencyMap.HasConnection(outFacing);
+            bool isPresent = AdjacencyMap.HasConnection(outFacing);
             CreateWallCaps(isPresent, outFacing);
 
-            isPresent = _adjacencyMap.HasConnection(TileHelper.GetOpposite(outFacing));
+            isPresent = AdjacencyMap.HasConnection(TileHelper.GetOpposite(outFacing));
             CreateWallCaps(isPresent, TileHelper.GetOpposite(outFacing));
         }
 

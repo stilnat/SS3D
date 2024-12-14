@@ -5,18 +5,13 @@ using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Events;
-using SS3D.Systems.Rounds.Events;
-using SS3D.Systems.Tile;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace SS3D.Systems.Atmospherics
@@ -41,36 +36,35 @@ namespace SS3D.Systems.Atmospherics
         // the granularity of values representing a concentration, the higher the more the change between two different concentrations
         // can be subtle. But keep in mind setting a higher value for this will mean having to send more data to clients.
         private const byte ConcentrationRange = 16;
-        
+
         // The amount of moles for which the concentration will look at its maximum on client
         private const int MaxMoles = 1000;
-        
-        private readonly Dictionary<NetworkConnection, PreviousValuesChunkCentered> _previousValuesChunkCenteredPlayers = new();
-        
-        private List<Entity> _playersEntities = new();
-        private AtmosEnvironmentSystem _atmosEnvironmentSystem;
 
+        private readonly Dictionary<NetworkConnection, PreviousValuesChunkCentered> _previousValuesChunkCenteredPlayers = new();
+
+        private List<Entity> _playersEntities = new();
+
+        private AtmosEnvironmentSystem _atmosEnvironmentSystem;
 
         // only manipulate that on client
         private byte[] _previousConcentrationValues;
-        
+
         public override void OnStartServer()
         {
             base.OnStartServer();
             AddHandle(SpawnedPlayersUpdated.AddListener(HandleSpawnedPlayersUpdated));
             _atmosEnvironmentSystem = Subsystems.Get<AtmosEnvironmentSystem>();
-            _atmosEnvironmentSystem.AtmosTick += HandleAtmosTick;
+            _atmosEnvironmentSystem.OnAtmosTick += HandleAtmosTick;
         }
 
-
         /// <summary>
-        /// For each observing entities, we want to send the data necessary to visualise visible gas. 
+        /// For each observing entities, we want to send the data necessary to visualise visible gas.
         /// </summary>
         [Server]
         private void HandleAtmosTick(float dt)
         {
             foreach (Entity player in _playersEntities)
-            { 
+            {
                 AtmosContainer atmosTile = _atmosEnvironmentSystem.GetAtmosContainer(player.Position);
 
                 if (atmosTile == null)
@@ -88,29 +82,30 @@ namespace SS3D.Systems.Atmospherics
                 Vector2Int key = chunk.GetKey();
 
                 byte[] data = RetrieveGasData(player.Position);
-                
+
                 // if we had already values for the chunk, use delta compress for better compression
                 if (key == _previousValuesChunkCenteredPlayers[player.Owner].ChunkKey)
                 {
                     byte[] deltaCompressedData = DeltaCompress(data, _previousValuesChunkCenteredPlayers[player.Owner].PreviousConcentrationValues);
                     RpcDeltaAtmosData(player.Owner, deltaCompressedData);
                 }
+
                 // If we don't have previous values, just compress the raw data.
                 else
                 {
                     PreviousValuesChunkCentered previousValuesChunkCentered = _previousValuesChunkCenteredPlayers[player.Owner];
-                    previousValuesChunkCentered.ChunkKey = key; 
+                    previousValuesChunkCentered.ChunkKey = key;
                     _previousValuesChunkCenteredPlayers[player.Owner] = previousValuesChunkCentered;
                     byte[] compressedData = Compress(data);
                     RpcAtmosData(player.Owner, compressedData);
                 }
-                
+
                 PreviousValuesChunkCentered previousValuesChunk = _previousValuesChunkCenteredPlayers[player.Owner];
-                previousValuesChunk.PreviousConcentrationValues = data; 
+                previousValuesChunk.PreviousConcentrationValues = data;
                 _previousValuesChunkCenteredPlayers[player.Owner] = previousValuesChunk;
             }
         }
-        
+
         [TargetRpc]
         private void RpcAtmosData(NetworkConnection connection, byte[] compressedData)
         {
@@ -135,17 +130,16 @@ namespace SS3D.Systems.Atmospherics
         {
             AtmosContainer atmosTile = _atmosEnvironmentSystem.GetAtmosContainer(position);
             AtmosChunk[] chunks = atmosTile.Map.GetChunkAndEightNeighbours(position);
-                
             List<byte> chunkBytesList = new();
 
             foreach (AtmosChunk chunk in chunks)
             {
                 if (chunk == null)
                 {
-                    chunkBytesList.AddRange(new byte[AtmosMap.CHUNK_SIZE * AtmosMap.CHUNK_SIZE]);
+                    chunkBytesList.AddRange(new byte[AtmosMap.ChunkSize * AtmosMap.ChunkSize]);
                     continue;
                 }
-                    
+
                 chunkBytesList.AddRange(
                     chunk.GetAllTileAtmosObjects()
                         .Select(x => Convert.ToByte(math.min((x.AtmosObject.CoreGasses[0] / MaxMoles) * ConcentrationRange, ConcentrationRange))));
@@ -181,9 +175,9 @@ namespace SS3D.Systems.Atmospherics
 
             return compressed;
 
-            //Stats(toCompress, decompressed, compressed, "lossless");
+            // Stats(toCompress, decompressed, compressed, "lossless");
         }
-        
+
         [Server]
         private byte[] Compress(byte[] toCompress)
         {
@@ -201,12 +195,12 @@ namespace SS3D.Systems.Atmospherics
 
             return compressed;
         }
-        
+
         [Client]
         private byte[] Decompress(byte[] compressedData)
         {
             byte[] decompressed;
-            
+
             using (MemoryStream inputMemoryStream = new(compressedData))
             using (MemoryStream outputMemoryStream = new())
             using (DeflateStream deflateStream = new(inputMemoryStream, CompressionMode.Decompress))
@@ -218,12 +212,11 @@ namespace SS3D.Systems.Atmospherics
             return decompressed;
         }
 
-
         [Client]
         private byte[] DeltaDecompress(byte[] compressedData)
         {
             byte[] decompressDeltas;
-            
+
             using (MemoryStream inputMemoryStream = new(compressedData))
             using (MemoryStream outputMemoryStream = new())
             using (DeflateStream deflateStream = new(inputMemoryStream, CompressionMode.Decompress))
@@ -232,27 +225,26 @@ namespace SS3D.Systems.Atmospherics
                 decompressDeltas = outputMemoryStream.ToArray();
             }
 
-            byte[] decompressed = new byte[AtmosMap.CHUNK_SIZE * AtmosMap.CHUNK_SIZE];
-            
+            byte[] decompressed = new byte[AtmosMap.ChunkSize * AtmosMap.ChunkSize];
+
             for (int i = 0; i < decompressed.Length; i++)
             {
-                decompressed[i] = (byte)(_previousConcentrationValues[i] + decompressDeltas[i] - ConcentrationRange); 
+                decompressed[i] = (byte)(_previousConcentrationValues[i] + decompressDeltas[i] - ConcentrationRange);
             }
 
             return decompressed;
         }
 
-
         private void Stats(byte[] originalData, byte[] reconstitutedData, byte[] compressedData, string name)
         {
             int maxError = 0;
-            float averageError = 0; 
+            float averageError = 0;
             for (int i = 0; i < originalData.Length; i++)
             {
                 maxError = math.max(math.abs(originalData[i] - reconstitutedData[i]), maxError);
                 averageError += (math.abs(originalData[i] - reconstitutedData[i]) - averageError) / (i + 1);
             }
-            
+
             Debug.Log($"method {name}, Original byte array size: {originalData.Length}, compressed data {compressedData.Length}");
             Debug.Log($"method {name} max error between original and reconstituted data {maxError}. Average error {averageError}");
         }
@@ -264,11 +256,11 @@ namespace SS3D.Systems.Atmospherics
             _playersEntities = e.SpawnedPlayers;
             Entity lastSpawned = e.SpawnedPlayers.Last();
             AtmosContainer atmosTile = _atmosEnvironmentSystem.GetAtmosContainer(lastSpawned.Position);
-            _previousValuesChunkCenteredPlayers[lastSpawned.Owner] = 
+            _previousValuesChunkCenteredPlayers[lastSpawned.Owner] =
                 new(RetrieveGasData(lastSpawned.Position), atmosTile.Chunk.GetKey());
             RpcSendPreviousValues(lastSpawned.Owner, _previousValuesChunkCenteredPlayers[lastSpawned.Owner].PreviousConcentrationValues);
         }
-        
+
         [TargetRpc]
         private void RpcSendPreviousValues(NetworkConnection connection, byte[] previousValues)
         {

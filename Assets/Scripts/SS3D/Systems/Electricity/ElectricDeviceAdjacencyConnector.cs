@@ -1,4 +1,6 @@
-﻿namespace SS3D.Systems.Tile.Connections
+﻿using SS3D.Systems.Tile;
+
+namespace System.Electricity
 {
     /// <summary>
     /// Very simple class for electric devices that do not need their mesh to be updated when something connect to them;

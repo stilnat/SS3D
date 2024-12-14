@@ -11,17 +11,16 @@ namespace SS3D.Systems.Atmospherics
     /// </summary>
     public struct AtmosJobPersistentData
     {
-
         /// <summary>
         /// The type of changes for the TileChanges struct.
         /// </summary>
         private enum ChangeType
         {
-            AddGas,
-            RemoveGas,
-            AddHeat,
-            RemoveHeat,
-            StateChange,
+            AddGas = 0,
+            RemoveGas = 1,
+            AddHeat = 2,
+            RemoveHeat = 3,
+            StateChange = 4,
         }
 
         /// <summary>
@@ -37,13 +36,13 @@ namespace SS3D.Systems.Atmospherics
             public AtmosState State;
             public float Heat;
         }
-        
+
         public readonly AtmosMap Map;
 
         public readonly List<AtmosContainer> AtmosTiles;
 
         /// <summary>
-        ///  For a given index in this array, return the indexes of all its neighbours, used by the atmos tiles. 
+        ///  For a given index in this array, return the indexes of all its neighbours, used by the atmos tiles.
         /// </summary>
         public NativeArray<AtmosObjectNeighboursIndexes> NeighbourTileIndexes;
 
@@ -61,20 +60,20 @@ namespace SS3D.Systems.Atmospherics
         /// Array that contains data about tile indexes (as in NativeAtmosTiles) and how much heat they give to their neighbours.
         /// </summary>
         public NativeArray<HeatTransferToNeighbours> HeatTransferArray;
-        
+
         /// <summary>
         /// Contains Chunk keys and the order in which they were created on the tilemap, used for efficient look up for neighbour tiles in jobs.
         /// TODO : update when chunk added
         /// </summary>
         public NativeHashMap<int2, int> ChunkKeyHashMap;
-        
+
         // Keeps track of array elements for which pressure is different from its neighbours.
         public NativeList<int> ActiveEnvironmentIndexes;
 
         // Keeps track of array elements for which pressure is equalized but still has some difference in the type of gas with its neighbours.
         public NativeList<int> SemiActiveEnvironmentIndexes;
 
-        // Keeps track of changed atmos objects 
+        // Keeps track of changed atmos objects
         private readonly List<TileChanges> _atmosObjectsToChange;
 
         public AtmosJobPersistentData(AtmosMap map, List<AtmosContainer> atmosTiles)
@@ -102,7 +101,6 @@ namespace SS3D.Systems.Atmospherics
             LoadNativeArrays();
         }
 
-
         public void ChangeState(AtmosContainer tile, AtmosState state)
         {
             AtmosObject atmosObject = tile.AtmosObject;
@@ -113,13 +111,13 @@ namespace SS3D.Systems.Atmospherics
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
-                Moles = 0, 
+                Moles = 0,
                 State = state,
             };
 
             _atmosObjectsToChange.Add(tileChanges);
         }
-        
+
         public void RemoveGasses(AtmosContainer tile, float4 amount)
         {
             if (tile.AtmosObject.State == AtmosState.Blocked)
@@ -135,19 +133,19 @@ namespace SS3D.Systems.Atmospherics
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
-                Moles = amount, 
+                Moles = amount,
             };
 
             _atmosObjectsToChange.Add(tileChanges);
         }
-        
+
         public void AddGasses(AtmosContainer tile, float4 amount)
         {
             if (tile.AtmosObject.State == AtmosState.Blocked)
             {
                 return;
             }
-            
+
             AtmosObject atmosObject = tile.AtmosObject;
 
             TileChanges tileChanges = new()
@@ -156,7 +154,7 @@ namespace SS3D.Systems.Atmospherics
                 X = tile.X,
                 Y = tile.Y,
                 ChunkKey = atmosObject.ChunkKey,
-                Moles = amount, 
+                Moles = amount,
             };
             _atmosObjectsToChange.Add(tileChanges);
         }
@@ -167,7 +165,7 @@ namespace SS3D.Systems.Atmospherics
             {
                 return;
             }
-            
+
             AtmosObject atmosObject = tile.AtmosObject;
 
             TileChanges tileChanges = new()
@@ -187,7 +185,7 @@ namespace SS3D.Systems.Atmospherics
             {
                 return;
             }
-            
+
             AtmosObject atmosObject = tile.AtmosObject;
 
             TileChanges tileChanges = new()
@@ -225,9 +223,9 @@ namespace SS3D.Systems.Atmospherics
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
-                        Moles = moles, 
+                        Moles = moles,
                     };
-                    
+
                     _atmosObjectsToChange.Add(tileChanges);
                 }
             }
@@ -248,14 +246,14 @@ namespace SS3D.Systems.Atmospherics
                     {
                         continue;
                     }
-                    
+
                     TileChanges tileChanges = new()
                     {
                         ChangeType = ChangeType.RemoveGas,
                         X = tile.X,
                         Y = tile.Y,
                         ChunkKey = atmosObject.ChunkKey,
-                        Moles = atmosObject.CoreGasses, 
+                        Moles = atmosObject.CoreGasses,
                     };
 
                     _atmosObjectsToChange.Add(tileChanges);
@@ -281,42 +279,47 @@ namespace SS3D.Systems.Atmospherics
 
                 switch (change.ChangeType)
                 {
-                     case ChangeType.AddGas:
-                         atmosObject.AddCoreGasses(change.Moles);
-                         atmosObject.State = AtmosState.Active;
-                         break;
-                     case ChangeType.RemoveGas:
-                         atmosObject.RemoveCoreGasses(change.Moles);
-                         atmosObject.State = AtmosState.Active;
-                         break;
-                     case ChangeType.AddHeat:
-                         atmosObject.AddHeat(change.Heat);
-                         atmosObject.State = AtmosState.Active;
-                         break;
-                     case ChangeType.RemoveHeat:
-                         atmosObject.RemoveHeat(change.Heat);
-                         atmosObject.State = AtmosState.Active;
-                         break;
-                     case ChangeType.StateChange:
-                         atmosObject.State = change.State;
-                         break;
+                    case ChangeType.AddGas:
+                    {
+                        atmosObject.AddCoreGasses(change.Moles);
+                        atmosObject.State = AtmosState.Active;
+                        break;
+                    }
+
+                    case ChangeType.RemoveGas:
+                    {
+                        atmosObject.RemoveCoreGasses(change.Moles);
+                        atmosObject.State = AtmosState.Active;
+                        break;
+                    }
+
+                    case ChangeType.AddHeat:
+                    {
+                        atmosObject.AddHeat(change.Heat);
+                        atmosObject.State = AtmosState.Active;
+                        break;
+                    }
+
+                    case ChangeType.RemoveHeat:
+                    {
+                        atmosObject.RemoveHeat(change.Heat);
+                        atmosObject.State = AtmosState.Active;
+                        break;
+                    }
+
+                    case ChangeType.StateChange:
+                    {
+                        atmosObject.State = change.State;
+                        break;
+                    }
                 }
-                
-                    
+
                 NativeAtmosTiles[indexInNativeArray] = atmosObject;
             }
-            
+
             _atmosObjectsToChange.Clear();
             ActiveEnvironmentIndexes.Clear();
             SemiActiveEnvironmentIndexes.Clear();
-        }
-
-        private void LoadNativeArrays()
-        {
-            for (int i = 0; i < AtmosTiles.Count; i++)
-            {
-                NativeAtmosTiles[i] = AtmosTiles[i].AtmosObject;
-            }
         }
 
         public void Destroy()
@@ -339,6 +342,14 @@ namespace SS3D.Systems.Atmospherics
             WriteResults(SemiActiveEnvironmentIndexes, NativeAtmosTiles, AtmosTiles);
         }
 
+        private void LoadNativeArrays()
+        {
+            for (int i = 0; i < AtmosTiles.Count; i++)
+            {
+                NativeAtmosTiles[i] = AtmosTiles[i].AtmosObject;
+            }
+        }
+
         private void WriteResults(NativeList<int> activeIndexes, NativeArray<AtmosObject> nativeAtmosObjects, List<AtmosContainer> atmosObjects)
         {
             for (int i = 0; i < activeIndexes.Length; i++)
@@ -359,8 +370,7 @@ namespace SS3D.Systems.Atmospherics
                 return -1;
             }
 
-            return (indexChunk * AtmosMap.CHUNK_SIZE * AtmosMap.CHUNK_SIZE) + x + (AtmosMap.CHUNK_SIZE * y);
+            return (indexChunk * AtmosMap.ChunkSize * AtmosMap.ChunkSize) + x + (AtmosMap.ChunkSize * y);
         }
     }
-
 }

@@ -22,8 +22,7 @@ namespace SS3D.Systems.Atmospherics
         private AtmosContainer[] _atmosGridList;
         private AtmosContainer[] _atmosPipeLeftList;
 
-        public AtmosChunk(AtmosMap map, Vector2Int chunkKey, int width, 
-            int height, float tileSize, Vector3 originPosition)
+        public AtmosChunk(AtmosMap map, Vector2Int chunkKey, int width, int height, float tileSize, Vector3 originPosition)
         {
             _map = map;
             _chunkKey = chunkKey;
@@ -56,10 +55,7 @@ namespace SS3D.Systems.Atmospherics
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public Vector3 GetWorldPosition(int x, int y)
-        {
-            return new Vector3(x, 0, y) * _tileSize + _originPosition;
-        }
+        public Vector3 GetWorldPosition(int x, int y) => (new Vector3(x, 0, y) * _tileSize) + _originPosition;
 
         /// <summary>
         /// Returns the x and y offset for a given chunk position.
@@ -71,26 +67,11 @@ namespace SS3D.Systems.Atmospherics
             return new Vector2Int((int)Math.Round(worldPosition.x - _originPosition.x), (int)Math.Round(worldPosition.z - _originPosition.z));
         }
 
-        protected void CreateAllGrids()
-        {
-            _atmosGridList = new AtmosContainer[GetWidth() * GetHeight()];
-            _atmosPipeLeftList =  new AtmosContainer[GetWidth() * GetHeight()];
-
-            for (int x = 0; x < GetWidth(); x++)
-            {
-                for (int y = 0; y < GetHeight(); y++)
-                {
-                    _atmosGridList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.Turf, 2.5f);
-                    _atmosPipeLeftList[y * GetWidth() + x] = new(_map, this, x, y, TileLayer.PipeLeft, 0.25f);
-                }
-            }
-        }
-
         public AtmosContainer GetTileAtmosObject(int x, int y)
         {
             if (x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight())
             {
-                return _atmosGridList[y * GetWidth() + x];
+                return _atmosGridList[(y * GetWidth()) + x];
             }
 
             return default;
@@ -98,24 +79,27 @@ namespace SS3D.Systems.Atmospherics
 
         public AtmosContainer GetTileAtmosObject(Vector3 worldPosition)
         {
-            Vector2Int vector = new Vector2Int();
-            vector = GetXY(worldPosition);
+            Vector2Int vector = GetXY(worldPosition);
             return GetTileAtmosObject(vector.x, vector.y);
         }
-        
-        public List<AtmosContainer> GetAllAtmosObjects()
-        {
-            return new(_atmosGridList.Concat(_atmosPipeLeftList));
-        }
 
-        public List<AtmosContainer> GetAllTileAtmosObjects()
-        {
-            return new(_atmosGridList);
-        }
+        public List<AtmosContainer> GetAllAtmosObjects() => new(_atmosGridList.Concat(_atmosPipeLeftList));
 
-        public List<AtmosContainer> GetAllPipeLeftAtmosObjects()
+        public List<AtmosContainer> GetAllTileAtmosObjects() => new(_atmosGridList);
+
+        protected void CreateAllGrids()
         {
-            return new(_atmosPipeLeftList);
+            _atmosGridList = new AtmosContainer[GetWidth() * GetHeight()];
+            _atmosPipeLeftList = new AtmosContainer[GetWidth() * GetHeight()];
+
+            for (int x = 0; x < GetWidth(); x++)
+            {
+                for (int y = 0; y < GetHeight(); y++)
+                {
+                    _atmosGridList[(y * GetWidth()) + x] = new(_map, this, x, y, TileLayer.Turf, 2.5f);
+                    _atmosPipeLeftList[(y * GetWidth()) + x] = new(_map, this, x, y, TileLayer.PipeLeft, 0.25f);
+                }
+            }
         }
     }
 }

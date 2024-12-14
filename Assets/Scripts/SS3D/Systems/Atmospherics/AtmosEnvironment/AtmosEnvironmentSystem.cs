@@ -14,9 +14,7 @@ namespace SS3D.Systems.Atmospherics
 {
     public sealed class AtmosEnvironmentSystem : Core.Behaviours.System
     {
-        public Action<float> AtmosTick;
-
-        public float UpdateRate = 0.5f;
+        public event Action<float> OnAtmosTick;
 
         private TileSystem _tileSystem;
         private List<AtmosMap> _atmosMaps;
@@ -35,48 +33,8 @@ namespace SS3D.Systems.Atmospherics
         // True when jobs are scheduled, false after making sure they completed.
         private bool _jobsScheduled;
 
-        protected override void OnStart()
-        {   
-            base.OnStart();
-            _tileSystem = Subsystems.Get<TileSystem>();
-
-            // Initialization is invoked by the tile manager
-            _tileSystem.TileSystemLoaded += Initialize;
-            _jobHandles = new(1, Allocator.Persistent);
-        }
-
-        private void Update()
-        {
-            if (!_initCompleted)
-            {
-                return;
-            }
-
-            if (Time.fixedTime >= _lastStep + UpdateRate)
-            {
-                // If the time step is smaller than the number of frames waited by the DelayCompleteJob method, then its necessary to ensure jobs are complete before proceeding
-                if (_jobsScheduled)
-                {
-                    CompleteJobs();
-                }
-
-                float dt = Time.fixedTime - _lastStep;
-                
-                foreach (AtmosJobPersistentData atmosJob in _atmosJobs)
-                {
-                    atmosJob.Refresh();
-                    ScheduleTileObjectJobs(atmosJob, dt);
-                }
-                
-                _jobsScheduled = true;
-
-                StartCoroutine(DelayCompleteJob());
-
-                _lastStep = Time.fixedTime;
-
-                AtmosTick?.Invoke(dt);
-            }
-        }
+        [field:SerializeField]
+        public float UpdateRate { get; set; }
 
         [CanBeNull]
         public AtmosContainer GetAtmosContainer(Vector3 worldPosition)
@@ -85,6 +43,7 @@ namespace SS3D.Systems.Atmospherics
             {
                 return null;
             }
+
             foreach (AtmosMap map in _atmosMaps)
             {
                 AtmosContainer atmos = map.GetTileAtmosObject(worldPosition);
@@ -109,20 +68,19 @@ namespace SS3D.Systems.Atmospherics
 
             if (tile != null)
             {
-                _atmosJobs.FirstOrDefault(x => x.Map == tile.Map).ChangeState(tile, state);
+                _atmosJobs.Find(x => x.Map == tile.Map).ChangeState(tile, state);
             }
         }
-        
+
         public void AddGasses(Vector3 worldPosition, float4 amount)
         {
             AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {
-                _atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddGasses(tile, amount);
+                _atmosJobs.Find(x => x.Map == tile.Map).AddGasses(tile, amount);
             }
         }
-
 
         public void RandomizeAllGasses(float maxAmount)
         {
@@ -133,14 +91,14 @@ namespace SS3D.Systems.Atmospherics
         {
             _atmosJobs.ForEach(job => job.ClearAllGasses());
         }
-        
+
         public void RemoveGasses(Vector3 worldPosition, float4 amount)
         {
             AtmosContainer tile = GetAtmosContainer(worldPosition);
 
             if (tile != null)
             {
-                _atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveGasses(tile, amount);
+                _atmosJobs.Find(x => x.Map == tile.Map).RemoveGasses(tile, amount);
             }
         }
 
@@ -150,7 +108,7 @@ namespace SS3D.Systems.Atmospherics
 
             if (tile != null)
             {
-                _atmosJobs.FirstOrDefault(x => x.Map == tile.Map).AddHeat(tile, amount);
+                _atmosJobs.Find(x => x.Map == tile.Map).AddHeat(tile, amount);
             }
         }
 
@@ -160,7 +118,74 @@ namespace SS3D.Systems.Atmospherics
 
             if (tile != null)
             {
-                _atmosJobs.FirstOrDefault(x => x.Map == tile.Map).RemoveHeat(tile, amount);
+                _atmosJobs.Find(x => x.Map == tile.Map).RemoveHeat(tile, amount);
+            }
+        }
+
+        protected override void OnDestroyed()
+        {
+            base.OnDestroyed();
+            if (_atmosMaps == null || _atmosJobs == null)
+            {
+                return;
+            }
+
+            foreach (AtmosMap map in _atmosMaps)
+            {
+                map.Clear();
+            }
+
+            _atmosMaps.Clear();
+
+            foreach (AtmosJobPersistentData job in _atmosJobs)
+            {
+                job.Destroy();
+            }
+
+            _atmosJobs.Clear();
+            _jobHandles.Dispose();
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+            _tileSystem = Subsystems.Get<TileSystem>();
+
+            // Initialization is invoked by the tile manager
+            _tileSystem.OnTileSystemLoaded += Initialize;
+            _jobHandles = new(1, Allocator.Persistent);
+        }
+
+        private void Update()
+        {
+            if (!_initCompleted)
+            {
+                return;
+            }
+
+            if (Time.fixedTime >= _lastStep + UpdateRate)
+            {
+                // If the time step is smaller than the number of frames waited by the DelayCompleteJob method, then its necessary to ensure jobs are complete before proceeding
+                if (_jobsScheduled)
+                {
+                    CompleteJobs();
+                }
+
+                float dt = Time.fixedTime - _lastStep;
+
+                foreach (AtmosJobPersistentData atmosJob in _atmosJobs)
+                {
+                    atmosJob.Refresh();
+                    ScheduleTileObjectJobs(atmosJob, dt);
+                }
+
+                _jobsScheduled = true;
+
+                StartCoroutine(DelayCompleteJob());
+
+                _lastStep = Time.fixedTime;
+
+                OnAtmosTick?.Invoke(dt);
             }
         }
 
@@ -235,23 +260,60 @@ namespace SS3D.Systems.Atmospherics
         private void ScheduleTileObjectJobs(AtmosJobPersistentData atmosJob, float deltaTime)
         {
             // compute neighbour indexes of tile atmos objects. TODO :  No need to run this job unless a new chunk was created
-            ComputeIndexesJob computeIndexesJob = new(atmosJob.NeighbourTileIndexes, atmosJob.NativeAtmosTiles, atmosJob.ChunkKeyHashMap, 16);
+            ComputeIndexesJob computeIndexesJob = new(
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.NativeAtmosTiles,
+                atmosJob.ChunkKeyHashMap,
+                16);
 
-            SetAtmosStateJob setAtmosStateJob = new(atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes, atmosJob.SemiActiveEnvironmentIndexes);
+            SetAtmosStateJob setAtmosStateJob = new(
+                atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.ActiveEnvironmentIndexes,
+                atmosJob.SemiActiveEnvironmentIndexes);
 
-            ComputeFluxesJob diffusionFluxJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime, false);
-            TransferFluxesJob transferDiffusionFluxJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles, atmosJob.NeighbourTileIndexes, atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray());
+            ComputeFluxesJob diffusionFluxJob = new(
+                atmosJob.NativeAtmosTiles,
+                atmosJob.MoleTransferArray,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray(),
+                deltaTime,
+                false);
 
-            ComputeFluxesJob activeFluxesJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime, true);
-            TransferFluxesJob transferActiveFluxesJob = new(atmosJob.MoleTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
+            TransferFluxesJob transferDiffusionFluxJob = new(
+                atmosJob.MoleTransferArray,
+                atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.SemiActiveEnvironmentIndexes.AsDeferredJobArray());
+
+            ComputeFluxesJob activeFluxesJob = new(
+                atmosJob.NativeAtmosTiles,
+                atmosJob.MoleTransferArray,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(),
+                deltaTime,
+                true);
+
+            TransferFluxesJob transferActiveFluxesJob = new(
+                atmosJob.MoleTransferArray,
+                atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
             ComputeVelocityJob velocityJob = new(atmosJob.NativeAtmosTiles, atmosJob.MoleTransferArray, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
-            ComputeHeatTransferJob computeHeatJob = new(atmosJob.NativeAtmosTiles, atmosJob.HeatTransferArray, atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(), deltaTime);
-            TransferHeatJob transferHeatJob = new(atmosJob.HeatTransferArray, atmosJob.NativeAtmosTiles,
-                atmosJob.NeighbourTileIndexes, atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
+            ComputeHeatTransferJob computeHeatJob = new(
+                atmosJob.NativeAtmosTiles,
+                atmosJob.HeatTransferArray,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray(),
+                deltaTime);
 
+            TransferHeatJob transferHeatJob = new(
+                atmosJob.HeatTransferArray,
+                atmosJob.NativeAtmosTiles,
+                atmosJob.NeighbourTileIndexes,
+                atmosJob.ActiveEnvironmentIndexes.AsDeferredJobArray());
 
             if (_usesParallelComputation)
             {
@@ -268,9 +330,8 @@ namespace SS3D.Systems.Atmospherics
                 JobHandle computeHeatJobHandle = computeHeatJob.Schedule(atmosJob.ActiveEnvironmentIndexes.Length, 64, computeVelocityHandle);
                 JobHandle transferHeatJobHandle = transferHeatJob.Schedule(computeHeatJobHandle);
 
-
                 _jobHandles.Add(computeIndexesHandle);
-                _jobHandles.Add(setActiveHandle); 
+                _jobHandles.Add(setActiveHandle);
                 _jobHandles.Add(diffusionFluxHandle);
                 _jobHandles.Add(transferDiffusionFluxHandle);
                 _jobHandles.Add(activeFluxHandle);
@@ -289,9 +350,9 @@ namespace SS3D.Systems.Atmospherics
                 computeHeatJob.Run(atmosJob.ActiveEnvironmentIndexes.Length);
                 transferHeatJob.Run();
             }
+
             Debug.Log($"Active count : {atmosJob.ActiveEnvironmentIndexes.Length}, SemiActive count : {atmosJob.SemiActiveEnvironmentIndexes.Length}, "
                 + $"Inactive count : {atmosJob.NativeAtmosTiles.Length - atmosJob.ActiveEnvironmentIndexes.Length - atmosJob.SemiActiveEnvironmentIndexes.Length}");
-
         }
 
         /// <summary>
@@ -309,30 +370,6 @@ namespace SS3D.Systems.Atmospherics
             {
                 CompleteJobs();
             }
-        }
-
-        protected override void OnDestroyed()
-        {
-            base.OnDestroyed();
-            if (_atmosMaps == null || _atmosJobs == null)
-            {
-                return;
-            }
-
-            foreach (AtmosMap map in _atmosMaps)
-            {
-                map.Clear();
-            }
-
-            _atmosMaps.Clear();
-
-            foreach (AtmosJobPersistentData job in _atmosJobs)
-            {
-                job.Destroy();
-            }
-
-            _atmosJobs.Clear();
-            _jobHandles.Dispose();
         }
     }
 }

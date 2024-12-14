@@ -1,12 +1,13 @@
-
-
-/// <summary>
-/// Most commonly used gasses. Use a float4 struct for SIMD optimization.
-/// </summary>
-public enum CoreAtmosGasses
+namespace SS3D.Systems.Atmospherics
 {
-    Oxygen = 0,
-    Nitrogen = 1,
-    CarbonDioxide = 2,
-    Plasma = 3
+    /// <summary>
+    /// Most commonly used gasses. Use a float4 struct for SIMD optimization.
+    /// </summary>
+    public enum CoreAtmosGasses
+    {
+        Oxygen = 0,
+        Nitrogen = 1,
+        CarbonDioxide = 2,
+        Plasma = 3,
+    }
 }

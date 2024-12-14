@@ -12,10 +12,9 @@ namespace SS3D.Systems.Atmospherics
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
     public struct SetAtmosStateJob : IJob
     {
-                
         [ReadOnly]
         private readonly NativeArray<AtmosObjectNeighboursIndexes> _neighboursIndexes;
-        
+
         [NativeDisableParallelForRestriction]
         private NativeArray<AtmosObject> _tileObjectBuffer;
 
@@ -23,8 +22,8 @@ namespace SS3D.Systems.Atmospherics
 
         private NativeList<int> _semiactiveIndexes;
 
-        
-        public SetAtmosStateJob(NativeArray<AtmosObject> tileObjectBuffer,
+        public SetAtmosStateJob(
+            NativeArray<AtmosObject> tileObjectBuffer,
             NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
             NativeList<int> activeIndexes,
             NativeList<int> semiactiveIndexes)
@@ -60,7 +59,7 @@ namespace SS3D.Systems.Atmospherics
                     atmos.State = AtmosState.Active;
                     _activeIndexes.Add(index);
                 }
-                else if(isActiveOrSemiActive[1])
+                else if (isActiveOrSemiActive[1])
                 {
                     atmos.State = AtmosState.Semiactive;
                     _semiactiveIndexes.Add(index);
@@ -80,7 +79,7 @@ namespace SS3D.Systems.Atmospherics
             {
                 return false;
             }
-            
+
             AtmosObject neighbour = _tileObjectBuffer[neighbourIndex];
             AtmosObject atmos = _tileObjectBuffer[index];
 
@@ -92,13 +91,13 @@ namespace SS3D.Systems.Atmospherics
             if (neighbour.State == AtmosState.Inactive && atmos.State == AtmosState.Inactive)
             {
                 return false;
-            } 
+            }
 
             if (math.abs(atmos.Pressure - neighbour.Pressure) > GasConstants.PressureEpsilon)
             {
                 return new(true, false);
             }
-            
+
             float4 molesToTransfer = (atmos.CoreGasses - neighbour.CoreGasses) * GasConstants.GasDiffusionRate;
             if (math.any(molesToTransfer > GasConstants.DiffusionEpsilon))
             {

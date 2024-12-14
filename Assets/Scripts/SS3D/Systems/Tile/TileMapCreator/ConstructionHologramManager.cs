@@ -27,29 +27,37 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// The last direction registered by a build ghost.
         /// </summary>
         private Direction _lastRegisteredDirection;
+
         private InputSystem _inputSystem;
+
         private Controls.TileCreatorActions _controls;
-        private bool _isPlacingItem = false;
+
+        private bool _isPlacingItem;
+
         /// <summary>
         /// Snapped position are positions in the center of tiles, to display tile objects ghosts properly.
         /// </summary>
         private Vector3 _lastSnappedPosition;
+
         /// <summary>
         /// The snapped position of the mouse, in the middle of a tile, when the player starts dragging with the mouse.
         /// </summary>
         private Vector3 _dragStartPostion;
-        /// <summary>
-        /// Is the player currently dragging ?
-        /// </summary>
-        public bool IsDragging => _isDragging;
-        private bool _isDragging;
+
         private GenericObjectSo _selectedObject;
+
         /// <summary>
         /// List of build ghosts currently displaying in game.
         /// </summary>
         private List<ConstructionHologram> _holograms = new();
+
         [SerializeField]
         private TileMapMenu _menu;
+
+        /// <summary>
+        /// Is the player currently dragging ?
+        /// </summary>
+        public bool IsDragging { get; private set; }
 
         public void SetSelectedObject(GenericObjectSo genericObjectSo)
         {
@@ -62,7 +70,47 @@ namespace SS3D.Systems.Tile.TileMapCreator
             _selectedObject = genericObjectSo;
 
             DestroyHolograms();
-            CreateHologram(genericObjectSo.prefab, TileHelper.GetPointedPosition(!_isPlacingItem));
+            CreateHologram(genericObjectSo.Prefab, TileHelper.GetPointedPosition(!_isPlacingItem));
+        }
+
+        /// <summary>
+        /// Rotate all existing ghosts in the next allowed rotation.
+        /// </summary>
+        public void SetNextRotation()
+        {
+            foreach (ConstructionHologram hologram in _holograms)
+            {
+                hologram.SetNextRotation();
+                RefreshHologram(hologram);
+            }
+
+            _lastRegisteredDirection = _holograms[0].Direction;
+        }
+
+        /// <summary>
+        /// Instantiate in the correct position and rotation a single hologram.
+        /// </summary>
+        public ConstructionHologram CreateHologram(GameObject prefab, Vector3 position)
+        {
+            GameObject tileObject = Instantiate(prefab);
+            ConstructionHologram hologram = new(tileObject, position, _lastRegisteredDirection);
+            tileObject.transform.SetPositionAndRotation(hologram.TargetPosition, Quaternion.Euler(0, TileHelper.GetRotationAngle(hologram.Direction), 0));
+            _holograms.Add(hologram);
+            RefreshHologram(hologram);
+            return hologram;
+        }
+
+        /// <summary>
+        /// Destroy all existing holograms.
+        /// </summary>
+        public void DestroyHolograms()
+        {
+            for (int i = _holograms.Count - 1; i >= 0; i--)
+            {
+                _holograms[i].Destroy();
+            }
+
+            _holograms.Clear();
         }
 
         protected override void OnStart()
@@ -88,17 +136,18 @@ namespace SS3D.Systems.Tile.TileMapCreator
             ActivateGhosts();
 
             Vector3 position = TileHelper.GetPointedPosition(!_isPlacingItem);
+
             // Move hologram, that sticks to the mouse. Currently it exists only if player is not dragging.
             if (_holograms.Count == 1)
             {
-                _holograms.First().TargetPosition = position;
+                _holograms[0].TargetPosition = position;
                 if (position != _lastSnappedPosition)
                 {
-                    RefreshHologram(_holograms.First());
+                    RefreshHologram(_holograms[0]);
                 }
             }
 
-            if (_isDragging && (position != _lastSnappedPosition) && (_selectedObject != null))
+            if (IsDragging && (position != _lastSnappedPosition) && (_selectedObject != null))
             {
                 Vector3[] tiles;
                 if (_controls.SquareDrag.phase == InputActionPhase.Performed)
@@ -123,7 +172,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
                 {
                     for (int i = 0; i < -difference; i++)
                     {
-                        CreateHologram(_selectedObject.prefab, new());
+                        CreateHologram(_selectedObject.Prefab, Vector3.zero);
                     }
                 }
 
@@ -134,46 +183,8 @@ namespace SS3D.Systems.Tile.TileMapCreator
                     RefreshHologram(_holograms[i]);
                 }
             }
+
             _lastSnappedPosition = position;
-        }
-
-        /// <summary>
-        /// Rotate all existing ghosts in the next allowed rotation.
-        /// </summary>
-        public void SetNextRotation()
-        {
-            foreach (ConstructionHologram hologram in _holograms)
-            {
-                hologram.SetNextRotation();
-                RefreshHologram(hologram);
-            }
-            _lastRegisteredDirection = _holograms.First().Direction;
-        }
-
-        /// <summary>
-        /// Instantiate in the correct position and rotation a single hologram.
-        /// </summary>
-        public ConstructionHologram CreateHologram(GameObject prefab, Vector3 position)
-        {
-            GameObject tileObject = Instantiate(prefab);
-            ConstructionHologram hologram = new(tileObject, position, _lastRegisteredDirection);
-            tileObject.transform.rotation = Quaternion.Euler(0, TileHelper.GetRotationAngle(hologram.Direction), 0);
-            tileObject.transform.position = hologram.TargetPosition;
-            _holograms.Add(hologram);
-            RefreshHologram(hologram);
-            return hologram;
-        }
-
-        /// <summary>
-        /// Destroy all existing holograms.
-        /// </summary>
-        public void DestroyHolograms()
-        {
-            for (int i = _holograms.Count - 1; i >= 0; i--)
-            {
-                _holograms[i].Destroy();
-            }
-            _holograms.Clear();
         }
 
         /// <summary>
@@ -191,9 +202,11 @@ namespace SS3D.Systems.Tile.TileMapCreator
         {
             // Dragging is disabled for items
             if (_isPlacingItem)
+            {
                 return;
+            }
 
-            _isDragging = true;
+            IsDragging = true;
             _dragStartPostion = TileHelper.GetPointedPosition(true);
         }
 
@@ -202,7 +215,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// </summary>
         private void HandlePlacePerformed(InputAction.CallbackContext context)
         {
-            _isDragging = false;
+            IsDragging = false;
 
             if (_menu.MouseOverUI)
             {
@@ -220,8 +233,12 @@ namespace SS3D.Systems.Tile.TileMapCreator
 
             DestroyHolograms();
 
-            if (_selectedObject == null) return;
-            CreateHologram(_selectedObject.prefab, TileHelper.GetPointedPosition(!_isPlacingItem));
+            if (_selectedObject == null)
+            {
+                return;
+            }
+
+            CreateHologram(_selectedObject.Prefab, TileHelper.GetPointedPosition(!_isPlacingItem));
         }
 
         /// <summary>
@@ -268,7 +285,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         }
 
         /// <summary>
-        /// Update material of holograms based build (or anything else) mode and holograms position  
+        /// Update material of holograms based build (or anything else) mode and holograms position
         /// </summary>
         private void RefreshHologram(ConstructionHologram hologram)
         {
@@ -302,7 +319,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         }
 
         /// <summary>
-        /// Starting from a given position, create holograms along a line defined by dragging. 
+        /// Starting from a given position, create holograms along a line defined by dragging.
         /// </summary>
         private Vector3[] LineDrag(Vector3 position)
         {
@@ -313,6 +330,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
 
             return tiles;
         }
+
         /// <summary>
         /// Create a square of objects holograms.
         /// </summary>
@@ -325,22 +343,21 @@ namespace SS3D.Systems.Tile.TileMapCreator
             int y2 = (int)Math.Max(_dragStartPostion.z, position.z);
 
             List<Vector3> tiles = new();
-            
+
             for (int i = y1; i <= y2; i++)
             {
                 for (int j = x1; j <= x2; j++)
                 {
-                    tiles.Add(new (j, position.y, i));
+                    tiles.Add(new(j, position.y, i));
                 }
             }
 
             return tiles.ToArray();
         }
-        
+
         [ServerRpc(RequireOwnership = false)]
         private void RpcSendCanBuild(string tileObjectSoName, Vector3 placePosition, Direction dir, bool replaceExisting, NetworkConnection conn)
         {
-
             TileSystem tileSystem = Subsystems.Get<TileSystem>();
 
             TileObjectSo tileObjectSo = (TileObjectSo)tileSystem.GetAsset(tileObjectSoName);
@@ -359,19 +376,9 @@ namespace SS3D.Systems.Tile.TileMapCreator
         private void RpcReceiveCanBuild(NetworkConnection conn, Vector3 placePosition, bool canBuild)
         {
             // Find correct hologram to update its material
-            for (int i = 0; i < _holograms.Count; i++)
+            foreach (ConstructionHologram hologram in _holograms.Where(hologram => hologram.TargetPosition == placePosition))
             {
-                ConstructionHologram hologram = _holograms[i];
-                if (hologram.TargetPosition != placePosition) continue;
-
-                if (canBuild)
-                {
-                    hologram.ChangeHologramColor(ConstructionMode.Valid);
-                }
-                else
-                {
-                    hologram.ChangeHologramColor(ConstructionMode.Invalid);
-                }
+                hologram.ChangeHologramColor(canBuild ? ConstructionMode.Valid : ConstructionMode.Invalid);
                 return;
             }
         }
@@ -385,8 +392,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
-                PlacedItemObject placedItem = hitInfo.collider.gameObject.GetComponent<PlacedItemObject>();
-                if (placedItem != null)
+                if (hitInfo.collider.gameObject.TryGetComponent(out PlacedItemObject placedItem))
                 {
                     Subsystems.Get<TileSystem>().RpcClearItemObject(placedItem.NameString, placedItem.gameObject.transform.position);
                 }

@@ -7,19 +7,29 @@ using SS3D.Interactions.Interfaces;
 using System;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Atmospherics
 {
     public class MixerAtmosObject : TrinaryAtmosDevice
     {
+        public event Action<float> OnUpdateMixerFirstInputAmount;
+
+        public event Action<bool> OnUpdateMixerActive;
+
+        public event Action<float> OnUpdateTargetPressure;
 
         private const float MaxPressure = 4500f;
+
+        [FormerlySerializedAs("MixerViewPrefab")]
+        [SerializeField]
+        private GameObject _mixerViewPrefab;
 
         [SyncVar(OnChange = nameof(SyncFirstInputAmount))]
         private float _inputOneAmount = 50f;
 
         [SyncVar(OnChange = nameof(SyncMixerActive))]
-        private bool _mixerActive = false;
+        private bool _mixerActive;
 
         [SyncVar(OnChange = nameof(SyncTargetPressure))]
         private float _targetPressure = 101f;
@@ -32,13 +42,6 @@ namespace SS3D.Systems.Atmospherics
 
         [ServerRpc(RequireOwnership = false)]
         public void SetFirstInput(float value) => _inputOneAmount = value;
-
-        public Action<float> UpdateMixerFirstInputAmount;
-        public Action<bool> UpdateMixerActive;
-        public Action<float> UpdateTargetPressure;
-
-        public GameObject MixerViewPrefab;
-
 
         public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
@@ -74,7 +77,6 @@ namespace SS3D.Systems.Atmospherics
             float transferMoles1 = ratioOnetoTwo * transferMoles;
             float transferMoles2 = (1f - ratioOnetoTwo) * transferMoles;
 
-
             // We can't transfer more moles than there are
             float firstInputTotalMoles = BackPipe.AtmosObject.TotalMoles;
             float secondInputTotalMoles = SidePipe.AtmosObject.TotalMoles;
@@ -95,32 +97,31 @@ namespace SS3D.Systems.Atmospherics
             float4 molesFirstToTransfer = BackPipe.AtmosObject.CoreGassesProportions * transferMoles1;
             float4 molesSecondToTransfer = BackPipe.AtmosObject.CoreGassesProportions * transferMoles2;
 
-            Subsystems.Get<PipeSystem>().RemoveCoreGasses(BackPipePosition, molesFirstToTransfer, Pipelayer);
-            Subsystems.Get<PipeSystem>().RemoveCoreGasses(SidePipePosition, molesSecondToTransfer, Pipelayer);
-            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesFirstToTransfer, Pipelayer);
-            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesSecondToTransfer, Pipelayer);
+            Subsystems.Get<PipeSystem>().RemoveCoreGasses(BackPipePosition, molesFirstToTransfer, PipeLayer);
+            Subsystems.Get<PipeSystem>().RemoveCoreGasses(SidePipePosition, molesSecondToTransfer, PipeLayer);
+            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesFirstToTransfer, PipeLayer);
+            Subsystems.Get<PipeSystem>().AddCoreGasses(FrontPipePosition, molesSecondToTransfer, PipeLayer);
         }
 
         private void MixerInteract(InteractionEvent interactionEvent, InteractionReference arg2)
         {
-            GameObject mixerView = Instantiate(MixerViewPrefab);
+            GameObject mixerView = Instantiate(_mixerViewPrefab);
             mixerView.GetComponent<MixerView>().Initialize(this);
         }
 
         private void SyncFirstInputAmount(float oldValue, float newValue, bool asServer)
         {
-            UpdateMixerFirstInputAmount?.Invoke(newValue);
+            OnUpdateMixerFirstInputAmount?.Invoke(newValue);
         }
 
         private void SyncTargetPressure(float oldValue, float newValue, bool asServer)
         {
-            UpdateTargetPressure?.Invoke(newValue);
+            OnUpdateTargetPressure?.Invoke(newValue);
         }
 
         private void SyncMixerActive(bool oldValue, bool newValue, bool asServer)
         {
-            UpdateMixerActive?.Invoke(newValue);
+            OnUpdateMixerActive?.Invoke(newValue);
         }
-
     }
 }

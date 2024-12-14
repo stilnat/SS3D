@@ -13,9 +13,8 @@ namespace SS3D.Systems.Atmospherics
     /// Diffuse fluxes are fluxes happening when there's no pressure differences, but there's differences in moles.
     /// </summary>
     [BurstCompile(FloatMode = FloatMode.Fast, FloatPrecision = FloatPrecision.Standard)]
-    struct ComputeFluxesJob : IJobParallelFor
+    public struct ComputeFluxesJob : IJobParallelFor
     {
-
         // Array containing all atmos tiles of the map.
         [ReadOnly]
         private readonly NativeArray<AtmosObject> _tileObjectBuffer;
@@ -28,19 +27,22 @@ namespace SS3D.Systems.Atmospherics
         [ReadOnly]
         private readonly NativeArray<int> _activeIndexes;
 
-        [NativeDisableParallelForRestriction]
-        [WriteOnly]
-        private NativeArray<MoleTransferToNeighbours> _moleTransfers;
-
         private readonly float _deltaTime;
 
         // If the fluxes computed should be active fluxes or diffuse fluxes.
         private readonly bool _activeFlux;
 
+        [NativeDisableParallelForRestriction]
+        [WriteOnly]
+        private NativeArray<MoleTransferToNeighbours> _moleTransfers;
 
-
-        public ComputeFluxesJob(NativeArray<AtmosObject> tileObjectBuffer, NativeArray<MoleTransferToNeighbours> moleTransfers,
-            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes, NativeArray<int> activeIndexes, float deltaTime, bool activeFlux)
+        public ComputeFluxesJob(
+            NativeArray<AtmosObject> tileObjectBuffer,
+            NativeArray<MoleTransferToNeighbours> moleTransfers,
+            NativeArray<AtmosObjectNeighboursIndexes> neighboursIndexes,
+            NativeArray<int> activeIndexes,
+            float deltaTime,
+            bool activeFlux)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _deltaTime = deltaTime;
@@ -57,24 +59,25 @@ namespace SS3D.Systems.Atmospherics
             AtmosObject defaultAtmos = default;
 
             AtmosObject northNeighbour = _neighboursIndexes[activeIndex].NorthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].NorthNeighbour];
-            AtmosObject southNeighbour = _neighboursIndexes[activeIndex].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].SouthNeighbour]; 
-            AtmosObject eastNeighbour = _neighboursIndexes[activeIndex].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].EastNeighbour]; 
-            AtmosObject westNeighbour = _neighboursIndexes[activeIndex].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].WestNeighbour]; 
+            AtmosObject southNeighbour = _neighboursIndexes[activeIndex].SouthNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].SouthNeighbour];
+            AtmosObject eastNeighbour = _neighboursIndexes[activeIndex].EastNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].EastNeighbour];
+            AtmosObject westNeighbour = _neighboursIndexes[activeIndex].WestNeighbour == -1 ? defaultAtmos : _tileObjectBuffer[_neighboursIndexes[activeIndex].WestNeighbour];
 
-            bool4 hasNeighbours = new(_neighboursIndexes[activeIndex].NorthNeighbour != -1,
+            bool4 hasNeighbours = new(
+                _neighboursIndexes[activeIndex].NorthNeighbour != -1,
                 _neighboursIndexes[activeIndex].SouthNeighbour != -1,
                 _neighboursIndexes[activeIndex].EastNeighbour != -1,
-            _neighboursIndexes[activeIndex].WestNeighbour != -1);
+                _neighboursIndexes[activeIndex].WestNeighbour != -1);
 
             // Do actual work
             _moleTransfers[activeIndex] = AtmosCalculator.SimulateGasTransfers(
-                _tileObjectBuffer[activeIndex], 
+                _tileObjectBuffer[activeIndex],
                 activeIndex,
                 northNeighbour,
-                southNeighbour, 
+                southNeighbour,
                 eastNeighbour,
                 westNeighbour,
-                _deltaTime, 
+                _deltaTime,
                 _activeFlux,
                 hasNeighbours);
         }

@@ -15,12 +15,14 @@ namespace SS3D.Systems.Atmospherics
 
         [NativeDisableParallelForRestriction]
         private NativeArray<AtmosObject> _tileObjectBuffer;
-        
+
         [ReadOnly]
         private NativeArray<int> _activeIndexes;
-        
-        public ComputeVelocityJob(NativeArray<AtmosObject> tileObjectBuffer,
-            NativeArray<MoleTransferToNeighbours> moleTransfers, NativeArray<int> activeIndexes)
+
+        public ComputeVelocityJob(
+            NativeArray<AtmosObject> tileObjectBuffer,
+            NativeArray<MoleTransferToNeighbours> moleTransfers,
+            NativeArray<int> activeIndexes)
         {
             _tileObjectBuffer = tileObjectBuffer;
             _moleTransfers = moleTransfers;
@@ -34,10 +36,10 @@ namespace SS3D.Systems.Atmospherics
             AtmosObject atmosObject = _tileObjectBuffer[activeIndex];
 
             // Currently velocity is simply the amount of moles transferred to each neighbour.
-            atmosObject.VelocityNorth =  _moleTransfers[activeIndex].TransferMolesNorth;
-            atmosObject.VelocitySouth =  _moleTransfers[activeIndex].TransferMolesSouth;
-            atmosObject.VelocityEast =  _moleTransfers[activeIndex].TransferMolesEast;
-            atmosObject.VelocityWest =  _moleTransfers[activeIndex].TransferMolesWest;
+            atmosObject.VelocityNorth = _moleTransfers[activeIndex].TransferMolesNorth;
+            atmosObject.VelocitySouth = _moleTransfers[activeIndex].TransferMolesSouth;
+            atmosObject.VelocityEast = _moleTransfers[activeIndex].TransferMolesEast;
+            atmosObject.VelocityWest = _moleTransfers[activeIndex].TransferMolesWest;
             _tileObjectBuffer[activeIndex] = atmosObject;
         }
     }

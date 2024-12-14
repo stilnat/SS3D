@@ -38,7 +38,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// </summary>
         public void Clear()
         {
-            _confirmOverWriteButton.gameObject.SetActive(false);
+            _confirmOverWriteButton.SetActive(false);
             _saveMapContentRoot.SetActive(false);
             _saveText.gameObject.SetActive(false);
         }
@@ -48,8 +48,8 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// </summary>
         public void Display()
         {
-            _saveMapContentRoot.gameObject.SetActive(true);
-            _confirmOverWriteButton.gameObject.SetActive(false);
+            _saveMapContentRoot.SetActive(true);
+            _confirmOverWriteButton.SetActive(false);
             _saveMapContentRoot.SetActive(true);
         }
 
@@ -68,7 +68,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         public void HandleConfirmOverWriteButton()
         {
             SaveMap(_saveInputField.text);
-            _confirmOverWriteButton.gameObject.SetActive(false);
+            _confirmOverWriteButton.SetActive(false);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
         {
             if (Subsystems.Get<TileSystem>().MapNameAlreadyExist(_saveInputField.text))
             {
-                _confirmOverWriteButton.gameObject.SetActive(true);
+                _confirmOverWriteButton.SetActive(true);
             }
             else
             {
@@ -135,7 +135,5 @@ namespace SS3D.Systems.Tile.TileMapCreator
 
             _saveText.gameObject.SetActive(false);
         }
-
-
     }
 }

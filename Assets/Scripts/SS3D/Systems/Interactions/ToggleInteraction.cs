@@ -1,7 +1,7 @@
 ﻿using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
-using SS3D.Systems.Animations;
-using SS3D.Systems.Inventory.Containers;
+// using SS3D.Systems.Animations;
+// using SS3D.Systems.Inventory.Containers;
 using System;
 using UnityEngine;
 
@@ -84,7 +84,9 @@ namespace SS3D.Systems.Interactions
         public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             base.Start(interactionEvent, reference);
-            Hand hand = interactionEvent.Source as Hand;
+            return true;
+
+            /* Hand hand = interactionEvent.Source as Hand;
 
             Vector3 point = interactionEvent.Point;
 
@@ -98,7 +100,7 @@ namespace SS3D.Systems.Interactions
                 interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
             }
             
-            return true;
+            return true;*/
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)

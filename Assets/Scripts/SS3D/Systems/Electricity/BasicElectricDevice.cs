@@ -17,10 +17,15 @@ namespace SS3D.Systems.Tile.Connections
             base.OnStartServer();
 
             ElectricitySystem electricitySystem = Subsystems.Get<ElectricitySystem>();
+
             if (electricitySystem.IsSetUp)
+            {
                 electricitySystem.AddElectricalElement(this);
+            }
             else
+            {
                 electricitySystem.OnSystemSetUp += OnElectricitySystemSetup;
+            }
         }
 
         protected override void OnDestroyed()

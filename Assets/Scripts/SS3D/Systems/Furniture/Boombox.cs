@@ -53,7 +53,7 @@ namespace SS3D.Systems.Audio
             }
             
             AudioOn = !AudioOn;
-            _powerConsumer.isIdle = !AudioOn;
+            _powerConsumer.IsIdle = !AudioOn;
             
             if (AudioOn)
             {

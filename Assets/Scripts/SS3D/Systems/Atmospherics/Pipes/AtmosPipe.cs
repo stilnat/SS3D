@@ -8,7 +8,6 @@ namespace SS3D.Systems.Atmospherics
 {
     public class AtmosPipe : NetworkActor, IAtmosPipe
     {
-
         public AtmosObject AtmosObject { get; set; }
 
         public PlacedTileObject PlacedTileObject => GetComponent<PlacedTileObject>();

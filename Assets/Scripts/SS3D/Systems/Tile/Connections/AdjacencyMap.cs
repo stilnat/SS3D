@@ -1,9 +1,7 @@
-﻿using System.Collections;
+﻿using SS3D.Systems.Tile.Connections.AdjacencyTypes;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using FishNet.Object.Synchronizing;
-using FishNet.Object.Synchronizing.Internal;
-using SS3D.Systems.Tile.Connections.AdjacencyTypes;
 
 namespace SS3D.Systems.Tile.Connections
 {
@@ -12,8 +10,23 @@ namespace SS3D.Systems.Tile.Connections
     /// </summary>
     public class AdjacencyMap
     {
-        //Stores an array of which of the 8 surrounding tiles have a connection. Order assumed to match Direction enum values.
+        // Stores an array of which of the 8 surrounding tiles have a connection. Order assumed to match Direction enum values.
         private AdjacencyData[] _connections;
+
+        public AdjacencyMap()
+        {
+            _connections = new AdjacencyData[]
+            {
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
+            };
+        }
 
         /// <summary>
         /// Get the number of cardinal connections
@@ -30,25 +43,7 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public int ConnectionCount => GetAdjacencies(true).Count + GetAdjacencies(false).Count;
 
-        public AdjacencyMap()
-        {
-            _connections = new [] {
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData (TileObjectGenericType.None, TileObjectSpecificType.None, false),
-            };
-        }
-
-        public bool HasConnection(Direction direction)
-        {
-            return _connections[(int)direction].Exists;
-        }
-
+        public bool HasConnection(Direction direction) => _connections[(int)direction].Exists;
 
         /// <summary>
         /// Gets the direction of the only cardinal/diagonal connection.
@@ -61,8 +56,6 @@ namespace SS3D.Systems.Tile.Connections
             List<Direction> foundConnections = GetAdjacencies(cardinal);
             return foundConnections[0];
         }
-
-
 
         /// <summary>
         /// Get the direction of the only cardinal/diagonal non connection.
@@ -102,10 +95,10 @@ namespace SS3D.Systems.Tile.Connections
         /// <returns></returns>
         public bool SetConnection(Direction direction, AdjacencyData data)
         {
-            bool changed = !data.Equals(_connections[(int) direction]);
+            bool changed = !data.Equals(_connections[(int)direction]);
             if (changed)
             {
-                _connections[(int) direction] = data;
+                _connections[(int)direction] = data;
             }
 
             return changed;
@@ -113,17 +106,18 @@ namespace SS3D.Systems.Tile.Connections
 
         public List<Direction> GetAdjacencies(bool cardinal)
         {
-            //Are we getting adjacencies for cardinal or diagonal directions?
+            // Are we getting adjacencies for cardinal or diagonal directions?
             List<int> directionIndexes = cardinal ?
-                TileHelper.CardinalDirections().Select(direction => (int)direction).ToList() : 
-                TileHelper.DiagonalDirections().Select(direction => (int)direction).ToList();
-            //Loop through each index in direction indexes, pick those that exist and cast them to the Direction enum.
-            return (from index in directionIndexes where _connections[index].Exists select (Direction) index).ToList();
+                TileHelper.CardinalDirections().ConvertAll(direction => (int)direction) :
+                TileHelper.DiagonalDirections().ConvertAll(direction => (int)direction);
+
+            // Loop through each index in direction indexes, pick those that exist and cast them to the Direction enum.
+            return (from index in directionIndexes where _connections[index].Exists select (Direction)index).ToList();
         }
-        
+
         public void DeserializeFromByte(byte bytemap)
         {
-            BitArray bits = new(new[] { bytemap });
+            BitArray bits = new(new byte[] { bytemap });
             AdjacencyData[] adjacencyData = new AdjacencyData[8];
 
             for (int i = 0; i < bits.Length; i++)
@@ -145,7 +139,7 @@ namespace SS3D.Systems.Tile.Connections
                 }
             }
 
-            return (byte) sum;
+            return (byte)sum;
         }
 
         public override string ToString()

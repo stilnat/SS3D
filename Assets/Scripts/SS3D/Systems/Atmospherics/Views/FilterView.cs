@@ -46,11 +46,9 @@ namespace SS3D.Systems.Atmospherics
             _volumeSlider.ValueTickUpdated += UpdateVolumeTransferred;
             _closeUI.onClick.AddListener(Destroy);
 
-            _filterAtmosObject.UpdateFilterGas += UpdateFilterGasVisuals;
-            _filterAtmosObject.UpdateActive += active => _turnOn.SetState(active, true);
-            _filterAtmosObject.UpdateFlux += flux => UpdateVolumeTransferredVisuals(flux, false);
-
-
+            _filterAtmosObject.OnUpdateFilterGas += UpdateFilterGasVisuals;
+            _filterAtmosObject.OnUpdateActive += active => _turnOn.SetState(active, true);
+            _filterAtmosObject.OnUpdateFlux += flux => UpdateVolumeTransferredVisuals(flux, false);
 
             _filterOxygen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Oxygen));
             _filterNitrogen.SetState(_filterAtmosObject.IsFiltering(CoreAtmosGasses.Nitrogen));
@@ -88,21 +86,28 @@ namespace SS3D.Systems.Atmospherics
             switch (gas)
             {
                 case CoreAtmosGasses.Nitrogen:
+                {
                     _filterNitrogen.SetState(isFiltering, true);
-
                     break;
+                }
+
                 case CoreAtmosGasses.Oxygen:
+                {
                     _filterOxygen.SetState(isFiltering, true);
-
                     break;
+                }
+
                 case CoreAtmosGasses.CarbonDioxide:
+                {
                     _filterCarbonDioxyde.SetState(isFiltering, true);
-
                     break;
+                }
+
                 case CoreAtmosGasses.Plasma:
+                {
                     _filterPlasma.SetState(isFiltering, true);
-
                     break;
+                }
             }
         }
     }

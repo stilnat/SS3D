@@ -31,11 +31,11 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         private bool IsConnectedToDoor(PlacedTileObject neighbourObject)
         {
-            var doorConnector = neighbourObject.GetComponent<DoorAdjacencyConnector>();
-            var door = doorConnector.PlacedObject;
+            DoorAdjacencyConnector doorConnector = neighbourObject.GetComponent<DoorAdjacencyConnector>();
+            PlacedTileObject door = doorConnector.PlacedObject;
             if (door != null)
             {
-                if (_placedObject.IsOnLeft(door) || _placedObject.IsOnRight(door))
+                if (PlacedObject.IsOnLeft(door) || PlacedObject.IsOnRight(door))
                 {
                     return true;
                 }
@@ -51,14 +51,14 @@ namespace SS3D.Systems.Tile.Connections
         {
             var tileSystem = Subsystems.Get<TileSystem>();
             var map = tileSystem.CurrentMap;
-            var neighbours = map.GetNeighbourPlacedObjects(_placedObject.Layer, _placedObject.transform.position);
+            var neighbours = map.GetNeighbourPlacedObjects(PlacedObject.Layer, PlacedObject.transform.position);
 
             foreach( var neighbour in neighbours )
             {
                 var doorConnector = neighbour?.GetComponent<DoorAdjacencyConnector>();
                 if (doorConnector == null) continue;
 
-                if (_placedObject.IsOnLeft(neighbour) || _placedObject.IsOnRight(neighbour))
+                if (PlacedObject.IsOnLeft(neighbour) || PlacedObject.IsOnRight(neighbour))
                 {
                     door = neighbour;
                     return true;

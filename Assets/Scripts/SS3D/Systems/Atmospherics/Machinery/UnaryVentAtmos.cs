@@ -13,36 +13,38 @@ using UnityEngine;
 
 namespace SS3D.Systems.Atmospherics
 {
-
     public class UnaryVentAtmos : BasicAtmosDevice, IInteractionTarget
     {
+        private enum PressureEqualizingMode
+        {
+            Internal = 0,
+            External = 1,
+        }
+
+        private enum OperatingMode
+        {
+            Pump = 0,
+            Suck = 1,
+        }
+
+        private const float RotationSpeedSucking = 1f;
+
+        private const float RotationSpeedPumping = -1f;
 
         private bool _deviceActive = true;
+
         private TileLayer _pipeLayer = TileLayer.PipeLeft;
+
         private float _targetPressure = 101.3f;
+
         private PressureEqualizingMode _pressureMode = PressureEqualizingMode.External;
+
         private OperatingMode _operatingMode = OperatingMode.Pump;
 
         [SerializeField]
         private Transform _fans;
 
         private TweenerCore<Quaternion, Vector3, QuaternionOptions> _rotationTween;
-
-        private const float RotationSpeedSucking = 1f;
-
-        private const float RotationSpeedPumping = -1f;
-
-        private enum PressureEqualizingMode
-        {
-            Internal,
-            External,
-        }
-
-        private enum OperatingMode
-        {
-            Pump,
-            Suck,
-        }
 
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
@@ -158,8 +160,6 @@ namespace SS3D.Systems.Atmospherics
                     .
                     SetLoops(-1, LoopType.Incremental);
             }
-
         }
-
     }
 }

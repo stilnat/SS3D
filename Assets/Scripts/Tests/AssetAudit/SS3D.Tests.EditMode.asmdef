@@ -10,7 +10,8 @@
         "SS3D.Examine",
         "SS3D.Logging",
         "SS3D.Systems",
-        "Unity.Localization"
+        "Unity.Localization",
+        "SS3D.Tiles"
     ],
     "includePlatforms": [
         "Editor"

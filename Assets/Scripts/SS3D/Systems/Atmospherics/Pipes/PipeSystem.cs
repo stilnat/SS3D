@@ -18,8 +18,6 @@ namespace SS3D.Systems.Atmospherics
 
         public event Action OnSystemSetUp;
 
-        public bool IsSetUp { get; private set; }
-
         private bool _pipesGraphIsDirty;
 
         /// <summary>
@@ -32,6 +30,8 @@ namespace SS3D.Systems.Atmospherics
 
         private List<IAtmosDevice> _atmosDevices;
 
+        public bool IsSetUp { get; private set; }
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -40,7 +40,7 @@ namespace SS3D.Systems.Atmospherics
             _atmosDevices = new();
             IsSetUp = true;
             OnSystemSetUp?.Invoke();
-            Subsystems.Get<AtmosEnvironmentSystem>().AtmosTick += OnTick;
+            Subsystems.Get<AtmosEnvironmentSystem>().OnAtmosTick += OnTick;
         }
 
         public void RemoveAtmosDevice(IAtmosDevice atmosDevice)
@@ -87,7 +87,6 @@ namespace SS3D.Systems.Atmospherics
             PlacedTileObject tileObject = pipe.PlacedTileObject;
             PipeVertice pipeVertice = new((short)tileObject.WorldOrigin.x, (short)tileObject.WorldOrigin.y, (byte)tileObject.Layer);
 
-
             _pipesGraph.AddVertex(pipeVertice);
             List<PlacedTileObject> neighbours = tileObject.Connector?.GetConnectedNeighbours();
 
@@ -106,24 +105,6 @@ namespace SS3D.Systems.Atmospherics
             }
 
             _pipesGraphIsDirty = true;
-        }
-
-        private void OnTick(float dt)
-        {
-            if (_pipesGraphIsDirty)
-            {
-                UpdateAllNetPipesTopology();
-            }
-
-            foreach (IAtmosDevice atmosDevice in _atmosDevices)
-            {
-                atmosDevice.StepAtmos(dt);
-            }
-
-            foreach (PipeNet pipeNet in _netPipes.Values)
-            {
-                pipeNet.ApplyGasses();
-            }
         }
 
         public bool TryGetAtmosPipe(Vector3 worldPosition, TileLayer layer, out IAtmosPipe atmosPipe)
@@ -191,6 +172,24 @@ namespace SS3D.Systems.Atmospherics
             _pipesGraphIsDirty = true;
         }
 
+        private void OnTick(float dt)
+        {
+            if (_pipesGraphIsDirty)
+            {
+                UpdateAllNetPipesTopology();
+            }
+
+            foreach (IAtmosDevice atmosDevice in _atmosDevices)
+            {
+                atmosDevice.StepAtmos(dt);
+            }
+
+            foreach (PipeNet pipeNet in _netPipes.Values)
+            {
+                pipeNet.ApplyGasses();
+            }
+        }
+
         [Server]
         private void UpdateAllNetPipesTopology()
         {
@@ -234,28 +233,5 @@ namespace SS3D.Systems.Atmospherics
 
             _pipesGraphIsDirty = false;
         }
-    }
-
-    public interface IAtmosDevice
-    {
-        public void StepAtmos(float dt);
-    }
-
-    public interface IAtmosPipe
-    {
-        PlacedTileObject PlacedTileObject { get; }
-
-        public int PipeNetIndex { get; set; }
-
-        public AtmosObject AtmosObject { get; set; }
-
-        public TileLayer TileLayer { get; }
-
-        public Vector2Int WorldOrigin { get; }
-    }
-
-    public interface IAtmosValve : IAtmosPipe
-    {
-        public bool IsOpen { get; }
     }
 }

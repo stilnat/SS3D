@@ -13,24 +13,27 @@ namespace SS3D.Systems.Atmospherics
     {
         public enum ValveType
         {
-            Manual,
-            Digital
+            Manual = 0,
+            Digital = 1,
         }
 
-        public ValveType valveType;
+        [SerializeField]
+        private ValveType _valveType;
 
         [SerializeField]
         private bool _isEnabled = true;
 
         public PlacedTileObject PlacedTileObject => GetComponent<PlacedTileObject>();
 
-        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
-
         public int PipeNetIndex { get; set; }
 
         public AtmosObject AtmosObject { get; set; }
+
         public TileLayer TileLayer { get; private set; }
+
         public Vector2Int WorldOrigin { get; private set; }
+
+        public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         public override void OnStartServer()
         {
@@ -50,20 +53,6 @@ namespace SS3D.Systems.Atmospherics
             }
         }
 
-        private void SetValve(bool enable)
-        {
-            _isEnabled = enable;
-
-            if (_isEnabled)
-            {
-                Subsystems.Get<PipeSystem>().RegisterPipe(this);
-            }
-            else
-            {
-                Subsystems.Get<PipeSystem>().RemovePipe(this);
-            }
-        }
-
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             return new IInteraction[]
@@ -78,6 +67,20 @@ namespace SS3D.Systems.Atmospherics
         private void ValveInteract(InteractionEvent interactionEvent, InteractionReference arg2)
         {
             SetValve(!_isEnabled);
+        }
+
+        private void SetValve(bool enable)
+        {
+            _isEnabled = enable;
+
+            if (_isEnabled)
+            {
+                Subsystems.Get<PipeSystem>().RegisterPipe(this);
+            }
+            else
+            {
+                Subsystems.Get<PipeSystem>().RemovePipe(this);
+            }
         }
     }
 }

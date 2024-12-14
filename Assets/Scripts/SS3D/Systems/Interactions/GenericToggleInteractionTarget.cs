@@ -16,7 +16,8 @@ namespace SS3D.Systems.Interactions
     {
         [SyncVar]
         private bool _on;
-        public Action<bool> OnToggle;
+
+        public event Action<bool> OnToggle;
  
         private IInteractionPointProvider _interactionPointProvider;
 

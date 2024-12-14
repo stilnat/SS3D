@@ -16,11 +16,15 @@ namespace SS3D.Systems.Tile.TileMapCreator
     /// </summary>
     public class TileMapLoadTab : NetworkActor, ITileMenuTab
     {
+        private const int FontSelectedSize = 18;
+
+        private const int FontUnSelectedSize = 15;
+
         [SerializeField]
         private TileMapMenu _menu;
 
         /// <summary>
-        /// A prefab containing an input field for the name of a map, 
+        /// A prefab containing an input field for the name of a map,
         /// </summary>
         [SerializeField]
         private GameObject _mapNameSlotPrefab;
@@ -28,19 +32,16 @@ namespace SS3D.Systems.Tile.TileMapCreator
         [SerializeField]
         private GameObject _loadMapContentRoot;
 
-        private const int FontSelectedSize = 18;
-        private const int FontUnSelectedSize = 15;
-
         /// <summary>
         /// Clear the load tab.
         /// </summary>
         public void Clear()
         {
-            _loadMapContentRoot.gameObject.SetActive(false);
+            _loadMapContentRoot.SetActive(false);
 
             for (int i = 0; i < _loadMapContentRoot.transform.childCount; i++)
             {
-                _loadMapContentRoot.transform.GetChild(i).gameObject.Dispose(true);
+                _loadMapContentRoot.transform.GetChild(i).Dispose(true);
             }
         }
 
@@ -49,16 +50,16 @@ namespace SS3D.Systems.Tile.TileMapCreator
         /// </summary>
         public void Display()
         {
-            _loadMapContentRoot.gameObject.SetActive(true);
-            var MapNames = LocalStorage.GetAllObjectsNameInFolder(Subsystems.Get<TileSystem>().SavePath);
+            _loadMapContentRoot.SetActive(true);
+            List<string> mapNames = LocalStorage.GetAllObjectsNameInFolder(Subsystems.Get<TileSystem>().SavePath);
 
-            foreach (string mapName in MapNames)
+            foreach (string mapName in mapNames)
             {
                 string mapNameWithNoExtension = mapName.Substring(0, mapName.IndexOf("."));
                 GameObject slot = Instantiate(_mapNameSlotPrefab, _loadMapContentRoot.transform, true);
 
                 // I've no idea why but something modify the slots scale so it's necessary to adjust it here.
-                slot.transform.localScale= Vector3.one;
+                slot.transform.localScale = Vector3.one;
 
                 MapNameSlot mapNameSlot = slot.GetComponent<MapNameSlot>();
                 mapNameSlot.MapNameField.readOnly = true;
@@ -67,7 +68,7 @@ namespace SS3D.Systems.Tile.TileMapCreator
                 mapNameSlot.MapNameField.onSelect.AddListener((string x) => LoadMap(mapNameWithNoExtension));
                 mapNameSlot.DeleteButton.onClick.AddListener(() => DeleteMap(mapNameWithNoExtension));
                 mapNameSlot.RenameButton.onClick.AddListener(() => Rename(mapNameSlot.MapNameField));
-                slot.gameObject.SetActive(true);
+                slot.SetActive(true);
             }
         }
 
@@ -129,7 +130,6 @@ namespace SS3D.Systems.Tile.TileMapCreator
             mapNameField.textComponent.fontSize = FontSelectedSize;
         }
 
-
         /// <summary>
         /// Does the renaming at the end of edit, when clicking away from the input field.
         /// </summary>
@@ -155,7 +155,6 @@ namespace SS3D.Systems.Tile.TileMapCreator
             Refresh();
 
             mapNameField.onSelect.AddListener(delegate { LoadMap(mapNameField.text); });
-           
         }
     }
 }
