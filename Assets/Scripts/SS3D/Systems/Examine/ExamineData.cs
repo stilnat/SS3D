@@ -6,11 +6,13 @@ namespace SS3D.Systems.Examine
     [CreateAssetMenu(menuName = "Examine", fileName = "ExamineData")]
     public class ExamineData : ScriptableObject
     {
+        [SerializeField]
+        private LocalizedStringTable _localizationTable;
+
         /// <summary>
         /// The table holding the localization strings for this object.
         /// </summary>
-        [field:SerializeField]
-        public LocalizedStringTable LocalizationTable { get; private set; }
+        public LocalizedStringTable LocalizationTable => _localizationTable;
 
         /// <summary>
         /// Key to access the name of the object, when the cursor hovers over the item.

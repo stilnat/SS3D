@@ -88,7 +88,7 @@ namespace SS3D.Systems.Tile
             GameObject placedGameObject = Instantiate(tileObjectSo.Prefab);
             placedGameObject.transform.SetPositionAndRotation(worldPosition, Quaternion.Euler(0, TileHelper.GetRotationAngle(dir), 0));
 
-            if (placedGameObject.TryGetComponent(out PlacedTileObject placedObject))
+            if (!placedGameObject.TryGetComponent(out PlacedTileObject placedObject))
             {
                 // Ideally an editor script adds this instead of doing it at runtime
                 placedObject = placedGameObject.AddComponent<PlacedTileObject>();

@@ -42,10 +42,10 @@ namespace SS3D.Systems.Examine
             {
                 ExamineData data = examinable.GetData();
 
-                if (data.LocalizationTable != null)
+                if (data.LocalizationTable != null && !data.LocalizationTable.IsEmpty)
                 {
                     _currentStringTable = data.LocalizationTable?.GetTable();
-                    if (_currentStringTable[data.NameKey]?.LocalizedValue is null)
+                    if (!_currentStringTable || _currentStringTable[data.NameKey] is null || _currentStringTable[data.NameKey].LocalizedValue is null)
                     {
                         hoverTextToDisplay = data.NameKey + " *[to be localized]*";
                     }
