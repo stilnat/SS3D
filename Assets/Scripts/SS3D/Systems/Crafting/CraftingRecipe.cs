@@ -13,7 +13,7 @@ namespace SS3D.Systems.Crafting
     /// Crafting recipes allow to replace a bunch of item by another, using a specific interaction.
     /// </summary>
     [CreateAssetMenu(fileName = "Recipe", menuName = "SS3D/Crafting/Recipe")]
-    public class CraftingRecipe : ScriptableObject
+    public partial class CraftingRecipe : ScriptableObject
     {
         [FormerlySerializedAs("Target")]
         [Tooltip("The target of the crafting, what needs to be clicked on by the player to start the crafting.")]
