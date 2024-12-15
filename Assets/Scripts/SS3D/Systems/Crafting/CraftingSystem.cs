@@ -257,7 +257,7 @@ namespace SS3D.Systems.Crafting
             InteractionEvent interactionEvent,
             TaggedEdge<RecipeStep, RecipeStepLink> link)
         {
-            if (link.Target.IsTerminal)
+            if (!link.Target.IsTerminal)
             {
                 // Either apply some crafting on the current target, or do it on new game objects.
                 interactionEvent.Target.GetGameObject().GetComponent<ICraftable>()?.Modify(interaction, interactionEvent, link.Target.Name);
