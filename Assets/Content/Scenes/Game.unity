@@ -218,9 +218,9 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 246961643}
   _networkObjectCache: {fileID: 246961643}
+  _warmupSeconds: 1
   _roundState: 0
   _currentTimerSeconds: 0
-  _warmupSeconds: 1
 --- !u!114 &246961643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,12 +302,12 @@ MonoBehaviour:
   _componentIndexCache: 6
   _addedNetworkObject: {fileID: 1506918116}
   _networkObjectCache: {fileID: 1506918116}
-  SfxAudioSourcePrefab: {fileID: 2009473039716497087, guid: c06c615017500c94686e0eb5eb4402cf, type: 3}
-  MusicAudioSourcePrefab: {fileID: 506012496172542686, guid: 8d3ef04cfa66af24a8803a70f9d93a53, type: 3}
-  MinSfxAudioSources: 10
-  MaxSfxAudioSources: 30
-  MinMusicAudioSources: 3
-  MaxMusicAudioSources: 10
+  _sfxAudioSourcePrefab: {fileID: 2009473039716497087, guid: c06c615017500c94686e0eb5eb4402cf, type: 3}
+  _musicAudioSourcePrefab: {fileID: 506012496172542686, guid: 8d3ef04cfa66af24a8803a70f9d93a53, type: 3}
+  _minSfxAudioSources: 10
+  _maxSfxAudioSources: 30
+  _minMusicAudioSources: 3
+  _maxMusicAudioSources: 10
   _purgeFrequency: 2
 --- !u!114 &327065888 stripped
 MonoBehaviour:
@@ -342,11 +342,19 @@ PrefabInstance:
     - target: {fileID: 671993911563188758, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
       propertyPath: _networkBehaviours.Array.data[0]
       value: 
-      objectReference: {fileID: 337356181}
+      objectReference: {fileID: 0}
     - target: {fileID: 671993911563188758, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
       propertyPath: _networkBehaviours.Array.data[1]
       value: 
-      objectReference: {fileID: 337356180}
+      objectReference: {fileID: 0}
+    - target: {fileID: 1398417341146899860, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
+      propertyPath: _scenePathHash
+      value: 2499635508
+      objectReference: {fileID: 0}
+    - target: {fileID: 1398417341146899860, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
+      propertyPath: <SceneId>k__BackingField
+      value: 10735852758927368375
+      objectReference: {fileID: 0}
     - target: {fileID: 3668632408795746160, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
       propertyPath: _networkObjectCache
       value: 
@@ -405,28 +413,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
---- !u!114 &337356180 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3668632408795746160, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
-  m_PrefabInstance: {fileID: 337356179}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &337356181 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5277672805471324147, guid: 137c35d92407ced47ba10c5e0553c290, type: 3}
-  m_PrefabInstance: {fileID: 337356179}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555a9241a5054d04cbb220278204f9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &427758460 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7839063152655121251, guid: ef47552bb578a784f8ef9916b369b6fb, type: 3}
@@ -818,15 +804,11 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 1506918116}
   _networkObjectCache: {fileID: 1506918116}
-  substancesList:
-  - {fileID: 11400000, guid: 4d7f77f3af8ddb64a943ac9d824f7718, type: 2}
-  - {fileID: 11400000, guid: 7f1bb63c629a1834dad404114aac6f42, type: 2}
-  - {fileID: 11400000, guid: b8980899917cbe5448c75ab705a4751e, type: 2}
-  - {fileID: 11400000, guid: 051216e4e5bce264385ffe2c70500d9f, type: 2}
-  - {fileID: 11400000, guid: e1163ff5257b4c04aa9df8bb85fa6188, type: 2}
-  - {fileID: 11400000, guid: 2030145386ed160418f9a07c5d68774f, type: 2}
+  _substancesList:
   - {fileID: 11400000, guid: 02eff39cd6b70a64abc4a59e3cc1b4d3, type: 2}
-  recipes: []
+  - {fileID: 11400000, guid: 4d7f77f3af8ddb64a943ac9d824f7718, type: 2}
+  - {fileID: 11400000, guid: 2030145386ed160418f9a07c5d68774f, type: 2}
+  <Recipes>k__BackingField: []
 --- !u!1 &606666308
 GameObject:
   m_ObjectHideFlags: 0
@@ -1749,7 +1731,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021075485018, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -230.00002
+      value: -229.99997
       objectReference: {fileID: 0}
     - target: {fileID: 4468402021449001342, guid: cc5383d385556f443b2a7d3202f2b2c1, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2025,7 +2007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3038db747c2f84449947b0c478b6d20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HoverName: {fileID: 1177464309}
+  _hoverName: {fileID: 1177464309}
 --- !u!1 &1127411102
 GameObject:
   m_ObjectHideFlags: 0
@@ -2565,8 +2547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f60b6c7627b0e1442ba89319e509a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpdateRate: 0.1
   _usesParallelComputation: 0
+  <UpdateRate>k__BackingField: 0
 --- !u!114 &1798120481
 MonoBehaviour:
   m_ObjectHideFlags: 0
