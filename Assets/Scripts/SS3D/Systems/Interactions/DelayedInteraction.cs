@@ -44,7 +44,7 @@ namespace SS3D.Interactions
         }
 
         public abstract override string GetName(InteractionEvent interactionEvent);
-        public override Sprite GetIcon(InteractionEvent interactionEvent) { return Icon; }
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon;
         public abstract override bool CanInteract(InteractionEvent interactionEvent);
 
         /// <summary>
@@ -52,10 +52,10 @@ namespace SS3D.Interactions
         /// </summary>
         /// <param name="interactionEvent">The interaction event</param>
         /// <param name="reference">The reference to this interaction</param>
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public sealed override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             StartCounter();
-            return true;
+            return StartImmediately(interactionEvent, reference);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace SS3D.Interactions
         /// </summary>
         /// <param name="interactionEvent">The interaction event</param>
         /// <param name="reference">The reference to this interaction</param>
-        public override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
+        public sealed override bool Update(InteractionEvent interactionEvent, InteractionReference reference)
         {
             if (_lastCheck + CheckInterval < Time.time && _hasStarted)
             {
@@ -95,7 +95,7 @@ namespace SS3D.Interactions
             return true;
         }
 
-        protected void StartCounter()
+        private void StartCounter()
         {
             _startTime = Time.time;
             _lastCheck = _startTime;
@@ -110,5 +110,11 @@ namespace SS3D.Interactions
         /// </summary>
         /// <param name="interactionEvent">The interaction event</param>
         protected abstract void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference);
+
+        /// <summary>
+        /// first step of a delayed interaction.
+        /// </summary>
+        /// <param name="interactionEvent">The interaction event</param>
+        protected abstract bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference);
     }
 }

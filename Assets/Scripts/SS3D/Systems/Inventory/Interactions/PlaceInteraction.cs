@@ -99,17 +99,6 @@ namespace SS3D.Systems.Inventory.Interactions
             return rangeCheck;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            base.Start(interactionEvent, reference);
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            if (!hand) { return true; }
-            hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
-                InteractionType.Place, hand, hand.ItemInHand.GetComponent<AbstractHoldable>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
-            
-            return true;
-        }
-
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
             if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand is not null)
@@ -127,6 +116,16 @@ namespace SS3D.Systems.Inventory.Interactions
             item.Container.RemoveItem(item);
             item.GiveOwnership(null);
             item.transform.parent = null;
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+            if (!hand) { return true; }
+            hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
+                InteractionType.Place, hand, hand.ItemInHand.GetComponent<AbstractHoldable>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
+            
+            return true;
         }
     }
 }

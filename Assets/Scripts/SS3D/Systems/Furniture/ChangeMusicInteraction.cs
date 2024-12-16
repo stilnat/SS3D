@@ -54,10 +54,21 @@ namespace SS3D.Systems.Audio
             return false;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            StartCounter();
+            
+        }
 
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            if (interactionEvent.Target is Boombox boom)
+            {
+                boom.ChangeCurrentMusic();
+            }
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
             Hand hand = interactionEvent.Source as Hand;
 
             Vector3 point = interactionEvent.Point;
@@ -73,19 +84,6 @@ namespace SS3D.Systems.Audio
             }
             
             return true;
-        }
-
-        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            
-        }
-
-        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            if (interactionEvent.Target is Boombox boom)
-            {
-                boom.ChangeCurrentMusic();
-            }
         }
     }
 }

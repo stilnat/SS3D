@@ -55,24 +55,6 @@ namespace SS3D.Systems.Combat.Interactions
             return true;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            base.Start(interactionEvent, reference);
-
-            IInteractionTarget target = interactionEvent.Target;
-            IInteractionSource source = interactionEvent.Source;
-
-            // Curently just hit the first body part of an entity if it finds one.
-            // Should instead choose the body part using the target dummy doll ?
-            // Also should be able to hit with other things than just hands.
-            if (source.GetRootSource() is Hand hand)
-            {
-                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Hit, hand, null, interactionEvent.Point, Delay);
-            }
-
-            return true;
-        }
-
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
             
@@ -89,6 +71,22 @@ namespace SS3D.Systems.Combat.Interactions
                 entity.GetComponent<Ragdoll>().KnockDown(1f);
                 entity.GetComponent<Ragdoll>().AddForceToAllParts(-hand.Up);
             }
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            IInteractionTarget target = interactionEvent.Target;
+            IInteractionSource source = interactionEvent.Source;
+
+            // Curently just hit the first body part of an entity if it finds one.
+            // Should instead choose the body part using the target dummy doll ?
+            // Also should be able to hit with other things than just hands.
+            if (source.GetRootSource() is Hand hand)
+            {
+                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Hit, hand, null, interactionEvent.Point, Delay);
+            }
+
+            return true;
         }
     }
 }

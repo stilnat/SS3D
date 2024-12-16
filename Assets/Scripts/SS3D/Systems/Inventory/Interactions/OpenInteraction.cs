@@ -103,10 +103,23 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            base.Start(interactionEvent, reference);
+            
+        }
 
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            Debug.Log("in OpenInteraction, Start");
+            GameObject target = ((IGameObjectProvider) interactionEvent.Target).GameObject;
+            Animator animator = target.GetComponent<Animator>();
+            bool open = animator.GetBool(OpenId);
+            animator.SetBool(OpenId, !open);
+            OnOpenStateChange(!open);
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
             Hand hand = interactionEvent.Source as Hand;
 
             Vector3 point = interactionEvent.Point;
@@ -122,21 +135,6 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             return true;
-        }
-
-        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            
-        }
-
-        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            Debug.Log("in OpenInteraction, Start");
-            GameObject target = ((IGameObjectProvider) interactionEvent.Target).GameObject;
-            Animator animator = target.GetComponent<Animator>();
-            bool open = animator.GetBool(OpenId);
-            animator.SetBool(OpenId, !open);
-            OnOpenStateChange(!open);
         }
 
         private void OnOpenStateChange(bool e)

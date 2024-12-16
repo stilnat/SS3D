@@ -84,32 +84,6 @@ namespace SS3D.Systems.Crafting
             return InteractionExtensions.RangeCheck(interactionEvent);
         }
 
-        [Server]
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            StartCounter();
-            _startPosition = _characterTransform.position;
-            Subsystems.TryGet(out CraftingSystem craftingSystem);
-            craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
-            ViewLocator.Get<CraftingMenu>()[0].HideMenu();
-
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-
-            Vector3 point = interactionEvent.Point;
-
-            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
-            {
-                point = customPoint;
-            }
-
-            if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
-            {
-                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkBehaviour, point, Delay);
-            }
-
-            return true;
-        }
-
         [NotNull]
         public override string GetName(InteractionEvent interactionEvent)
         {
@@ -134,6 +108,30 @@ namespace SS3D.Systems.Crafting
                 craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
                 craftingSystem.Craft(this, interactionEvent);
             }
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            _startPosition = _characterTransform.position;
+            Subsystems.TryGet(out CraftingSystem craftingSystem);
+            craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
+            ViewLocator.Get<CraftingMenu>()[0].HideMenu();
+
+            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkBehaviour, point, Delay);
+            }
+
+            return true;
         }
     }
 }

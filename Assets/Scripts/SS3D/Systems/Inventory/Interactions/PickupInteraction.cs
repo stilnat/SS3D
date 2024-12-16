@@ -67,30 +67,6 @@ namespace SS3D.Systems.Inventory.Interactions
             return true;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            base.Start(interactionEvent, reference);
-
-            // remember that when we call this Start, we are starting the interaction per se
-            // so we check if the source of the interaction is a Hand, and if the target is an Item
-            if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
-            {
-
-                target.GiveOwnership(hand.Owner);
-                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Pickup, hand, target.Holdable, Vector3.zero, TimeToMoveBackItem + TimeToReachItem);
-
-                try {
-                    string ckey = hand.HandsController.Inventory.Body.Mind.player.Ckey;
-
-                    // and call the event for picking up items for the Game Mode System
-                    new ItemPickedUpEvent(target, ckey).Invoke(this);
-                }
-                catch { Debug.Log("Couldn't get Player Ckey"); }
-            }
-
-            return true;
-        }
-
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
             // We don't want to cancel the interaction if the item is already in hand
@@ -116,6 +92,28 @@ namespace SS3D.Systems.Inventory.Interactions
                 Item item = targetBehaviour.GameObject.GetComponent<Item>();
                 hand.Container.AddItem(item);
             }
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            // remember that when we call this Start, we are starting the interaction per se
+            // so we check if the source of the interaction is a Hand, and if the target is an Item
+            if (interactionEvent.Source is Hand hand && interactionEvent.Target is Item target)
+            {
+
+                target.GiveOwnership(hand.Owner);
+                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Pickup, hand, target.Holdable, Vector3.zero, TimeToMoveBackItem + TimeToReachItem);
+
+                try {
+                    string ckey = hand.HandsController.Inventory.Body.Mind.player.Ckey;
+
+                    // and call the event for picking up items for the Game Mode System
+                    new ItemPickedUpEvent(target, ckey).Invoke(this);
+                }
+                catch { Debug.Log("Couldn't get Player Ckey"); }
+            }
+
+            return true;
         }
     }
 }

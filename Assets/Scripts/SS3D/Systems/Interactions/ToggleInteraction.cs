@@ -81,28 +81,6 @@ namespace SS3D.Systems.Interactions
             return CanInteractCallback.Invoke(interactionEvent);
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            base.Start(interactionEvent, reference);
-            return true;
-
-            /* Hand hand = interactionEvent.Source as Hand;
-
-            Vector3 point = interactionEvent.Point;
-
-            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
-            {
-                point = customPoint;
-            }
-
-            if (hand != null)
-            {
-                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
-            }
-            
-            return true;*/
-        }
-
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
 
@@ -119,6 +97,27 @@ namespace SS3D.Systems.Interactions
                 toggle.Toggle();
             }
 
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            return true;
+
+            /* Hand hand = interactionEvent.Source as Hand;
+
+            Vector3 point = interactionEvent.Point;
+
+            if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
+            {
+                point = customPoint;
+            }
+
+            if (hand != null)
+            {
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
+            }
+
+            return true;*/
         }
     }
 }
