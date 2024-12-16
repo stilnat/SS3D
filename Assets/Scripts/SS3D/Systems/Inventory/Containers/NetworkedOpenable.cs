@@ -31,11 +31,7 @@ namespace SS3D.Systems.Inventory.Containers
 
     public virtual IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
     {
-        OpenInteraction openInteraction = new()
-        {
-            Icon = OverrideOpenIcon
-        };
-
+        OpenInteraction openInteraction = new();
         openInteraction.OnOpenStateChanged += OpenStateChanged;
 
         return new IInteraction[]

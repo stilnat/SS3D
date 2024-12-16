@@ -8,31 +8,33 @@ using UnityEngine;
 
 namespace SS3D.Substances
 {
-    public class TransferSubstanceInteraction : Interaction
+    public class TransferSubstanceInteraction : IInteraction
     {
-        public override InteractionType InteractionType => InteractionType.None;
+        public InteractionType InteractionType => InteractionType.None;
 
         /// <summary>
         /// Checks if the interaction should be possible
         /// </summary>
         public Predicate<InteractionEvent> CanInteractCallback { get; set; } = _ => true;
 
-        public override IClientInteraction CreateClient(InteractionEvent interactionEvent)
+        public string GetGenericName() => "Transfer";
+
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent)
         {
             return null;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
+        public string GetName(InteractionEvent interactionEvent)
         {
             return "Transfer";
         }
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
+        public Sprite GetIcon(InteractionEvent interactionEvent)
         {
             return null;
         }
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!InteractionExtensions.RangeCheck(interactionEvent))
             {
@@ -58,7 +60,7 @@ namespace SS3D.Substances
             return CanInteractCallback.Invoke(interactionEvent);
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             if (interactionEvent.Source is not IGameObjectProvider provider || !provider.GameObject.TryGetComponent(out SubstanceContainer container))
             {
@@ -71,6 +73,12 @@ namespace SS3D.Substances
             targetContainer.SetDirty();
 
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

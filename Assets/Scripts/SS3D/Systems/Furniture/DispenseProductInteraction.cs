@@ -2,6 +2,7 @@
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Tile;
 using UnityEngine;
 
@@ -10,20 +11,26 @@ namespace SS3D.Systems.Furniture
     /// <summary>
     /// The interaction to dispense a product on a VendingMachine.
     /// </summary>
-    public class DispenseProductInteraction : Interaction
+    public class DispenseProductInteraction : IInteraction
     {
         public string ProductName;
         public int ProductStock;
         public int ProductIndex;
-        
+
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
+
         /// <inheritdoc />
-        public override string GetName(InteractionEvent interactionEvent)
+        public string GetName(InteractionEvent interactionEvent)
         {
             return $"Dispense {ProductName} (x{ProductStock})";
         }
 
+        public string GetGenericName() => "Dispense";
+
+        public InteractionType InteractionType => InteractionType.Press;
+
         /// <inheritdoc />
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             IInteractionTarget target = interactionEvent.Target;
 
@@ -37,13 +44,10 @@ namespace SS3D.Systems.Furniture
         }
 
         /// <inheritdoc />
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Take;
-        }
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Take;
 
         /// <inheritdoc />
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionTarget target = interactionEvent.Target;
 
@@ -52,6 +56,12 @@ namespace SS3D.Systems.Furniture
                 vendingMachine.DispenseProduct(ProductIndex);
             }
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => throw new System.NotImplementedException();
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

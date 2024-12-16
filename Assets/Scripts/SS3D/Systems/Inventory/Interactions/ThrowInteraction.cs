@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
-    public class ThrowInteraction : Interaction
+    public class ThrowInteraction : IInteraction
     {
         private const float SecondPerMeterFactorDef = 0.3f;
 
@@ -23,7 +23,11 @@ namespace SS3D.Systems.Inventory.Interactions
         private const float MaxForce = 20;
 
         [NotNull]
-        public override string GetGenericName() => "Throw";
+        public string GetGenericName() => "Throw";
+
+        public InteractionType InteractionType => InteractionType.None;
+
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         /// <summary>
         /// Gets the name when interacted with a source
@@ -31,19 +35,19 @@ namespace SS3D.Systems.Inventory.Interactions
         /// <param name="interactionEvent">The source used in the interaction</param>
         /// <returns>The display name of the interaction</returns>
         [NotNull]
-        public override string GetName(InteractionEvent interactionEvent) => "Throw";
+        public string GetName(InteractionEvent interactionEvent) => "Throw";
 
         /// <summary>
         /// Gets the interaction icon
         /// </summary>
-        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Take;
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Take;
 
         /// <summary>
         /// Checks if this interaction can be executed
         /// </summary>
         /// <param name="interactionEvent">The interaction source</param>
         /// <returns>If the interaction can be executed</returns>
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if(interactionEvent.Source is not IGameObjectProvider source)
             {
@@ -71,7 +75,7 @@ namespace SS3D.Systems.Inventory.Interactions
             return !hand.Empty;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             if(interactionEvent.Source is not IGameObjectProvider source)
             {
@@ -89,6 +93,13 @@ namespace SS3D.Systems.Inventory.Interactions
             source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand.Holdable, Vector3.zero, 0.5f);
 
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => throw new NotImplementedException();
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            throw new NotImplementedException();
         }
 
         private async void ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)

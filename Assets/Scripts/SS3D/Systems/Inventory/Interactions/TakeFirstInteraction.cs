@@ -1,6 +1,8 @@
 ﻿using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using System.Linq;
@@ -9,7 +11,7 @@ using UnityEngine;
 namespace SS3D.Systems.Inventory.Interactions
 {
     // This Interaction takes the first available item inside a container
-    public sealed class TakeFirstInteraction : Interaction
+    public sealed class TakeFirstInteraction : IInteraction
     {
         private readonly AttachedContainer _attachedContainer;
 
@@ -24,22 +26,17 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
-        public override string GetGenericName()
-        {
-            return "Take";
-        }
+        public string GetGenericName() => "Take";
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Take in " + _attachedContainer.ContainerName;
-        }
+        public InteractionType InteractionType => InteractionType.None;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Take;
-        }
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => throw new System.NotImplementedException();
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public string GetName(InteractionEvent interactionEvent) => "Take in " + _attachedContainer.ContainerName;
+
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Take;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!InteractionExtensions.RangeCheck(interactionEvent))
             {
@@ -55,7 +52,7 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Hand hand = (Hand) interactionEvent.Source;
 
@@ -67,6 +64,12 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

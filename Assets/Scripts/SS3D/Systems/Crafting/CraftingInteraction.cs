@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using QuikGraph;
 using SS3D.Core;
+using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Systems.Animations;
@@ -56,7 +57,7 @@ namespace SS3D.Systems.Crafting
         /// <summary>
         /// Type of this interaction, defines which recipe will be available.
         /// </summary>
-        public InteractionType InteractionType => _type;
+        public override InteractionType InteractionType => _type;
 
         /// <summary>
         /// The transform of the game object executing the crafting interaction, useful to check if the source moved
@@ -68,6 +69,10 @@ namespace SS3D.Systems.Crafting
         /// The recipe link associated to this interaction. Crafting interactions are always associated to a recipe link.
         /// </summary>
         public TaggedEdge<RecipeStep, RecipeStepLink> ChosenLink => _chosenLink;
+
+        public override string GetGenericName() => "Craft";
+
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Take;
 
         /// <summary>
         /// Check if the crafting can occur.

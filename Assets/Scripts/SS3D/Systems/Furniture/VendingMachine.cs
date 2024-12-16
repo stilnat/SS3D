@@ -107,7 +107,6 @@ namespace SS3D.Systems.Furniture
                     ProductName = _productsToDispense[i].Product.NameString,
                     ProductIndex = i,
                     ProductStock = _productsToDispense[i].Stock,
-                    Icon = InteractionIcons.Take
                 };
             }
 

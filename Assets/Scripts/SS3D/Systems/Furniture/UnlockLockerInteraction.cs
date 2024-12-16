@@ -4,6 +4,7 @@ using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
 using SS3D.Systems.Furniture;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Traits;
 using System;
@@ -11,29 +12,30 @@ using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
-    public sealed class UnlockLockerInteraction : Interaction
+    public sealed class UnlockLockerInteraction : IInteraction
     {
-        private readonly IDPermission _permissionToUnlock;
-        private readonly Locker _locker;
-
         public event EventHandler<bool> OnOpenStateChanged;
+
+        private readonly IDPermission _permissionToUnlock;
+
+        private readonly Locker _locker;
 
         public UnlockLockerInteraction(Locker locker, IDPermission permission)
         {
             _locker = locker;
             _permissionToUnlock = permission;
         }
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Unlock Locker";
-        }
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Open;
-        }
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => throw new NotImplementedException();
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public string GetName(InteractionEvent interactionEvent) => "Unlock Locker";
+        public string GetGenericName() => throw new NotImplementedException();
+
+        public InteractionType InteractionType { get; }
+
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!InteractionExtensions.RangeCheck(interactionEvent))
             {
@@ -48,7 +50,7 @@ namespace SS3D.Systems.Inventory.Interactions
             return _locker.IsLocked && !_locker.IsOpen;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionSource source = interactionEvent.Source;
             if (source is IGameObjectProvider sourceGameObjectProvider)
@@ -70,6 +72,12 @@ namespace SS3D.Systems.Inventory.Interactions
                 return true;
             }
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

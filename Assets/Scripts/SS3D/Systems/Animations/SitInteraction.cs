@@ -1,6 +1,7 @@
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
@@ -12,31 +13,27 @@ namespace SS3D.Systems.Animations
     /// <summary>
     /// Interaction to allow sitting
     /// </summary>
-    public sealed class SitInteraction : Interaction
+    public sealed class SitInteraction : IInteraction
     {
 
         public float TimeToSit{ get; private set; }
 
-        public override InteractionType InteractionType => InteractionType.Sit;
+        public InteractionType InteractionType => InteractionType.Sit;
 
         public SitInteraction(float timeToSit)
         {
             TimeToSit = timeToSit;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Sit";
-        }
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
-        public override string GetGenericName() => "Sit";
+        public string GetName(InteractionEvent interactionEvent) => "Sit";
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon ? Icon : InteractionIcons.Discard;
-        }
+        public string GetGenericName() => "Sit";
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Discard;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!interactionEvent.Target.GetGameObject().TryGetComponent(out Sittable sit))
             {
@@ -51,12 +48,9 @@ namespace SS3D.Systems.Animations
             return true;
         }
 
-        private bool GoodDistanceFromRootToSit(Transform sit, Transform playerRoot)
-        {
-            return Vector3.Distance(playerRoot.position, sit.position) < 2f;
-        }
+        private bool GoodDistanceFromRootToSit(Transform sit, Transform playerRoot) => Vector3.Distance(playerRoot.position, sit.position) < 2f;
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
 
@@ -70,7 +64,9 @@ namespace SS3D.Systems.Animations
             return false;
         }
 
-        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Debug.Log("attempting to cancel animation");
 

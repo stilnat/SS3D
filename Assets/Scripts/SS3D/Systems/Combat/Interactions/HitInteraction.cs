@@ -22,20 +22,13 @@ namespace SS3D.Systems.Combat.Interactions
             Delay = time;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Hit";
-        }
+        public override string GetName(InteractionEvent interactionEvent) => "Hit";
 
-        public override string GetGenericName()
-        {
-            return "Hit";
-        }
+        public override string GetGenericName() => "Hit";
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Nuke;
-        }
+        public override InteractionType InteractionType => InteractionType.Hit;
+
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Nuke;
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {

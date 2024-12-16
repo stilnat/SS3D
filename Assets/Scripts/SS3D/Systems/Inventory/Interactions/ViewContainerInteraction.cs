@@ -1,13 +1,15 @@
 ﻿using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
-    public class ViewContainerInteraction : Interaction
+    public class ViewContainerInteraction : IInteraction
     {
         public float MaxDistance { get; set; }
 
@@ -18,22 +20,17 @@ namespace SS3D.Systems.Inventory.Interactions
             AttachedContainer = attachedContainer;
         }
 
-        public override string GetGenericName()
-        {
-            return "View Container";
-        }
+        public string GetGenericName() => "View Container";
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "View " + AttachedContainer.ContainerName;
-        }
+        public InteractionType InteractionType => InteractionType.None;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Open;
-        }
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public string GetName(InteractionEvent interactionEvent) => "View " + AttachedContainer.ContainerName;
+
+        public Sprite GetIcon(InteractionEvent interactionEvent) =>InteractionIcons.Open;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!InteractionExtensions.RangeCheck(interactionEvent))
             {
@@ -45,7 +42,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            var containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
+            ContainerViewer containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
             if (containerViewer == null)
             {
                 return false;
@@ -59,13 +56,19 @@ namespace SS3D.Systems.Inventory.Interactions
             return !containerViewer.HasContainer(AttachedContainer) && entity.GetComponent<Hands>().SelectedHand.CanInteract(AttachedContainer.gameObject);
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            var containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
+            ContainerViewer containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
 
             containerViewer.ShowContainerUI(AttachedContainer);
 
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

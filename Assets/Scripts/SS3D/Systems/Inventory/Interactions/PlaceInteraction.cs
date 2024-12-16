@@ -40,18 +40,12 @@ namespace SS3D.Systems.Inventory.Interactions
         }
 
         [NotNull]
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Place";
-        }
+        public override string GetName(InteractionEvent interactionEvent) => "Place";
 
         [NotNull]
         public override string GetGenericName() => "Place";
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon ? Icon : InteractionIcons.Discard;
-        }
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Discard;
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {

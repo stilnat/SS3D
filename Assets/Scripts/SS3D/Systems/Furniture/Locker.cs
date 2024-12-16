@@ -102,11 +102,8 @@ namespace SS3D.Systems.Furniture
 
             LockLockerInteraction lockLockerInteraction = new(this, permissionToUnlock);
             UnlockLockerInteraction unlockLockerInteraction = new(this, permissionToUnlock);
-            
-            LockerDoorInteraction lockerDoorInteraction = new(this)
-            {
-                Name = IsOpen ? "Close Locker" : "Open Locker",
-            };
+
+            LockerDoorInteraction lockerDoorInteraction = new(this);
             
             interactions.Add(lockLockerInteraction);
             interactions.Add(unlockLockerInteraction);

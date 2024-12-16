@@ -6,6 +6,7 @@ using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Furniture;
 using SS3D.Systems.GameModes.Events;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.PlayerControl;
 using UnityEngine;
 
@@ -14,19 +15,19 @@ namespace SS3D.Systems.Inventory.Items.Generic
     /// <summary>
     /// Boom.
     /// </summary>
-    public class NukeDetonateInteraction : Interaction
+    public class NukeDetonateInteraction : IInteraction
     {
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Detonate Nuke";
-        }
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
-        {
-            return Icon != null ? Icon : InteractionIcons.Nuke;
-        }
+        public string GetName(InteractionEvent interactionEvent) => "Detonate Nuke";
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public string GetGenericName() => "Detonate Nuke";
+
+        public InteractionType InteractionType => InteractionType.None;
+
+        public Sprite GetIcon(InteractionEvent interactionEvent) =>InteractionIcons.Nuke;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             IInteractionSource source = interactionEvent.Source;
             bool inRange = InteractionExtensions.RangeCheck(interactionEvent);
@@ -44,7 +45,7 @@ namespace SS3D.Systems.Inventory.Items.Generic
             return true;
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionSource source = interactionEvent.Source;
             IInteractionTarget target = interactionEvent.Target;
@@ -55,6 +56,12 @@ namespace SS3D.Systems.Inventory.Items.Generic
                 new NukeDetonateEvent(nuke, playerSystem.GetCkey(source.GetComponentInParent<Entity>().Owner)).Invoke(this);
             }
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

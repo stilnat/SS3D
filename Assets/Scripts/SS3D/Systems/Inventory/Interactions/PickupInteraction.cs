@@ -31,15 +31,14 @@ namespace SS3D.Systems.Inventory.Interactions
         }
 
         [NotNull]
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Pick up";
-        }
+        public override string GetName(InteractionEvent interactionEvent) => "Pick up";
 
         [NotNull]
         public override string GetGenericName() => "Pickup";
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Take;
+        public override InteractionType InteractionType => InteractionType.Pickup;
+
+        public override Sprite GetIcon(InteractionEvent interactionEvent) =>InteractionIcons.Take;
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {

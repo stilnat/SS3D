@@ -18,7 +18,7 @@ namespace SS3D.Systems.Audio
     
         public override InteractionType InteractionType => InteractionType.Press;
 
-        public override IClientInteraction CreateClient(InteractionEvent interactionEvent)
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent)
         {
             return null;
         }

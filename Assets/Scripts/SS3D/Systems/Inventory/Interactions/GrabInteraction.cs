@@ -24,11 +24,15 @@ public class GrabInteraction : ContinuousInteraction
         Delay = TimeToReachGrabPlace;
     }
 
+    public override IClientInteraction CreateClient(InteractionEvent interactionEvent) => new ClientDelayedInteraction();
+
     public override string GetName(InteractionEvent interactionEvent) => "Grab";
 
     public override string GetGenericName() => "Grab";
 
     public override InteractionType InteractionType => InteractionType.Grab;
+
+    public override Sprite GetIcon(InteractionEvent interactionEvent) => throw new System.NotImplementedException();
 
     public override bool CanInteract(InteractionEvent interactionEvent)
     {
@@ -58,10 +62,8 @@ public class GrabInteraction : ContinuousInteraction
         return true;
     }
 
-    public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+    protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
     {
-        base.Start(interactionEvent, reference);
-
         Hand hand = interactionEvent.Source.GetRootSource() as Hand;
         Draggable grabbable = interactionEvent.Target as Draggable;
         
@@ -77,7 +79,6 @@ public class GrabInteraction : ContinuousInteraction
         _grabbedBodyPart = interactionEvent.Target as Draggable;
         _previousOwner = _grabbedBodyPart.Owner;
         _grabbedBodyPart.NetworkObject.GiveOwnership(hand.Owner);
-
     }
     
 

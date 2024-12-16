@@ -2,6 +2,7 @@
 using QuikGraph;
 using SS3D.Core;
 using SS3D.Interactions;
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Interactions;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace SS3D.Systems.Crafting
 {
-    public sealed class OpenCraftingMenuInteraction : Interaction
+    public sealed class OpenCraftingMenuInteraction : IInteraction
     {
         private InteractionType _interactionType;
 
@@ -18,10 +19,12 @@ namespace SS3D.Systems.Crafting
             _interactionType = craftingInteraction;
         }
 
-        public override InteractionType InteractionType => InteractionType.None;
+        public InteractionType InteractionType => InteractionType.None;
 
         [NotNull]
-        public override string GetGenericName() => "Open crafting menu";
+        public string GetGenericName() => "Open crafting menu";
+
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         /// <summary>
         /// Get the name of the interaction
@@ -29,12 +32,12 @@ namespace SS3D.Systems.Crafting
         /// <param name="interactionEvent">The source used in the interaction</param>
         /// <returns>The display name of the interaction</returns>
         [NotNull]
-        public override string GetName(InteractionEvent interactionEvent) => "Open crafting menu";
+        public string GetName(InteractionEvent interactionEvent) => "Open crafting menu";
 
         /// <summary>
         /// Get the icon of the interaction
         /// </summary>
-        public override Sprite GetIcon(InteractionEvent interactionEvent)
+        public Sprite GetIcon(InteractionEvent interactionEvent)
         {
             return null;
         }
@@ -44,7 +47,7 @@ namespace SS3D.Systems.Crafting
         /// </summary>
         /// <param name="interactionEvent">The interaction source</param>
         /// <returns>If the interaction can be executed</returns>
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!Subsystems.TryGet(out CraftingSystem craftingSystem))
             {
@@ -63,13 +66,19 @@ namespace SS3D.Systems.Crafting
         /// <param name="interactionEvent">The source used in the interaction</param>
         /// <param name="reference"></param>
         /// <returns>If the interaction should continue running</returns>
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             List<CraftingInteraction> craftingInteractions = craftingSystem.CreateInteractions(interactionEvent, _interactionType);
             ViewLocator.Get<CraftingMenu>()[0].DisplayMenu(craftingInteractions, interactionEvent, reference, _interactionType);
 
             return true;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }

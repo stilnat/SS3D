@@ -3,13 +3,14 @@ using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
-    public sealed class StoreInteraction : Interaction
+    public sealed class StoreInteraction : IInteraction
     {
         private readonly AttachedContainer _attachedContainer;
 
@@ -18,12 +19,18 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
+
         [NotNull]
-        public override string GetName(InteractionEvent interactionEvent) => "Store in " + _attachedContainer.ContainerName;
+        public string GetName(InteractionEvent interactionEvent) => "Store in " + _attachedContainer.ContainerName;
 
-        public override Sprite GetIcon(InteractionEvent interactionEvent) => Icon != null ? Icon : InteractionIcons.Discard;
+        public string GetGenericName() => "Store";
 
-        public override bool CanInteract(InteractionEvent interactionEvent)
+        public InteractionType InteractionType => InteractionType.None;
+
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Discard;
+
+        public bool CanInteract(InteractionEvent interactionEvent)
         {
             if (!InteractionExtensions.RangeCheck(interactionEvent))
             {
@@ -56,7 +63,7 @@ namespace SS3D.Systems.Inventory.Interactions
             return target.CanContainItem(item);
         }
 
-        public override bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionSource source = interactionEvent.Source;
             if (source is IGameObjectProvider sourceGameObjectProvider)
@@ -69,6 +76,12 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             return false;
+        }
+
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+
+        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        {
         }
     }
 }
