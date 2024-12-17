@@ -26,10 +26,10 @@ namespace SS3D.Systems.Inventory.Interactions
             _permissionToUnlock = permission;
         }
 
-        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => throw new NotImplementedException();
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         public string GetName(InteractionEvent interactionEvent) => "Unlock Locker";
-        public string GetGenericName() => throw new NotImplementedException();
+        public string GetGenericName() => "Unlock Locker";
 
         public InteractionType InteractionType { get; }
 

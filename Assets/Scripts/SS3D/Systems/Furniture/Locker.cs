@@ -2,6 +2,7 @@ using Coimbra;
 using DG.Tweening;
 using FishNet.Object.Synchronizing;
 using JetBrains.Annotations;
+using SS3D.Content.Systems.Interactions;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
@@ -103,7 +104,10 @@ namespace SS3D.Systems.Furniture
             LockLockerInteraction lockLockerInteraction = new(this, permissionToUnlock);
             UnlockLockerInteraction unlockLockerInteraction = new(this, permissionToUnlock);
 
-            LockerDoorInteraction lockerDoorInteraction = new(this);
+            SimpleInteraction lockerDoorInteraction = new()
+            {
+                Name = IsOpen ? "Close locker" : "Open locker", Interact = OpenOrClose, CanInteractCallback = CanOpenOrClose, RangeCheck = true,
+            };
             
             interactions.Add(lockLockerInteraction);
             interactions.Add(unlockLockerInteraction);
@@ -117,5 +121,12 @@ namespace SS3D.Systems.Furniture
         }
 
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => TryGetInteractionPoint(source, out point);
+
+        private bool CanOpenOrClose(InteractionEvent interactionEvent) => !IsLocked && InteractionExtensions.RangeCheck(interactionEvent);
+
+        private void OpenOrClose(InteractionEvent interactionEvent, InteractionReference interactionReference)
+        {
+            IsOpen = !IsOpen;
+        }
     }
 }
