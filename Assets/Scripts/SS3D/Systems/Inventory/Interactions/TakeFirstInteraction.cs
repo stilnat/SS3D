@@ -15,10 +15,6 @@ namespace SS3D.Systems.Inventory.Interactions
     {
         private readonly AttachedContainer _attachedContainer;
 
-        public float TimeToMoveBackItem { get; private set; }
-
-        public float TimeToReachItem { get; private set; }
-
         public TakeFirstInteraction(AttachedContainer attachedContainer, float timeToMoveBackItem, float timeToReachItem)
         {
             TimeToMoveBackItem = timeToMoveBackItem;
@@ -26,9 +22,13 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
-        public string GetGenericName() => "Take";
+        public float TimeToMoveBackItem { get; private set; }
+
+        public float TimeToReachItem { get; private set; }
 
         public InteractionType InteractionType => InteractionType.None;
+
+        public string GetGenericName() => "Take";
 
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => throw new System.NotImplementedException();
 
@@ -44,9 +44,9 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             // Will only appear if the current hand is empty and the container isn't empty
-            if (interactionEvent.Source is Hand hand && _attachedContainer != null)
+            if (interactionEvent.Source is IItemHolder itemHolder && _attachedContainer != null)
             {
-                return hand.IsEmpty() && !_attachedContainer.Empty;
+                return itemHolder.Empty && !_attachedContainer.Empty;
             }
 
             return false;
@@ -54,13 +54,11 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Hand hand = (Hand) interactionEvent.Source;
-
             Item pickupItem = _attachedContainer.Items.First();
 
-            if (pickupItem != null)
+            if (pickupItem != null && interactionEvent.Source is IContainerProvider containerProvider)
             {
-                //hand.Pickup(pickupItem, TimeToMoveBackItem, TimeToReachItem);
+                containerProvider.Container.AddItem(pickupItem);
             }
 
             return false;

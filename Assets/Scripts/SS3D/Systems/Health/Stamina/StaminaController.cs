@@ -87,7 +87,7 @@ namespace SS3D.Systems.Health
         {
             if (IsServer)
             {
-                _stamina.RechargeStamina(updateEvent.DeltaTime);
+                //_stamina.RechargeStamina(updateEvent.DeltaTime);
             }
         }
 

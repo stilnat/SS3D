@@ -1,4 +1,3 @@
-
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Observing;
@@ -14,7 +13,7 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
         /// </summary>
         [Tooltip("ClientId a connection must be to pass the condition.")]
         [SerializeField]
-        private int _id = 0;
+        private int _id;
 
         /// <summary>
         /// Returns if the object which this condition resides should be visible to connection.
@@ -24,23 +23,27 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
         /// <param name="notProcessed">True if the condition was not processed. This can be used to skip processing for performance. While output as true this condition result assumes the previous ConditionMet value.</param>
         public override bool ConditionMet(NetworkConnection connection, bool currentlyAdded, out bool notProcessed)
         {
-            var container = NetworkObject.GetComponent<AttachedContainer>();
+            AttachedContainer container = NetworkObject.GetComponent<AttachedContainer>();
             notProcessed = false;
 
-            float sqrMaximumDistance = (container.MaxDistance * container.MaxDistance);
+            float sqrMaximumDistance = container.MaxDistance * container.MaxDistance;
 
             Vector3 thisPosition = NetworkObject.transform.position;
             foreach (NetworkObject nob in connection.Objects)
             {
-                //If within distance.
+                // If within distance.
                 if (Vector3.SqrMagnitude(nob.transform.position - thisPosition) <= sqrMaximumDistance)
                 {
                     // Must be opened for it's content to be visible.
                     if (container.IsOpenable && container.ContainerInteractive.IsOpen())
+                    {
                         return true;
-                    else if (!container.IsOpenable) return true;
+                    }
+                    else if (!container.IsOpenable)
+                    {
+                        return true;
+                    }
                 }
-
             }
 
             /* If here no client objects are within distance. */
@@ -64,7 +67,5 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
         {
             return this;
         }
-
     }
 }
-

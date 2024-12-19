@@ -1,13 +1,11 @@
-﻿using JetBrains.Annotations;
-using System;
+﻿using FishNet.Object;
+using JetBrains.Annotations;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
-using SS3D.Systems.Animations;
-using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
+using System;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
@@ -16,10 +14,6 @@ namespace SS3D.Systems.Inventory.Interactions
     [Serializable]
     public class PlaceInteraction : DelayedInteraction
     {
-        public float TimeToMoveBackHand { get; private set; }
-
-        public float TimeToReachDropPlace { get; private set; }
-
         /// <summary>
         /// The maximum angle of surface the item will allow being dropped on
         /// </summary>
@@ -30,14 +24,18 @@ namespace SS3D.Systems.Inventory.Interactions
         /// </summary>
         private LayerMask _defaultMask = LayerMask.GetMask("Default");
 
-        public override InteractionType InteractionType => InteractionType.Place;
-
         public PlaceInteraction(float timeToMoveBackHand, float timeToReachDropPlace)
         {
             TimeToReachDropPlace = timeToReachDropPlace;
             TimeToMoveBackHand = timeToMoveBackHand;
             Delay = TimeToReachDropPlace;
         }
+
+        public float TimeToMoveBackHand { get; private set; }
+
+        public float TimeToReachDropPlace { get; private set; }
+
+        public override InteractionType InteractionType => InteractionType.Place;
 
         [NotNull]
         public override string GetName(InteractionEvent interactionEvent) => "Place";
@@ -50,44 +48,26 @@ namespace SS3D.Systems.Inventory.Interactions
         public override bool CanInteract(InteractionEvent interactionEvent)
         {
             // If item is not in hand return false
-            if (interactionEvent.Source.GetRootSource() is not Hand)
-            {
-                return false;
-            }
-
-            Entity entity = interactionEvent.Source.GetComponentInParent<Entity>();
-            if (!entity)
+            if (interactionEvent.Source.GetRootSource() is not IItemHolder)
             {
                 return false;
             }
 
             // Confirm the entities ViewPoint can see the drop point
-            Vector3 direction = (interactionEvent.Point - entity.ViewPoint.transform.position).normalized;
-            bool raycast = Physics.Raycast(entity.ViewPoint.transform.position, direction, out RaycastHit hit, 
-                Mathf.Infinity, _defaultMask);
+            Vector3 direction = (interactionEvent.Point - interactionEvent.Source.GameObject.transform.position).normalized;
+            bool raycast = Physics.Raycast(interactionEvent.Source.GameObject.transform.position, direction, out RaycastHit hit, Mathf.Infinity, _defaultMask);
             if (!raycast)
             {
                 return false;
             }
 
-            // Confirm raycasted hit point is near the interaction point.
-            // This is necessary because interaction rays are casted from the camera, not from view point
-           // if (Vector3.Distance(interactionEvent.Point, hit.point) > 0.1)
-            //{
-            //    return false;
-           // }
-            
             // Consider if the surface is facing up
             float angle = Vector3.Angle(interactionEvent.Normal, Vector3.up);
             if (angle > _maxSurfaceAngle)
             {
                 return false;
             }
-            
-            if (interactionEvent.Source.GetRootSource() is not Hand)
-            {
-                return false;
-            }
+
             bool rangeCheck = InteractionExtensions.RangeCheck(interactionEvent);
 
             return rangeCheck;
@@ -95,18 +75,20 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            if (interactionEvent.Source.GetRootSource() is Hand hand && hand.ItemInHand is not null)
+            if (interactionEvent.Source.GetRootSource() is IItemHolder itemHolder && itemHolder.ItemHeld && interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate itemHolderAnimated)
             {
-                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
+                itemHolderAnimated.CancelSourceAnimation(InteractionType.Place, interactionEvent.Target.GetComponent<NetworkObject>(), TimeToMoveBackHand + TimeToReachDropPlace);
             }
         }
 
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            if (!hand) { return; }
+            if (interactionEvent.Source.GetRootSource() is not IItemHolder hand)
+            {
+                return;
+            }
 
-            Item item = hand.ItemInHand;
+            Item item = hand.ItemHeld;
             item.Container.RemoveItem(item);
             item.GiveOwnership(null);
             item.transform.parent = null;
@@ -114,11 +96,12 @@ namespace SS3D.Systems.Inventory.Interactions
 
         protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            if (!hand) { return true; }
-            hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(
-                InteractionType.Place, hand, hand.ItemInHand.GetComponent<AbstractHoldable>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
-            
+            if (interactionEvent.Source.GetRootSource() is not IInteractionSourceAnimate hand)
+            {
+                return true;
+            }
+
+            hand.PlaySourceAnimation(InteractionType.Place, interactionEvent.Target.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
             return true;
         }
     }

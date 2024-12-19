@@ -19,7 +19,8 @@
         "Unity.InputSystem",
         "Unity.InputSystem.TestFramework",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "SS3D.Inventory"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

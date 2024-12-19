@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Coimbra;
-using SS3D.Core;
+﻿using Coimbra;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Inventory.Containers;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Serialization;
-using SS3D.Logging;
 
 namespace SS3D.Systems.Inventory.UI
 {
@@ -18,23 +14,25 @@ namespace SS3D.Systems.Inventory.UI
     public class ContainerView : View
     {
         /// <summary>
-        /// The script handling logic regarding when to remove and add container UIs.
-        /// </summary>
-        private ContainerViewer containerViewer;
-
-        /// <summary>
         /// List of displayed containers on the player screen.
         /// </summary>
         private readonly List<ContainerDisplay> _containerDisplays = new();
 
         /// <summary>
+        /// The script handling logic regarding when to remove and add container UIs.
+        /// </summary>
+        private ContainerViewer _containerViewer;
+
+        /// <summary>
         /// The prefab for a container display
         /// </summary>
-        public GameObject ContainerUiPrefab;
+        [FormerlySerializedAs("ContainerUiPrefab")]
+        [SerializeField]
+        private GameObject _containerUiPrefab;
 
         public void Setup(ContainerViewer viewer)
         {
-            containerViewer = viewer;
+            _containerViewer = viewer;
             viewer.OnContainerOpened += InventoryOnContainerOpened;
             viewer.OnContainerClosed += InventoryOnContainerClosed;
         }
@@ -70,13 +68,12 @@ namespace SS3D.Systems.Inventory.UI
                 }
             }
 
-            GameObject ui = Instantiate(ContainerUiPrefab);
+            GameObject ui = Instantiate(_containerUiPrefab);
             ContainerUi containerUi = ui.GetComponent<ContainerUi>();
             Assert.IsNotNull(containerUi);
             containerUi.AttachedContainer = container;
-            containerUi.Inventory = containerViewer.inventory;
+            containerUi.Inventory = _containerViewer.Inventory;
             _containerDisplays.Add(new ContainerDisplay(ui, container));
         }
     }
 }
-

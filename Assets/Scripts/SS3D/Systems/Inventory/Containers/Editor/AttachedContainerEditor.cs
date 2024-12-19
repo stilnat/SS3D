@@ -32,15 +32,13 @@ public class AttachedContainerEditor : Editor
         TitleStyle.normal.textColor = Color.white;
 
         attachedContainer = (AttachedContainer)target;
-        var SerializedAutomaticContainerSetUp = serializedObject.FindProperty("_automaticContainerSetUp");
+        SerializedProperty SerializedAutomaticContainerSetUp = serializedObject.FindProperty("_automaticContainerSetUp");
         if (SerializedAutomaticContainerSetUp.boolValue)
         {
             AddBase();
             containerInteractive = attachedContainer.ContainerInteractive;
             containerItemDisplay = attachedContainer.ContainerItemDisplay;
         }
-
-
     }
 
 
@@ -346,7 +344,7 @@ public class AttachedContainerEditor : Editor
         GameObject networkedParent = GetParentNetworkIdentity(attachedContainer.gameObject);
         sp.objectReferenceValue = networkedParent != null ? networkedParent.AddComponent<ContainerInteractive>() : attachedContainer.gameObject.AddComponent<ContainerInteractive>();
         serializedObject.ApplyModifiedProperties();
-        attachedContainer.ContainerInteractive.attachedContainer = attachedContainer;
+        attachedContainer.ContainerInteractive.AttachedContainer = attachedContainer;
     }
 
     private void RemoveInteractive()
@@ -365,7 +363,7 @@ public class AttachedContainerEditor : Editor
         SerializedProperty sp = serializedObject.FindProperty("ContainerItemDisplay");
         sp.objectReferenceValue = attachedContainer.gameObject.AddComponent<ContainerItemDisplay>();
         serializedObject.ApplyModifiedProperties();
-        attachedContainer.ContainerItemDisplay.attachedContainer = attachedContainer;
+        attachedContainer.ContainerItemDisplay.AttachedContainer = attachedContainer;
     }
 
     private void RemoveCustomDisplay()

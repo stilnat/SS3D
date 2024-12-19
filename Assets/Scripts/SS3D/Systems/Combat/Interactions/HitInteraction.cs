@@ -6,6 +6,7 @@ using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Health;
 using SS3D.Data.Generated;
+using SS3D.Intents;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;

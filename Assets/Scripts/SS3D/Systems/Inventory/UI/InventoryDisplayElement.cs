@@ -1,20 +1,13 @@
+using SS3D.Logging;
 using SS3D.Systems.Inventory.Items;
-using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using SS3D.Logging;
 
 namespace SS3D.Systems.Inventory.UI
 {
     public abstract class InventoryDisplayElement : MonoBehaviour, IDropHandler
     {
-        public HumanInventory Inventory;
-
-        /// <summary>
-        /// Called when an item is being dropped onto this display
-        /// </summary>
-        /// <param name="display"></param>
-        public abstract void OnItemDisplayDrop(ItemDisplay display);
+        public IInventory Inventory { get; set; }
 
         /// <summary>
         /// Called when an item is dragged and dropped outside
@@ -27,15 +20,18 @@ namespace SS3D.Systems.Inventory.UI
 
         public void OnDrop(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Left) return;
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
+
             GameObject drag = eventData.pointerDrag;
             if (drag == null)
             {
                 return;
             }
 
-            ItemDisplay display = drag.GetComponent<ItemDisplay>();
-            if (display == null)
+            if (drag.TryGetComponent(out ItemDisplay display))
             {
                 Log.Warning(this, "dragging on null display");
                 return;
@@ -43,5 +39,11 @@ namespace SS3D.Systems.Inventory.UI
 
             OnItemDisplayDrop(display);
         }
+
+        /// <summary>
+        /// Called when an item is being dropped onto this display
+        /// </summary>
+        /// <param name="display"></param>
+        protected abstract void OnItemDisplayDrop(ItemDisplay display);
     }
 }

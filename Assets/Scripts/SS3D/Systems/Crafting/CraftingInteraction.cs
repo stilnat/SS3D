@@ -133,7 +133,7 @@ namespace SS3D.Systems.Crafting
 
             if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkBehaviour, point, Delay);
+                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkObject, point, Delay);
             }
 
             return true;

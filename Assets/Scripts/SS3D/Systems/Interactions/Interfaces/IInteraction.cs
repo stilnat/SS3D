@@ -10,6 +10,11 @@ namespace SS3D.Interactions.Interfaces
     public interface IInteraction
     {
         /// <summary>
+        /// Type of the interaction, can be used to play specific animations, used in the crafting system too
+        /// </summary>
+        InteractionType InteractionType { get; }
+
+        /// <summary>
         /// Creates a client interaction (client-side)
         /// </summary>
         IClientInteraction CreateClient(InteractionEvent interactionEvent);
@@ -27,11 +32,6 @@ namespace SS3D.Interactions.Interfaces
         /// </summary>
         /// <returns></returns>
         string GetGenericName();
-
-        /// <summary>
-        /// Type of the interaction, can be used to play specific animations, used in the crafting system too
-        /// </summary>
-        InteractionType InteractionType { get; }
 
         /// <summary>
         /// Gets the interaction icon

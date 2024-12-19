@@ -2,7 +2,6 @@
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
@@ -11,24 +10,24 @@ namespace SS3D.Systems.Inventory.Interactions
 {
     public class ViewContainerInteraction : IInteraction
     {
-        public float MaxDistance { get; set; }
-
-        public readonly AttachedContainer AttachedContainer;
+        private readonly AttachedContainer _attachedContainer;
 
         public ViewContainerInteraction(AttachedContainer attachedContainer)
         {
-            AttachedContainer = attachedContainer;
+            _attachedContainer = attachedContainer;
         }
-
-        public string GetGenericName() => "View Container";
 
         public InteractionType InteractionType => InteractionType.None;
 
+        public float MaxDistance { get; set; }
+
+        public string GetGenericName() => "View Container";
+
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
-        public string GetName(InteractionEvent interactionEvent) => "View " + AttachedContainer.ContainerName;
+        public string GetName(InteractionEvent interactionEvent) => "View " + _attachedContainer.ContainerName;
 
-        public Sprite GetIcon(InteractionEvent interactionEvent) =>InteractionIcons.Open;
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
 
         public bool CanInteract(InteractionEvent interactionEvent)
         {
@@ -37,7 +36,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            if (AttachedContainer == null)
+            if (_attachedContainer == null)
             {
                 return false;
             }
@@ -48,19 +47,14 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            Entity entity = interactionEvent.Source.GetComponentInParent<Entity>();
-            if (entity == null)
-            {
-                return false;
-            }
-            return !containerViewer.HasContainer(AttachedContainer) && entity.GetComponent<Hands>().SelectedHand.CanInteract(AttachedContainer.gameObject);
+            return !containerViewer.HasContainer(_attachedContainer);
         }
 
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             ContainerViewer containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
 
-            containerViewer.ShowContainerUI(AttachedContainer);
+            containerViewer.ShowContainerUI(_attachedContainer);
 
             return false;
         }

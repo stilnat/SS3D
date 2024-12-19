@@ -1,12 +1,11 @@
+using FishNet.Object;
 using JetBrains.Annotations;
 using SS3D.Data.Generated;
+using SS3D.Intents;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Animations;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using System;
 using System.Threading.Tasks;
@@ -22,12 +21,12 @@ namespace SS3D.Systems.Inventory.Interactions
 
         private const float MaxForce = 20;
 
-        [NotNull]
-        public string GetGenericName() => "Throw";
-
         public InteractionType InteractionType => InteractionType.None;
 
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
+
+        [NotNull]
+        public string GetGenericName() => "Throw";
 
         /// <summary>
         /// Gets the name when interacted with a source
@@ -49,25 +48,18 @@ namespace SS3D.Systems.Inventory.Interactions
         /// <returns>If the interaction can be executed</returns>
         public bool CanInteract(InteractionEvent interactionEvent)
         {
-            if(interactionEvent.Source is not IGameObjectProvider source)
-            {
-                return false;
-            }
-            
-            AimController aimController = source.GameObject.GetComponentInParent<AimController>();
-
-            if (!aimController)
+            if (interactionEvent.Source is not IAimingTargetProvider source)
             {
                 return false;
             }
 
-            if (!aimController.IsAimingToThrow)
+            if (!source.IsAimingToThrow)
             {
                 return false;
             }
 
             // If item is not in hand return false
-            if (interactionEvent.Source.GetRootSource() is not Hand hand)
+            if (interactionEvent.Source.GetRootSource() is not IItemHolder hand)
             {
                 return false;
             }
@@ -77,20 +69,37 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            if(interactionEvent.Source is not IGameObjectProvider source)
+            if (interactionEvent.Source is not IGameObjectProvider source)
             {
                 return false;
             }
 
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand; 
-            if(!hand) { return false; }
+            if (interactionEvent.Source.GetRootSource() is not IItemHolder itemHolder)
+            {
+                return false;
+            }
 
-            HumanoidMovementController movementController = source.GameObject.GetComponentInParent<HumanoidMovementController>();
-            IntentController intentController = source.GameObject.GetComponentInParent<IntentController>();
+            if (interactionEvent.Source.GetRootSource() is not IAimingTargetProvider aimingTargetProvider)
+            {
+                return false;
+            }
 
-            ServerThrow(hand, hand.ItemInHand, movementController.transform, movementController.AimTarget, intentController.Intent, 0.5f);
+            if (interactionEvent.Source.GetRootSource() is not IIntentProvider intentProvider)
+            {
+                return false;
+            }
 
-            source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Throw, hand, hand.ItemInHand.Holdable, Vector3.zero, 0.5f);
+            if (interactionEvent.Source.GetRootSource() is not IRootTransformProvider rootTransformProvider)
+            {
+                return false;
+            }
+
+            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.rootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.5f);
+
+            if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
+            {
+                animatedSource.PlaySourceAnimation(InteractionType.Throw, interactionEvent.Target.GetComponent<NetworkObject>(), Vector3.zero, 0.5f);
+            }
 
             return false;
         }
@@ -100,54 +109,6 @@ namespace SS3D.Systems.Inventory.Interactions
         public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
             throw new NotImplementedException();
-        }
-
-        private async void ServerThrow(Hand throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)
-        {
-            // remove client ownership so that server can take full control of item trajectory
-            item.RemoveOwnership();
-
-            // ignore collisions while in hand, the time the item gets a bit out of the player collider.
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), true);
-
-            // wait roughly the time of animation on client before actually throwing
-            await Task.Delay((int)(time * 1000));
- 
-            item.transform.parent = null;
-            item.GetComponent<Rigidbody>().isKinematic = false;
-            item.GetComponent<Collider>().enabled = true;
-            AddForceToItem(item.GameObject, playerRoot, aimTarget, intent);
-
-            throwingHand.Container.RemoveItem(item);
-
-            // after a short amount of time, stop ignoring collisions
-            await Task.Delay(300);
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), false);
-        }
-
-        private void AddForceToItem(GameObject item, Transform playerRoot, Transform aimTarget, IntentType intent)
-        {
-            Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, playerRoot);
-
-            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, playerRoot);
-
-
-            Vector2 initialVelocity = ComputeInitialVelocity(
-                ComputeTimeToReach(intent, aimTarget.position, playerRoot),
-                targetCoordinates,
-                initialItemCoordinates.y,
-                initialItemCoordinates.x);
-
-            Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
-
-            Vector3 initialVelocityInWorldCoordinate = playerRoot.TransformDirection(initialVelocityInRootCoordinate);
-
-            if (initialVelocityInWorldCoordinate.magnitude > MaxForce)
-            {
-                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * MaxForce;
-            }
-
-            item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
         }
 
         private static float ComputeTimeToReach(IntentType intent, Vector3 targetPosition, Transform playerRoot)
@@ -193,10 +154,57 @@ namespace SS3D.Systems.Inventory.Interactions
             float g = Physics.gravity.y;
             float initialHorizontalVelocity = (targetCoordinates.x - initialHorizontalPosition) / timeToReachTarget;
 
-            float initialVerticalVelocity = 
+            float initialVerticalVelocity =
                 (targetCoordinates.y - initialHeight - (0.5f * g * (Mathf.Pow(targetCoordinates.x - initialHorizontalPosition, 2) / Mathf.Pow(initialHorizontalVelocity, 2)))) * initialHorizontalVelocity / (targetCoordinates.x - initialHorizontalPosition);
 
             return new(initialHorizontalVelocity, initialVerticalVelocity);
+        }
+
+        private async void ServerThrow(IItemHolder throwingHand, Item item, Transform playerRoot, Transform aimTarget, IntentType intent, float time)
+        {
+            // remove client ownership so that server can take full control of item trajectory
+            item.RemoveOwnership();
+
+            // ignore collisions while in hand, the time the item gets a bit out of the player collider.
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), true);
+
+            // wait roughly the time of animation on client before actually throwing
+            await Task.Delay((int)(time * 1000));
+
+            item.transform.parent = null;
+            item.GetComponent<Rigidbody>().isKinematic = false;
+            item.GetComponent<Collider>().enabled = true;
+            AddForceToItem(item.GameObject, playerRoot, aimTarget, intent);
+
+            item.Container.RemoveItem(item);
+
+            // after a short amount of time, stop ignoring collisions
+            await Task.Delay(300);
+            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), false);
+        }
+
+        private void AddForceToItem(GameObject item, Transform playerRoot, Transform aimTarget, IntentType intent)
+        {
+            Vector2 targetCoordinates = ComputeTargetCoordinates(aimTarget.position, playerRoot);
+
+            Vector2 initialItemCoordinates = ComputeItemInitialCoordinates(item.transform.position, playerRoot);
+
+            Vector2 initialVelocity = ComputeInitialVelocity(
+                ComputeTimeToReach(intent, aimTarget.position, playerRoot),
+                targetCoordinates,
+                initialItemCoordinates.y,
+                initialItemCoordinates.x);
+
+            Vector3 initialVelocityInRootCoordinate = new Vector3(0, initialVelocity.y, initialVelocity.x);
+
+            Vector3 initialVelocityInWorldCoordinate = playerRoot.TransformDirection(initialVelocityInRootCoordinate);
+
+            if (initialVelocityInWorldCoordinate.magnitude > MaxForce)
+            {
+                initialVelocityInWorldCoordinate = initialVelocityInWorldCoordinate.normalized * MaxForce;
+            }
+
+            item.GetComponent<Rigidbody>().AddForce(initialVelocityInWorldCoordinate, ForceMode.VelocityChange);
         }
     }
 }

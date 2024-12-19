@@ -1,23 +1,26 @@
-﻿using System;
-using Coimbra;
+﻿using Coimbra;
 using SS3D.Systems.Inventory.Containers;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Inventory.UI
 {
     public class ContainerUi : MonoBehaviour
     {
-        public ItemGrid Grid;
-        public TMP_Text ContainerName;
+        [FormerlySerializedAs("Grid")]
+        [SerializeField]
+        private ItemGrid _grid;
+
+        private TMP_Text _containerName;
 
         private AttachedContainer _attachedContainer;
 
-        public HumanInventory Inventory
+        public IInventory Inventory
         {
-            set => Grid.Inventory = value;
-            get => Grid.Inventory;
+            get => _grid.Inventory;
+            set => _grid.Inventory = value;
         }
 
         public AttachedContainer AttachedContainer
@@ -25,14 +28,14 @@ namespace SS3D.Systems.Inventory.UI
             set
             {
                 _attachedContainer = value;
-                Grid.AttachedContainer = value;
+                _grid.AttachedContainer = value;
                 UpdateContainer(value);
             }
         }
 
         public void Close()
         {
-            Inventory.containerViewer.CmdContainerClose(_attachedContainer);
+            Inventory.ContainerViewer.CmdContainerClose(_attachedContainer);
             gameObject.Dispose(true);
         }
 
@@ -45,20 +48,20 @@ namespace SS3D.Systems.Inventory.UI
 
             container.ContainerUi = this;
 
-            RectTransform rectTransform = Grid.GetComponent<RectTransform>();
-            Vector2 gridDimensions = Grid.GetGridDimensions();
+            RectTransform rectTransform = _grid.GetComponent<RectTransform>();
+            Vector2 gridDimensions = _grid.GetGridDimensions();
             float width = rectTransform.offsetMin.x + Math.Abs(rectTransform.offsetMax.x) + gridDimensions.x + 1;
             float height = rectTransform.offsetMin.y + Math.Abs(rectTransform.offsetMax.y) + gridDimensions.y;
             RectTransform rect = transform.GetChild(0).GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(width, height);
 
             // Set the text inside the containerUI to be the name of the container
-            ContainerName.text = _attachedContainer.ContainerName;
+            _containerName.text = _attachedContainer.ContainerName;
 
             // Position the text correctly inside the UI.
             Vector3[] v = new Vector3[4];
-            rect.GetLocalCorners(v); 
-            ContainerName.transform.localPosition = v[1] + new Vector3(0.03f * width, -0.02f * height, 0);
+            rect.GetLocalCorners(v);
+            _containerName.transform.localPosition = v[1] + new Vector3(0.03f * width, -0.02f * height, 0);
         }
     }
 }

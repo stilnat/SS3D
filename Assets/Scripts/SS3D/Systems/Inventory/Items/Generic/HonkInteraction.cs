@@ -13,26 +13,21 @@ namespace SS3D.Systems.Inventory.Items.Generic
     /// </summary>
     public class HonkInteraction : IInteraction
     {
+        public InteractionType InteractionType => InteractionType.None;
+
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         public string GetName(InteractionEvent interactionEvent) => "Honk";
 
-        public string GetGenericName() =>  "Honk";
+        public string GetGenericName() => "Honk";
 
-        public InteractionType InteractionType => InteractionType.None;
-
-        public Sprite GetIcon(InteractionEvent interactionEvent) =>InteractionIcons.Honk;
+        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Honk;
 
         public bool CanInteract(InteractionEvent interactionEvent)
         {
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
             bool inRange = InteractionExtensions.RangeCheck(interactionEvent);
-
-            if(source is not Hand)
-            {
-                return false;
-            }
 
             if (target is not BikeHorn horn)
             {
@@ -53,6 +48,7 @@ namespace SS3D.Systems.Inventory.Items.Generic
             {
                 horn.Honk();
             }
+
             return false;
         }
 

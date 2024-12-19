@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using SS3D.Interactions;
+﻿using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Inventory.Interactions;
 using SS3D.Systems.Inventory.Items;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using SS3D.Data.Generated;
+using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Inventory.Containers
 {
@@ -16,31 +16,40 @@ namespace SS3D.Systems.Inventory.Containers
     /// </summary>
     public class ContainerInteractive : NetworkedOpenable
     {
-        public AttachedContainer attachedContainer;
+        [FormerlySerializedAs("attachedContainer")]
+        [SerializeField]
+        private AttachedContainer _attachedContainer;
+
         private Sprite _viewContainerIcon;
+
+        public AttachedContainer AttachedContainer
+        {
+            get => _attachedContainer;
+            set => _attachedContainer = value;
+        }
 
         public override IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
-            if (attachedContainer.HasCustomInteraction)
+            if (_attachedContainer.HasCustomInteraction)
             {
                 return Array.Empty<IInteraction>();
             }
 
             List<IInteraction> interactions = new();
 
-            StoreInteraction storeInteraction = new(attachedContainer);
+            StoreInteraction storeInteraction = new(_attachedContainer);
 
-            TakeFirstInteraction takeFirstInteraction = new(attachedContainer, Entities.Data.Animations.Humanoid.PickupReachTime, Entities.Data.Animations.Humanoid.PickupMoveItemTime);
+            TakeFirstInteraction takeFirstInteraction = new(_attachedContainer, 0.2f, 0.2f);
 
-            ViewContainerInteraction view = new(attachedContainer)
+            ViewContainerInteraction view = new(_attachedContainer)
             {
-                MaxDistance = attachedContainer.MaxDistance,
+                MaxDistance = _attachedContainer.MaxDistance,
             };
 
             // Pile or Normal the Store Interaction will always appear, but View only appears in Normal containers
-            if (IsOpen() | !attachedContainer.OnlyStoreWhenOpen | !attachedContainer.IsOpenable)
+            if (IsOpen() | !_attachedContainer.OnlyStoreWhenOpen | !_attachedContainer.IsOpenable)
             {
-                if (attachedContainer.HasUi)
+                if (_attachedContainer.HasUi)
                 {
                     interactions.Add(storeInteraction);
                     interactions.Add(view);
@@ -52,21 +61,25 @@ namespace SS3D.Systems.Inventory.Containers
                 }
             }
 
-            if (!attachedContainer.IsOpenable)
+            if (!_attachedContainer.IsOpenable)
             {
                 return interactions.ToArray();
             }
 
-            OpenInteraction openInteraction = new(attachedContainer);
+            OpenInteraction openInteraction = new(_attachedContainer);
             openInteraction.OnOpenStateChanged += OpenStateChanged;
             interactions.Add(openInteraction);
 
             return interactions.ToArray();
         }
 
-        protected override void OpenStateChanged(object sender, bool e)
+        protected override void SyncOpenState(bool oldVal, bool newVal, bool asServer)
         {
-            base.OpenStateChanged(sender, e);
+            base.SyncOpenState(oldVal, newVal, asServer);
+            if (!newVal)
+            {
+                CloseUis();
+            }
         }
 
         /// <summary>
@@ -77,34 +90,26 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         private void CloseUis()
         {
-            if (attachedContainer.ContainerUi != null)
+            if (_attachedContainer.ContainerUi != null)
             {
-                attachedContainer.ContainerUi.Close();
+                _attachedContainer.ContainerUi.Close();
             }
 
             // We check for each item if they are interactive containers.
-            foreach(Item item in attachedContainer.Items)
+            foreach (Item item in _attachedContainer.Items)
             {
                 ContainerInteractive[] containerInteractives = item.GameObject.GetComponents<ContainerInteractive>();
+
                 // If the item is an interactive container, we call this method again on it.
                 if (containerInteractives == null)
                 {
                     continue;
                 }
 
-                foreach(ContainerInteractive c in containerInteractives)
+                foreach (ContainerInteractive c in containerInteractives)
                 {
                     c.CloseUis();
                 }
-            }
-        }
-
-        protected override void SyncOpenState(bool oldVal, bool newVal, bool asServer)
-        {
-            base.SyncOpenState(oldVal, newVal, asServer);
-            if (!newVal)
-            {
-                CloseUis();
             }
         }
     }

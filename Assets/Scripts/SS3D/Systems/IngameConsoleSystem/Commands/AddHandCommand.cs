@@ -53,7 +53,7 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands
 
             Hands hands = entity.GetComponent<Hands>();
             HumanInventory inventory = entity.GetComponent<HumanInventory>();
-            inventory.TryAddContainer(leftHandObject.GetComponent<AttachedContainer>());
+            inventory.AddContainer(leftHandObject.GetComponent<AttachedContainer>());
             hands.AddHand(leftHand);
 
             return "hand added";
