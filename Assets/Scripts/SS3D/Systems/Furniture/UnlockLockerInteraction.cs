@@ -6,6 +6,7 @@ using SS3D.Logging;
 using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.UI;
 using SS3D.Traits;
 using System;
 using UnityEngine;
@@ -26,12 +27,13 @@ namespace SS3D.Systems.Inventory.Interactions
             _permissionToUnlock = permission;
         }
 
+        public InteractionType InteractionType { get; }
+
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         public string GetName(InteractionEvent interactionEvent) => "Unlock Locker";
-        public string GetGenericName() => "Unlock Locker";
 
-        public InteractionType InteractionType { get; }
+        public string GetGenericName() => "Unlock Locker";
 
         public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
 
@@ -46,32 +48,32 @@ namespace SS3D.Systems.Inventory.Interactions
             {
                 return false;
             }
-            
+
             return _locker.IsLocked && !_locker.IsOpen;
         }
 
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             IInteractionSource source = interactionEvent.Source;
-            if (source is IGameObjectProvider sourceGameObjectProvider)
-            {
-                Hands hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
-                
-                if (hands != null)
-                {
-                    if (hands.Inventory.HasPermission(_permissionToUnlock))
-                    {
-                        Log.Information(this, "Locker has been unlocked!");
-                        _locker.IsLocked = false;
-                    } else
-                    {
-                        Log.Information(this, "No permission to unlock Locker!");
-                    }
-                }
 
-                return true;
+            if (source is not IGameObjectProvider sourceGameObjectProvider)
+            {
+                return false;
             }
-            return false;
+
+            IIDPermissionProvider idPermission = sourceGameObjectProvider.GameObject.GetComponentInParent<IIDPermissionProvider>();
+
+            if (idPermission.HasPermission(_permissionToUnlock))
+            {
+                Log.Information(this, "Locker has been unlocked!");
+                _locker.IsLocked = false;
+            }
+            else
+            {
+                Log.Information(this, "No permission to unlock Locker!");
+            }
+
+            return true;
         }
 
         public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;

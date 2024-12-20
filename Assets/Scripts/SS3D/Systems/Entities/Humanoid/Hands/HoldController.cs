@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Intents;
 using SS3D.Interactions;
+using SS3D.Systems.Combat.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
@@ -15,7 +16,6 @@ using UnityEngine;
 
 namespace SS3D.Systems.Animations
 {
-
     /// <summary>
     /// Handle the state of holding items and hand positions
     /// </summary>
@@ -61,10 +61,8 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private AimController _aimController;
 
-
         // Hold transforms, the transforms where items are going to position themselves when held in hand.
         // Left transform are parented under the left shoulder, and Right transforms under the right one.
-
         [SerializeField]
         private Transform _gunHoldRight;
 
@@ -113,9 +111,6 @@ namespace SS3D.Systems.Animations
         [SerializeField]
         private Transform _underArmRight;
 
-
-
-        
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -126,6 +121,37 @@ namespace SS3D.Systems.Animations
             }
 
             GetComponent<Ragdoll>().OnRagdoll += HandleRagdoll;
+        }
+
+        public void BringToHand(Hand hand, AbstractHoldable holdable, float duration)
+        {
+            StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
+        }
+
+        /// <summary>
+        /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place.
+        /// </summary>
+        /// <param name="hand"> The main hand holding the item</param>
+        /// <param name="item"> The item held</param>
+        /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
+        public void UpdateItemPositionConstraintAndRotation([NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
+        {
+            bool toThrow = _aimController.IsAimingToThrow;
+            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
+
+            // Fetch how the item should be held
+            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
+
+            // The position where the item should be, given its hold type
+            Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+
+            // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
+            Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
+
+            DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
+
+            // Do the same with interpolating rotation.
+            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration);
         }
 
         protected override void OnAwake()
@@ -152,45 +178,9 @@ namespace SS3D.Systems.Animations
             _holdData.Add(new(HandHoldType.ThrowSmallItem, _smallItemRightThrow, HandType.RightHand));
         }
 
-        
-        public void BringToHand(Hand hand, AbstractHoldable holdable, float duration)
-        {
-            StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
-        }
-
-        /// <summary>
-        /// Update the held item position and rotation IK target of the relevant hand, so that item held are placed at the right place. 
-        /// </summary>
-        /// <param name="hand"> The main hand holding the item</param>
-        /// <param name="item"> The item held</param>
-        /// <param name="duration"> The time in second to go from the current item position to its updated position</param>
-        public void UpdateItemPositionConstraintAndRotation(
-            [NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
-        {
-            bool toThrow = _aimController.IsAimingToThrow;
-            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
-
-            // Fetch how the item should be held
-            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
-
-            // The position where the item should be, given its hold type
-            Transform hold = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-
-            // Interpolate from current position to updated position the constraint offset, so that item goes to the right hold position.
-            Vector3 finalOffset = OffsetFromHoldTypeAndHand(itemHoldType, hand.HandType);
-
-            DOTween.To(() => hand.Hold.ItemPositionConstraint.data.offset, x => hand.Hold.ItemPositionConstraint.data.offset = x, finalOffset, duration);
-            
-
-            // Do the same with interpolating rotation.
-            hand.Hold.ItemPositionConstraint.data.constrainedObject.DOLocalRotate(hold.localRotation.eulerAngles, duration);
-        }
-
         private IEnumerator CoroutineBringToHand([NotNull] Hand hand, [NotNull] AbstractHoldable holdable, float duration)
         {
             Vector3 start = holdable.GameObject.transform.position;
-            
-
             bool toThrow = _aimController.IsAimingToThrow;
             bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && holdable.CanHoldTwoHand && oppositeHand.Empty;
 
@@ -199,9 +189,8 @@ namespace SS3D.Systems.Animations
 
             Transform target = TargetFromHoldTypeAndHand(itemHoldType, hand.HandType);
 
-
             // Smoothly move item toward the target position
-            for(float timePassed = 0f; timePassed < duration; timePassed += Time.deltaTime)
+            for (float timePassed = 0f; timePassed < duration; timePassed += Time.deltaTime)
             {
                 float factor = timePassed / duration;
                 factor = Mathf.SmoothStep(0, 1, factor);
@@ -210,7 +199,7 @@ namespace SS3D.Systems.Animations
 
                 yield return null;
             }
-    
+
             holdable.GameObject.transform.position = target.position;
 
             if (itemHoldType == HandHoldType.SmallItem)
@@ -221,11 +210,10 @@ namespace SS3D.Systems.Animations
 
                 // multiply by inverse of hold transform to "remove" the hold parent rotation.
                 hand.Hold.Pivot.transform.localRotation = Quaternion.Inverse(hand.Hold.HoldTransform.localRotation) * Quaternion.Inverse(holdOnItem.localRotation);
-               
+
                 // Assign the relative position between the attachment point and the object
                 holdable.transform.localPosition = -holdOnItem.localPosition;
-                holdable.transform.localRotation = Quaternion.identity;    
-
+                holdable.transform.localRotation = Quaternion.identity;
                 hand.Hold.HoldIkConstraint.weight = 0f;
             }
             else
@@ -240,37 +228,42 @@ namespace SS3D.Systems.Animations
                 hand.Hold.HoldIkConstraint.weight = 1f;
                 hand.Hold.HandTargetFollowHold(false, holdable);
             }
-
         }
-
 
         /// <summary>
         /// This method is necessary to sync between clients items held in hand, for instance for late joining client, or simply client far away on the map.
         /// </summary>
         private void SyncItemsInHandsChanged(SyncListOperation op, int index, HandItem oldItem, HandItem newItem, bool asServer)
         {
-            if (asServer) { return; }
+            if (asServer)
+            {
+                return;
+            }
 
             switch (op)
             {
                 case SyncListOperation.Add or SyncListOperation.Insert or SyncListOperation.Set:
+                {
                     AddItem(newItem.Hand, newItem.Holdable);
                     break;
+                }
 
                 case SyncListOperation.RemoveAt:
+                {
                     RemoveItem(oldItem.Hand);
                     break;
+                }
             }
         }
 
         [Client]
         private void RemoveItem(Hand hand)
         {
-            if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemInHand.Holdable.CanHoldTwoHand)
+            if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemHeld.Holdable.CanHoldTwoHand)
             {
-                UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
+                UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
                 hand.Hold.HoldIkConstraint.weight = 1f;
-                hand.Hold.HandTargetFollowHold(true, oppositeHand.ItemInHand.Holdable);
+                hand.Hold.HandTargetFollowHold(true, oppositeHand.ItemHeld.Holdable);
             }
         }
 
@@ -282,7 +275,7 @@ namespace SS3D.Systems.Animations
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
             {
-                UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemInHand.Holdable, 0.2f);
+                UpdateItemPositionConstraintAndRotation(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
             }
         }
 
@@ -309,7 +302,6 @@ namespace SS3D.Systems.Animations
             }
         }
 
-
         // TODO : add a handle for selected hand change, and update only visually the intent for selected hand
         private void HandleIntentChange(object sender, IntentType e)
         {
@@ -317,18 +309,18 @@ namespace SS3D.Systems.Animations
 
             if (mainHand.Full)
             {
-                UpdateItemPositionConstraintAndRotation(mainHand, mainHand.ItemInHand.Holdable, 0.25f);
+                UpdateItemPositionConstraintAndRotation(mainHand, mainHand.ItemHeld.Holdable, 0.25f);
             }
         }
 
         private void HandleAimChange(bool isAiming, bool toThrow)
         {
-            if (!_hands.SelectedHand.ItemInHand)
+            if (!_hands.SelectedHand.ItemHeld)
             {
                 return;
             }
 
-            AbstractHoldable holdable = _hands.SelectedHand.ItemInHand.Holdable;
+            AbstractHoldable holdable = _hands.SelectedHand.ItemHeld.Holdable;
             Gun gun = null;
 
             // handle aiming with shoulder aim
@@ -340,18 +332,20 @@ namespace SS3D.Systems.Animations
                 gun.transform.localPosition = -gun.RifleButt.localPosition;
                 gun.transform.localRotation = Quaternion.identity;
             }
+
             // Stop aiming with shoulder aim
             else if (gun && !isAiming)
             {
-                _hands.SelectedHand.ItemInHand.GameObject.transform.parent = _hands.SelectedHand.Hold.ItemPositionTargetLocker;
-                _hands.SelectedHand.ItemInHand.GameObject.transform.localPosition = Vector3.zero;
-                _hands.SelectedHand.ItemInHand.GameObject.transform.localRotation = Quaternion.identity;
-                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
+                _hands.SelectedHand.ItemHeld.GameObject.transform.parent = _hands.SelectedHand.Hold.ItemPositionTargetLocker;
+                _hands.SelectedHand.ItemHeld.GameObject.transform.localPosition = Vector3.zero;
+                _hands.SelectedHand.ItemHeld.GameObject.transform.localRotation = Quaternion.identity;
+                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemHeld.Holdable, 0.2f);
             }
+
             // if it's not a gun, or if its to throw it
             else
             {
-                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemInHand.Holdable, 0.2f);
+                UpdateItemPositionConstraintAndRotation(_hands.SelectedHand, _hands.SelectedHand.ItemHeld.Holdable, 0.2f);
             }
         }
 
@@ -373,7 +367,10 @@ namespace SS3D.Systems.Animations
         [Server]
         private void HandleRagdoll(bool isRagdoll)
         {
-            if (!isRagdoll) { return; }
+            if (!isRagdoll)
+            {
+                return;
+            }
 
             foreach (Hand hand in GetComponentsInChildren<Hand>())
             {

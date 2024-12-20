@@ -7,6 +7,7 @@ using SS3D.Systems.Entities;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Systems.Inventory.Items.Generic;
+using SS3D.Systems.Inventory.UI;
 using SS3D.Systems.PlayerControl;
 using SS3D.Systems.PlayerControl.Events;
 using SS3D.Traits;
@@ -169,7 +170,7 @@ namespace SS3D.Systems.Roles
         private void SpawnIdentificationItems(Entity entity, RoleData role)
         {
             ItemSystem itemSystem = Subsystems.Get<ItemSystem>();
-            HumanInventory inventory = entity.GetComponent<HumanInventory>();
+            IInventory inventory = entity.GetComponent<IInventory>();
 
             if (!inventory.TryGetTypeContainer(ContainerType.Identification, 0, out AttachedContainer container))
             {
@@ -201,20 +202,21 @@ namespace SS3D.Systems.Roles
         /// <param name="loadout">The loadout of items he will receive</param>
         private void SpawnLoadoutItems(Entity entity, RoleLoadout loadout)
         {
-            Hands hands = entity.GetComponent<Hands>();
-            HumanInventory inventory = entity.GetComponent<HumanInventory>();
+            IInventory inventory = entity.GetComponent<IInventory>();
 
-            Dictionary<ContainerType, AttachedContainer> containers = new Dictionary<ContainerType, AttachedContainer>();
-            List<AttachedContainer> handContainers = hands.HandContainers;
+            Dictionary<ContainerType, AttachedContainer> containers = new();
+            List<AttachedContainer> handContainers = new();
 
             foreach (AttachedContainer inventoryContainer in inventory.Containers)
             {
                 if (inventoryContainer.ContainerType == ContainerType.Hand)
                 {
-                    continue;
+                    handContainers.Add(inventoryContainer);
                 }
-
-                containers.Add(inventoryContainer.ContainerType, inventoryContainer);
+                else
+                {
+                    containers.Add(inventoryContainer.ContainerType, inventoryContainer); 
+                }
             }
 
             foreach (KeyValuePair<ContainerType, GameObject> itemToEquip in loadout.Equipment)
@@ -240,7 +242,7 @@ namespace SS3D.Systems.Roles
                 SpawnItemInSlot(loadout.HandRight, true, handContainers[1]);
             }
             
-            inventory.TriggerInventorySetup();
+            inventory.Init();
         }
 
         /// <summary>

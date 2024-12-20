@@ -16,14 +16,52 @@ namespace SS3D.Systems.Tile.Connections
     /// in particular with the way they connect with doors, hence why they need their own connector
     /// script.
     /// </summary>
-    public class WallAdjacencyConnector : AbstractHorizontalConnector, IAdjacencyConnector
+    public class WallAdjacencyConnector : AbstractHorizontalConnector
     {
         /// <summary>
         /// Script to help walls to choose their shape.
         /// </summary>
-        [SerializeField] private AdvancedConnector _advancedAdjacency;
+        [SerializeField]
+        private AdvancedConnector _advancedAdjacency;
 
         protected override IMeshAndDirectionResolver AdjacencyResolver => _advancedAdjacency;
+
+        /// <summary>
+        /// Walls connect to other walls, and to doors, when doors are placed on their left or on their
+        /// right.
+        /// </summary>
+        public override bool IsConnected(PlacedTileObject neighbourObject)
+        {
+            if (neighbourObject == null)
+            {
+                return false;
+            }
+
+            bool isConnected = neighbourObject.HasAdjacencyConnector;
+            isConnected &= neighbourObject.GenericType == TileObjectGenericType.Wall || neighbourObject.GenericType == TileObjectGenericType.Door;
+
+            if (neighbourObject.GetComponent<DoorAdjacencyConnector>() != null)
+            {
+                isConnected &= IsConnectedToDoor(neighbourObject);
+            }
+
+            TileSystem tileSystem = Subsystems.Get<TileSystem>();
+            TileMap map = tileSystem.CurrentMap;
+
+            // Needed for a weird edge case when you put walls all around a door. Will avoid connecting
+            // to a wall in front or behind the door, if this wall is itself connected to door.
+            // This is to avoid the wall considering there's 3 connections, because if it does, it takes
+            // a L2 shape which allow to see through the wall.
+            if (TryGetOnLeftOrRightDoor(out PlacedTileObject door) && neighbourObject.GetComponent<WallAdjacencyConnector>() != null)
+            {
+                if (neighbourObject.IsInFront(door) || neighbourObject.IsBehind(door))
+                {
+                    isConnected &= false;
+                }
+            }
+
+            return isConnected;
+        }
 
         /// <summary>
         /// Check if this wall is conencted to the neighbour object when it's a door.
@@ -39,8 +77,8 @@ namespace SS3D.Systems.Tile.Connections
                 {
                     return true;
                 }
-                    
             }
+
             return false;
         }
 
@@ -49,62 +87,26 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         private bool TryGetOnLeftOrRightDoor(out PlacedTileObject door)
         {
-            var tileSystem = Subsystems.Get<TileSystem>();
-            var map = tileSystem.CurrentMap;
-            var neighbours = map.GetNeighbourPlacedObjects(PlacedObject.Layer, PlacedObject.transform.position);
+            TileSystem tileSystem = Subsystems.Get<TileSystem>();
+            TileMap map = tileSystem.CurrentMap;
+            PlacedTileObject[] neighbours = map.GetNeighbourPlacedObjects(PlacedObject.Layer, PlacedObject.transform.position);
 
-            foreach( var neighbour in neighbours )
+            foreach (PlacedTileObject neighbour in neighbours)
             {
-                var doorConnector = neighbour?.GetComponent<DoorAdjacencyConnector>();
-                if (doorConnector == null) continue;
+                if (!neighbour || !neighbour.TryGetComponent(out DoorAdjacencyConnector _))
+                {
+                    continue;
+                }
 
                 if (PlacedObject.IsOnLeft(neighbour) || PlacedObject.IsOnRight(neighbour))
                 {
                     door = neighbour;
                     return true;
                 }
-                    
             }
+
             door = null;
             return false;
-        }
-
-        /// <summary>
-        /// Walls connect to other walls, and to doors, when doors are placed on their left or on their
-        /// right.
-        /// </summary>
-        public override bool IsConnected(PlacedTileObject neighbourObject)
-        {
-            if(neighbourObject == null) return false;
-
-            bool isConnected = (neighbourObject.HasAdjacencyConnector);
-
-            isConnected &= neighbourObject.GenericType == TileObjectGenericType.Wall ||
-                neighbourObject.GenericType == TileObjectGenericType.Door;
-
-            if (neighbourObject.GetComponent<DoorAdjacencyConnector>() != null)
-            {
-                isConnected &= IsConnectedToDoor(neighbourObject);
-            }
-
-            var tileSystem = Subsystems.Get<TileSystem>();
-            var map = tileSystem.CurrentMap;
-
-            // Needed for a weird edge case when you put walls all around a door. Will avoid connecting
-            // to a wall in front or behind the door, if this wall is itself connected to door.
-            // This is to avoid the wall considering there's 3 connections, because if it does, it takes
-            // a L2 shape which allow to see through the wall.
-
-            if(TryGetOnLeftOrRightDoor(out PlacedTileObject door) 
-                && neighbourObject.GetComponent<WallAdjacencyConnector>() != null)
-            {
-                if (neighbourObject.IsInFront(door) || neighbourObject.IsBehind(door))
-                {
-                    isConnected &= false;
-                }
-            }
-
-            return isConnected;
         }
     }
 }

@@ -10,8 +10,10 @@ namespace SS3D.Systems.Animations
     /// <summary>
     /// Put that on body parts that can be grabbed
     /// </summary>
-    public class GrabbableBodyPart : Draggable, IInteractionTarget
+    public class DraggableBodyPart : Draggable
     {
+        public override bool MoveToGrabber => true;
+
         public override bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point)
         {
             point = gameObject.transform.position;
@@ -23,7 +25,5 @@ namespace SS3D.Systems.Animations
 
             return true;
         }
-
-        public override bool MoveToGrabber => true;
     }
 }

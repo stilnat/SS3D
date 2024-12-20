@@ -15,7 +15,7 @@ namespace SS3D.Systems.Tile.Connections
 {
     /// <summary>
     /// Connector for disposal furniture. e.g disposal outlets and disposal bins.
-    /// It doesn't do much, except checking for an available pipe just below itself, and 
+    /// It doesn't do much, except checking for an available pipe just below itself, and
     /// signaling this pipe to update itself upon adding or clearing the disposal furniture.
     /// </summary>
     public class DisposalFurnitureConnector : NetworkActor, IAdjacencyConnector
@@ -23,11 +23,6 @@ namespace SS3D.Systems.Tile.Connections
         private PlacedTileObject _placedObject;
 
         private bool _connectedToPipe;
-
-        private void Setup()
-        {
-            _placedObject = GetComponent<PlacedTileObject>();
-        }
 
         public List<PlacedTileObject> GetConnectedNeighbours()
         {
@@ -40,30 +35,25 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public bool IsConnected(PlacedTileObject neighbourObject)
         {
-            if(neighbourObject == null) return false;
-
-            if (!neighbourObject.TryGetComponent<DisposalPipeAdjacencyConnector>(out var pipeConnector))
+            if (!neighbourObject || !neighbourObject.TryGetComponent<DisposalPipeAdjacencyConnector>(out DisposalPipeAdjacencyConnector pipeConnector))
+            {
                 return false;
+            }
 
             Vector2Int neighbourPosition = neighbourObject.Origin;
 
-            if(neighbourPosition != _placedObject.Origin) return false;
-
-            if (pipeConnector.HorizontalConnectionCount >= 2) return false;
-
-            return true;
+            return neighbourPosition == _placedObject.Origin && pipeConnector.HorizontalConnectionCount < 2;
         }
 
         public void UpdateAllConnections()
         {
-            
             Setup();
 
             // update pipe just below.
             if (TryGetPipeBelow(out PlacedTileObject pipe))
             {
                 UpdateSingleConnection(Direction.North, pipe, true);
-            };
+            }
         }
 
         public bool UpdateSingleConnection(Direction dir, PlacedTileObject neighbourObject, bool updateNeighbour)
@@ -74,25 +64,11 @@ namespace SS3D.Systems.Tile.Connections
             bool updated = _connectedToPipe != isConnected;
 
             if (updated)
+            {
                 neighbourObject.UpdateAdjacencies();
+            }
 
             return updated;
-        }
-
-        /// <summary>
-        /// Just get the pipe below the disposal furniture if it exists.
-        /// </summary>
-        private bool TryGetPipeBelow(out PlacedTileObject pipe)
-        {
-            TileSystem tileSystem = Subsystems.Get<TileSystem>();
-            var map = tileSystem.CurrentMap;
-
-            TileChunk currentChunk = map.GetChunk(_placedObject.gameObject.transform.position);
-            SingleTileLocation pipeLocation = (SingleTileLocation) currentChunk.GetTileLocation(TileLayer.Disposal,
-                _placedObject.Origin.x, _placedObject.Origin.y);
-            pipe = pipeLocation.PlacedObject;
-
-            return pipe != null;
         }
 
         /// <summary>
@@ -101,8 +77,33 @@ namespace SS3D.Systems.Tile.Connections
         public List<PlacedTileObject> GetNeighbours()
         {
             bool hasNeighbour = TryGetPipeBelow(out PlacedTileObject pipe);
-            if (hasNeighbour) return new List<PlacedTileObject> { pipe };
-            else return new List<PlacedTileObject>();  
+
+            if (hasNeighbour)
+            {
+                return new() { pipe };
+            }
+
+            return new();
+        }
+
+        private void Setup()
+        {
+            _placedObject = GetComponent<PlacedTileObject>();
+        }
+
+        /// <summary>
+        /// Just get the pipe below the disposal furniture if it exists.
+        /// </summary>
+        private bool TryGetPipeBelow(out PlacedTileObject pipe)
+        {
+            TileSystem tileSystem = Subsystems.Get<TileSystem>();
+            TileMap map = tileSystem.CurrentMap;
+
+            TileChunk currentChunk = map.GetChunk(_placedObject.gameObject.transform.position);
+            SingleTileLocation pipeLocation = (SingleTileLocation)currentChunk.GetTileLocation(TileLayer.Disposal, _placedObject.Origin.x, _placedObject.Origin.y);
+            pipe = pipeLocation.PlacedObject;
+
+            return pipe != null;
         }
     }
 }

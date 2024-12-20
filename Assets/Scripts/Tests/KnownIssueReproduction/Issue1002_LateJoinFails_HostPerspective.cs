@@ -8,7 +8,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using System.Diagnostics;
-using SS3D.Systems.Entities.Humanoid;
 using System;
 using SS3D.Systems.PlayerControl;
 using System.Linq;

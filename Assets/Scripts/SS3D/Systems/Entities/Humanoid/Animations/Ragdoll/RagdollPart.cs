@@ -1,13 +1,17 @@
 using FishNet.Component.Transforming;
+using SS3D.Logging;
 using UnityEngine;
 
-/// <summary>
-/// Component, that identifies GameObjects that are parts of a ragdoll
-/// </summary>
-public class RagdollPart : MonoBehaviour
+namespace SS3D.Systems.Entities.Humanoid
 {
-    protected void OnJointBreak(float breakForce)
+    /// <summary>
+    /// Component, that identifies GameObjects that are parts of a ragdoll
+    /// </summary>
+    public class RagdollPart : MonoBehaviour
     {
-        Debug.Log("A joint has just been broken!, force: " + breakForce);
+        protected void OnJointBreak(float breakForce)
+        {
+            Log.Information(this, "A joint has just been broken!, force: " + breakForce);
+        }
     }
 }

@@ -5,15 +5,19 @@ namespace SS3D.Systems.Entities.Silicon
 {
     public class EngineerBorgAnimatorController : Actor
     {
-        [SerializeField] private ThreadController _movementController;
+        [SerializeField]
+        private ThreadController _movementController;
 
-        [SerializeField] private Animator _animator;
-        [SerializeField] private float _lerpMultiplier;
-        
+        [SerializeField]
+        private Animator _animator;
+
+        [SerializeField]
+        private float _lerpMultiplier;
+
         protected override void OnStart()
         {
             base.OnStart();
-            SubscribeToEvents();    
+            SubscribeToEvents();
         }
 
         protected override void OnDestroyed()
@@ -45,7 +49,6 @@ namespace SS3D.Systems.Entities.Silicon
             float currentSpeed = _animator.GetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed);
             float newLerpModifier = isMoving ? _lerpMultiplier : (_lerpMultiplier * 3);
             speed = Mathf.Lerp(currentSpeed, speed, Time.deltaTime * newLerpModifier);
-            
             _animator.SetFloat(SS3D.Systems.Entities.Data.Animations.Humanoid.MovementSpeed, speed);
         }
     }

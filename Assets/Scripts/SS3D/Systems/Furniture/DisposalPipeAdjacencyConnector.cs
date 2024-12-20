@@ -1,19 +1,14 @@
 ﻿using FishNet.Object.Synchronizing;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Interactions.Interfaces;
-using SS3D.Logging;
 using SS3D.Systems.Furniture;
-using SS3D.Systems.Tile.Connections;
 using SS3D.Systems.Tile.Connections.AdjacencyTypes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Systems.Tile.Connections
-
 {
     /// <summary>
     /// Connector for disposal pipes only.
@@ -23,7 +18,8 @@ namespace SS3D.Systems.Tile.Connections
         /// <summary>
         /// Structure helping to determine disposal pipes shape and rotation.
         /// </summary>
-        [SerializeField] private DisposalPipeConnector _pipeAdjacency;
+        [SerializeField]
+        private DisposalPipeConnector _pipeAdjacency;
 
         /// <summary>
         /// Adjacency map for all horizontal connections.
@@ -52,7 +48,6 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         private PlacedTileObject _placedObject;
 
-
         /// <summary>
         /// A byte, representing the 8 possible connections with other pipes neighbours.
         /// </summary>
@@ -63,7 +58,6 @@ namespace SS3D.Systems.Tile.Connections
         /// Upon Setup, this should stay true.
         /// </summary>
         private bool _initialized;
-
 
         private TileObjectGenericType _disposalType = TileObjectGenericType.Disposal;
 
@@ -77,6 +71,157 @@ namespace SS3D.Systems.Tile.Connections
             return GetNeighbours().Where(IsConnected).ToList();
         }
 
+        /// <summary>
+        /// Connection for disposal pipes is not completely trivial. Disposal pipes should
+        /// not connect to neighbour pipe if they are vertical, unless they are in front of them.
+        /// If there is a disposal furniture above them, they should connected to it if they have a single
+        /// connection or none. They otherwise connect only to other disposal pipes.
+        /// </summary>
+        public bool IsConnected(PlacedTileObject neighbourObject)
+        {
+            if (neighbourObject == null)
+            {
+                return false;
+            }
+
+            if (_verticalConnection && neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector _))
+            {
+                return IsVerticalAndNeighbourInRightPosition(neighbourObject);
+            }
+
+            if (neighbourObject.TryGetComponent(out IDisposalElement _))
+            {
+                return IsConnectedToDisposalFurniture(neighbourObject);
+            }
+
+            if (neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector neighbourConnectorAgain) && neighbourConnectorAgain._verticalConnection)
+            {
+                return IsConnectedToVerticalPipe(neighbourObject);
+            }
+
+            return neighbourObject.HasAdjacencyConnector && neighbourObject.GenericType == _disposalType;
+        }
+
+        public bool UpdateSingleConnection(Direction dir, PlacedTileObject neighbourObject, bool updateNeighbour)
+        {
+            Setup();
+
+            bool isConnected = IsConnected(neighbourObject);
+            bool isUpdated;
+            bool neighbourIsRemovedDisposalFurniture = false;
+
+            // If neighbour is a disposal furniture and this disposal pipe is connected to it
+            if (isConnected && IsConnectedToDisposalFurniture(neighbourObject))
+            {
+                isUpdated = !_verticalConnection;
+                _verticalConnection = true;
+            }
+
+            // If neighbour is a removed disposal furniture which used to be connected to this disposal pipe.
+            else if (!neighbourObject && !TryGetDisposalElementAbovePipe(out IDisposalElement _) && _verticalConnection)
+            {
+                neighbourIsRemovedDisposalFurniture = true;
+                isUpdated = true;
+                _verticalConnection = false;
+            }
+
+            // Else it's not a disposal furniture and we simply use the adjacency map for horizontal connections
+            // with other Disposal pipes.
+            else
+            {
+                isUpdated = _adjacencyMap.SetConnection(dir, new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
+            }
+
+            if (isUpdated)
+            {
+                _syncedConnections = _adjacencyMap.SerializeToByte();
+                _direction = _placedObject.Direction;
+                UpdateMeshAndDirection();
+
+                // Update neighbour connector if they are pipes,
+                // and itself in all directions if it just removed a furniture above
+                if (neighbourObject && neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector connector))
+                {
+                    connector.UpdateAllConnections();
+                }
+
+                if (neighbourIsRemovedDisposalFurniture)
+                {
+                    UpdateAllConnections();
+                }
+            }
+
+            return isUpdated;
+        }
+
+        public void UpdateAllConnections()
+        {
+            Setup();
+
+            List<PlacedTileObject> neighbourObjects = GetNeighbours();
+
+            bool changed = false;
+
+            foreach (PlacedTileObject neighbourObject in neighbourObjects)
+            {
+                _placedObject.NeighbourAtDirectionOf(neighbourObject, out Direction dir);
+                changed |= UpdateSingleConnection(dir, neighbourObject, true);
+            }
+
+            if (changed)
+            {
+                UpdateMeshAndDirection();
+            }
+        }
+
+        /// <summary>
+        /// Get the neighbours of this disposal pipe. This include all disposal pipes
+        /// adjacents (cardinal and diagonal) and eventually the disposal furniture above it.
+        /// </summary>
+        public List<PlacedTileObject> GetNeighbours()
+        {
+            PlacedTileObject placedDisposal = null;
+            List<PlacedTileObject> neighbours = new();
+            if (TryGetDisposalElementAbovePipe(out IDisposalElement disposalElement))
+            {
+                placedDisposal = disposalElement.GameObject.GetComponent<PlacedTileObject>();
+            }
+
+            if (placedDisposal != null)
+            {
+                neighbours.Add(placedDisposal);
+            }
+
+            TileSystem tileSystem = Subsystems.Get<TileSystem>();
+            TileMap map = tileSystem.CurrentMap;
+            neighbours.AddRange(map.GetNeighbourPlacedObjects(_placedObject.Layer, _placedObject.gameObject.transform.position));
+            neighbours.RemoveAll(x => x == null);
+            return neighbours;
+        }
+
+        protected virtual void UpdateMeshAndDirection()
+        {
+            Tuple<Mesh, float, AdjacencyShape> info = _pipeAdjacency.GetMeshRotationShape(_adjacencyMap, _verticalConnection);
+            transform.localRotation = Quaternion.identity;
+
+            Vector3 pos = transform.position;
+            Quaternion localRotation = _filter.transform.localRotation;
+            Vector3 eulerRotation = localRotation.eulerAngles;
+            _filter.mesh = info.Item1;
+
+            if (info.Item3 == AdjacencyShape.Vertical)
+            {
+                // remove some y so the vertical model is at the right place in the ground.
+                transform.position = new Vector3(pos.x, -0.67f, pos.z);
+                _filter.transform.localRotation = Quaternion.Euler(eulerRotation.x, TileHelper.GetRotationAngle(_direction), eulerRotation.z);
+            }
+            else
+            {
+                // reinitialize y to 0 if the model is non vertical.
+                transform.position = new Vector3(pos.x, 0f, pos.z);
+                _filter.transform.localRotation = Quaternion.Euler(eulerRotation.x, info.Item2, eulerRotation.z);
+            }
+        }
 
         private void Setup()
         {
@@ -87,30 +232,6 @@ namespace SS3D.Systems.Tile.Connections
                 _placedObject = GetComponent<PlacedTileObject>();
                 _initialized = true;
             }
-        }
-
-        /// <summary>
-        /// Connection for disposal pipes is not completely trivial. Disposal pipes should
-        /// not connect to neighbour pipe if they are vertical, unless they are in front of them.
-        /// If there is a disposal furniture above them, they should connected to it if they have a single
-        /// connection or none. They otherwise connect only to other disposal pipes.
-        /// </summary>
-        public bool IsConnected(PlacedTileObject neighbourObject)
-        {
-            if (neighbourObject == null) return false;
-
-            if (_verticalConnection == true 
-                    && neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector neighbourConnector))
-                return IsVerticalAndNeighbourInRightPosition(neighbourObject);
-
-            if (neighbourObject.TryGetComponent<IDisposalElement>(out var disposalFurniture))
-                return IsConnectedToDisposalFurniture(neighbourObject);
-
-            if(neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector neighbourConnectorAgain)
-                && neighbourConnectorAgain._verticalConnection == true)
-                return IsConnectedToVerticalPipe(neighbourObject);
-
-            return neighbourObject.HasAdjacencyConnector && neighbourObject.GenericType == _disposalType;
         }
 
         /// <summary>
@@ -131,16 +252,16 @@ namespace SS3D.Systems.Tile.Connections
         private bool IsConnectedToDisposalFurniture(PlacedTileObject neighbourObject)
         {
             // check if neighbour is the disposal furniture just above this.
-            bool IsDisposalFurnitureAbove = false;
-            TryGetDisposalElementAbovePipe(out var aboveDisposalFurniture);
+            bool isDisposalFurnitureAbove = false;
+            TryGetDisposalElementAbovePipe(out IDisposalElement aboveDisposalFurniture);
 
-            if (neighbourObject.TryGetComponent<IDisposalElement>(out var disposalFurniture)
+            if (neighbourObject.TryGetComponent(out IDisposalElement disposalFurniture)
                 && disposalFurniture == aboveDisposalFurniture)
             {
-                IsDisposalFurnitureAbove = true;
+                isDisposalFurnitureAbove = true;
             }
 
-            return IsDisposalFurnitureAbove && HorizontalConnectionCount < 2;
+            return isDisposalFurnitureAbove && HorizontalConnectionCount < 2;
         }
 
         /// <summary>
@@ -150,7 +271,7 @@ namespace SS3D.Systems.Tile.Connections
         {
             bool isConnected = neighbourObject != null;
             isConnected &= neighbourObject.TryGetComponent(out DisposalPipeAdjacencyConnector neighbourConnector);
-            isConnected &= neighbourConnector._verticalConnection == true;
+            isConnected &= neighbourConnector._verticalConnection;
             isConnected &= neighbourConnector._placedObject.NeighbourAtDirectionOf(_placedObject, out Direction direction);
             isConnected &= neighbourConnector._placedObject.Direction == direction;
             return isConnected;
@@ -161,114 +282,19 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         private bool TryGetDisposalElementAbovePipe(out IDisposalElement disposalFurniture)
         {
+            disposalFurniture = null;
             TileSystem tileSystem = Subsystems.Get<TileSystem>();
-            var map = tileSystem.CurrentMap;
+            TileMap map = tileSystem.CurrentMap;
 
             TileChunk currentChunk = map.GetChunk(_placedObject.gameObject.transform.position);
-            SingleTileLocation furnitureLocation = (SingleTileLocation) currentChunk.GetTileLocation(TileLayer.FurnitureBase, _placedObject.Origin.x, _placedObject.Origin.y);
-            disposalFurniture = furnitureLocation.PlacedObject?.GetComponent<IDisposalElement>();
+            SingleTileLocation furnitureLocation = (SingleTileLocation)currentChunk.GetTileLocation(TileLayer.FurnitureBase, _placedObject.Origin.x, _placedObject.Origin.y);
+
+            if (furnitureLocation.PlacedObject)
+            {
+                disposalFurniture = furnitureLocation.PlacedObject.GetComponent<IDisposalElement>();
+            }
 
             return disposalFurniture != null;
-        }
-
-        public bool UpdateSingleConnection(Direction dir, PlacedTileObject neighbourObject, bool updateNeighbour)
-        {
-            Setup();
-
-            bool isConnected = IsConnected(neighbourObject);
-            bool isUpdated;
-            bool neighbourIsRemovedDisposalFurniture = false;
-
-            // If neighbour is a disposal furniture and this disposal pipe is connected to it
-            if (isConnected && IsConnectedToDisposalFurniture(neighbourObject))
-            {
-                isUpdated = _verticalConnection != true;
-                _verticalConnection = true;
-            }
-
-            // If neighbour is a removed disposal furniture which used to be connected to this disposal pipe.
-            else if (neighbourObject == null 
-                && !TryGetDisposalElementAbovePipe(out IDisposalElement disposalFurniture) 
-                && _verticalConnection == true)
-            {
-                neighbourIsRemovedDisposalFurniture = true;
-                isUpdated = true;
-                _verticalConnection = false;
-            }
-
-            // Else it's not a disposal furniture and we simply use the adjacency map for horizontal connections
-            // with other Disposal pipes.
-            else
-            {
-                isUpdated = _adjacencyMap.SetConnection(dir,
-                    new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
-            }
-
-            if (isUpdated)
-            {
-                _syncedConnections = _adjacencyMap.SerializeToByte();
-                _direction = _placedObject.Direction;
-                UpdateMeshAndDirection();
-
-                // Update neighbour connector if they are pipes,
-                // and itself in all directions if it just removed a furniture above
-                var connector = neighbourObject?.GetComponent<DisposalPipeAdjacencyConnector>();
-                if(connector != null)
-                {
-                    connector.UpdateAllConnections();
-                }
-                if (neighbourIsRemovedDisposalFurniture)
-                {
-                    UpdateAllConnections();
-                }
-            }
-                
-            return isUpdated;
-        }
-
-        public void UpdateAllConnections()
-        {
-            Setup();
-
-            var neighbourObjects = GetNeighbours();
-
-            bool changed = false;
-
-            foreach (var neighbourObject in neighbourObjects)
-            {
-                _placedObject.NeighbourAtDirectionOf(neighbourObject, out Direction dir);
-                changed |= UpdateSingleConnection(dir, neighbourObject, true);
-            }
-
-            if (changed)
-            {
-                UpdateMeshAndDirection();
-            }
-        }
-
-        protected virtual void UpdateMeshAndDirection()
-        {
-            var info = _pipeAdjacency.GetMeshRotationShape(_adjacencyMap, _verticalConnection);
-            transform.localRotation = Quaternion.identity;
-
-            Vector3 pos = transform.position;
-            Quaternion localRotation = _filter.transform.localRotation;
-            Vector3 eulerRotation = localRotation.eulerAngles;
-            _filter.mesh = info.Item1;
-
-
-            if (info.Item3 == AdjacencyShape.Vertical)
-            {
-                // remove some y so the vertical model is at the right place in the ground.
-                transform.position = new Vector3(pos.x, -0.67f, pos.z); 
-                _filter.transform.localRotation = Quaternion.Euler(eulerRotation.x, TileHelper.GetRotationAngle(_direction), eulerRotation.z);
-            }
-            else
-            {
-                // reinitialize y to 0 if the model is non vertical.
-                transform.position = new Vector3(pos.x, 0f, pos.z);
-                _filter.transform.localRotation = Quaternion.Euler(eulerRotation.x, info.Item2, eulerRotation.z);
-            }
         }
 
         /// <summary>
@@ -307,28 +333,6 @@ namespace SS3D.Systems.Tile.Connections
                 Setup();
                 UpdateMeshAndDirection();
             }
-        }
-
-        /// <summary>
-        /// Get the neighbours of this disposal pipe. This include all disposal pipes
-        /// adjacents (cardinal and diagonal) and eventually the disposal furniture above it.
-        /// </summary>
-        public List<PlacedTileObject> GetNeighbours()
-        {
-            PlacedTileObject placedDisposal = null;
-            List<PlacedTileObject> neighbours = new();
-            if (TryGetDisposalElementAbovePipe(out IDisposalElement disposalElement))
-            {
-                placedDisposal = disposalElement.GameObject.GetComponent<PlacedTileObject>();
-            }
-            if (placedDisposal != null)
-                neighbours.Add(placedDisposal);
-
-            TileSystem tileSystem = Subsystems.Get<TileSystem>();
-            var map = tileSystem.CurrentMap;
-            neighbours.AddRange(map.GetNeighbourPlacedObjects(_placedObject.Layer, _placedObject.gameObject.transform.position));
-            neighbours.RemoveAll(x => x == null);
-            return neighbours;
         }
     }
 }

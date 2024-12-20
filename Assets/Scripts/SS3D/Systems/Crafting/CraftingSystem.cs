@@ -15,15 +15,14 @@ using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Logging;
 using SS3D.Systems.Dragging;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
+using SS3D.Systems.Inventory.UI;
 using SS3D.Systems.Tile;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Hand = SS3D.Systems.Inventory.Containers.Hand;
 
 namespace SS3D.Systems.Crafting
 {
@@ -164,7 +163,7 @@ namespace SS3D.Systems.Crafting
             {
                 CraftingInteraction interaction = new(
                     recipeLink.Tag.ExecutionTime,
-                    interactionEvent.Source.GameObject.GetComponentInParent<HumanoidMovementController>().transform,
+                    interactionEvent.Source is IRootTransformProvider rootTransformProvider ? rootTransformProvider.RootTransform : interactionEvent.Source.GameObject.transform,
                     craftingInteractionType,
                     recipeLink);
 
@@ -450,8 +449,7 @@ namespace SS3D.Systems.Crafting
             GameObject instance;
 
             // If result is an item held in hand, either put the crafting result in hand or in front of the crafter.
-            if (interactionEvent.Target is Item targetItem && interactionEvent.Source is Hand hand &&
-                    targetItem.Container == hand.Container)
+            if (interactionEvent.Target is Item targetItem && interactionEvent.Source is IContainerProvider hand && targetItem.Container == hand.Container)
             {
                 instance = DefaultCraftItemHeldInHand(prefab, hand, recipeStep, interaction);
             }
@@ -483,21 +481,24 @@ namespace SS3D.Systems.Crafting
 
         private void AddRecipeIngredientInHand(InteractionEvent interactionEvent, List<IRecipeIngredient> ingredients)
         {
-            Hands hands = interactionEvent.Source.GameObject.GetComponentInParent<Hands>();
-            if (hands)
-            {
-                List<Item> itemsInHand = new();
-                foreach (Hand hand in hands.PlayerHands)
-                {
-                    itemsInHand.AddRange(hand.Container.Items);
-                }
+            IInventory inventory = interactionEvent.Source.GameObject.GetComponentInParent<IInventory>();
 
-                foreach (Item item in itemsInHand)
+            if (inventory is null)
+            {
+                return;
+            }
+
+            List<Item> itemsInHand = new();
+            foreach (AttachedContainer container in inventory.Containers.Where(x => x.ContainerType == ContainerType.Hand))
+            {
+                itemsInHand.AddRange(container.Items);
+            }
+
+            foreach (Item item in itemsInHand)
+            {
+                if (item.GameObject.TryGetComponent(out IRecipeIngredient recipeIngredient))
                 {
-                    if (item.GameObject.TryGetComponent(out IRecipeIngredient recipeIngredient))
-                    {
-                        ingredients.Add(recipeIngredient);
-                    }
+                    ingredients.Add(recipeIngredient);
                 }
             }
         }
@@ -506,7 +507,7 @@ namespace SS3D.Systems.Crafting
         /// Handles spawning item, when the target is an item held in hand, and the result is whatever.
         /// </summary>>
         [Server]
-        private GameObject DefaultCraftItemHeldInHand(GameObject prefab, Hand hand, RecipeStep recipeStep, CraftingInteraction interaction)
+        private GameObject DefaultCraftItemHeldInHand(GameObject prefab, IContainerProvider hand, RecipeStep recipeStep, CraftingInteraction interaction)
         {
             GameObject instance;
 
@@ -628,7 +629,7 @@ namespace SS3D.Systems.Crafting
         private bool ItemTargetIsValid(InteractionEvent interactionEvent, Item target)
         {
             // item target is valid if it is in hand holding the item or out of container.
-            if (target.Container && interactionEvent.Source is Hand hand && hand.Container == target.Container)
+            if (target.Container && interactionEvent.Source is IContainerProvider hand && hand.Container == target.Container)
             {
                 return true;
             }

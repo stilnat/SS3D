@@ -8,75 +8,80 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class FeetController : NetworkActor
+namespace SS3D.Systems.Health
 {
+    public class FeetController : NetworkActor
+    {
+        public event Action<float> OnFeetHealthChanged;
 
-    public Action<float> FeetHealthChanged;
+        /// <summary>
+        /// List of feet used by the player
+        /// </summary>
+        private List<FootBodyPart> _feet;
 
-	/// <summary>
-	/// List of feet used by the player
-	/// </summary>
-	List<FootBodyPart> feet;
+        /// <summary>
+        /// Number of optimal feet to move at the maximum speed. For a human, more than two feets is useless, and less makes you run slower (or not at all).
+        /// </summary>
+        private int _optimalFeetNumber = 2;
 
-	/// <summary>
-	/// Number of optimal feet to move at the maximum speed. For a human, more than two feets is useless, and less makes you run slower (or not at all).
-	/// </summary>
-	private int _optimalFeetNumber = 2;
+        /// <summary>
+        /// Factor influencing the speed of a player, based upon state of feets. Should be between 0 and 1 in value.
+        /// </summary>
+        [SyncVar]
+        private float _feetHealthFactor;
 
-	/// <summary>
-	/// Factor influencing the speed of a player, based upon state of feets. Should be between 0 and 1 in value.
-	/// </summary>
-	[SyncVar] private float _feetHealthFactor;
+        private float _minFeetHealthFactorToStand = 0.5f;
 
-    private float _minFeetHealthFactorToStand = 0.5f;
+        public float FeetHealthFactor => _feetHealthFactor;
 
-	public float FeetHealthFactor => _feetHealthFactor;
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            _feet = GetComponentsInChildren<FootBodyPart>().ToList();
 
-	public override void OnStartServer()
-	{
-		base.OnStartServer();
-		feet = GetComponentsInChildren<FootBodyPart>().ToList();
-		foreach (FootBodyPart foot in feet)
-		{
-			foot.OnDamageInflicted += HandleFootHurt;
-			foot.OnBodyPartDetached += HandleFootRemoved;
-			foot.OnBodyPartDestroyed += HandleFootRemoved;
-		}
-		_feetHealthFactor = 1;
-	}
+            foreach (FootBodyPart foot in _feet)
+            {
+                foot.OnDamageInflicted += HandleFootHurt;
+                foot.OnBodyPartDetached += HandleFootRemoved;
+                foot.OnBodyPartDestroyed += HandleFootRemoved;
+            }
 
-    /// <summary>
-    /// Update feet health factor when a foot takes damages.
-    /// </summary>
-    [Server]
-    private void HandleFootHurt(object sender, EventArgs e)
-	{
-		UpdateFeetHealthFactor();
-	}
+            _feetHealthFactor = 1;
+        }
 
-    /// <summary>
-    /// If a foot is destroyed or detached, remove it from the list of available feet.
-    /// </summary>
-    [Server]
-    private void HandleFootRemoved(object sender, EventArgs e)
-	{
-		FootBodyPart foot = (FootBodyPart)sender;
-		if (foot != null)
-		{
-			feet.Remove(foot);
-		}
-		UpdateFeetHealthFactor();
-	}
+        /// <summary>
+        /// Update feet health factor when a foot takes damages.
+        /// </summary>
+        [Server]
+        private void HandleFootHurt(object sender, EventArgs e)
+        {
+            UpdateFeetHealthFactor();
+        }
 
-    /// <summary>
-    /// Simply update the feet health factor, based on the health of each available feet and their numbers.
-    /// </summary>
-    [Server]
-    private void UpdateFeetHealthFactor()
-	{
-		_feetHealthFactor = feet.Sum(x => x.GetSpeedContribution()) / _optimalFeetNumber;
+        /// <summary>
+        /// If a foot is destroyed or detached, remove it from the list of available feet.
+        /// </summary>
+        [Server]
+        private void HandleFootRemoved(object sender, EventArgs e)
+        {
+            FootBodyPart foot = (FootBodyPart)sender;
 
-        
-        FeetHealthChanged?.Invoke(_feetHealthFactor);
-	}
+            if (foot != null)
+            {
+                _feet.Remove(foot);
+            }
+
+            UpdateFeetHealthFactor();
+        }
+
+        /// <summary>
+        /// Simply update the feet health factor, based on the health of each available feet and their numbers.
+        /// </summary>
+        [Server]
+        private void UpdateFeetHealthFactor()
+        {
+            _feetHealthFactor = _feet.Sum(x => x.GetSpeedContribution()) / _optimalFeetNumber;
+            OnFeetHealthChanged?.Invoke(_feetHealthFactor);
+        }
+    }
 }

@@ -8,8 +8,10 @@ using SS3D.Interactions.Extensions;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.Items;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace SS3D.Systems.Crafting
 {
@@ -100,9 +102,11 @@ namespace SS3D.Systems.Crafting
             Subsystems.TryGet(out CraftingSystem craftingSystem);
             craftingSystem.CancelMoveAllObjectsToCraftPoint(reference);
 
-            if (interactionEvent.Source.GameObject.TryGetComponent(out IInteractiveTool tool) && interactionEvent.Source.GetRootSource() is Hand hand)
+            if (interactionEvent.Source.GetRootSource() is IItemHolder itemHolder
+                && interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource
+                && itemHolder.ItemHeld.TryGetComponent(out IInteractiveTool tool))
             {
-                hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
+                animatedSource.CancelSourceAnimation(InteractionType, tool.NetworkObject, Delay);
             }
         }
 
@@ -122,18 +126,17 @@ namespace SS3D.Systems.Crafting
             craftingSystem.MoveAllObjectsToCraftPoint(this, interactionEvent, reference);
             ViewLocator.Get<CraftingMenu>()[0].HideMenu();
 
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-
             Vector3 point = interactionEvent.Point;
-
             if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
             {
                 point = customPoint;
             }
 
-            if (hand != null && hand.ItemInHand.TryGetComponent(out IInteractiveTool tool))
+            if (interactionEvent.Source.GetRootSource() is IItemHolder itemHolder
+                && interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource
+                && itemHolder.ItemHeld.TryGetComponent(out IInteractiveTool tool))
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, tool.NetworkObject, point, Delay);
+                animatedSource.PlaySourceAnimation(InteractionType, tool.NetworkObject, point, Delay);
             }
 
             return true;

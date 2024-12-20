@@ -12,7 +12,9 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands.ItemCommands
     public class SpawnItemCommand : Command
     {
         public override string LongDescription => "Spawn item using item name at the same position as human or at position x,z";
+
         public override string ShortDescription => "Spawn item";
+
         public override ServerRoleTypes AccessLevel => ServerRoleTypes.User;
 
         public override CommandType Type => CommandType.Server;
@@ -21,8 +23,10 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands.ItemCommands
         {
             CheckArgsResponse checkArgsResponse = CheckArgs(args);
 
-            if (checkArgsResponse.IsValid == false)
+            if (!checkArgsResponse.IsValid)
+            {
                 return checkArgsResponse.InvalidArgs;
+            }
 
             string itemName = args[0];
 
@@ -39,7 +43,7 @@ namespace SS3D.Systems.IngameConsoleSystem.Commands.ItemCommands
 
         protected override CheckArgsResponse CheckArgs(string[] args)
         {
-            CheckArgsResponse response = new CheckArgsResponse();
+            CheckArgsResponse response = default;
 
             if (args.Length != 1 && args.Length != 3)
             {

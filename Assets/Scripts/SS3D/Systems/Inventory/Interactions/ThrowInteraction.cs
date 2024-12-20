@@ -94,7 +94,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.rootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.5f);
+            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.RootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.5f);
 
             if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
             {

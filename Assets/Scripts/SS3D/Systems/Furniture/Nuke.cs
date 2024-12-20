@@ -1,10 +1,8 @@
-using SS3D.Interactions;
-using SS3D.Interactions.Interfaces;
-using FishNet.Object;
 using SS3D.Content.Systems.Interactions;
 using SS3D.Core;
-using SS3D.Data.Generated;
+using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities;
 using SS3D.Systems.GameModes.Events;
 using SS3D.Systems.Inventory.Items.Generic;
@@ -15,19 +13,21 @@ namespace SS3D.Systems.Furniture
 {
     public class Nuke : InteractionSource, IInteractionTarget
     {
-
         public bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point) => this.GetInteractionPoint(source, out point);
 
         IInteraction[] IInteractionTarget.CreateTargetInteractions(InteractionEvent interactionEvent)
         {
-            return new IInteraction[] { new SimpleInteraction()
+            return new IInteraction[]
             {
-                Name = "Detonate", Interact = Detonate, CanInteractCallback = CanDetonate, RangeCheck = true,
-            }};
+                new SimpleInteraction()
+                {
+                    Name = "Detonate", Interact = Detonate, CanInteractCallback = CanDetonate, RangeCheck = true,
+                },
+            };
         }
 
         private bool CanDetonate(InteractionEvent interactionEvent)
-        { 
+        {
             IInteractionSource source = interactionEvent.Source;
             bool inRange = InteractionExtensions.RangeCheck(interactionEvent);
 

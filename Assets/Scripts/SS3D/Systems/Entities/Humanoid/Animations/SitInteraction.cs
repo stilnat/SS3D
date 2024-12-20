@@ -3,7 +3,6 @@ using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Entities;
 using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
@@ -16,15 +15,14 @@ namespace SS3D.Systems.Animations
     /// </summary>
     public sealed class SitInteraction : IInteraction
     {
-
-        public float TimeToSit{ get; private set; }
-
-        public InteractionType InteractionType => InteractionType.Sit;
-
         public SitInteraction(float timeToSit)
         {
             TimeToSit = timeToSit;
         }
+
+        public float TimeToSit { get; private set; }
+
+        public InteractionType InteractionType => InteractionType.Sit;
 
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
@@ -49,8 +47,6 @@ namespace SS3D.Systems.Animations
             return true;
         }
 
-        private bool GoodDistanceFromRootToSit(Transform sit, Transform playerRoot) => Vector3.Distance(playerRoot.position, sit.position) < 2f;
-
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Hand hand = interactionEvent.Source.GetRootSource() as Hand;
@@ -61,7 +57,6 @@ namespace SS3D.Systems.Animations
             }
 
             hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Sit, hand, sit.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToSit);
-            
             return false;
         }
 
@@ -76,5 +71,7 @@ namespace SS3D.Systems.Animations
                 hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
             }
         }
+
+        private bool GoodDistanceFromRootToSit(Transform sit, Transform playerRoot) => Vector3.Distance(playerRoot.position, sit.position) < 2f;
     }
 }

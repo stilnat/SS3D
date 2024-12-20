@@ -1,18 +1,14 @@
-using Coimbra.Services.Events;
-using Coimbra.Services.PlayerLoopEvents;
 using FishNet;
 using FishNet.Object;
-using FishNet.Object.Synchronizing;
-using System;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Camera;
+using SS3D.Systems.Health;
 using SS3D.Systems.Inputs;
-using SS3D.Systems.Screens;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
-using Actor = SS3D.Core.Behaviours.Actor;
 using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -24,9 +20,9 @@ namespace SS3D.Systems.Entities.Humanoid
     [RequireComponent(typeof(Entity))]
     [RequireComponent(typeof(HumanoidAnimatorController))]
     [RequireComponent(typeof(Animator))]
-    public class HumanoidMovementController : NetworkActor
+    public class HumanoidMovementController : NetworkActor, ISpeedProvider
     {
-       public event Action<float> OnSpeedChangeEvent;
+        public event Action<float> OnSpeedChangeEvent;
 
         private const float DefaultSpeed = 1f;
         private const float RunFactor = 3f;
@@ -57,11 +53,10 @@ namespace SS3D.Systems.Entities.Humanoid
         private Vector2 _input;
         private Vector2 _smoothedInput;
 
-        private Actor _camera;
+        private CameraActor _camera;
         private Controls.MovementActions _movementControls;
         private Controls.HotkeysActions _hotkeysControls;
         private InputSystem _inputSystem;
-
 
         [SerializeField]
         private float _aimRotationSpeed = 5f;
@@ -85,17 +80,27 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <returns></returns>
         public float MaxSpeed => ComputeSpeed() / DefaultSpeed * (IsRunning ? DefaultSpeed : RunFactor);
 
-
         public override void OnStartClient()
         {
             base.OnStartClient();
+
             if (!GetComponent<NetworkObject>().IsOwner)
             {
                 enabled = false;
+
                 return;
             }
 
             Setup();
+        }
+
+        protected override void OnDestroyed()
+        {
+            base.OnDestroyed();
+            _movementControls.ToggleRun.performed -= HandleToggleRun;
+            InstanceFinder.TimeManager.OnTick -= HandleNetworkTick;
+            _inputSystem.ToggleActionMap(_movementControls, false);
+            _inputSystem.ToggleActionMap(_hotkeysControls, false);
         }
 
         [Client]
@@ -115,7 +120,6 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
-        
         /// <summary>
         /// Executes the movement code and updates the IK targets.
         /// </summary>
@@ -124,7 +128,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             ProcessPlayerInput();
             MoveMovementTarget(_input, _input.magnitude == 0 ? 5 : 1);
-            
+
             _rb.velocity = TargetMovement * (float)(_movementSpeed * TimeManager.TickDelta);
 
             if (_positionController.Movement != MovementType.Aiming && _input.magnitude != 0)
@@ -138,7 +142,6 @@ namespace SS3D.Systems.Entities.Humanoid
             }
         }
 
-
         /// <summary>
         /// Moves the movement targets with the given input.
         /// </summary>
@@ -146,12 +149,10 @@ namespace SS3D.Systems.Entities.Humanoid
         [Client]
         private void MoveMovementTarget(Vector2 movementInput, float multiplier = 1)
         {
-            Vector3 newTargetMovement = (movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized)
-                + (movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized);
+            Vector3 newTargetMovement = (movementInput.y * Vector3.Cross(_camera.Right, Vector3.up).normalized) + (movementInput.x * Vector3.Cross(Vector3.up, _camera.Forward).normalized);
 
             // smoothly changes the target movement
-            TargetMovement = Vector3.Lerp(
-                TargetMovement, newTargetMovement, (float)(TimeManager.TickDelta * (_lerpMultiplier * multiplier)));
+            TargetMovement = Vector3.Lerp(TargetMovement, newTargetMovement, (float)(TimeManager.TickDelta * (_lerpMultiplier * multiplier)));
 
             Vector3 resultingMovement = TargetMovement + Position;
             _absoluteMovement = resultingMovement;
@@ -165,8 +166,7 @@ namespace SS3D.Systems.Entities.Humanoid
         private void RotatePlayerToMovement(bool lookOpposite)
         {
             Quaternion lookRotation = Quaternion.LookRotation(lookOpposite ? -TargetMovement : TargetMovement);
-            transform.rotation = Quaternion.Slerp(
-                Rotation, lookRotation, (float)(TimeManager.TickDelta * _rotationLerpMultiplier));
+            transform.rotation = Quaternion.Slerp(Rotation, lookRotation, (float)(TimeManager.TickDelta * _rotationLerpMultiplier));
         }
 
         /// <summary>
@@ -180,9 +180,8 @@ namespace SS3D.Systems.Entities.Humanoid
 
             float inputFilteredSpeed = ComputeSpeed();
 
-            _input = new Vector2(x,y).normalized * inputFilteredSpeed;
-            _smoothedInput = Vector2.Lerp(
-                _smoothedInput, _input, (float)(TimeManager.TickDelta * (_lerpMultiplier / 10)));
+            _input = new Vector2(x, y).normalized * inputFilteredSpeed;
+            _smoothedInput = Vector2.Lerp(_smoothedInput, _input, (float)(TimeManager.TickDelta * (_lerpMultiplier / 10)));
 
             OnSpeedChangeEvent?.Invoke(_input.magnitude != 0 ? inputFilteredSpeed : 0);
         }
@@ -190,14 +189,14 @@ namespace SS3D.Systems.Entities.Humanoid
         [Client]
         private float ComputeSpeed()
         {
-             float speed = DefaultSpeed;
-             speed *= IsRunning ? RunFactor : 1;
-             speed *= _positionController.Movement == MovementType.Aiming ? AimFactor : 1;
-             speed *= _positionController.Movement == MovementType.Dragging ? DragFactor : 1;
-             speed *= GetComponent<PositionController>().PositionType == PositionType.Proning ? CrawlFactor : 1;
-             speed *= GetComponent<PositionController>().PositionType == PositionType.Crouching ? CrouchFactor : 1;
+            float speed = DefaultSpeed;
+            speed *= IsRunning ? RunFactor : 1;
+            speed *= _positionController.Movement == MovementType.Aiming ? AimFactor : 1;
+            speed *= _positionController.Movement == MovementType.Dragging ? DragFactor : 1;
+            speed *= GetComponent<PositionController>().PositionType == PositionType.Proning ? CrawlFactor : 1;
+            speed *= GetComponent<PositionController>().PositionType == PositionType.Crouching ? CrouchFactor : 1;
 
-             return speed;
+            return speed;
         }
 
         /// <summary>
@@ -224,7 +223,7 @@ namespace SS3D.Systems.Entities.Humanoid
             _inputSystem.ToggleActionMap(_movementControls, true);
             _inputSystem.ToggleActionMap(_hotkeysControls, true);
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-            _positionController.ChangedPosition += HandleChangedPosition;
+            _positionController.OnChangedPosition += HandleChangedPosition;
         }
 
         private void HandleChangedPosition(PositionType position, float durationTransition)
@@ -246,7 +245,7 @@ namespace SS3D.Systems.Entities.Humanoid
         private void UpdateAimTargetPosition()
         {
             // Cast a ray from the mouse position into the scene
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _camera.Camera.ScreenPointToRay(Input.mousePosition);
 
             // Check if the ray hits any collider
             if (Physics.Raycast(ray, out RaycastHit hit))
@@ -266,19 +265,8 @@ namespace SS3D.Systems.Entities.Humanoid
             if (direction != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation, targetRotation, (float)(_aimRotationSpeed * TimeManager.TickDelta));
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, (float)(_aimRotationSpeed * TimeManager.TickDelta));
             }
         }
-
-        protected override void OnDestroyed()
-        {
-            base.OnDestroyed();
-            _movementControls.ToggleRun.performed -= HandleToggleRun;
-            InstanceFinder.TimeManager.OnTick -= HandleNetworkTick;
-            _inputSystem.ToggleActionMap(_movementControls, false);
-            _inputSystem.ToggleActionMap(_hotkeysControls, false);
-        }
     }
-
 }

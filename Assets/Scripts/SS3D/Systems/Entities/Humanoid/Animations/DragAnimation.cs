@@ -10,13 +10,9 @@ using Object = UnityEngine.Object;
 
 namespace SS3D.Systems.Animations
 {
-    public class GrabAnimation : AbstractProceduralAnimation
+    public class DragAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
-
-        private FixedJoint _fixedJoint;
-
-        private LayerMask _grabbableLayer;
 
         private const float JointBreakForce = 5000f;
 
@@ -28,7 +24,11 @@ namespace SS3D.Systems.Animations
 
         private readonly Hand _secondaryHand;
 
-        public GrabAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, NetworkObject target)
+        private FixedJoint _fixedJoint;
+
+        private LayerMask _grabbableLayer;
+
+        public DragAnimation(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, Hand secondaryHand, NetworkObject target)
             : base(time, proceduralAnimationController)
         {
             _grabbedObject = target.GetComponent<Draggable>();
@@ -50,13 +50,13 @@ namespace SS3D.Systems.Animations
 
         private void ReleaseGrab()
         {
-            if (_grabbedObject is not null && _grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
+            if (_grabbedObject && _grabbedObject.TryGetComponent(out Rigidbody grabbedRb))
             {
                 grabbedRb.detectCollisions = true;
             }
 
-            if (_fixedJoint is not null)
-            { 
+            if (_fixedJoint)
+            {
                 Object.Destroy(_fixedJoint);
             }
 
@@ -100,7 +100,7 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change pickup constraint weight of the main hand from 0 to 1
-            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x =>  _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration)
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration)
                 .OnComplete(HandleGrabbing));
 
             // Stop looking
@@ -114,7 +114,7 @@ namespace SS3D.Systems.Animations
         {
             _mainHand.HandBone.GetComponent<Rigidbody>().isKinematic = true;
             _mainHand.HandBone.GetComponent<Collider>().enabled = false;
-                
+
             // Only the owner handle physics since transform are client authoritative for now
             if (!_mainHand.IsOwner)
             {
@@ -125,13 +125,11 @@ namespace SS3D.Systems.Animations
 
             if (_grabbedObject.MoveToGrabber)
             {
-                _grabbedObject.transform.position = _mainHand.Hold.HoldTransform.position; 
+                _grabbedObject.transform.position = _mainHand.Hold.HoldTransform.position;
                 grabbedRb.velocity = Vector3.zero;
                 grabbedRb.position = _mainHand.Hold.HoldTransform.position;
                 grabbedRb.detectCollisions = false;
             }
-
-            
 
             _fixedJoint = Controller.GameObject.AddComponent<FixedJoint>();
             _fixedJoint.connectedBody = grabbedRb;

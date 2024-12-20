@@ -1,5 +1,6 @@
 using DG.Tweening;
 using JetBrains.Annotations;
+using SS3D.Systems.Entities;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Utils;
 using System;
@@ -14,17 +15,7 @@ namespace SS3D.Systems.Animations
     {
         public abstract event Action<IProceduralAnimation> OnCompletion;
 
-        public abstract void ClientPlay();
-
-        public abstract void Cancel();
-
-        private bool _positionHasChanged; 
-
-        protected float InteractionTime { get; private set; }
-
-        protected Sequence InteractionSequence { get; private set; }
-
-        protected ProceduralAnimationController Controller { get; private set; }
+        private bool _positionHasChanged;
 
         protected AbstractProceduralAnimation(float interactionTime, ProceduralAnimationController controller)
         {
@@ -33,17 +24,15 @@ namespace SS3D.Systems.Animations
             InteractionSequence = DOTween.Sequence();
         }
 
-        /// <summary>
-        ///  Try to rotate on the flat plane the player toward a given position, often useful for procedural animations.
-        /// </summary>
-        protected void TryRotateTowardTargetPosition(Transform rootTransform, float rotateTime, Vector3 position)
-        {
-            if (Controller.PositionController.PositionType != PositionType.Sitting)
-            {
-                InteractionSequence.Join(Controller.transform.DORotate(
-                    QuaternionExtension.SameHeightPlaneLookRotation(position - rootTransform.position, Vector3.up).eulerAngles, rotateTime));
-            }
-        }
+        protected float InteractionTime { get; private set; }
+
+        protected Sequence InteractionSequence { get; private set; }
+
+        protected ProceduralAnimationController Controller { get; private set; }
+
+        public abstract void ClientPlay();
+
+        public abstract void Cancel();
 
         /// <summary>
         /// Create a rotation of the IK target to make sure the hand reach in a natural way the item.
@@ -58,6 +47,18 @@ namespace SS3D.Systems.Animations
             targetRotation *= Quaternion.AngleAxis(90f, Vector3.right);
 
             hand.Hold.HandIkTarget.rotation = targetRotation;
+        }
+
+        /// <summary>
+        ///  Try to rotate on the flat plane the player toward a given position, often useful for procedural animations.
+        /// </summary>
+        protected void TryRotateTowardTargetPosition(Transform rootTransform, float rotateTime, Vector3 position)
+        {
+            if (Controller.PositionController.PositionType != PositionType.Sitting)
+            {
+                InteractionSequence.Join(Controller.transform.DORotate(
+                    QuaternionExtension.SameHeightPlaneLookRotation(position - rootTransform.position, Vector3.up).eulerAngles, rotateTime));
+            }
         }
 
         /// <summary>
@@ -79,6 +80,5 @@ namespace SS3D.Systems.Animations
                 positionController.TryToGetToPreviousPosition();
             }
         }
-
     }
 }

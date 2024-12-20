@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IRootTransformProvider
 {
-     Transform rootTransform { get; }
+     Transform RootTransform { get; }
 }

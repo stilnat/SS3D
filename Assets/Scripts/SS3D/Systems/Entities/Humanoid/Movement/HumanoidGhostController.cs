@@ -1,8 +1,4 @@
-using System;
-using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Systems.Health;
-using SS3D.Systems.Screens;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -13,8 +9,9 @@ namespace SS3D.Systems.Entities.Humanoid
     /// </summary>
     public class HumanoidGhostController : NetworkActor
     {
-        private float moveSpeed = 5f;      // Movement speed
-        private float rotationSpeed = 10f; // Rotation speed for smooth turning
+        private float _moveSpeed = 5f; // Movement speed
+
+        private float _rotationSpeed = 10f; // Rotation speed for smooth turning
 
         public override void OnStartClient()
         {
@@ -25,21 +22,21 @@ namespace SS3D.Systems.Entities.Humanoid
                 enabled = false;
             }
         }
-        private void Update()
+
+        protected void Update()
         {
             float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");    
+            float vertical = Input.GetAxis("Vertical");
 
             Vector3 movement = new Vector3(horizontal, 0, vertical).normalized;
 
-            transform.position += movement * (moveSpeed * Time.deltaTime);
+            transform.position += movement * (_moveSpeed * Time.deltaTime);
 
             if (movement != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(movement);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
             }
         }
     }
-
 }

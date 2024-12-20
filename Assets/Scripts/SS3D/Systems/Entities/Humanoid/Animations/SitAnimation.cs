@@ -1,15 +1,8 @@
 using DG.Tweening;
 using FishNet.Object;
-using SS3D.Interactions;
-using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Furniture;
-using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
-using SS3D.Utils;
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Animations
 {
@@ -17,13 +10,13 @@ namespace SS3D.Systems.Animations
     /// Simple animation allowing to place correctly the human before playing the sit animation.
     /// I'm not sure the sitting stuff really has its place here, maybe more in humanoid movement controller
     /// </summary>
-    public sealed class Sit : AbstractProceduralAnimation
+    public sealed class SitAnimation : AbstractProceduralAnimation
     {
         public override event Action<IProceduralAnimation> OnCompletion;
 
         private readonly Sittable _sit;
 
-        public Sit(float interactionTime, ProceduralAnimationController controller, NetworkObject sit)
+        public SitAnimation(float interactionTime, ProceduralAnimationController controller, NetworkObject sit)
             : base(interactionTime, controller)
         {
             _sit = sit.GetComponent<Sittable>();

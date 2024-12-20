@@ -1,8 +1,10 @@
 ﻿using NUnit.Framework;
 using SS3D.Core;
 using SS3D.Data.Generated;
+using SS3D.Systems.Camera;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Humanoid;
+using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Rounds;
 using SS3D.Systems.Screens;
 using SS3D.UI.Buttons;
@@ -116,17 +118,17 @@ namespace SS3D.Tests
         public static IEnumerator PlayerCanDropAndPickUpItem(PlayModeTest fixture)
         {
             // Get local player position, interaction controller and put bikehorn in first hand available.
-            var hand = TestHelpers.LocalPlayerSpawnItemInFirstHandAvailable(Items.PDA);
-            var playerPosition = TestHelpers.GetLocalPlayerPosition();
+            AttachedContainer hand = TestHelpers.LocalPlayerSpawnItemInFirstHandAvailable(Items.PDA);
+            Vector3 playerPosition = TestHelpers.GetLocalPlayerPosition();
 
             yield return new WaitForSeconds(0.2f);
 
             // Drop item at a close position from local player
-            var itemPosition = playerPosition;
-            var camera = Subsystems.Get<CameraSystem>().PlayerCamera.GetComponent<Camera>();
-            var target = camera.WorldToScreenPoint(itemPosition);
+            Vector3 itemPosition = playerPosition;
+            Camera camera = Subsystems.Get<CameraSystem>().PlayerCamera.GetComponent<Camera>();
+            Vector3 target = camera.WorldToScreenPoint(itemPosition);
 
-            var target2D = new Vector2(target.x, target.y) - new Vector2(-60, -60);
+            Vector2 target2D = new Vector2(target.x, target.y) - new Vector2(-60, -60);
             fixture.Set(fixture.Mouse.position, target2D);
 
             // Check that player can drop and pick up item again.

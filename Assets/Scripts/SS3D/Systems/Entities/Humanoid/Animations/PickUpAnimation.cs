@@ -30,7 +30,7 @@ namespace SS3D.Systems.Animations
 
         public override void ClientPlay()
         {
-            bool withTwoHands = _secondaryHand is not null && _secondaryHand.Empty && _holdable.CanHoldTwoHand;
+            bool withTwoHands = _secondaryHand && _secondaryHand.Empty && _holdable.CanHoldTwoHand;
 
             SetUpPickup(withTwoHands);
 
@@ -102,17 +102,17 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _itemReachDuration));
 
             // At the same time change hold and pickup constraint weight of the main hand from 0 to 1
-            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.HoldIkConstraint.weight, x =>  _mainHand.Hold.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.HoldIkConstraint.weight, x => _mainHand.Hold.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
 
             // When reached for the item, parent it to the item position target locker
-            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x =>  _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
+            InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration).OnComplete(() =>
                 _holdable.transform.parent = _mainHand.Hold.ItemPositionTargetLocker));
 
             // Reproduce changes on second hand if picking up with two hands
             if (withTwoHands)
             {
                 InteractionSequence.Join(DOTween.To(() => _secondaryHand.Hold.HoldIkConstraint.weight, x => _secondaryHand.Hold.HoldIkConstraint.weight = x, 1f, _itemReachDuration));
-                InteractionSequence.Join(DOTween.To(() => _secondaryHand.Hold.PickupIkConstraint.weight, x =>_secondaryHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
+                InteractionSequence.Join(DOTween.To(() => _secondaryHand.Hold.PickupIkConstraint.weight, x => _secondaryHand.Hold.PickupIkConstraint.weight = x, 1f, _itemReachDuration));
             }
 
             // Once reached, start moving and rotating item toward its constrained position.

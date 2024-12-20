@@ -10,7 +10,7 @@ namespace SS3D.Systems.Animations
     /// Procedural animation for interaction done with hand holding nothing.
     /// </summary>
     public class InteractWithHandAnimation : AbstractProceduralAnimation
-    { 
+    {
         public override event Action<IProceduralAnimation> OnCompletion;
 
         private readonly float _moveHandTime;
@@ -58,7 +58,6 @@ namespace SS3D.Systems.Animations
 
         private void InteractWithHand()
         {
-
             AlignHandWithShoulder(_targetPosition, _hand);
 
             AdaptPosition(Controller.PositionController, _hand, _targetPosition);
@@ -70,7 +69,7 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _moveHandTime));
 
             // Move hand toward target
-            InteractionSequence.Join(_hand.Hold.HandIkTarget.DOMove(_targetPosition, _moveHandTime).OnComplete(() =>  _hand.Hold.PlayAnimation(_interactionType)));
+            InteractionSequence.Join(_hand.Hold.HandIkTarget.DOMove(_targetPosition, _moveHandTime).OnComplete(() => _hand.Hold.PlayAnimation(_interactionType)));
 
             InteractionSequence.AppendInterval(InteractionTime - _moveHandTime);
 
@@ -94,8 +93,8 @@ namespace SS3D.Systems.Animations
         {
             Vector3 fromShoulderToTarget = (interactionPoint - mainHand.Hold.UpperArm.transform.position).normalized;
             mainHand.Hold.HandIkTarget.rotation = Quaternion.LookRotation(fromShoulderToTarget);
-            mainHand.Hold.HandIkTarget.rotation *= Quaternion.Euler(90f, 0f,0);
-            mainHand.Hold.HandIkTarget.rotation *= Quaternion.Euler(0f, 180f,0);
+            mainHand.Hold.HandIkTarget.rotation *= Quaternion.Euler(90f, 0f, 0);
+            mainHand.Hold.HandIkTarget.rotation *= Quaternion.Euler(0f, 180f, 0);
         }
     }
 }

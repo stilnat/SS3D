@@ -27,7 +27,7 @@ namespace SS3D.Systems.Animations
         private readonly Vector3 _targetPosition;
 
         public InteractAnimations(ProceduralAnimationController proceduralAnimationController, float time, Hand mainHand, NetworkObject target, InteractionType interactionType, Vector3 targetPosition)
-            : base(time, proceduralAnimationController) 
+            : base(time, proceduralAnimationController)
         {
             _tool = target.GetComponent<IInteractiveTool>();
             _moveToolTime = Mathf.Min(time, 0.2f);
@@ -84,7 +84,7 @@ namespace SS3D.Systems.Animations
             // turn the player toward its target so all subsequent computations
             // are correctly done with player oriented toward target. Then, in the same frame,
             // put player at its initial rotation.
-            Transform transform = mainHand.HandsController.transform;
+            Transform transform = mainHand.RootTransform.transform;
             Vector3 directionFromTransformToTarget = interactionPoint - transform.position;
             directionFromTransformToTarget.y = 0f;
             Quaternion initialPlayerRotation = transform.rotation;
@@ -114,7 +114,7 @@ namespace SS3D.Systems.Animations
             TryRotateTowardTargetPosition(Controller.transform, _moveToolTime, _targetPosition);
 
             AdaptPosition(Controller.PositionController, _mainHand, _targetPosition);
-           
+
             // Start looking at item
             InteractionSequence.Join(DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 1f, _moveToolTime));
 
@@ -141,6 +141,5 @@ namespace SS3D.Systems.Animations
                 OnCompletion?.Invoke(this);
             });
         }
-
     }
 }

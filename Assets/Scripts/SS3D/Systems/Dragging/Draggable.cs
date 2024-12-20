@@ -18,6 +18,12 @@ namespace SS3D.Systems.Dragging
         [SyncVar]
         private bool _dragged;
 
+        /// <summary>
+        /// If true, when grabbing, the draggable root transform should be moved toward the grabber, otherwise it's the grabber that moves toward the grabbed item.
+        /// For heavy, rigid stuff this should be false, for stuff such as ragdoll this should be true.
+        /// </summary>
+        public abstract bool MoveToGrabber { get; }
+
         public bool Dragged => _dragged;
 
         [NotNull]
@@ -30,11 +36,5 @@ namespace SS3D.Systems.Dragging
         }
 
         public abstract bool TryGetInteractionPoint(IInteractionSource source, out Vector3 point);
-
-        /// <summary>
-        /// If true, when grabbing, the draggable root transform should be moved toward the grabber, otherwise it's the grabber that moves toward the grabbed item.
-        /// For heavy, rigid stuff this should be false, for stuff such as ragdoll this should be true.
-        /// </summary>
-        public abstract bool MoveToGrabber { get; }
     }
 }

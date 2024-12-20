@@ -9,7 +9,6 @@ namespace SS3D.Systems.Animations
     /// </summary>
     public class ItemHitPoint : MonoBehaviour
     {
-
         [SerializeField]
         [Dropdown(nameof(GetDirectionValues))]
         private Vector3 _forwardHit = Vector3.forward;

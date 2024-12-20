@@ -1,15 +1,12 @@
-﻿using SS3D.Interactions;
-using SS3D.Interactions.Extensions;
-using SS3D.Interactions.Interfaces;
-using UnityEngine;
-using SS3D.Systems.Inventory.Containers;
-using SS3D.Systems.Entities;
-using SS3D.Systems.Health;
+﻿using FishNet.Object;
 using SS3D.Data.Generated;
 using SS3D.Intents;
-using SS3D.Systems.Animations;
-using SS3D.Systems.Entities.Humanoid;
+using SS3D.Interactions;
+using SS3D.Interactions.Extensions;
+using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
+using UnityEngine;
 
 namespace SS3D.Systems.Combat.Interactions
 {
@@ -23,11 +20,11 @@ namespace SS3D.Systems.Combat.Interactions
             Delay = time;
         }
 
+        public override InteractionType InteractionType => InteractionType.Hit;
+
         public override string GetName(InteractionEvent interactionEvent) => "Hit";
 
         public override string GetGenericName() => "Hit";
-
-        public override InteractionType InteractionType => InteractionType.Hit;
 
         public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Nuke;
 
@@ -36,22 +33,11 @@ namespace SS3D.Systems.Combat.Interactions
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
 
-            if (source.GetRootSource() is not Hand hand)
-            {
-                return false;
-            }
-
-            if (hand.GetComponentInParent<IntentController>().Intent != IntentType.Harm)
-            {
-                return false;
-            }
-
-            return true;
+            return source.GetRootSource() is IIntentProvider hand && hand.Intent == IntentType.Harm;
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            
         }
 
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
@@ -59,11 +45,15 @@ namespace SS3D.Systems.Combat.Interactions
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
 
-            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null && source.GetRootSource() is Hand hand)
+            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null)
             {
                 Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
-                entity.GetComponent<Ragdoll>().KnockDown(1f);
-                entity.GetComponent<Ragdoll>().AddForceToAllParts(-hand.Up);
+
+                if (entity is IRagdollable ragdoll)
+                {
+                    ragdoll.Knockdown(1f);
+                    ragdoll.AddForceToAllRagdollParts(-interactionEvent.Source.GameObject.transform.up);
+                }
             }
         }
 
@@ -75,9 +65,9 @@ namespace SS3D.Systems.Combat.Interactions
             // Curently just hit the first body part of an entity if it finds one.
             // Should instead choose the body part using the target dummy doll ?
             // Also should be able to hit with other things than just hands.
-            if (source.GetRootSource() is Hand hand)
+            if (source.GetRootSource() is IInteractionSourceAnimate animatedSource)
             {
-                hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType.Hit, hand, null, interactionEvent.Point, Delay);
+                animatedSource.PlaySourceAnimation(InteractionType.Hit, interactionEvent.Target.GetComponent<NetworkObject>(), interactionEvent.Point, Delay);
             }
 
             return true;

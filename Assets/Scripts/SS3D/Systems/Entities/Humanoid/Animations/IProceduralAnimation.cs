@@ -4,7 +4,6 @@ namespace SS3D.Systems.Animations
 {
     public interface IProceduralAnimation
     {
-
         /// <summary>
         /// Event that should be called when the animation ends.
         /// </summary>

@@ -5,6 +5,7 @@ using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Intents;
 using SS3D.Interactions;
+using SS3D.Systems.Combat.Interactions;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
@@ -21,8 +22,7 @@ namespace SS3D.Systems.Animations
     /// </summary>
     public class AimController : NetworkActor
     {
-
-        public event Action<bool, bool> OnAim; 
+        public event Action<bool, bool> OnAim;
 
         [SerializeField]
         private Hands _hands;
@@ -114,7 +114,7 @@ namespace SS3D.Systems.Animations
         private void AimGunOnPerformed(InputAction.CallbackContext obj)
         {
             // To aim, the intent must be harmful, and a gun must be in hand.
-            bool canAim = _intentController.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemInHand.GameObject.HasComponent<Gun>();
+            bool canAim = _intentController.Intent == IntentType.Harm && _hands.SelectedHand.Full && _hands.SelectedHand.ItemHeld.GameObject.HasComponent<Gun>();
 
             if (canAim)
             {

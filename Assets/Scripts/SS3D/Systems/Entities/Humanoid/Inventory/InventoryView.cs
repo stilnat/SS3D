@@ -1,18 +1,12 @@
-﻿using System;
+﻿using Coimbra;
+using FishNet.Object;
+using SS3D.Core.Behaviours;
+using SS3D.Logging;
+using SS3D.Systems.Inventory.Containers;
 using System.Collections.Generic;
 using System.Linq;
-using Coimbra;
-using SS3D.Core;
-using SS3D.Core.Behaviours;
-using SS3D.Systems.Inventory.Containers;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Serialization;
-using SS3D.Logging;
-using UnityEngine.UI;
-using TMPro;
-using FishNet.Object;
-using FishNet;
 
 namespace SS3D.Systems.Inventory.UI
 {
@@ -21,72 +15,122 @@ namespace SS3D.Systems.Inventory.UI
     /// </summary>
     public class InventoryView : View
     {
-        // A reference to the Inventory it displays
-        private HumanInventory Inventory;
+        // All the slots present in the UI.
+        private readonly List<SingleItemContainerSlot> _slots = new();
 
-        [SerializeField] private GameObject HorizontalLayout;
+        // A reference to the Inventory it displays
+        private HumanInventory _inventory;
+
+        [FormerlySerializedAs("HorizontalLayout")]
+        [SerializeField]
+        private GameObject _horizontalLayout;
 
         // Slots prefab in the horizontal layout
-        [SerializeField] private GameObject PocketPrefab;
-        [SerializeField] private GameObject IDSlotPrefab;
-        [SerializeField] private GameObject HandLeftPrefab;
-        [SerializeField] private GameObject HandRightPrefab;
-        [SerializeField] private GameObject BagPrefab;
-        [SerializeField] private GameObject BeltPrefab;
-        [SerializeField] private GameObject Divisor;
+        [FormerlySerializedAs("PocketPrefab")]
+        [SerializeField]
+        private GameObject _pocketPrefab;
+
+        [FormerlySerializedAs("IDSlotPrefab")]
+        [SerializeField]
+        private GameObject _idSlotPrefab;
+
+        [FormerlySerializedAs("HandLeftPrefab")]
+        [SerializeField]
+        private GameObject _handLeftPrefab;
+
+        [FormerlySerializedAs("HandRightPrefab")]
+        [SerializeField]
+        private GameObject _handRightPrefab;
+
+        [FormerlySerializedAs("BagPrefab")]
+        [SerializeField]
+        private GameObject _bagPrefab;
+
+        [FormerlySerializedAs("BeltPrefab")]
+        [SerializeField]
+        private GameObject _beltPrefab;
+
+        [FormerlySerializedAs("Divisor")]
+        [SerializeField]
+        private GameObject _divisor;
 
         /// <summary>
         /// The order in which each containerType in the Horizontal layout should display.
         /// </summary>
+        [FormerlySerializedAs("HorizontalSlotOrder")]
         [SerializeField]
-        private List<ContainerType> HorizontalSlotOrder;
+        private List<ContainerType> _horizontalSlotOrder;
 
-        [SerializeField] private GameObject ClothingLayout;
+        [FormerlySerializedAs("ClothingLayout")]
+        [SerializeField]
+        private GameObject _clothingLayout;
 
         // Slots prefab for the Clothing grid.
-        [SerializeField] private GameObject ShoeLeftPrefab;
-        [SerializeField] private GameObject ShoeRightPrefab;
-        [SerializeField] private GameObject GloveLeftPrefab;
-        [SerializeField] private GameObject GloveRightPrefab;
-        [SerializeField] private GameObject GlassesPrefab;
-        [SerializeField] private GameObject MaskPrefab;
-        [SerializeField] private GameObject HeadPrefab;
-        [SerializeField] private GameObject JumpsuitPrefab;
-        [SerializeField] private GameObject ExoSuitPrefab;
-        [SerializeField] private GameObject EarLeftPrefab;
-        [SerializeField] private GameObject EarRightPrefab;
-        [SerializeField] private GameObject DummyPrefab;
+        [FormerlySerializedAs("ShoeLeftPrefab")]
+        [SerializeField]
+        private GameObject _shoeLeftPrefab;
 
+        [FormerlySerializedAs("ShoeRightPrefab")]
+        [SerializeField]
+        private GameObject _shoeRightPrefab;
 
-        private object lockObject = new object();
+        [FormerlySerializedAs("GloveLeftPrefab")]
+        [SerializeField]
+        private GameObject _gloveLeftPrefab;
+
+        [FormerlySerializedAs("GloveRightPrefab")]
+        [SerializeField]
+        private GameObject _gloveRightPrefab;
+
+        [FormerlySerializedAs("GlassesPrefab")]
+        [SerializeField]
+        private GameObject _glassesPrefab;
+
+        [FormerlySerializedAs("MaskPrefab")]
+        [SerializeField]
+        private GameObject _maskPrefab;
+
+        [FormerlySerializedAs("HeadPrefab")]
+        [SerializeField]
+        private GameObject _headPrefab;
+
+        [FormerlySerializedAs("JumpsuitPrefab")]
+        [SerializeField]
+        private GameObject _jumpsuitPrefab;
+
+        [FormerlySerializedAs("ExoSuitPrefab")]
+        [SerializeField]
+        private GameObject _exoSuitPrefab;
+
+        [FormerlySerializedAs("EarLeftPrefab")]
+        [SerializeField]
+        private GameObject _earLeftPrefab;
+
+        [FormerlySerializedAs("EarRightPrefab")]
+        [SerializeField]
+        private GameObject _earRightPrefab;
+
+        [FormerlySerializedAs("DummyPrefab")]
+        [SerializeField]
+        private GameObject _dummyPrefab;
+
+        private object _lockObject = new object();
 
         /// <summary>
         /// The order in which clothing slots appear in the grid by container type,
         /// from top left, to bottom right.
         /// </summary>
+        [FormerlySerializedAs("ClothingSlotPosition")]
         [SerializeField]
-        private List<ContainerType> ClothingSlotPosition;
-
-        // All the slots present in the UI.
-        private List<SingleItemContainerSlot> Slots = new();
+        private List<ContainerType> _clothingSlotPosition;
 
         // The number of Hand slots.
-        public int CountHandsSlots => Slots.Count(x => x.Container.ContainerType == ContainerType.Hand);
-        
-        private bool HasSlotOfType(ContainerType type)
-        {
-            return Slots.Any(x=> x.Container.ContainerType == type); 
-        }
-
-        private bool HasSlotWithHigherOrSameOrderThan(ContainerType type)
-        {
-            return Slots.Any(x => OrderOfType(x.Container.ContainerType) >= OrderOfType(type));
-        }
+        public int CountHandsSlots => _slots.Count(x => x.Container.ContainerType == ContainerType.Hand);
 
         public void Setup(HumanInventory inventory)
         {
             FillClothingLayoutWithDummySlots();
-            Inventory = inventory;
+            _inventory = inventory;
 
             foreach (AttachedContainer container in inventory.Containers)
             {
@@ -98,15 +142,46 @@ namespace SS3D.Systems.Inventory.UI
         }
 
         /// <summary>
+        /// Get the transform of a hand slot game object.
+        /// </summary>
+        /// <param name="index"> The index of the hand slot, necessary as multiple hand slots can be on a player. </param>
+        /// <returns> The transform of the hand slot at the specified index.</returns>
+        public Transform GetHandSlot(Hand hand)
+        {
+            SingleItemContainerSlot slot = _slots.Find(x => x.Container == hand.Container);
+            return slot.transform;
+        }
+
+        public void DestroyAllSlots()
+        {
+            for (int i = _slots.Count - 1; i >= 0; i--)
+            {
+                _slots[i].gameObject.Dispose(true);
+            }
+
+            _slots.Clear();
+        }
+
+        private bool HasSlotOfType(ContainerType type)
+        {
+            return _slots.Any(x => x.Container.ContainerType == type);
+        }
+
+        private bool HasSlotWithHigherOrSameOrderThan(ContainerType type)
+        {
+            return _slots.Any(x => OrderOfType(x.Container.ContainerType) >= OrderOfType(type));
+        }
+
+        /// <summary>
         /// Necessary method to set up the clothing slot grid. It fills the whole grid with invisible dummy slots.
         /// </summary>
         [Client]
         private void FillClothingLayoutWithDummySlots()
         {
-            for (int i=0; i< ClothingSlotPosition.Count; i++)
+            for (int i = 0; i < _clothingSlotPosition.Count; i++)
             {
-                GameObject dummySlot = Instantiate(DummyPrefab);
-                dummySlot.transform.SetParent(ClothingLayout.transform, false);
+                GameObject dummySlot = Instantiate(_dummyPrefab);
+                dummySlot.transform.SetParent(_clothingLayout.transform, false);
                 dummySlot.transform.SetAsFirstSibling();
             }
         }
@@ -117,94 +192,134 @@ namespace SS3D.Systems.Inventory.UI
         [Client]
         private void HandleInventoryContainerAdded(AttachedContainer container)
         {
-            if (Slots.Exists(x => x.Container == container))
+            if (_slots.Exists(x => x.Container == container))
+            {
                 return;
+            }
 
             SingleItemContainerSlot slot;
             switch (container.Type)
             {
                 case ContainerType.Hand:
+                {
                     slot = AddHandSlot();
                     break;
+                }
 
                 case ContainerType.Pocket:
-                    slot = AddHorizontalLayoutSlot(PocketPrefab, ContainerType.Pocket);
+                {
+                    slot = AddHorizontalLayoutSlot(_pocketPrefab, ContainerType.Pocket);
                     break;
+                }
 
                 case ContainerType.Identification:
-                    slot = AddHorizontalLayoutSlot(IDSlotPrefab, ContainerType.Identification);
+                {
+                    slot = AddHorizontalLayoutSlot(_idSlotPrefab, ContainerType.Identification);
                     break;
+                }
 
                 case ContainerType.Bag:
-                    slot = AddHorizontalLayoutSlot(BagPrefab, ContainerType.Bag);
+                {
+                    slot = AddHorizontalLayoutSlot(_bagPrefab, ContainerType.Bag);
                     break;
+                }
 
                 case ContainerType.Glasses:
-                    slot = AddClothingSlot(GlassesPrefab);
+                {
+                    slot = AddClothingSlot(_glassesPrefab);
                     break;
+                }
 
                 case ContainerType.Mask:
-                    slot = AddClothingSlot(MaskPrefab);
+                {
+                    slot = AddClothingSlot(_maskPrefab);
                     break;
+                }
 
                 case ContainerType.EarLeft:
-                    slot = AddClothingSlot(EarLeftPrefab);
+                {
+                    slot = AddClothingSlot(_earLeftPrefab);
                     break;
+                }
 
                 case ContainerType.EarRight:
-                    slot = AddClothingSlot(EarRightPrefab);
+                {
+                    slot = AddClothingSlot(_earRightPrefab);
                     break;
+                }
 
                 case ContainerType.Head:
-                    slot = AddClothingSlot(HeadPrefab);
+                {
+                    slot = AddClothingSlot(_headPrefab);
                     break;
+                }
 
                 case ContainerType.ExoSuit:
-                    slot = AddClothingSlot(ExoSuitPrefab);
+                {
+                    slot = AddClothingSlot(_exoSuitPrefab);
                     break;
+                }
 
                 case ContainerType.Jumpsuit:
-                    slot = AddClothingSlot(JumpsuitPrefab);
+                {
+                    slot = AddClothingSlot(_jumpsuitPrefab);
                     break;
+                }
 
                 case ContainerType.GloveLeft:
-                    slot = AddClothingSlot(GloveLeftPrefab);
+                {
+                    slot = AddClothingSlot(_gloveLeftPrefab);
                     break;
+                }
 
                 case ContainerType.GloveRight:
-                    slot = AddClothingSlot(GloveRightPrefab);
+                {
+                    slot = AddClothingSlot(_gloveRightPrefab);
                     break;
+                }
 
                 case ContainerType.ShoeLeft:
-                    slot = AddClothingSlot(ShoeLeftPrefab);
+                {
+                    slot = AddClothingSlot(_shoeLeftPrefab);
                     break;
+                }
 
                 case ContainerType.ShoeRight:
-                    slot = AddClothingSlot(ShoeRightPrefab);
+                {
+                    slot = AddClothingSlot(_shoeRightPrefab);
                     break;
+                }
 
                 case ContainerType.Belt:
-                    slot = AddHorizontalLayoutSlot(BeltPrefab, ContainerType.Belt);
+                {
+                    slot = AddHorizontalLayoutSlot(_beltPrefab, ContainerType.Belt);
                     break;
-
+                }
 
                 default:
+                {
                     Log.Error(this, $"Unknown or missing container type {container.Type} for this container {container}");
                     slot = null;
                     break;
+                }
             }
-            if (slot == null) return;
+
+            if (slot == null)
+            {
+                return;
+            }
+
             slot.Container = container;
-            slot.Inventory = Inventory;
-            Slots.Add(slot);
+            slot.Inventory = _inventory;
+            _slots.Add(slot);
         }
 
         /// <summary>
-        /// For a given container type in the Horizontal slot, give it's order from left to right. 
+        /// For a given container type in the Horizontal slot, give it's order from left to right.
         /// </summary>
-        private int OrderOfType(ContainerType type) 
+        private int OrderOfType(ContainerType type)
         {
-            return HorizontalSlotOrder.FindIndex(0, x => x == type);
+            return _horizontalSlotOrder.FindIndex(0, x => x == type);
         }
 
         /// <summary>
@@ -214,67 +329,68 @@ namespace SS3D.Systems.Inventory.UI
         {
             if (CountHandsSlots % 2 == 0)
             {
-                return AddHorizontalLayoutSlot(HandLeftPrefab, ContainerType.Hand);
+                return AddHorizontalLayoutSlot(_handLeftPrefab, ContainerType.Hand);
             }
-            else return AddHorizontalLayoutSlot(HandRightPrefab, ContainerType.Hand);
+
+            return AddHorizontalLayoutSlot(_handRightPrefab, ContainerType.Hand);
         }
 
         /// <summary>
-        /// This place a slot in the horizontal layout according to the order defined 
+        /// This place a slot in the horizontal layout according to the order defined
         /// by element order in the HorizontalSlotOrder List of containerType.
         /// In case of multiple slots with the same container type, it places the slot after all other slots
         /// with same container type.
         /// </summary>
         private int PlaceHorizontalLayoutSlot(ContainerType type)
         {
-            //TODO fix hands again
-
             // if no slot with order higher place at end
             if (!HasSlotWithHigherOrSameOrderThan(type))
             {
-                return HorizontalLayout.transform.childCount;   
+                return _horizontalLayout.transform.childCount;
             }
 
             // if slot with same order, place at last index of slot type.
             if (HasSlotOfType(type))
             {
-                return (LastIndexSlotOfType(type)+1);
+                return LastIndexSlotOfType(type) + 1;
             }
 
             // if slot with order lower, place at last index of type just below.
-            for (int i = 0; i < HorizontalLayout.transform.childCount; i++)
+            for (int i = 0; i < _horizontalLayout.transform.childCount; i++)
             {
-                Transform childTransform = HorizontalLayout.transform.GetChild(i);
-                
+                Transform childTransform = _horizontalLayout.transform.GetChild(i);
                 if (childTransform.gameObject.TryGetComponent(out SingleItemContainerSlot slot) && OrderOfType(slot.Container.ContainerType) >= OrderOfType(type))
                 {
-                        return i;     
+                    return i;
                 }
             }
+
             Log.Warning(this, "returning slot position 0, should not reach this point");
             return 0;
         }
 
         /// <summary>
-        /// Returns the game object sibling index of the ith game object being a 
+        /// Returns the game object sibling index of the ith game object being a
         /// SingleContainerSlot and having a given ContainerType in the horizontal layout.
         /// </summary>
         /// <returns> Index 0 if no slot with container type given is found, otherwise the ith index slot of the given type.</returns>
         private int IndexSlotOfType(ContainerType type, int number)
         {
             int countOfGivenType = 0;
-            for (int i = 0; i < HorizontalLayout.transform.childCount; i++)
+            for (int i = 0; i < _horizontalLayout.transform.childCount; i++)
             {
-                Transform childTransform = HorizontalLayout.transform.GetChild(i);
+                Transform childTransform = _horizontalLayout.transform.GetChild(i);
                 if (childTransform.gameObject.TryGetComponent(out SingleItemContainerSlot slot) && slot.Container.ContainerType == type)
                 {
-                    if(number == countOfGivenType)
+                    if (number == countOfGivenType)
                     {
                         return i;
                     }
-                    countOfGivenType++;   
+
+                    countOfGivenType++;
                 }
             }
+
             return 0;
         }
 
@@ -286,15 +402,15 @@ namespace SS3D.Systems.Inventory.UI
         private int LastIndexSlotOfType(ContainerType type)
         {
             SingleItemContainerSlot slotOfType = null;
-            for (int i = 0; i < HorizontalLayout.transform.childCount; i++)
+            for (int i = 0; i < _horizontalLayout.transform.childCount; i++)
             {
-                
-                Transform childTransform = HorizontalLayout.transform.GetChild(i);
+                Transform childTransform = _horizontalLayout.transform.GetChild(i);
                 if (childTransform.gameObject.TryGetComponent(out SingleItemContainerSlot slot) && slot.Container.ContainerType == type)
                 {
                     slotOfType = slot;
                 }
             }
+
             if (slotOfType == null)
             {
                 Log.Warning(this, "no slots of type " + type.ToString() + ", returning index 0 ");
@@ -311,20 +427,20 @@ namespace SS3D.Systems.Inventory.UI
         private SingleItemContainerSlot AddClothingSlot(GameObject prefabToInstantiate)
         {
             GameObject clothingSlot = Instantiate(prefabToInstantiate, transform);
-            clothingSlot.transform.SetParent(ClothingLayout.transform, false);
-            clothingSlot.gameObject.TryGetComponent(out SingleItemContainerSlot slot);
-            int clothPosition = ClothingSlotPosition.FindIndex(0, x => x == slot.ContainerType);
+            clothingSlot.transform.SetParent(_clothingLayout.transform, false);
+            clothingSlot.TryGetComponent(out SingleItemContainerSlot slot);
+            int clothPosition = _clothingSlotPosition.FindIndex(0, x => x == slot.ContainerType);
 
-            int slotPositionForContainerType = ClothingSlotPosition.FindIndex(0, x => x == slot.ContainerType);
+            int slotPositionForContainerType = _clothingSlotPosition.FindIndex(0, x => x == slot.ContainerType);
 
-            Transform currentSlotTransform = ClothingLayout.transform.GetChild(slotPositionForContainerType);
+            Transform currentSlotTransform = _clothingLayout.transform.GetChild(slotPositionForContainerType);
 
             // Remove the place holder dummy slot first.
             if (currentSlotTransform.gameObject.TryGetComponent(out DummySlot currentSlot))
             {
                 currentSlotTransform.transform.SetParent(null, false);
                 currentSlotTransform.gameObject.Dispose(true);
-            };
+            }
 
             clothingSlot.transform.SetSiblingIndex(clothPosition);
             return slot;
@@ -337,20 +453,9 @@ namespace SS3D.Systems.Inventory.UI
         {
             GameObject slot = Instantiate(prefab, transform);
             int slotIndex = PlaceHorizontalLayoutSlot(type);
-            slot.transform.SetParent(HorizontalLayout.transform, false);
+            slot.transform.SetParent(_horizontalLayout.transform, false);
             slot.transform.SetSiblingIndex(slotIndex);
-            return slot.GetComponent<SingleItemContainerSlot>(); 
-        }
-
-        /// <summary>
-        /// Get the transform of a hand slot game object.
-        /// </summary>
-        /// <param name="index"> The index of the hand slot, necessary as multiple hand slots can be on a player. </param>
-        /// <returns> The transform of the hand slot at the specified index.</returns>
-        public Transform GetHandSlot(Hand hand)
-        {
-            SingleItemContainerSlot slot = Slots.Find(x => x.Container == hand.Container);
-            return slot.transform;
+            return slot.GetComponent<SingleItemContainerSlot>();
         }
 
         /// <summary>
@@ -359,31 +464,27 @@ namespace SS3D.Systems.Inventory.UI
         /// </summary>
         private void HandleInventoryContainerRemoved(AttachedContainer container)
         {
-            int indexToRemove = Slots.FindIndex(slot => slot.Container == container);
-            
+            int indexToRemove = _slots.FindIndex(slot => slot.Container == container);
+
             // Replace the removed slot with a dummy slot if it's a clothing type of slot.
             // This allow the grid layout elements to keep their positions despite having a slot removed.
-            if(ClothingSlotPosition.Contains(container.Type)){
-                GameObject dummySlot = Instantiate(DummyPrefab);
-                dummySlot.transform.SetParent(ClothingLayout.transform, false);
-                int clothPosition = ClothingSlotPosition.FindIndex(0, x => x == Slots[indexToRemove].Container.ContainerType);
+            if (_clothingSlotPosition.Contains(container.Type))
+            {
+                GameObject dummySlot = Instantiate(_dummyPrefab);
+                dummySlot.transform.SetParent(_clothingLayout.transform, false);
+                int clothPosition = _clothingSlotPosition.FindIndex(0, x => x == _slots[indexToRemove].Container.ContainerType);
                 dummySlot.transform.SetSiblingIndex(clothPosition);
             }
 
-            SingleItemContainerSlot slot = Slots[indexToRemove];
-            if (slot == null) return;
+            SingleItemContainerSlot slot = _slots[indexToRemove];
 
-            slot?.gameObject.Dispose(true);
-            Slots.RemoveAt(indexToRemove);
+            if (slot == null)
+            {
+                return;
+            }
+
+            slot.gameObject.Dispose(true);
+            _slots.RemoveAt(indexToRemove);
         }
-
-		public void DestroyAllSlots()
-		{
-			for(int i = Slots.Count-1; i>=0; i--)
-			{
-				Slots[i].gameObject.Dispose(true);
-			}
-            Slots.Clear();
-		}
     }
 }

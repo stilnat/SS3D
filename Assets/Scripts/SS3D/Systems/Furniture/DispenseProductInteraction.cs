@@ -13,21 +13,28 @@ namespace SS3D.Systems.Furniture
     /// </summary>
     public class DispenseProductInteraction : IInteraction
     {
-        public string ProductName;
-        public int ProductStock;
-        public int ProductIndex;
+        private readonly string _productName;
+        private readonly int _productStock;
+        private readonly int _productIndex;
+
+        public DispenseProductInteraction(string productName, int productStock, int productIndex)
+        {
+            _productName = productName;
+            _productStock = productStock;
+            _productIndex = productIndex;
+        }
+
+        public InteractionType InteractionType => InteractionType.Press;
 
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         /// <inheritdoc />
         public string GetName(InteractionEvent interactionEvent)
         {
-            return $"Dispense {ProductName} (x{ProductStock})";
+            return $"Dispense {_productName} (x{_productStock})";
         }
 
         public string GetGenericName() => "Dispense";
-
-        public InteractionType InteractionType => InteractionType.Press;
 
         /// <inheritdoc />
         public bool CanInteract(InteractionEvent interactionEvent)
@@ -53,8 +60,9 @@ namespace SS3D.Systems.Furniture
 
             if (target is VendingMachine vendingMachine)
             {
-                vendingMachine.DispenseProduct(ProductIndex);
+                vendingMachine.DispenseProduct(_productIndex);
             }
+
             return false;
         }
 

@@ -20,7 +20,9 @@
         "Unity.InputSystem.TestFramework",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "SS3D.Inventory"
+        "SS3D.Inventory",
+        "SS3D.Entity.Humanoid",
+        "SS3D.Camera"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FishNet.Object;
+﻿using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
-using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
 using SS3D.Systems.Inputs;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Systems.Inventory.UI;
-using UnityEditor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -19,7 +17,6 @@ using InputSystem = SS3D.Systems.Inputs.InputSystem;
 
 namespace SS3D.Systems.Inventory.Containers
 {
-
     /// <summary>
     /// Handle selections of the active hands, changing colors of active hand slot, and using controls such as dropping or swapping hands.
     /// Also acts as a controller for all hands present on the player.
@@ -27,7 +24,6 @@ namespace SS3D.Systems.Inventory.Containers
     [RequireComponent(typeof(HumanInventory))]
     public class Hands : NetworkActor, IHandsController
     {
-
         public delegate void HandContentsHandler(Hand hand, Item oldItem, Item newItem, ContainerChangeType type);
 
         public event HandContentsHandler OnHandContentChanged;
@@ -38,14 +34,13 @@ namespace SS3D.Systems.Inventory.Containers
         [SyncObject]
         public readonly SyncList<Hand> PlayerHands = new();
 
-
         private Controls.HotkeysActions _controls;
 
         /// <summary>
         /// Reference to the inventory linked to Hands.
         /// </summary>
         [NonSerialized]
-        public HumanInventory Inventory;
+        private HumanInventory _inventory;
 
         /// <summary>
         /// Color of selected hand, or when mouse passes over the slot.
@@ -78,19 +73,19 @@ namespace SS3D.Systems.Inventory.Containers
         public Hand HandFromContainer(AttachedContainer container)
         {
             return PlayerHands.FirstOrDefault(x => x.Container == container);
-        } 
+        }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
 
             PlayerHands.AddRange(GetComponentsInChildren<Hand>());
-            foreach(Hand hand in PlayerHands)
+            foreach (Hand hand in PlayerHands)
             {
-                hand.HandsController = this;
                 hand.OnHandDisabled += HandleHandRemoved;
                 hand.OnContentsChanged += HandleHandContentChanged;
             }
+
             // Set the selected hand to be the first available one.
             _selectedHand = PlayerHands.FirstOrDefault();
         }
@@ -119,17 +114,21 @@ namespace SS3D.Systems.Inventory.Containers
             return true;
         }
 
-
         /// <summary>
         /// Sync for clients, set highlight on slots properly.
         /// </summary>
         public void SyncSelectedHand(Hand oldHand, Hand newHand, bool asServer)
         {
-            if (asServer || !IsOwner) return;
-            if(oldHand != null)
+            if (asServer || !IsOwner)
+            {
+                return;
+            }
+
+            if (oldHand != null)
             {
                 SetHandHighlight(oldHand, false);
             }
+
             if (newHand != null)
             {
                 SetHandHighlight(newHand, true);
@@ -139,43 +138,8 @@ namespace SS3D.Systems.Inventory.Containers
         [Client]
         public void SetInventory(HumanInventory inventory)
         {
-            Inventory = inventory;
-            Inventory.OnInventorySetUp += OnInventorySetUp;
-        }
-
-        [Client]
-        private void OnInventorySetUp()
-        {
-            SetHandHighlight(PlayerHands.First(), true);
-
-            // Set up hand related controls.
-            _controls = Subsystems.Get<InputSystem>().Inputs.Hotkeys;
-            _controls.SwapHands.performed += HandleSwapHands;
-            _controls.Drop.performed += HandleDropHeldItem;
-
-            Inventory.OnInventorySetUp -= OnInventorySetUp;
-        }
-
-        protected override void OnDestroyed()
-        {
-            base.OnDestroyed();
-
-            if (IsOwner)
-            {
-                _controls.SwapHands.performed -= HandleSwapHands;
-                _controls.Drop.performed -= HandleDropHeldItem;
-            }
-        }
-
-        [Client]
-        private void HandleSwapHands(InputAction.CallbackContext context)
-        {
-            // We don't swap hand if there's a single one.
-            if (!IsOwner || !enabled || PlayerHands.Count <= 1)
-            {
-                return;
-            }
-            CmdNextHand();
+            _inventory = inventory;
+            _inventory.OnInventorySetUp += OnInventorySetUp;
         }
 
         /// <summary>
@@ -186,7 +150,6 @@ namespace SS3D.Systems.Inventory.Containers
         [ServerRpc]
         public void CmdSetActiveHand(AttachedContainer selectedContainer)
         {
-
             Hand hand = PlayerHands.FirstOrDefault(x => x.Container == selectedContainer);
 
             if (hand == selectedContainer)
@@ -211,6 +174,96 @@ namespace SS3D.Systems.Inventory.Containers
             }
         }
 
+        /// <summary>
+        /// The source of interaction is either the active hand or the tool held in active hand.
+        /// </summary>
+        [ServerOrClient]
+        public IInteractionSource GetActiveInteractionSource()
+        {
+            // If no hand is selected, there's no interaction source.
+            if (SelectedHand == null)
+            {
+                return null;
+            }
+
+            IInteractionSource tool = SelectedHand.GetActiveTool();
+            return tool ?? SelectedHand;
+        }
+
+        /// <summary>
+        /// Change selected hand if the selected hand is removed.
+        /// </summary>
+        /// <param name="hand"></param>
+        [Server]
+        public void HandleHandRemoved(Hand hand)
+        {
+            hand.OnContentsChanged -= HandleHandContentChanged;
+
+            if (!PlayerHands.Remove(hand))
+            {
+                return;
+            }
+
+            if (PlayerHands.Count == 0)
+            {
+                _selectedHand = null;
+                return;
+            }
+
+            if (hand == SelectedHand)
+            {
+                NextHand();
+            }
+        }
+
+        [Server]
+        public void AddHand(Hand hand)
+        {
+            hand.OnContentsChanged += HandleHandContentChanged;
+
+            PlayerHands.Add(hand);
+            if (PlayerHands.Count == 1)
+            {
+                _selectedHand = hand;
+            }
+        }
+
+        protected override void OnDestroyed()
+        {
+            base.OnDestroyed();
+
+            if (IsOwner)
+            {
+                _controls.SwapHands.performed -= HandleSwapHands;
+                _controls.Drop.performed -= HandleDropHeldItem;
+            }
+        }
+
+        [Client]
+        private void OnInventorySetUp()
+        {
+            SetHandHighlight(PlayerHands[0], true);
+
+            // Set up hand related controls.
+            _controls = Subsystems.Get<InputSystem>().Inputs.Hotkeys;
+            _controls.SwapHands.performed += HandleSwapHands;
+            _controls.Drop.performed += HandleDropHeldItem;
+
+            _inventory.OnInventorySetUp -= OnInventorySetUp;
+        }
+
+        [Client]
+        private void HandleSwapHands(InputAction.CallbackContext context)
+        {
+            // We don't swap hand if there's a single one.
+            if (!IsOwner || !enabled || PlayerHands.Count <= 1)
+            {
+                return;
+            }
+
+            CmdNextHand();
+        }
+
         [Client]
         private void HandleDropHeldItem(InputAction.CallbackContext context)
         {
@@ -233,7 +286,7 @@ namespace SS3D.Systems.Inventory.Containers
         [Client]
         private void SetHandHighlight(Hand hand, bool highlight)
         {
-            Transform handSlot = ViewLocator.Get<InventoryView>().First().GetHandSlot(hand);
+            Transform handSlot = ViewLocator.Get<InventoryView>()[0].GetHandSlot(hand);
             Button button = handSlot.GetComponent<Button>();
             ColorBlock buttonColors = button.colors;
             if (highlight)
@@ -248,65 +301,6 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             button.colors = buttonColors;
-        }
-
-        /// <summary>
-        /// The source of interaction is either the active hand or the tool held in active hand.
-        /// </summary>
-        [ServerOrClient]
-        public IInteractionSource GetActiveInteractionSource()
-        {
-            // If no hand is selected, there's no interaction source.
-            if (SelectedHand == null) return null;
-
-            IInteractionSource tool = SelectedHand.GetActiveTool();
-            if(tool != null)
-            {
-                return tool;
-            }
-            else
-            {
-                return SelectedHand;
-            }
-        }
-
-        /// <summary>
-        /// Change selected hand if the selected hand is removed.
-        /// </summary>
-        /// <param name="hand"></param>
-        [Server]
-        public void HandleHandRemoved(Hand hand)
-        {
-            hand.OnContentsChanged -= HandleHandContentChanged;
-
-            if (!PlayerHands.Remove(hand))
-            {
-                return;
-            }
-
-            if(PlayerHands.Count == 0)
-            {
-                _selectedHand = null;
-                return;
-            }
-
-            if (hand == SelectedHand)
-            {
-                NextHand();
-            }
-            
-        }
-
-        [Server]
-        public void AddHand(Hand hand)
-        {
-            hand.OnContentsChanged += HandleHandContentChanged;
-
-            PlayerHands.Add(hand);
-            if(PlayerHands.Count == 1)
-            {
-                _selectedHand = hand;
-            }
         }
 
         private void HandleHandContentChanged(Hand hand, Item olditem, Item newitem, ContainerChangeType type)

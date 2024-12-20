@@ -2,7 +2,7 @@
 using SS3D.Core.Behaviours;
 using UnityEngine;
 
-namespace SS3D.Systems.Screens.Events
+namespace SS3D.Systems.Camera.Events
 {
     public partial struct CameraTargetChanged : IEvent
     {

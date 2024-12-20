@@ -1,24 +1,17 @@
-﻿using Coimbra.Services.Events;
-using Coimbra.Services.PlayerLoopEvents;
-using System.Collections.Generic;
-using System.Linq;
-using FishNet.Connection;
-using FishNet.Object;
+﻿using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Logging;
 using SS3D.Systems.Entities;
-using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Systems.Inventory.UI;
 using SS3D.Systems.Roles;
-using UnityEngine;
-using System.Collections;
-using FishNet.Object.Synchronizing;
-using System.ComponentModel;
-using static UnityEngine.GraphicsBuffer;
-using SS3D.Systems.Interactions;
 using SS3D.Traits;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Inventory.Containers
@@ -27,16 +20,10 @@ namespace SS3D.Systems.Inventory.Containers
     /// Inventory stores all containers that are visible in slots on the player. That includes clothing, hands, id, backpack and others.
     /// It also handles doing a bunch of moving item around containers on the player and out of it.
     /// </summary>
-    public class HumanInventory : NetworkActor, IInventory
+    public class HumanInventory : NetworkActor, IInventory, IIDPermissionProvider
     {
-        /// <summary>
-        /// List of containers present on the player, meaning, in the player HUD, shown as slots.
-        /// </summary>
-        [SyncObject]
-        private readonly SyncList<AttachedContainer> _containersOnPlayer = new();
-
-
         public delegate void InventoryContainerModifiedEventHandler(AttachedContainer container);
+
         public delegate void Notify();
 
         // When a container is added to this inventory
@@ -51,29 +38,34 @@ namespace SS3D.Systems.Inventory.Containers
         // When the inventory is done doing its setup
         public event Notify OnInventorySetUp;
 
+        /// <summary>
+        /// List of containers present on the player, meaning, in the player HUD, shown as slots.
+        /// </summary>
+        [SyncObject]
+        private readonly SyncList<AttachedContainer> _containersOnPlayer = new();
+
         // reference to the component allowing to display out of inventory containers.
         [FormerlySerializedAs("containerViewer")]
         [SerializeField]
         private ContainerViewer _containerViewer;
 
-        public List<AttachedContainer> Containers => _containersOnPlayer.Collection.ToList();
-
-        /// <summary>
-        /// The controllable body of the owning player
-        /// </summary>
-        public Entity Body;
-
         /// <summary>
         /// The hands used by this inventory
         /// </summary>
-        public Hands Hands;
+        [FormerlySerializedAs("Hands")]
+        [SerializeField]
+        private Hands _hands;
+
+        public List<AttachedContainer> Containers => _containersOnPlayer.Collection.ToList();
 
         /// <summary>
         /// Number of hands container on this inventory.
         /// </summary>
-        public int CountHands => _containersOnPlayer.Where(x => x.Type == ContainerType.Hand).Count();
+        public int CountHands => _containersOnPlayer.Count(x => x.Type == ContainerType.Hand);
 
         public ContainerViewer ContainerViewer => _containerViewer;
+
+        public Hands Hands => _hands;
 
         /// <summary>
         /// Try to get a particular type of container in the inventory, and if there's multiple, try to get the one at the given position.
@@ -81,72 +73,46 @@ namespace SS3D.Systems.Inventory.Containers
         /// <param name="position">The position of the container for a given type, if there's two pocket containers, it'd be 0 and 1</param>
         /// <param name="type"> The container we want back.</param>
         /// <returns></returns>
-        public bool TryGetTypeContainer(ContainerType type, int position, out AttachedContainer typeContainer) 
+        public bool TryGetTypeContainer(ContainerType type, int position, out AttachedContainer typeContainer)
         {
             int typeIndex = 0;
-            foreach (AttachedContainer container in _containersOnPlayer) 
+
+            foreach (AttachedContainer container in _containersOnPlayer)
             {
-                if(container.Type == type && position == typeIndex)
+                if (container.Type == type && position == typeIndex)
                 {
                     typeContainer = container;
+
                     return true;
                 }
-                else if(container.Type == type)
+                else if (container.Type == type)
                 {
                     typeIndex++;
                 }
             }
+
             typeContainer = null;
+
             return false;
-        }
-
-        protected override void OnAwake()
-        {
-            _containersOnPlayer.OnChange += SyncInventoryContainerChange;
-        }
-
-        /// <summary>
-        /// Called on server and client whenever there's an operation on the attached Container synclist.
-        /// The main role of this callback is to invoke events regarding the change of containers in the inventory for
-        /// other scripts to update.
-        /// </summary>
-        private void SyncInventoryContainerChange(SyncListOperation op, int index, AttachedContainer oldContainer, AttachedContainer newContainer, bool asServer)
-        {
-            if (asServer) return;
-            switch (op)
-            {
-                case SyncListOperation.Add:
-                    OnInventoryContainerAdded?.Invoke(newContainer);
-                    break;
-                case SyncListOperation.RemoveAt:
-                    OnInventoryContainerRemoved?.Invoke(oldContainer);
-                    break;
-            }
         }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
+
             if (!IsOwner)
             {
                 return;
             }
 
-            Hands.SetInventory(this);
+            _hands.SetInventory(this);
             SetupView();
         }
 
-        public void TriggerInventorySetup()
+        public void Init()
         {
             OnInventorySetUp?.Invoke();
-
             RpcInventorySetup();
-        }
-
-        [ObserversRpc]
-        private void RpcInventorySetup()
-        {
-            OnInventorySetUp?.Invoke();
         }
 
         public override void OnStartServer()
@@ -156,37 +122,62 @@ namespace SS3D.Systems.Inventory.Containers
         }
 
         /// <summary>
-        /// Get the attached container on the Human prefab and put them in this inventory.
-        /// Add only containers that display as slots in inventory.
+        /// Interact with a container at a certain position. Transfer items from selected hand to container, or from container to selected hand.
         /// </summary>
-        [Server]
-        private void SetUpContainers()
+        /// <param name="container">The container being interacted with.</param>
+        /// <param name="position">Position of the slot where the interaction happened.</param>
+        public void ClientInteractWithContainerSlot(AttachedContainer container, Vector2Int position)
         {
-            IEnumerable<AttachedContainer> attachedContainers = GetComponentsInChildren<AttachedContainer>().Where(x => x.DisplayAsSlotInUI);
-            foreach (AttachedContainer container in attachedContainers)
+            if (_hands == null)
             {
-                AddContainer(container);
-                Log.Information(this, "Adding {container} container to inventory", Logs.Generic, container);
+                return;
+            }
+
+            Item item = container.ItemAt(position);
+
+            if (container.ContainerType == ContainerType.Hand)
+            {
+                ActivateHand(container);
+            }
+
+            if (container == _hands.SelectedHand.Container && item != null)
+            {
+                GetComponent<InteractionController>().InteractInHand(item.gameObject, _hands.SelectedHand.gameObject);
+
+                return;
+            }
+
+            // If selected hand is empty and an item is present on the slot position in the container, transfer it to hand.
+            if (_hands.SelectedHand.IsEmpty())
+            {
+                if (item != null)
+                {
+                    ClientTransferItem(item, Vector2Int.zero, _hands.SelectedHand.Container);
+                }
+            }
+
+            // If selected hand has an item and there's no item on the slot in the container, transfer it to container slot.
+            else if (item == null)
+            {
+                ClientTransferItem(_hands.SelectedHand.ItemHeld, position, container);
             }
         }
 
-        [Client]
-        private void SetupView()
+        public bool HasPermission(IDPermission permission)
         {
-            InventoryView inventoryView = ViewLocator.Get<InventoryView>().First();
-            inventoryView.Setup(this);
+            // This check only in the first identification containers, if there's multiple and the id is not in the first one it won't work.
+            if (!TryGetTypeContainer(ContainerType.Identification, 0, out AttachedContainer idContainer))
+            {
+                return false;
+            }
+
+            if (idContainer.Items.FirstOrDefault() is not IIdentification id)
+            {
+                return false;
+            }
+
+            return id.HasPermission(permission);
         }
-
-		protected override void OnDisabled()
-		{
-			base.OnDisabled();
-			
-			if (!IsOwner) return;
-			
-			InventoryView inventoryView = ViewLocator.Get<InventoryView>().First();
-			inventoryView.DestroyAllSlots();
-
-		}
 
         /// <summary>
         /// Try to add a container to this inventory, check first if not already added.
@@ -205,7 +196,7 @@ namespace SS3D.Systems.Inventory.Containers
             container.OnItemAttached += HandleTryAddContainerOnItemAttached;
             container.OnItemDetached += HandleTryRemoveContainerOnItemDetached;
 
-            // Be careful, destroying an inventory container will cause issue as when syncing with client, the attachedContainer will be null. 
+            // Be careful, destroying an inventory container will cause issue as when syncing with client, the attachedContainer will be null.
             // Before destroying a container, consider disabling the behaviour or the game object it's on first to avoid this issue.
             container.OnAttachedContainerDisabled += RemoveContainer;
         }
@@ -228,14 +219,6 @@ namespace SS3D.Systems.Inventory.Containers
             container.OnAttachedContainerDisabled -= RemoveContainer;
         }
 
-		/// <summary>
-		/// Simply invoke the event OnContainerContentChanged.
-		/// </summary>
-		private void HandleContainerContentChanged(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type)
-        {
-            OnContainerContentChanged?.Invoke(container,oldItem,newItem,type);
-        }
-
         /// <summary>
         /// Requests the server to drop an item out of a container
         /// </summary>
@@ -251,32 +234,8 @@ namespace SS3D.Systems.Inventory.Containers
         /// <param name="container">This AttachedContainer should be the hand to activate.</param>
         public void ActivateHand(AttachedContainer container)
         {
-            Hands.CmdSetActiveHand(container);
+            _hands.CmdSetActiveHand(container);
         }
-
-        [ServerRpc]
-        private void CmdDropItem(GameObject gameObject)
-        {
-            Item item = gameObject.GetComponent<Item>();
-            if (item == null)
-            {
-                return;
-            }
-
-            AttachedContainer attachedTo = item.Container;
-            if (attachedTo == null)
-            {
-                return;
-            }
-
-            if (!_containerViewer.CanModifyContainer(attachedTo))
-            {
-                return;
-            }
-
-            attachedTo.RemoveItem(item); 
-        }
-
 
         /// <summary>
         /// Requests the server to transfer an item from one container to another, at the given slot position.
@@ -288,30 +247,141 @@ namespace SS3D.Systems.Inventory.Containers
             CmdTransferItem(item.gameObject, position, targetContainer);
         }
 
+        protected override void OnAwake()
+        {
+            _containersOnPlayer.OnChange += SyncInventoryContainerChange;
+        }
+
+        protected override void OnDisabled()
+        {
+            base.OnDisabled();
+
+            if (!IsOwner)
+            {
+                return;
+            }
+
+            InventoryView inventoryView = ViewLocator.Get<InventoryView>()[0];
+            inventoryView.DestroyAllSlots();
+        }
+
+        /// <summary>
+        /// Called on server and client whenever there's an operation on the attached Container synclist.
+        /// The main role of this callback is to invoke events regarding the change of containers in the inventory for
+        /// other scripts to update.
+        /// </summary>
+        private void SyncInventoryContainerChange(SyncListOperation op, int index, AttachedContainer oldContainer, AttachedContainer newContainer, bool asServer)
+        {
+            if (asServer)
+            {
+                return;
+            }
+
+            switch (op)
+            {
+                case SyncListOperation.Add:
+                {
+                    OnInventoryContainerAdded?.Invoke(newContainer);
+
+                    break;
+                }
+
+                case SyncListOperation.RemoveAt:
+                {
+                    OnInventoryContainerRemoved?.Invoke(oldContainer);
+
+                    break;
+                }
+            }
+        }
+
+        [ObserversRpc]
+        private void RpcInventorySetup()
+        {
+            OnInventorySetUp?.Invoke();
+        }
+
+        /// <summary>
+        /// Simply invoke the event OnContainerContentChanged.
+        /// </summary>
+        private void HandleContainerContentChanged(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type)
+        {
+            OnContainerContentChanged?.Invoke(container, oldItem, newItem, type);
+        }
+
+        /// <summary>
+        /// Get the attached container on the Human prefab and put them in this inventory.
+        /// Add only containers that display as slots in inventory.
+        /// </summary>
+        [Server]
+        private void SetUpContainers()
+        {
+            IEnumerable<AttachedContainer> attachedContainers = GetComponentsInChildren<AttachedContainer>().Where(x => x.DisplayAsSlotInUI);
+
+            foreach (AttachedContainer container in attachedContainers)
+            {
+                AddContainer(container);
+                Log.Information(this, "Adding {container} container to inventory", Logs.Generic, container);
+            }
+        }
+
+        [Client]
+        private void SetupView()
+        {
+            InventoryView inventoryView = ViewLocator.Get<InventoryView>()[0];
+            inventoryView.Setup(this);
+        }
+
+        [ServerRpc]
+        private void CmdDropItem(GameObject itemObject)
+        {
+            if (!itemObject.TryGetComponent(out Item item))
+            {
+                return;
+            }
+
+            AttachedContainer attachedTo = item.Container;
+
+            if (attachedTo == null)
+            {
+                return;
+            }
+
+            if (!_containerViewer.CanModifyContainer(attachedTo))
+            {
+                return;
+            }
+
+            attachedTo.RemoveItem(item);
+        }
+
         [ServerRpc]
         private void CmdTransferItem(GameObject itemObject, Vector2Int position, AttachedContainer container)
         {
-            Item item = itemObject.GetComponent<Item>();
-            if (item == null)
+            if (!itemObject.TryGetComponent(out Item item))
             {
                 return;
             }
 
             AttachedContainer itemContainer = item.Container;
+
             if (itemContainer == null)
             {
                 return;
             }
 
             // Can't put an item in its own container
-            if (item.GetComponentsInChildren<AttachedContainer>().AsEnumerable().Contains(container)){
+            if (item.GetComponentsInChildren<AttachedContainer>().AsEnumerable().Contains(container))
+            {
                 Log.Warning(this, "can't put an item in its own container");
+
                 return;
             }
 
             if (container == null)
             {
                 Log.Error(this, $"Client sent invalid container reference: NetId {container.ObjectId}");
+
                 return;
             }
 
@@ -321,73 +391,13 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             Hands hands = GetComponent<Hands>();
+
             if (hands == null || !hands.SelectedHand.CanInteract(container.gameObject))
             {
                 return;
             }
 
-            itemContainer.TransferItemToOther(item, position, container);     
-        }
-
-
-
-        /// <summary>
-        /// Interact with a container at a certain position. Transfer items from selected hand to container, or from container to selected hand.
-        /// </summary>
-        /// <param name="container">The container being interacted with.</param>
-        /// <param name="position">Position of the slot where the interaction happened.</param>
-        public void ClientInteractWithContainerSlot(AttachedContainer container, Vector2Int position)
-        {
-            if (Hands == null)
-            {
-                return;
-            }
-            Item item = container.ItemAt(position);
-
-            if (container.ContainerType == ContainerType.Hand)
-            {
-                ActivateHand(container);
-            }
-
-            if(container == Hands.SelectedHand.Container && item != null)
-            {
-                GetComponent<InteractionController>().InteractInHand(item.gameObject, Hands.SelectedHand.gameObject);
-                return;
-            }
-
-            // If selected hand is empty and an item is present on the slot position in the container, transfer it to hand.
-            if (Hands.SelectedHand.IsEmpty())
-            {
-                if (item != null)
-                {
-                    ClientTransferItem(item, Vector2Int.zero, Hands.SelectedHand.Container);
-                }
-            }
-            // If selected hand has an item and there's no item on the slot in the container, transfer it to container slot.
-            else
-            {
-                if (item == null)
-                {
-                    ClientTransferItem(Hands.SelectedHand.ItemInHand, position, container);
-                }
-            }
-        }
-
-
-        public bool HasPermission(IDPermission permission)
-        {
-            // This check only in the first identification containers, if there's multiple and the id is not in the first one it won't work.
-            if(!TryGetTypeContainer(ContainerType.Identification, 0, out AttachedContainer idContainer))
-            {
-                return false;
-            }
-
-            IIdentification id = idContainer.Items.FirstOrDefault() as IIdentification;
-            if (id == null)
-            {
-                return false;
-            }
-            return id.HasPermission(permission);
+            itemContainer.TransferItemToOther(item, position, container);
         }
 
         /// <summary>
@@ -397,14 +407,15 @@ namespace SS3D.Systems.Inventory.Containers
         private void HandleTryAddContainerOnItemAttached(object sender, Item item)
         {
             AttachedContainer parentContainer = (AttachedContainer)sender;
-            IEnumerable<AttachedContainer> itemContainers = item.GetComponentsInChildren<AttachedContainer>().Where(x=> x.DisplayAsSlotInUI);
-            
+            IEnumerable<AttachedContainer> itemContainers = item.GetComponentsInChildren<AttachedContainer>().Where(x => x.DisplayAsSlotInUI);
+
             foreach (AttachedContainer container in itemContainers)
             {
-                if( container.GetComponentInParent<Item>() != item)
+                if (container.GetComponentInParent<Item>() != item)
                 {
                     continue;
                 }
+
                 // If the item is held in hand, ignore it, it's not worn by the player so it shouldn't add yet any containers.
                 if (parentContainer == null || parentContainer.Type == ContainerType.Hand)
                 {
@@ -415,7 +426,7 @@ namespace SS3D.Systems.Inventory.Containers
                 {
                     AddContainer(container);
                 }
-            }    
+            }
         }
 
         /// <summary>
@@ -427,12 +438,13 @@ namespace SS3D.Systems.Inventory.Containers
             AttachedContainer parentContainer = (AttachedContainer)sender;
 
             // If the item is held in hand, ignore it, it's not worn by the player so it shouldn't remove any containers.
-            if (parentContainer is null || parentContainer.Type == ContainerType.Hand)
+            if (!parentContainer || parentContainer.Type == ContainerType.Hand)
             {
                 return;
             }
 
             AttachedContainer[] itemContainers = item.GetComponentsInChildren<AttachedContainer>();
+
             foreach (AttachedContainer container in itemContainers.Where(container => _containersOnPlayer.Contains(container)))
             {
                 RemoveContainer(container);

@@ -12,13 +12,19 @@ namespace SS3D.Systems.Inventory.UI
 
         public event ContainerContentsEventHandler OnContainerContentChanged;
 
+        public List<AttachedContainer> Containers { get; }
+
         public ContainerViewer ContainerViewer { get; }
+
+        public void Init();
 
         public void ClientDropItem(Item item);
 
         public void AddContainer(AttachedContainer container);
 
         public void RemoveContainer(AttachedContainer container);
+
+        public bool TryGetTypeContainer(ContainerType type, int position, out AttachedContainer typeContainer);
 
         public void ClientInteractWithContainerSlot(AttachedContainer container, Vector2Int position);
 

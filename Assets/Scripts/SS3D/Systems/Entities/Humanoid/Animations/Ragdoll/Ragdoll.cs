@@ -16,10 +16,14 @@ namespace SS3D.Systems.Entities.Humanoid
     /// <summary>
     /// Component for character's gameobject, that controlls ragdoll
     /// </summary>
-	public class Ragdoll : NetworkBehaviour
+    public class Ragdoll : NetworkBehaviour
     {
-
         public event Action<bool> OnRagdoll;
+
+        /// <summary>
+        /// Determines how much higher than the lowest point character will be during AlignToHips(). This var prevent character from getting stuck in the floor
+        /// </summary>
+        private const float AlignmentYDelta = 0.0051f;
 
         [SerializeField]
         private Collider _characterCollider;
@@ -43,30 +47,16 @@ namespace SS3D.Systems.Entities.Humanoid
 
         private NetworkConnection _owner;
 
-        /// <summary>
-        /// Determines how much higher than the lowest point character will be during AlignToHips(). This var prevent character from getting stuck in the floor 
-        /// </summary>
-        private const float AlignmentYDelta = 0.0051f;
-
         public bool IsFacingDown { get; private set; }
 
         public override void OnStartServer()
-		{
-			base.OnStartServer();
+        {
+            base.OnStartServer();
             _ragdollParts = (from part in GetComponentsInChildren<RagdollPart>() select part.transform.GetComponent<Transform>()).ToArray();
 
             // All rigid bodies are kinematic at start, only the owner should be able to change that afterwards.
-			SetRagdollPhysic(false);
-            _positionController.ChangedPosition += HandleChangedPosition;
-        }
-
-        [Server]
-        private void HandleChangedPosition(PositionType position, float recoverTime)
-        {
-            if (position == PositionType.ResetBones)
-            {
-                SetRagdollPhysic(false);
-            }
+            SetRagdollPhysic(false);
+            _positionController.OnChangedPosition += HandleChangedPosition;
         }
 
         [Server]
@@ -95,14 +85,22 @@ namespace SS3D.Systems.Entities.Humanoid
             foreach (Transform part in _ragdollParts)
             {
                 part.GetComponent<Rigidbody>().AddForce(force, ForceMode.VelocityChange);
-            } 
+            }
+        }
+
+        [Server]
+        private void HandleChangedPosition(PositionType position, float recoverTime)
+        {
+            if (position == PositionType.ResetBones)
+            {
+                SetRagdollPhysic(false);
+            }
         }
 
         /// <summary>
         /// Adjust player's position and rotation. Character's x and z coords equals hips coords, y is at lowest position.
         /// Character's y rotation is aligned with hips forwards direction.
         /// </summary>
-        
         [Server]
         private IEnumerator AlignToHips()
         {
@@ -142,7 +140,6 @@ namespace SS3D.Systems.Entities.Humanoid
         [Server]
         private void SetRagdollPhysic(bool isOn)
         {
-
             UnityEngine.Debug.Log($"Owner is {Owner}");
 
             // Managing ownership here is necessary as ragdoll is fully server handled, but player movement is client authoritative.
@@ -152,7 +149,7 @@ namespace SS3D.Systems.Entities.Humanoid
                 _owner = Owner;
                 RemoveOwnership();
             }
-            else if(_owner != null)
+            else if (_owner != null)
             {
                 GiveOwnership(_owner);
             }

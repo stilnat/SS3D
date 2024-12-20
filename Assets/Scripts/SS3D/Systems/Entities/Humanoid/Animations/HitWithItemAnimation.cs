@@ -1,5 +1,6 @@
 using Coimbra;
-//using DebugDrawingExtension;
+
+// using DebugDrawingExtension;
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Systems.Interactions;
@@ -51,8 +52,7 @@ namespace SS3D.Systems.Animations
             // Put the temp object on the root transform so it moves with the player, and put it at the same place as the hold
             temp.transform.parent = _rootTransform;
             Transform hold = _holdable.GetHold(true, _mainHand.HandType);
-            temp.transform.position = hold.position;
-            temp.transform.rotation = _holdable.transform.rotation;
+            temp.transform.SetPositionAndRotation(hold.position, _holdable.transform.rotation);
 
             // Parent the holdable on the temp object, such that the hold on the holdable is at the same place as the temp object
             _holdable.transform.parent = temp.transform;
@@ -73,14 +73,12 @@ namespace SS3D.Systems.Animations
             // In sequence, we first rotate toward the target
             InteractionSequence.Append(_rootTransform.DORotate(finalRotationPlayer.eulerAngles, timeToRotate));
 
-            // A bit later but still while rotating, we start changing the temporary game object position 
-            InteractionSequence.Insert(
-                timeToRotate * 0.4f, 
-                AnimateHandPosition(finalRotationPlayer, _mainHand.HandType == HandType.RightHand, temp.transform));
+            // A bit later but still while rotating, we start changing the temporary game object position
+            InteractionSequence.Insert(timeToRotate * 0.4f, AnimateHandPosition(finalRotationPlayer, _mainHand.HandType == HandType.RightHand, temp.transform));
 
             // At the same time we move the temporary game object, we start rotating it as well.
             // We have only half the duration here so that temporary game object is pointing in the right direction approximately when reaching the hit target
-            InteractionSequence.Join(AnimateHandRotation( InteractionTime * 0.5f, finalRotationPlayer, temp.transform));
+            InteractionSequence.Join(AnimateHandRotation(InteractionTime * 0.5f, finalRotationPlayer, temp.transform));
 
             InteractionSequence.OnStart(() =>
             {
@@ -88,7 +86,7 @@ namespace SS3D.Systems.Animations
                 Controller.LookAtTargetLocker.transform.position = _targetHitPosition;
                 Controller.LookAtTargetLocker.transform.parent = null;
                 Controller.LookAtConstraint.weight = 1;
-            }); 
+            });
             InteractionSequence.OnComplete(() =>
             {
                 RestorePosition(Controller.PositionController);
@@ -96,14 +94,13 @@ namespace SS3D.Systems.Animations
                 _holdable.transform.parent = _mainHand.Hold.ItemPositionTargetLocker;
                 _holdable.transform.DOLocalRotate(Quaternion.identity.eulerAngles, 0.3f);
                 _holdable.transform.DOLocalMove(Vector3.zero, 0.3f);
-                DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x=> _mainHand.Hold.PickupIkConstraint.weight = x, 0, 0.3f);
+                DOTween.To(() => _mainHand.Hold.PickupIkConstraint.weight, x => _mainHand.Hold.PickupIkConstraint.weight = x, 0, 0.3f);
                 DOTween.To(() => Controller.LookAtConstraint.weight, x => Controller.LookAtConstraint.weight = x, 0f, 0.3f);
             });
         }
 
         private Tween AnimateHandRotation(float duration, Quaternion finalRotation, Transform temp)
         {
-
             Sequence rotation = DOTween.Sequence();
 
             // All computations have to be done like if the player was already facing the direction it's facing in the end of its rotation
@@ -114,7 +111,7 @@ namespace SS3D.Systems.Animations
 
             Vector3 fromHandToHit = (_targetHitPosition - _mainHand.HandBone.position).normalized;
 
-            ItemHitPoint hitPoint = _mainHand.ItemInHand.GetComponent<ItemHitPoint>();
+            ItemHitPoint hitPoint = _mainHand.ItemHeld.GetComponent<ItemHitPoint>();
 
             Vector3 right = Vector3.Cross(Vector3.up, fromHandToHit).normalized;
 
@@ -124,8 +121,8 @@ namespace SS3D.Systems.Animations
             // the last rotation is such that the item went a bit over the target rotation to simulate the momentum and rotation of arm
             Quaternion lastRotation = QuaternionExtension.AltForwardLookRotation(right + fromHandToHit, hitPoint.ForwardHit,  hitPoint.UpHit);
 
-            rotation.Join(temp.transform.DORotate(firstRotation.eulerAngles, duration/2));
-            rotation.Append(temp.transform.DORotate(lastRotation.eulerAngles, duration/2));
+            rotation.Join(temp.transform.DORotate(firstRotation.eulerAngles, duration / 2));
+            rotation.Append(temp.transform.DORotate(lastRotation.eulerAngles, duration / 2));
 
             rotation.SetEase(Ease.InSine);
             rotation.Pause();
@@ -134,7 +131,6 @@ namespace SS3D.Systems.Animations
             _rootTransform.rotation = currentRotation;
             return rotation;
         }
-
 
         /// <summary>
         ///  Animate the trajectory of the hand while hitting with item
@@ -161,7 +157,7 @@ namespace SS3D.Systems.Animations
             // Allows showing the trajectory in editor
             tween.onUpdate += () =>
             {
-                //DebugExtension.DebugWireSphere(_mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
+                // DebugExtension.DebugWireSphere(_mainHand.Hold.HandIkTarget.position, 0.01f, 2f);
             };
 
             tween.Pause();
@@ -180,8 +176,7 @@ namespace SS3D.Systems.Animations
         /// <returns></returns>
         private Vector3[] ComputeHandPath(Vector3 targetHandHoldPosition, Vector3 fromShoulderToHit, bool isRight)
         {
-
-            float deviationFromStraightTrajectory = 0.2f;
+            const float deviationFromStraightTrajectory = 0.2f;
 
             // direction vector from the shoulder to the hit in transform parent space.
             Vector3 fromShoulderToHitRelativeToPlayer = _rootTransform.InverseTransformDirection(fromShoulderToHit);
@@ -199,31 +194,31 @@ namespace SS3D.Systems.Animations
 
             // compute the trajectory deviation point, using the cross product to get a vector orthogonal to the hit direction,
             // then, from the middle of the distance between hand and hit, step on the side from a given quantity.
-            // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically 
+            // Uses the up vector for the cross product, hopefully the player never hits perfectly vertically
             Vector3 trajectoryPeak = middleFromShoulderToHit + (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
             // Same as trajectoryPeak but for when the hand gets back in rest position
             Vector3 trajectoryPeakBack = hitPositionRelativeToPlayer - (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory));
 
             // show the hit target position in the player referential
-            //DebugExtension.DebugPoint((_rootTransform.rotation * hitPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
+            // DebugExtension.DebugPoint((_rootTransform.rotation * hitPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the beginning of the animation
-            //DebugExtension.DebugPoint((_rootTransform.rotation * shoulderPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
+            // DebugExtension.DebugPoint((_rootTransform.rotation * shoulderPositionRelativeToPlayer) + _rootTransform.position, Color.blue, 0.2f, 2f);
 
             // show the middle of the two precedent points
-            //DebugExtension.DebugPoint((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Color.green, 1f, 2f);
-
+            // DebugExtension.DebugPoint((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Color.green, 1f, 2f);
             Debug.DrawRay((_rootTransform.rotation * middleFromShoulderToHit) + _rootTransform.position, Vector3.Cross(Vector3.up, fromShoulderToHit).normalized * 0.6f, Color.green, 2f);
 
             // show the direction from hand to the hit target
-            Debug.DrawRay( _mainHand.HandBone.position, fromShoulderToHit, Color.red, 2f);
+            Debug.DrawRay(_mainHand.HandBone.position, fromShoulderToHit, Color.red, 2f);
 
             // show the trajectory point guiding the hand outside
-            //DebugExtension.DebugPoint( (_rootTransform.rotation * trajectoryPeak) + _rootTransform.position, Color.cyan, 0.2f,2f);
+            // DebugExtension.DebugPoint( (_rootTransform.rotation * trajectoryPeak) + _rootTransform.position, Color.cyan, 0.2f,2f);
 
             // Define the points for the trajectory in the player's root referential
-            Vector3[] path = {
+            Vector3[] path =
+            {
                 shoulderPositionRelativeToPlayer - (fromShoulderToHitRelativeToPlayer.normalized * 0.4f) + (Vector3.Cross(Vector3.up, fromShoulderToHitRelativeToPlayer).normalized * (deviationRightOrLeft * deviationFromStraightTrajectory)),
                 trajectoryPeak,
                 hitPositionRelativeToPlayer,
@@ -232,7 +227,6 @@ namespace SS3D.Systems.Animations
 
             return path;
         }
-
 
         /// <summary>
         /// Compute the position in world space of the hand hold, such that the item hit point reach the target hit position.
@@ -247,12 +241,12 @@ namespace SS3D.Systems.Animations
             Quaternion savedRotation = item.rotation;
             Vector3 savedPosition = item.position;
 
-            ItemHitPoint hitPoint = _mainHand.ItemInHand.GetComponent<ItemHitPoint>();
+            ItemHitPoint hitPoint = _mainHand.ItemHeld.GetComponent<ItemHitPoint>();
 
-            item.rotation = QuaternionExtension.AltForwardLookRotation(item.GetComponent<ItemHitPoint>().HitPoint.forward, hitPoint.ForwardHit, hitPoint.UpHit);
-
-            // Place item such that the item hit position match the target hit position 
-            item.position = _targetHitPosition - item.GetComponent<ItemHitPoint>().HitPoint.localPosition;
+            // Place item such that the item hit position match the target hit position
+            item.SetPositionAndRotation(
+                _targetHitPosition - item.GetComponent<ItemHitPoint>().HitPoint.localPosition,
+                QuaternionExtension.AltForwardLookRotation(item.GetComponent<ItemHitPoint>().HitPoint.forward, hitPoint.ForwardHit, hitPoint.UpHit));
 
             Transform hold = _holdable.GetHold(true, _mainHand.HandType);
 
@@ -260,15 +254,14 @@ namespace SS3D.Systems.Animations
             Vector3 targetHandHoldPosition = hold.position;
 
             // restore position and rotation
-            item.position = savedPosition;
-            item.rotation = savedRotation;
+            item.SetPositionAndRotation(savedPosition, savedRotation);
 
             float distanceHoldToHit = Vector3.Distance(hold.position, item.GetComponent<ItemHitPoint>().HitPoint.position);
 
             // We don't want our trajectory to be too streched, so we put the hit point closer if necessary, reachable by human hitting with item
             if (fromShoulderToHit.magnitude > InteractionTime + distanceHoldToHit)
             {
-                targetHandHoldPosition = _mainHand.ItemInHand.transform.position + (fromShoulderToHit.normalized * InteractionTime);
+                targetHandHoldPosition = _mainHand.ItemHeld.transform.position + (fromShoulderToHit.normalized * InteractionTime);
             }
 
             return targetHandHoldPosition;

@@ -1,20 +1,22 @@
 ﻿using Coimbra.Services.Events;
 using DG.Tweening;
-using SS3D.Core.Behaviours;
 using SS3D.Logging;
+using SS3D.Systems.Camera.Events;
 using SS3D.Systems.Entities.Events;
-using SS3D.Systems.Screens.Events;
 using UnityEngine;
 
-namespace SS3D.Systems.Screens
+namespace SS3D.Systems.Camera
 {
     /// <summary>
     /// Sets the camera follow for the local player.
     /// </summary>
-    public class PlayerCameraSystem  : Core.Behaviours.System
+    public class PlayerCameraSystem : Core.Behaviours.System
     {
-        [SerializeField] private Camera _camera;
-        [SerializeField] private CameraFollow _cameraFollow;
+        [SerializeField]
+        private CameraActor _camera;
+
+        [SerializeField]
+        private CameraFollow _cameraFollow;
 
         private Sequence _fovSequence;
 
@@ -37,8 +39,8 @@ namespace SS3D.Systems.Screens
             _fovSequence?.Kill();
             _fovSequence = DOTween.Sequence();
 
-            _fovSequence.Append(_camera.DOFieldOfView(75, 0.1f));
-            _fovSequence.Append(_camera.DOFieldOfView(65, .7F));
+            _fovSequence.Append(_camera.Camera.DOFieldOfView(75, 0.1f));
+            _fovSequence.Append(_camera.Camera.DOFieldOfView(65, .7F));
 
             Log.Information(this, "setting new camera target {gameObject}", Logs.Generic, target.name);
             _cameraFollow.SetTarget(target);

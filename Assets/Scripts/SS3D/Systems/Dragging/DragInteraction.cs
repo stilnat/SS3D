@@ -3,12 +3,8 @@ using FishNet.Object;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Animations;
-using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
-using System.Collections;
-using System.Collections.Generic;
+using SS3D.Systems.Inventory.Items;
 using UnityEngine;
 
 namespace SS3D.Systems.Dragging
@@ -19,13 +15,15 @@ namespace SS3D.Systems.Dragging
 
         private NetworkConnection _previousOwner;
 
-        public float TimeToReachGrabPlace { get; private set; }
-
         public DragInteraction(float timeToReachGrabPlace)
         {
             TimeToReachGrabPlace = timeToReachGrabPlace;
             Delay = TimeToReachGrabPlace;
         }
+
+        public override InteractionType InteractionType => InteractionType.Grab;
+
+        public float TimeToReachGrabPlace { get; private set; }
 
         public override IClientInteraction CreateClient(InteractionEvent interactionEvent) => new ClientDelayedInteraction();
 
@@ -33,14 +31,12 @@ namespace SS3D.Systems.Dragging
 
         public override string GetGenericName() => "Grab";
 
-        public override InteractionType InteractionType => InteractionType.Grab;
-
         public override Sprite GetIcon(InteractionEvent interactionEvent) => throw new System.NotImplementedException();
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {
             // Can only grab with hand
-            if (interactionEvent.Source.GetRootSource() is not Hand hand)
+            if (interactionEvent.Source.GetRootSource() is not IItemHolder hand)
             {
                 return false;
             }
@@ -51,45 +47,20 @@ namespace SS3D.Systems.Dragging
             }
 
             // check that our hand is empty
-            if (!hand.IsEmpty())
-            {
-                return false;
-            }
-
-            Entity entity = interactionEvent.Source.GetComponentInParent<Entity>();
-
-            if (!entity)
+            if (!hand.Empty)
             {
                 return false;
             }
 
             return true;
         }
-
-        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            Draggable grabbable = interactionEvent.Target as Draggable;
-
-            hand.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, grabbable.GetComponent<NetworkObject>(), grabbable.GameObject.transform.position, Delay);
-
-            return true;
-        }
-
-        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
-        {
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-
-            _draggedObject = interactionEvent.Target as Draggable;
-            _previousOwner = _draggedObject.Owner;
-            _draggedObject.NetworkObject.GiveOwnership(hand.Owner);
-        }
-
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Hand hand = interactionEvent.Source.GetRootSource() as Hand;
-            hand.GetComponentInParent<ProceduralAnimationController>().CancelAnimation(hand);
+            if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
+            {
+                animatedSource.CancelSourceAnimation(InteractionType, interactionEvent.Target.GetComponent<NetworkObject>(), Delay);
+            }
 
             // previous owner regain authority when not grabbed anymore
             if (_draggedObject != null)
@@ -101,6 +72,25 @@ namespace SS3D.Systems.Dragging
         protected override bool CanKeepInteracting(InteractionEvent interactionEvent, InteractionReference reference)
         {
             return true;
+        }
+
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            Draggable grabbable = interactionEvent.Target as Draggable;
+
+            if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
+            {
+                animatedSource.PlaySourceAnimation(InteractionType, interactionEvent.Target.GetComponent<NetworkObject>(), grabbable.GameObject.transform.position, Delay);
+            }
+
+            return true;
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            _draggedObject = interactionEvent.Target as Draggable;
+            _previousOwner = _draggedObject.Owner;
+            _draggedObject.NetworkObject.GiveOwnership(interactionEvent.Source.GetRootSource().NetworkObject.Owner);
         }
     }
 }

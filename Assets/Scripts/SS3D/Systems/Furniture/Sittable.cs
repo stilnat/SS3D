@@ -11,7 +11,6 @@ namespace SS3D.Systems.Furniture
 {
     public class Sittable : NetworkActor, IInteractionTarget
     {
-
         public IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
         {
             return Array.Empty<IInteraction>();

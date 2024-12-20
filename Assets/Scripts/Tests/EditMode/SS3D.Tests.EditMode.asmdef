@@ -17,7 +17,8 @@
         "SS3D.GameModes",
         "SS3D.Electricity",
         "SS3D.Tiles",
-        "SS3D.Inventory"
+        "SS3D.Inventory",
+        "SS3D.Health"
     ],
     "includePlatforms": [
         "Editor"

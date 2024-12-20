@@ -13,8 +13,8 @@ namespace SS3D.Systems.Animations
         public override event Action<IProceduralAnimation> OnCompletion;
 
         private readonly AbstractHoldable _holdable;
-        private  readonly Hand _mainHand;
-        private  readonly Hand _secondaryHand;
+        private readonly Hand _mainHand;
+        private readonly Hand _secondaryHand;
         private readonly Transform _rootTransform;
 
         public ThrowAnimation(float interactionTime, ProceduralAnimationController controller, NetworkObject holdable, Hand mainHand, Hand secondaryHand)
@@ -28,7 +28,6 @@ namespace SS3D.Systems.Animations
 
         public override void ClientPlay()
         {
-
             _mainHand.Hold.ItemPositionConstraint.weight = 0f;
 
             /*
@@ -51,10 +50,10 @@ namespace SS3D.Systems.Animations
             // do a little back and forth path
             InteractionSequence.Join(_mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, InteractionTime/2)
                 .SetLoops(2, LoopType.Yoyo));
-            */ 
+            */
 
-            InteractionSequence.OnComplete(() => { 
-                
+            InteractionSequence.OnComplete(() =>
+            {
                 _mainHand.Hold.HoldIkConstraint.weight = 0f;
                 _mainHand.Hold.PickupIkConstraint.weight = 0f;
 
@@ -67,7 +66,6 @@ namespace SS3D.Systems.Animations
                 }
 
                 _holdable.GameObject.transform.parent = null;
-
             });
 
             // Ignore collision between thrown item and player for a short while
@@ -76,16 +74,16 @@ namespace SS3D.Systems.Animations
             WaitToRestoreCollision();
         }
 
+        public override void Cancel()
+        {
+        }
+
         private async void WaitToRestoreCollision()
         {
             await Task.Delay(300);
+
             // Allow back collision between thrown item and player
             Physics.IgnoreCollision(_holdable.GetComponent<Collider>(), _rootTransform.GetComponent<Collider>(), false);
-        }
-
-        public override void Cancel()
-        {
-            
         }
     }
 }

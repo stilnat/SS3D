@@ -1,15 +1,28 @@
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using FishNet.Object;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
+using SS3D.Systems.Interactions;
+using SS3D.Systems.Inventory.UI;
 using System.Linq;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
 {
-    public class RagdollRecoverAnimator : NetworkActor
+    public partial class RagdollRecoverAnimator : NetworkActor
     {
+        private class BoneTransform
+        {
+            public BoneTransform(Vector3 position, Quaternion rotation)
+            {
+                Position = position;
+                Rotation = rotation;
+            }
+
+            public Vector3 Position { get; set; }
+
+            public Quaternion Rotation { get; set; }
+        }
 
         [SerializeField]
         private PositionController _positionController;
@@ -24,12 +37,6 @@ namespace SS3D.Systems.Entities.Humanoid
 
         [SerializeField]
         private Transform _hips;
-
-        private class BoneTransform
-        {
-            public Vector3 Position;
-            public Quaternion Rotation;
-        }
 
         /// <summary>
         /// Bones Transforms (position and rotation) in the first frame of StandUp animation
@@ -50,13 +57,13 @@ namespace SS3D.Systems.Entities.Humanoid
 
             for (int boneIndex = 0; boneIndex < _ragdollParts.Length; boneIndex++)
             {
-                _standUpBones[boneIndex] = new();
-                _ragdollBones[boneIndex] = new();
+                _standUpBones[boneIndex] = new(Vector3.zero, Quaternion.identity);
+                _ragdollBones[boneIndex] = new(Vector3.zero, Quaternion.identity);
             }
 
-            _positionController.ChangedPosition += HandleChangedPosition;
+            _positionController.OnChangedPosition += HandleChangedPosition;
         }
-        
+
         [Client]
         private void HandleChangedPosition(PositionType position, float recoverTime)
         {
@@ -70,7 +77,6 @@ namespace SS3D.Systems.Entities.Humanoid
         /// <summary>
         /// Switch to BonesReset state and prepare for BonesResetBehavior
         /// </summary>
-        
         [Client]
         private void BonesReset(AnimationClip clip, float timeToResetBones)
         {
@@ -86,7 +92,6 @@ namespace SS3D.Systems.Entities.Humanoid
         /// Copy current ragdoll parts local positions and rotations to array.
         /// </summary>
         /// <param name="partsTransforms">Array, that receives ragdoll parts positions</param>
-        
         [Client]
         private void PopulatePartsTransforms(BoneTransform[] partsTransforms)
         {
@@ -102,7 +107,6 @@ namespace SS3D.Systems.Entities.Humanoid
         /// </summary>
         /// <param name = "partsTransforms">Array, that receives ragdoll parts positions</param>
         /// <param name="animationClip"></param>
-        
         [Client]
         private void PopulateStandUpPartsTransforms(AnimationClip animationClip)
         {
@@ -118,10 +122,8 @@ namespace SS3D.Systems.Entities.Humanoid
             // Put character into first frame of animation
             animationClip.SampleAnimation(gameObject, 0f);
 
-
             // Put back character at the right place as the animation moved it
-             _character.position = originalPosition;
-             _character.rotation = originalRotation;
+            _character.SetPositionAndRotation(originalPosition, originalRotation);
 
             // Register hips position and rotation as moving the armature will messes with the hips position
             Vector3 originalHipsPosition = _hips.position;
@@ -132,18 +134,30 @@ namespace SS3D.Systems.Entities.Humanoid
             _armatureRoot.localRotation = originalArmatureRotation;
 
             // When moving the armature, it messes with the hips position, so we also move the hips back
-            _hips.position = originalHipsPosition;
-            _hips.rotation = originalHipsRotation;
+            _hips.SetPositionAndRotation(originalHipsPosition, originalHipsRotation);
 
             // Populate the bones local position and rotation when in first frame of animation
             PopulatePartsTransforms(_standUpBones);
-            
+
             // Move bones back to the ragdolled position they were in
             for (int partIndex = 0; partIndex < _ragdollParts.Length; partIndex++)
             {
                 _ragdollParts[partIndex].localPosition = _ragdollBones[partIndex].Position;
                 _ragdollParts[partIndex].localRotation = _ragdollBones[partIndex].Rotation;
             }
+        }
+    }
+
+    public partial class RagdollRecoverAnimator : IPlayInteractionAnimation
+    {
+        public void PlayAnimation(InteractionType interactionType)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void StopAnimation()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

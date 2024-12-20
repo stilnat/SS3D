@@ -1,11 +1,8 @@
-﻿using SS3D.Interactions;
+﻿using FishNet.Object;
+using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
-using SS3D.Systems.Animations;
 using SS3D.Systems.Interactions;
-using SS3D.Systems.Inventory.Containers;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SS3D.Systems.Audio
@@ -15,7 +12,6 @@ namespace SS3D.Systems.Audio
     /// </summary>
     public class ChangeMusicInteraction : DelayedInteraction
     {
-    
         public override InteractionType InteractionType => InteractionType.Press;
 
         public IClientInteraction CreateClient(InteractionEvent interactionEvent)
@@ -23,32 +19,30 @@ namespace SS3D.Systems.Audio
             return null;
         }
 
-        public override string GetName(InteractionEvent interactionEvent)
-        {
-            return "Change Music";
-        }
+        public override string GetName(InteractionEvent interactionEvent) => "Change Music";
 
-        public override string GetGenericName()
-        {
-            return "Change Music";
-        }
+        public override string GetGenericName() => "Change Music";
 
         public override Sprite GetIcon(InteractionEvent interactionEvent)
         {
             if (interactionEvent.Target is Boombox boom)
+            {
                 return boom.InteractionIcon;
+            }
+
             return null;
         }
 
         public override bool CanInteract(InteractionEvent interactionEvent)
         {
-            if (interactionEvent.Target is Boombox boom)
+            if (interactionEvent.Target is IToggleable boom)
             {
                 if (!InteractionExtensions.RangeCheck(interactionEvent))
                 {
                     return false;
                 }
-                return boom.AudioOn;
+
+                return boom.GetState();
             }
 
             return false;
@@ -56,7 +50,6 @@ namespace SS3D.Systems.Audio
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            
         }
 
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
@@ -69,8 +62,6 @@ namespace SS3D.Systems.Audio
 
         protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            Hand hand = interactionEvent.Source as Hand;
-
             Vector3 point = interactionEvent.Point;
 
             if (interactionEvent.Target.TryGetInteractionPoint(interactionEvent.Source, out Vector3 customPoint))
@@ -78,11 +69,11 @@ namespace SS3D.Systems.Audio
                 point = customPoint;
             }
 
-            if (hand != null)
+            if (interactionEvent.Source is IInteractionSourceAnimate animatedSource)
             {
-                interactionEvent.Source.GameObject.GetComponentInParent<ProceduralAnimationController>().PlayAnimation(InteractionType, hand, null, point, Delay);
+                animatedSource.PlaySourceAnimation(InteractionType, interactionEvent.Target.GetComponent<NetworkObject>(), point, Delay);
             }
-            
+
             return true;
         }
     }

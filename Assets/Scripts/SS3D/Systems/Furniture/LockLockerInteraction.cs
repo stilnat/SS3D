@@ -23,13 +23,13 @@ namespace SS3D.Systems.Inventory.Interactions
             _permissionToUnlock = permission;
         }
 
+        public InteractionType InteractionType => InteractionType.None;
+
         public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         public string GetName(InteractionEvent interactionEvent) => "Lock Locker";
 
         public string GetGenericName() => "Lock Locker";
-
-        public InteractionType InteractionType => InteractionType.None;
 
         public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
 
@@ -39,7 +39,7 @@ namespace SS3D.Systems.Inventory.Interactions
             {
                 return false;
             }
-            
+
             if (!_locker.Lockable)
             {
                 return false;
@@ -57,18 +57,12 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            Hands hands = sourceGameObjectProvider.GameObject.GetComponentInParent<Hands>();
-            if (hands == null)
-            {
-                return true;
-            }
-
-            if (hands.Inventory.HasPermission(_permissionToUnlock))
+            if (sourceGameObjectProvider.GameObject.GetComponentInParent<IIDPermissionProvider>().HasPermission(_permissionToUnlock))
             {
                 Log.Information(this, "Locker has been locked!");
                 _locker.IsLocked = true;
-            } 
-            else 
+            }
+            else
             {
                 Log.Information(this, "No permission to lock Locker!");
                 return false;

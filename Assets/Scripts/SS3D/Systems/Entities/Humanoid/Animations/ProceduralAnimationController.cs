@@ -1,10 +1,8 @@
 using FishNet.Object;
 using SS3D.Core.Behaviours;
 using SS3D.Intents;
-using SS3D.Interactions;
-using SS3D.Interactions.Interfaces;
+using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Humanoid;
-using SS3D.Systems.Furniture;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
@@ -18,6 +16,8 @@ namespace SS3D.Systems.Animations
 {
     public class ProceduralAnimationController : NetworkActor
     {
+        // We can't have more than one procedural animation running at the same time per hand (maybe should store Source instead of hand).
+        private readonly List<Tuple<Hand, IProceduralAnimation>> _animations = new();
 
         [field: SerializeField]
         public TargetFollow LookAtTargetLocker { get; private set; }
@@ -43,56 +43,11 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Hands Hands { get; private set; }
 
-        // We can't have more than one procedural animation running at the same time per hand (maybe should store Source instead of hand).
-        private readonly List<Tuple<Hand, IProceduralAnimation>> _animations = new();
-
         [Server]
         public void PlayAnimation(InteractionType interactionType, Hand hand,  NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
         {
             Hands.TryGetOppositeHand(hand, out Hand oppositeHand);
             ObserversPlayAnimation(interactionType, hand, oppositeHand, target, targetPosition, time, delay);
-        }
-
-        [ObserversRpc]
-        private void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
-        {
-            IProceduralAnimation proceduralAnimation;
-            switch (interactionType)
-            {
-                  case InteractionType.Pickup:
-                      proceduralAnimation = new PickUpAnimation(this, time, mainHand, secondaryHand, target.GetComponent<AbstractHoldable>());
-                      break;
-                  case InteractionType.Place:
-                      proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand, target.GetComponent<AbstractHoldable>(), targetPosition);
-                      break;
-                  case InteractionType.Screw:
-                      proceduralAnimation = new InteractAnimations(this, time, mainHand, target, interactionType, targetPosition);
-                      break;
-                  case InteractionType.Press:
-                      proceduralAnimation = new InteractWithHandAnimation(this, time, mainHand, targetPosition, interactionType);
-                      break;
-                  case InteractionType.Grab:
-                      proceduralAnimation = new GrabAnimation(this, time, mainHand, secondaryHand, target);
-                      break;
-                  case InteractionType.Sit:
-                      proceduralAnimation = new Sit(time, this, target);
-                      break;
-                  case InteractionType.Throw:
-                      proceduralAnimation = new ThrowAnimation(time, this, target, mainHand, secondaryHand);
-                      break;
-                  case InteractionType.Hit:
-                      proceduralAnimation = mainHand.Full ? 
-                          new HitWithItemAnimation(this, time, targetPosition, mainHand, target) : new HitAnimation(this, time, targetPosition, mainHand);
-                      break;
-                  default:
-                      return;
-
-            } 
-            
-            _animations.Add(new(mainHand, proceduralAnimation));
-
-            proceduralAnimation.ClientPlay();
-            proceduralAnimation.OnCompletion += RemoveAnimation;
         }
 
         [Server]
@@ -102,17 +57,79 @@ namespace SS3D.Systems.Animations
         }
 
         [ObserversRpc]
+        private void ObserversPlayAnimation(InteractionType interactionType, Hand mainHand, Hand secondaryHand, NetworkObject target, Vector3 targetPosition, float time, float delay = 0f)
+        {
+            IProceduralAnimation proceduralAnimation;
+            switch (interactionType)
+            {
+                case InteractionType.Pickup:
+                {
+                    proceduralAnimation = new PickUpAnimation(this, time, mainHand, secondaryHand, target.GetComponent<AbstractHoldable>());
+                    break;
+                }
+
+                case InteractionType.Place:
+                {
+                    proceduralAnimation = new PlaceAnimation(this, time, mainHand, secondaryHand, target.GetComponent<AbstractHoldable>(), targetPosition);
+                    break;
+                }
+
+                case InteractionType.Screw:
+                {
+                    proceduralAnimation = new InteractAnimations(this, time, mainHand, target, interactionType, targetPosition);
+                    break;
+                }
+
+                case InteractionType.Press:
+                {
+                    proceduralAnimation = new InteractWithHandAnimation(this, time, mainHand, targetPosition, interactionType);
+                    break;
+                }
+
+                case InteractionType.Grab:
+                {
+                    proceduralAnimation = new DragAnimation(this, time, mainHand, secondaryHand, target);
+                    break;
+                }
+
+                case InteractionType.Sit:
+                {
+                    proceduralAnimation = new SitAnimation(time, this, target);
+                    break;
+                }
+
+                case InteractionType.Throw:
+                {
+                    proceduralAnimation = new ThrowAnimation(time, this, target, mainHand, secondaryHand);
+                    break;
+                }
+
+                case InteractionType.Hit:
+                {
+                    proceduralAnimation = mainHand.Full ?
+                        new HitWithItemAnimation(this, time, targetPosition, mainHand, target) : new HitAnimation(this, time, targetPosition, mainHand);
+                    break;
+                }
+
+                default:
+                    return;
+            }
+
+            _animations.Add(new(mainHand, proceduralAnimation));
+            proceduralAnimation.ClientPlay();
+            proceduralAnimation.OnCompletion += RemoveAnimation;
+        }
+
+        [ObserversRpc]
         private void ObserverCancelAnimation(Hand hand)
         {
-            _animations.FirstOrDefault(x => x.Item1 == hand)?.Item2.Cancel();
-            _animations.Remove(_animations.FirstOrDefault(x => x.Item1 == hand));
+            _animations.Find(x => x.Item1 == hand)?.Item2.Cancel();
+            _animations.Remove(_animations.Find(x => x.Item1 == hand));
         }
 
         private void RemoveAnimation(IProceduralAnimation proceduralAnimation)
         {
-            _animations.Remove(_animations.FirstOrDefault(x => x.Item2 == proceduralAnimation));
+            _animations.Remove(_animations.Find(x => x.Item2 == proceduralAnimation));
         }
-
-
     }
 }

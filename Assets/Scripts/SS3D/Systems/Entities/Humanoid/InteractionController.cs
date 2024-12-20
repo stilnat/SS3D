@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FishNet.Object;
+﻿using FishNet.Object;
 using SS3D.Core;
 using SS3D.Core.Behaviours;
 using SS3D.Interactions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Logging;
+using SS3D.Systems.Camera;
 using SS3D.Systems.Inputs;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
-using SS3D.Systems.Screens;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -26,28 +26,33 @@ namespace SS3D.Systems.Interactions
         /// Mask for physics to use when finding targets
         /// </summary>
         [Tooltip("Mask for physics to use when finding targets")]
-        [SerializeField] private LayerMask _selectionMask = 0;
+        [SerializeField]
+        private LayerMask _selectionMask = 0;
 
         private Controls.InteractionsActions _controls;
         private Controls.HotkeysActions _hotkeysControls;
         private InputSystem _inputSystem;
-        
-        private Camera _camera;
+
+        private CameraActor _camera;
         private RadialInteractionView _radialView;
-        
+
         public override void OnStartClient()
         {
             base.OnStartClient();
-            if (!Owner.IsLocalClient) return;
+
+            if (!Owner.IsLocalClient)
+            {
+                return;
+            }
 
             _radialView = Subsystems.Get<RadialInteractionView>();
-            _camera = Subsystems.Get<CameraSystem>().PlayerCamera.GetComponent<Camera>();
+            _camera = Subsystems.Get<CameraSystem>().PlayerCamera;
             _inputSystem = Subsystems.Get<InputSystem>();
             Controls controls = _inputSystem.Inputs;
             _controls = controls.Interactions;
             _hotkeysControls = controls.Hotkeys;
             _radialView = Subsystems.Get<RadialInteractionView>();
-            _camera = Subsystems.Get<CameraSystem>().PlayerCamera.GetComponent<Camera>();
+            _camera = Subsystems.Get<CameraSystem>().PlayerCamera;
             _controls.RunPrimary.performed += HandleRunPrimary;
             _controls.ViewInteractions.performed += HandleView;
             _hotkeysControls.Use.performed += HandleUse;
@@ -57,24 +62,6 @@ namespace SS3D.Systems.Interactions
         public override void OnStopClient()
         {
             base.OnStopClient();
-            UnsubscribeFromEvents();
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            if (!Owner.IsLocalClient)
-            {
-                return;
-            }
-            _controls.RunPrimary.performed -= HandleRunPrimary;
-            _controls.ViewInteractions.performed -= HandleView;
-            _hotkeysControls.Use.performed -= HandleUse;
-            _inputSystem.ToggleActionMap(_controls, false);
-        }
-        
-        protected override void OnDestroyed()
-        {
-            base.OnDestroyed();
             UnsubscribeFromEvents();
         }
 
@@ -88,10 +75,11 @@ namespace SS3D.Systems.Interactions
             {
                 return;
             }
-            Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+            Ray ray = _camera.Camera.ScreenPointToRay(Mouse.current.position.ReadValue());
             List<InteractionEntry> viableInteractions = GetViableInteractions(ray, out InteractionEvent interactionEvent);
 
-            if (viableInteractions.Count <= 0)
+            if (viableInteractions.Count == 0)
             {
                 return;
             }
@@ -101,84 +89,6 @@ namespace SS3D.Systems.Interactions
             interactionEvent.Target = interaction.Target;
 
             CmdRunInteraction(ray, interactionName);
-        }
-
-        /// <summary>
-        /// Among the viable interaction, choose the most important one (powered by spaghetti logic)
-        /// </summary>
-        private InteractionEntry ChooseMostImportantInteraction(List<InteractionEntry> viableInteractions)
-        {
-            InteractionEntry throwInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Throw");
-            if (throwInteraction.Interaction != null)
-            {
-                return throwInteraction;
-            }
-
-            InteractionEntry hitInteraction = viableInteractions.FirstOrDefault(x => x.Interaction.GetGenericName() == "Hit");
-            if (hitInteraction.Interaction != null)
-            {
-                return hitInteraction;
-            }
-
-            return viableInteractions[0];
-        }
-
-        [Client]
-        private void HandleView(InputAction.CallbackContext callbackContext)
-        {
-            // leftButton is enabled in RadialInteractionView HandleDisappear
-            _inputSystem.ToggleBinding("<Mouse>/leftButton", false);
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-            Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            List<InteractionEntry> viableInteractions = GetViableInteractions(ray, out InteractionEvent interactionEvent);
-
-            ViewTargetInteractions(viableInteractions, interactionEvent, ray);
-        }
-
-        [Client]
-        private void HandleUse(InputAction.CallbackContext callbackContext)
-        {
-            // Activate item in selected hand
-            Hands hands = GetComponent<Hands>();
-            if (hands == null)
-            {
-                return;
-            }
-
-            Item item = hands.SelectedHand.ItemInHand;
-            if (item != null)
-            {
-                InteractInHand(item.gameObject, gameObject);
-            }
-        }
-
-        /// <summary>
-        /// Gets and opens the menu for a target's interactions
-        /// </summary>
-        /// <param name="viableInteractions"></param>
-        /// <param name="interactionEvent"></param>
-        /// <param name="ray"></param>
-        [Client]
-        private void ViewTargetInteractions(List<InteractionEntry> viableInteractions, InteractionEvent interactionEvent, Ray ray)
-        {
-            List<IInteraction> interactions = viableInteractions.Select(entry => entry.Interaction).ToList();
-
-            if (interactions.Count <= 0) { return; }
-
-            void handleInteractionSelected(IInteraction interaction, RadialInteractionButton _)
-            {
-                _radialView.OnInteractionSelected -= handleInteractionSelected;
-                string interactionName = interaction.GetName(interactionEvent);
-
-                CmdRunInteraction(ray, interactionName);
-            }
-
-            _radialView.SetInteractions(interactions, interactionEvent, Mouse.current.position.ReadValue());
-            _radialView.OnInteractionSelected += handleInteractionSelected;
-            _radialView.ShowInteractionsMenu();
         }
 
         /// <summary>
@@ -206,7 +116,7 @@ namespace SS3D.Systems.Interactions
             }
 
             interactionEvent.Target = entries[0].Target;
-            List<IInteraction> interactions = entries.Select(entry => entry.Interaction).ToList();
+            List<IInteraction> interactions = entries.ConvertAll(entry => entry.Interaction);
 
             if (showMenu && interactions.Count > 0)
             {
@@ -215,7 +125,7 @@ namespace SS3D.Systems.Interactions
 
                 _radialView.SetInteractions(interactions, interactionEvent, mousePosition);
 
-                void handleInteractionSelected(IInteraction interaction, RadialInteractionButton _)
+                void handleInteractionSelected(IInteraction interaction, RadialInteractionButton button)
                 {
                     int index = entries.FindIndex(x => x.Interaction == interaction);
                     string interactionName = interaction.GetName(interactionEvent);
@@ -227,9 +137,109 @@ namespace SS3D.Systems.Interactions
             }
             else
             {
-                IInteraction firstInteraction = entries.First().Interaction;
+                IInteraction firstInteraction = entries[0].Interaction;
                 CmdRunInventoryInteraction(target, sourceObject, 0, firstInteraction.GetName(interactionEvent));
             }
+        }
+
+        protected override void OnDestroyed()
+        {
+            base.OnDestroyed();
+            UnsubscribeFromEvents();
+        }
+
+        private void UnsubscribeFromEvents()
+        {
+            if (!Owner.IsLocalClient)
+            {
+                return;
+            }
+
+            _controls.RunPrimary.performed -= HandleRunPrimary;
+            _controls.ViewInteractions.performed -= HandleView;
+            _hotkeysControls.Use.performed -= HandleUse;
+            _inputSystem.ToggleActionMap(_controls, false);
+        }
+
+        /// <summary>
+        /// Among the viable interaction, choose the most important one (powered by spaghetti logic)
+        /// </summary>
+        private InteractionEntry ChooseMostImportantInteraction(List<InteractionEntry> viableInteractions)
+        {
+            InteractionEntry throwInteraction = viableInteractions.Find(x => x.Interaction.GetGenericName() == "Throw");
+            if (throwInteraction.Interaction != null)
+            {
+                return throwInteraction;
+            }
+
+            InteractionEntry hitInteraction = viableInteractions.Find(x => x.Interaction.GetGenericName() == "Hit");
+            if (hitInteraction.Interaction != null)
+            {
+                return hitInteraction;
+            }
+
+            return viableInteractions[0];
+        }
+
+        [Client]
+        private void HandleView(InputAction.CallbackContext callbackContext)
+        {
+            // leftButton is enabled in RadialInteractionView HandleDisappear
+            _inputSystem.ToggleBinding("<Mouse>/leftButton", false);
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            Ray ray = _camera.Camera.ScreenPointToRay(Mouse.current.position.ReadValue());
+            List<InteractionEntry> viableInteractions = GetViableInteractions(ray, out InteractionEvent interactionEvent);
+
+            ViewTargetInteractions(viableInteractions, interactionEvent, ray);
+        }
+
+        [Client]
+        private void HandleUse(InputAction.CallbackContext callbackContext)
+        {
+            // Activate item in selected hand
+            if (!TryGetComponent(out Hands hands))
+            {
+                return;
+            }
+
+            Item item = hands.SelectedHand.ItemHeld;
+            if (item != null)
+            {
+                InteractInHand(item.gameObject, gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Gets and opens the menu for a target's interactions
+        /// </summary>
+        /// <param name="viableInteractions"></param>
+        /// <param name="interactionEvent"></param>
+        /// <param name="ray"></param>
+        [Client]
+        private void ViewTargetInteractions(List<InteractionEntry> viableInteractions, InteractionEvent interactionEvent, Ray ray)
+        {
+            List<IInteraction> interactions = viableInteractions.ConvertAll(entry => entry.Interaction);
+
+            if (interactions.Count == 0)
+            {
+                return;
+            }
+
+            void handleInteractionSelected(IInteraction interaction, RadialInteractionButton button)
+            {
+                _radialView.OnInteractionSelected -= handleInteractionSelected;
+                string interactionName = interaction.GetName(interactionEvent);
+
+                CmdRunInteraction(ray, interactionName);
+            }
+
+            _radialView.SetInteractions(interactions, interactionEvent, Mouse.current.position.ReadValue());
+            _radialView.OnInteractionSelected += handleInteractionSelected;
+            _radialView.ShowInteractionsMenu();
         }
 
         /// <summary>
@@ -322,7 +332,7 @@ namespace SS3D.Systems.Interactions
             List<IInteractionTarget> targets = new();
 
             // Get all target components which are not disabled and the source can interact with
-            targets.AddRange(targetGameObject.GetComponents<IInteractionTarget>().Where(x =>(x as MonoBehaviour)?.enabled != false && source.CanInteractWithTarget(x)));
+            targets.AddRange(targetGameObject.GetComponents<IInteractionTarget>().Where(x => x is MonoBehaviour behaviour && behaviour.enabled && source.CanInteractWithTarget(x)));
             if (targets.Count < 1)
             {
                 targets.Add(new InteractionTargetGameObject(targetGameObject));
@@ -379,7 +389,7 @@ namespace SS3D.Systems.Interactions
         private IInteractionSource GetActiveInteractionSource()
         {
             IHandsController handsController = GetComponent<IHandsController>();
-            var interactionSource = handsController.GetActiveInteractionSource();
+            IInteractionSource interactionSource = handsController.GetActiveInteractionSource();
 
             return interactionSource;
         }
@@ -399,7 +409,6 @@ namespace SS3D.Systems.Interactions
             if (index < 0 || entries.Count <= index)
             {
                 Log.Error(target, "Inventory interaction with invalid index {index}", Logs.Generic, index);
-
                 return;
             }
 
@@ -408,9 +417,8 @@ namespace SS3D.Systems.Interactions
 
             if (chosenEntry.Interaction.GetName(interactionEvent) != interactionName)
             {
-                Log.Error(target, "Interaction at index {index} did not have the expected name of {interactionName}",
-                    Logs.Generic, index, interactionName);
-
+                const string errorMessage = "Interaction at index {index} did not have the expected name of {interactionName}";
+                Log.Error(target, errorMessage, Logs.Generic, index, interactionName);
                 return;
             }
 

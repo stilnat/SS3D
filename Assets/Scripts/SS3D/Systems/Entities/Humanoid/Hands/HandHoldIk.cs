@@ -70,10 +70,8 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public Transform HoldTransform { get; private set; }
 
-
         [field: SerializeField]
         public Transform Pivot { get; private set; }
-
 
         [field: SerializeField]
         public Hands Hands { get; private set; }
@@ -92,7 +90,6 @@ namespace SS3D.Systems.Animations
         /// </summary>
         [field: SerializeField]
         public TargetFollow HandTargetFollow { get; private set; }
-
 
         public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider, bool simulateRotation = true, float timeToReachRotation = 0f)
         {
@@ -134,14 +131,15 @@ namespace SS3D.Systems.Animations
             switch (interactionType)
             {
                 case InteractionType.Open:
+                {
                     PlayOpenAnimation();
                     break;
+                }
             }
         }
 
         public void StopAnimation()
         {
-            
         }
 
         /// <summary>
@@ -150,7 +148,8 @@ namespace SS3D.Systems.Animations
         private void PlayOpenAnimation()
         {
             // Define the points for the parabola
-            Vector3[] path = new Vector3[] {
+            Vector3[] path = new Vector3[]
+            {
                 HandBone.position,                             // Starting position
                 HandBone.position + (HandBone.forward * 0.1f), // Peak (the highest point)
                 HandBone.position + (HandBone.up * 0.1f),      // Final position
@@ -158,7 +157,7 @@ namespace SS3D.Systems.Animations
 
             // Animate the GameObject along the path in a smooth parabolic motion
             HandIkTarget.DOPath(path, 0.1f, PathType.CatmullRom)
-                .SetEase(Ease.Linear)           // You can adjust the ease function as needed
+                .SetEase(Ease.Linear) // You can adjust the ease function as needed
                 .SetLoops(1, LoopType.Restart); // Play the animation once, no loops
         }
     }
