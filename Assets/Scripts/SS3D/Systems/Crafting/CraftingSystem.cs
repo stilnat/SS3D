@@ -163,7 +163,7 @@ namespace SS3D.Systems.Crafting
             {
                 CraftingInteraction interaction = new(
                     recipeLink.Tag.ExecutionTime,
-                    interactionEvent.Source is IRootTransformProvider rootTransformProvider ? rootTransformProvider.RootTransform : interactionEvent.Source.GameObject.transform,
+                    interactionEvent.Source.GetRootSource() is IRootTransformProvider rootTransformProvider ? rootTransformProvider.RootTransform : interactionEvent.Source.GameObject.transform,
                     craftingInteractionType,
                     recipeLink);
 

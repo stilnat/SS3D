@@ -92,9 +92,11 @@ namespace SS3D.Systems.Inventory.Containers
         {
             // todo : hands should not handle sit interactions, ass should, but the interaction controller needs some changes to handle interaction sources other than hands
             base.CreateSourceInteractions(targets, entries);
-            IInteractionTarget target = targets.First(x => x?.GameObject.GetComponent<Sittable>());
 
-            if (target is Sittable)
+            #pragma warning disable RCS1077
+            IInteractionTarget target = targets.FirstOrDefault(x => x.GameObject.TryGetComponent(out Sittable sittable));
+
+            if (target is not null)
             {
                 entries.Add(new InteractionEntry(target, new SitInteraction(1f)));
             }

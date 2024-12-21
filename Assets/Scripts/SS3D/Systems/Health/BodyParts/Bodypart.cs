@@ -88,6 +88,7 @@ namespace SS3D.Systems.Health
         /// </summary>
         private bool _isDetached;
 
+        [field:SerializeField]
         public HealthController HealthController { get; set; }
 
         public BodyPart ExternalBodyPart => _externalBodyPart;

@@ -155,9 +155,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -204,12 +203,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 1411179409928790918}
-  _skinnedMeshRenderer: {fileID: 4523048996706197990}
   _bodyPartItem: {fileID: 6632297082311541152, guid: e60ba1e09be8316448e419ecbdfb64a6, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 6842646940697686107}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 1300
+  _bodyCollider: {fileID: 6842646940697686107}
+  _skinnedMeshRenderer: {fileID: 4523048996706197990}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &3205399072759136408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,7 +225,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 8314021876565239770}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &63587172050830169
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,7 +767,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 10
+  _clothType: 10
 --- !u!1 &271301714098798013
 GameObject:
   m_ObjectHideFlags: 0
@@ -1730,9 +1729,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 0
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 2731523558576099570}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 2731523558576099570}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -1764,8 +1762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25610b7ef51d43c7bc0bd2bc58036e61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attachedContainer: {fileID: 8256505731342381852}
-  Mirrored: 0
+  _attachedContainer: {fileID: 8256505731342381852}
 --- !u!1 &1088940176934566743
 GameObject:
   m_ObjectHideFlags: 0
@@ -1957,13 +1954,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 7283055141982688687}
-  _skinnedMeshRenderer: {fileID: 6320833692460391755}
   _bodyPartItem: {fileID: 8006468508714419156, guid: cc54bc74b2f4c2349b1f84b501b0a091, type: 3}
-  _internalBodyParts: {fileID: 8932444241067885183}
-  _bodyCollider: {fileID: 6043747450149884440}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 3800
-  Brain: {fileID: 0}
+  _bodyCollider: {fileID: 6043747450149884440}
+  _skinnedMeshRenderer: {fileID: 6320833692460391755}
+  _internalBodyParts: {fileID: 8932444241067885183}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &246883314092124711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1980,7 +1976,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 5445452685643267824}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &1123676128047337991
 GameObject:
   m_ObjectHideFlags: 0
@@ -2359,7 +2355,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 0
+  _clothType: 0
 --- !u!1 &1355441158168317597
 GameObject:
   m_ObjectHideFlags: 0
@@ -2722,7 +2718,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 5
+  _clothType: 5
 --- !u!1 &1612803228149900756
 GameObject:
   m_ObjectHideFlags: 0
@@ -2804,9 +2800,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -3160,8 +3155,8 @@ MonoBehaviour:
   _componentIndexCache: 37
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  HandsController: {fileID: 3222345056416986628}
-  Container: {fileID: 106693697180811514}
+  _handsController: {fileID: 3222345056416986628}
+  _container: {fileID: 106693697180811514}
   _interactionOrigin: {fileID: 7446386329022654784}
   _interactionPoint: {fileID: 4831511282220009542}
   _range:
@@ -3186,9 +3181,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -3219,7 +3213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd866b0631d05441982a4824740ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 4
+  _type: 4
 --- !u!114 &5197003998618759137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3248,13 +3242,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 2678939209099972296}
-  _skinnedMeshRenderer: {fileID: 8614988672726119717}
   _bodyPartItem: {fileID: 2207730063960764759, guid: 35dfc7c3f708a5b48a206b4a44e7ab49, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 482392232677275030}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 650
-  _hand: {fileID: 3587815548084978834}
+  _bodyCollider: {fileID: 482392232677275030}
+  _skinnedMeshRenderer: {fileID: 8614988672726119717}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &5678219672846588157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3271,7 +3264,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 8826138047776932930}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!114 &8717143165064236720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3481,7 +3474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 7
+  _clothType: 7
 --- !u!1 &2412487104171979487
 GameObject:
   m_ObjectHideFlags: 0
@@ -3693,7 +3686,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 4
+  _clothType: 4
 --- !u!1 &2612561786074311509
 GameObject:
   m_ObjectHideFlags: 0
@@ -3973,9 +3966,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 5257508295790914349}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 5257508295790914349}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -4055,9 +4047,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -4180,9 +4171,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 7892022672265885063, guid: 4a9d34a6cf84ef045a740513d8ae30b1, type: 3}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 909431137198346835}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 909431137198346835}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -4381,7 +4371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 8
+  _clothType: 8
 --- !u!1 &3062128947295213932
 GameObject:
   m_ObjectHideFlags: 0
@@ -4498,9 +4488,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -4686,9 +4675,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -4735,12 +4723,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 5436893931835344090}
-  _skinnedMeshRenderer: {fileID: 1622979028416893765}
   _bodyPartItem: {fileID: 6958959792659314810, guid: 94aaf82bb6ab002418e01d9cc7c6eaaa, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 7505105803955635009}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 1300
+  _bodyCollider: {fileID: 7505105803955635009}
+  _skinnedMeshRenderer: {fileID: 1622979028416893765}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &3855479951871235432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4757,7 +4745,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 2234433186656605347}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &3232642881017137434
 GameObject:
   m_ObjectHideFlags: 0
@@ -5005,9 +4993,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 7892022672265885063, guid: 4a9d34a6cf84ef045a740513d8ae30b1, type: 3}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -6534,7 +6521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 0
+  _clothType: 0
 --- !u!1 &3903025644265215209
 GameObject:
   m_ObjectHideFlags: 0
@@ -6882,7 +6869,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 2
+  _clothType: 2
 --- !u!1 &4087470722163705597
 GameObject:
   m_ObjectHideFlags: 0
@@ -7345,7 +7332,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   ViewPoint: {fileID: 8966162540359811168}
   _mind: {fileID: 0}
-  Ghost: {fileID: 2798955099631966591, guid: 7bbb74a7ffc8cae44baa886de43c586b, type: 3}
+  _ghost: {fileID: 2798955099631966591, guid: 7bbb74a7ffc8cae44baa886de43c586b, type: 3}
 --- !u!114 &7878631375339778391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7361,9 +7348,8 @@ MonoBehaviour:
   _componentIndexCache: 3
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  containerViewer: {fileID: 8922211754620765195}
-  Body: {fileID: 6974988727788291784}
-  Hands: {fileID: 3222345056416986628}
+  _containerViewer: {fileID: 8922211754620765195}
+  _hands: {fileID: 3222345056416986628}
 --- !u!114 &3222345056416986628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7449,7 +7435,6 @@ MonoBehaviour:
   _componentIndexCache: 6
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  inventory: {fileID: 7878631375339778391}
 --- !u!114 &3899653582605172798
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7508,7 +7493,6 @@ MonoBehaviour:
   _componentIndexCache: 9
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  _inventory: {fileID: 7878631375339778391}
 --- !u!114 &3265741626988572248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7541,8 +7525,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
-  OverrideOpenIcon: {fileID: 0}
-  attachedContainer: {fileID: 8932444241067885183}
+  _attachedContainer: {fileID: 8932444241067885183}
 --- !u!114 &909431137198346835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7559,8 +7542,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _openState: 0
-  OverrideOpenIcon: {fileID: 0}
-  attachedContainer: {fileID: 5482738034181427131}
+  _attachedContainer: {fileID: 5482738034181427131}
 --- !u!114 &2768583506857238720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7709,7 +7691,7 @@ MonoBehaviour:
   _componentIndexCache: 20
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  InitialSubstances: []
+  _initialSubstances: []
   _currentVolume: 0
   _volume: 0
   _locked: 0
@@ -7749,7 +7731,6 @@ MonoBehaviour:
   _componentIndexCache: 22
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  _player: {fileID: 1215874948772008144}
   _entity: {fileID: 6974988727788291784}
   _currentStamina: 0
 --- !u!114 &7000234689394846347
@@ -8152,7 +8133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 9
+  _clothType: 9
 --- !u!1 &4463635519283107385
 GameObject:
   m_ObjectHideFlags: 0
@@ -8233,9 +8214,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -8503,9 +8483,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -9670,9 +9649,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -9856,12 +9834,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 7283055141982688687}
-  _skinnedMeshRenderer: {fileID: 262857023589168767}
   _bodyPartItem: {fileID: 1888615333292121711, guid: 06b6be83779804245b7f6411fe07b851, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 1555919904235425052}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 2600
+  _bodyCollider: {fileID: 1555919904235425052}
+  _skinnedMeshRenderer: {fileID: 262857023589168767}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &2975662221698755616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9878,7 +9856,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 2678939209099972296}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &6051647588693044959
 GameObject:
   m_ObjectHideFlags: 0
@@ -10265,12 +10243,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 7283055141982688687}
-  _skinnedMeshRenderer: {fileID: 438734113384709814}
   _bodyPartItem: {fileID: 8256619991674398311, guid: 242a937784a622f4f8a6e6d097e0737c, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 8109562888836391813}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 9100
+  _bodyCollider: {fileID: 8109562888836391813}
+  _skinnedMeshRenderer: {fileID: 438734113384709814}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &1763874166213412924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10287,7 +10265,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 1411179409928790918}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &6303622268853229359
 GameObject:
   m_ObjectHideFlags: 0
@@ -10982,15 +10960,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 0}
-  _skinnedMeshRenderer: {fileID: 8955141318966753029}
   _bodyPartItem: {fileID: 5562010227207703736, guid: 4a9d34a6cf84ef045a740513d8ae30b1, type: 3}
-  _internalBodyParts: {fileID: 5482738034181427131}
-  _bodyCollider: {fileID: 9174870149651035048}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 25300
-  Heart: {fileID: 0}
-  LeftLung: {fileID: 0}
-  RightLung: {fileID: 0}
+  _bodyCollider: {fileID: 9174870149651035048}
+  _skinnedMeshRenderer: {fileID: 8955141318966753029}
+  _internalBodyParts: {fileID: 5482738034181427131}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &298388518423819514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11007,7 +10982,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 7283055141982688687}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &7177713358188291637
 GameObject:
   m_ObjectHideFlags: 0
@@ -11382,9 +11357,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -12328,9 +12302,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -13306,7 +13279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 3
+  _clothType: 3
 --- !u!1 &8596748660240446523
 GameObject:
   m_ObjectHideFlags: 0
@@ -13529,8 +13502,8 @@ MonoBehaviour:
   _componentIndexCache: 42
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  HandsController: {fileID: 3222345056416986628}
-  Container: {fileID: 2264540800286188451}
+  _handsController: {fileID: 3222345056416986628}
+  _container: {fileID: 2264540800286188451}
   _interactionOrigin: {fileID: 802911981376609306}
   _interactionPoint: {fileID: 7333641033910239129}
   _range:
@@ -13555,9 +13528,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -13588,7 +13560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd866b0631d05441982a4824740ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 4
+  _type: 4
 --- !u!114 &4464218306207283657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13617,13 +13589,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 202545571406291967}
-  _skinnedMeshRenderer: {fileID: 5277828545504622393}
   _bodyPartItem: {fileID: 7546631754298856378, guid: 7f5954f009d06b2439ca637b43920440, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 8570484835458278245}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 650
-  _hand: {fileID: 6031405573252463301}
+  _bodyCollider: {fileID: 8570484835458278245}
+  _skinnedMeshRenderer: {fileID: 5277828545504622393}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &986589593059531515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13640,7 +13611,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 2843296762048308240}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!114 &4620722943463480390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14127,7 +14098,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 12
+  _clothType: 12
 --- !u!1 &8937338257042491703
 GameObject:
   m_ObjectHideFlags: 0
@@ -14508,7 +14479,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ec1254401471447af0ba6a605e6715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clothType: 1
+  _clothType: 1
 --- !u!1 &9043871940045687799
 GameObject:
   m_ObjectHideFlags: 0
@@ -14674,9 +14645,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _automaticContainerSetUp: 1
-  ContainerInteractive: {fileID: 0}
-  ContainerItemDisplay: {fileID: 0}
-  ContainerUi: {fileID: 0}
+  _containerInteractive: {fileID: 0}
+  _containerItemDisplay: {fileID: 0}
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _onlyStoreWhenOpen: 0
   _openWhenContainerViewed: 0
@@ -14848,12 +14818,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 7283055141982688687}
-  _skinnedMeshRenderer: {fileID: 8883978477367138898}
   _bodyPartItem: {fileID: 3470038122221450171, guid: ecaf79b0a74bdb443a350e88daa94a66, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 6950812085448716441}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 9100
+  _bodyCollider: {fileID: 6950812085448716441}
+  _skinnedMeshRenderer: {fileID: 8883978477367138898}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &4408745738915918354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14870,7 +14840,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 5436893931835344090}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &9188007040990486818
 GameObject:
   m_ObjectHideFlags: 0
@@ -15024,12 +14994,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _parentBodyPart: {fileID: 7283055141982688687}
-  _skinnedMeshRenderer: {fileID: 6503873287137012856}
   _bodyPartItem: {fileID: 832941577213411195, guid: 432a4ad70e41e5c4f8f913f76fe0e66c, type: 3}
-  _internalBodyParts: {fileID: 0}
-  _bodyCollider: {fileID: 7388466660109749463}
-  HealthController: {fileID: 3215593588628414307}
   _bodyPartVolume: 2600
+  _bodyCollider: {fileID: 7388466660109749463}
+  _skinnedMeshRenderer: {fileID: 6503873287137012856}
+  _internalBodyParts: {fileID: 0}
+  <HealthController>k__BackingField: {fileID: 3215593588628414307}
 --- !u!114 &8513932958176526727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15046,7 +15016,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 202545571406291967}
-  isBleeding: 0
+  _isBleeding: 0
 --- !u!1 &9200825884340260337
 GameObject:
   m_ObjectHideFlags: 0
