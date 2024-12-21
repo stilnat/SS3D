@@ -6,12 +6,10 @@ using SS3D.Systems.Entities;
 using SS3D.Systems.Entities.Humanoid;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Rounds;
-using SS3D.Systems.Screens;
 using SS3D.UI.Buttons;
 using System.Collections;
 using System.Text;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace SS3D.Tests
