@@ -1,6 +1,7 @@
 ﻿using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Interfaces;
 using SS3D.Systems.Inventory.Items;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -72,6 +73,7 @@ namespace SS3D.Systems.Inventory.UI
         protected void Start()
         {
             Assert.IsNotNull(_itemDisplay);
+            _itemDisplay.OnDragOutOfUI += HandleDragOutOfUI;
             if (Container != null)
             {
                 UpdateContainer(Container);
@@ -86,6 +88,11 @@ namespace SS3D.Systems.Inventory.UI
         protected void OnDestroy()
         {
             Destroy(_itemDisplay);
+        }
+
+        private void HandleDragOutOfUI(object sender, EventArgs e)
+        {
+            DropItemOutside(_itemDisplay.Item);
         }
 
         /// <summary>

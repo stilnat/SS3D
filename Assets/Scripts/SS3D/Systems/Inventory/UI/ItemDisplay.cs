@@ -14,6 +14,8 @@ namespace SS3D.Systems.Inventory.UI
     /// </summary>
     public class ItemDisplay : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
     {
+        public event EventHandler OnDragOutOfUI;
+
         [SerializeField]
         private Image _itemImage;
 
@@ -99,7 +101,7 @@ namespace SS3D.Systems.Inventory.UI
             GameObject o = eventData.pointerCurrentRaycast.gameObject;
             if (o == null)
             {
-                GetComponentInParent<InventoryDisplayElement>().DropItemOutside(Item);
+                OnDragOutOfUI?.Invoke(this, EventArgs.Empty);
             }
         }
 

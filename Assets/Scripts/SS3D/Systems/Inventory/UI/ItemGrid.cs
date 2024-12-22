@@ -128,6 +128,7 @@ namespace SS3D.Systems.Inventory.UI
 
             GameObject o = Instantiate(_itemDisplayPrefab, transform);
             ItemGridItem itemSpriteOnGrid = o.GetComponent<ItemGridItem>();
+            itemSpriteOnGrid.OnDragOutOfUI += HandleDragOutOfUI;
 
             Vector2 cellSize = _gridLayout.cellSize;
             o.GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize.x, cellSize.y);
@@ -147,6 +148,7 @@ namespace SS3D.Systems.Inventory.UI
                     continue;
                 }
 
+                gridItem.OnDragOutOfUI -= HandleDragOutOfUI;
                 _gridItems.Remove(gridItem);
                 gridItem.gameObject.Dispose(true);
                 return;
@@ -195,6 +197,11 @@ namespace SS3D.Systems.Inventory.UI
             // We make it not visible the time it is transfered to another slot, to avoid seeing the sprite flickering.
             // display.MakeVisible(false);
             // display.ShouldDrop = true;
+        }
+
+        private void HandleDragOutOfUI(object sender, EventArgs e)
+        {
+            DropItemOutside(((ItemDisplay)sender).Item);
         }
 
         /// <summary>
