@@ -167,6 +167,14 @@ namespace SS3D.Systems.Inventory.UI
             }
         }
 
+        public void ResetDroppedItemDisplayPositionAndParent()
+        {
+            if (_droppedDisplay)
+            {
+                _droppedDisplay.ResetPositionAndParent();
+            }
+        }
+
         /// <summary>
         /// When an item display is dropped on this grid, this compute in which slot of the grid the sprite should be displayed.
         /// Does nothing if the area of drop is not free. Does nothing if the mouse is outside the slots.
@@ -176,6 +184,7 @@ namespace SS3D.Systems.Inventory.UI
         protected override void OnItemDisplayDrop(ItemDisplay display)
         {
             Item item = display.Item;
+            _droppedDisplay = display;
 
             Vector3 mousePosition = Input.mousePosition;
             Vector2 position = GetSlotPositionExact(mousePosition);

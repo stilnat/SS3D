@@ -187,7 +187,7 @@ namespace SS3D.Systems.Inventory.Containers
 
         public ContainerType ContainerType => _type;
 
-        public ContainerUi ContainerUi { get; set; }
+        public ContainerUiDisplay ContainerUiDisplay { get; set; }
 
         public ContainerInteractive ContainerInteractive => _containerInteractive;
 

@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Inventory.UI
 {
-    public class ContainerUi : MonoBehaviour
+    public class ContainerUiDisplay : MonoBehaviour
     {
         [SerializeField]
         private ItemGrid _grid;
@@ -30,7 +30,7 @@ namespace SS3D.Systems.Inventory.UI
 
         public void Init(AttachedContainer container, IInventory inventory)
         {
-            if (container is null || inventory is null || _isInit)
+            if (!container || inventory is null || _isInit)
             {
                 return;
             }
@@ -39,7 +39,7 @@ namespace SS3D.Systems.Inventory.UI
             Inventory = inventory;
             _attachedContainer = container;
 
-            container.ContainerUi = this;
+            container.ContainerUiDisplay = this;
             _grid.Init(_attachedContainer.Size, _attachedContainer.StoredItems);
             _grid.OnPointerClickSlot += HandleGridPointerClickSlot;
             _grid.OnItemDrop += HandleGridItemDrop;
@@ -76,13 +76,9 @@ namespace SS3D.Systems.Inventory.UI
 
         private void HandleGridItemDrop(Item item, Vector2Int slotPosition)
         {
-            if (!AttachedContainer.CanContainItemAtPosition(item, slotPosition))
+            if (!AttachedContainer.CanContainItemAtPosition(item, slotPosition) || (item.Container != null && !item.Container.CanRemoveItem(item)))
             {
-                return;
-            }
-
-            if (item.Container != null && !item.Container.CanRemoveItem(item))
-            {
+                _grid.ResetDroppedItemDisplayPositionAndParent();
                 return;
             }
 

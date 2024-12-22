@@ -19,8 +19,6 @@ namespace SS3D.Systems.Inventory.UI
 
         private Vector3 _oldPosition;
 
-        private InventoryDisplayElement _inventoryDisplayElement;
-
         private Item _item;
 
         private Transform _oldParent;
@@ -29,8 +27,6 @@ namespace SS3D.Systems.Inventory.UI
         private Image _slotImage;
         private Outline _outlineInner;
         private Outline _outlineOuter;
-
-        public bool ShouldDrop { get; set; }
 
         public Item Item
         {
@@ -68,18 +64,13 @@ namespace SS3D.Systems.Inventory.UI
             }
 
             _oldParent = transform.parent;
-            if (_inventoryDisplayElement == null)
-            {
-                _inventoryDisplayElement = _oldParent.GetComponentInParent<InventoryDisplayElement>();
-            }
-
             _oldPosition = GetComponent<RectTransform>().localPosition;
+
             Vector3 tempPosition = transform.position;
             transform.SetParent(transform.root, false);
             transform.position = tempPosition;
 
             _slotImage.raycastTarget = false;
-            ShouldDrop = false;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -104,14 +95,20 @@ namespace SS3D.Systems.Inventory.UI
 
             _slotImage.raycastTarget = true;
 
-            transform.SetParent(_oldParent, false);
-            GetComponent<RectTransform>().localPosition = _oldPosition;
-
             // If the raycast did not hit any element from the UI, drop the item out of the inventory.
             GameObject o = eventData.pointerCurrentRaycast.gameObject;
             if (o == null)
             {
                 GetComponentInParent<InventoryDisplayElement>().DropItemOutside(Item);
+            }
+        }
+
+        public void ResetPositionAndParent()
+        {
+            if (_oldParent)
+            {
+                transform.SetParent(_oldParent, false);
+                GetComponent<RectTransform>().localPosition = _oldPosition;
             }
         }
 

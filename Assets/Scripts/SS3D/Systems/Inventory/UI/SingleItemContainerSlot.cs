@@ -65,7 +65,6 @@ namespace SS3D.Systems.Inventory.UI
             }
 
             // listen to container change and update display eventually.
-            display.ShouldDrop = true;
             display.MakeVisible(false);
             Inventory.ClientTransferItem(display.Item, Vector2Int.zero, Container);
         }

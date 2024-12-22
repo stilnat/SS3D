@@ -69,8 +69,8 @@ namespace SS3D.Systems.Inventory.UI
             }
 
             GameObject ui = Instantiate(_containerUiPrefab);
-            ContainerUi containerUi = ui.GetComponent<ContainerUi>();
-            containerUi.Init(container, _containerViewer.Inventory);
+            ContainerUiDisplay containerUiDisplay = ui.GetComponent<ContainerUiDisplay>();
+            containerUiDisplay.Init(container, _containerViewer.Inventory);
             _containerDisplays.Add(new ContainerDisplay(ui, container));
         }
     }
