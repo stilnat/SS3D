@@ -184,8 +184,8 @@ namespace SS3D.Systems.Inventory.UI
             OnItemDrop?.Invoke(item, slot);
 
             // We make it not visible the time it is transfered to another slot, to avoid seeing the sprite flickering.
-            display.MakeVisible(false);
-            display.ShouldDrop = true;
+            // display.MakeVisible(false);
+            // display.ShouldDrop = true;
         }
 
         /// <summary>

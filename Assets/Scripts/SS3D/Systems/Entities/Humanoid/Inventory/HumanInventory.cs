@@ -385,7 +385,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            if (!_containerViewer.CanModifyContainer(itemContainer) || !_containerViewer.CanModifyContainer(container))
+            if ((itemContainer && !_containerViewer.CanModifyContainer(itemContainer)) || !_containerViewer.CanModifyContainer(container))
             {
                 return;
             }

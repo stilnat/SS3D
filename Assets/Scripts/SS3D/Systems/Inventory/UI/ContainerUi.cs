@@ -41,6 +41,13 @@ namespace SS3D.Systems.Inventory.UI
             gameObject.Dispose(true);
         }
 
+        protected void OnDestroy()
+        {
+            _grid.OnPointerClickSlot -= HandleGridPointerClickSlot;
+            _grid.OnItemDrop -= HandleGridItemDrop;
+            _attachedContainer.OnContentsChanged -= ContainerOnContentsChanged;
+        }
+
         private void UpdateContainer(AttachedContainer container)
         {
             if (container == null)

@@ -107,12 +107,6 @@ namespace SS3D.Systems.Inventory.UI
             transform.SetParent(_oldParent, false);
             GetComponent<RectTransform>().localPosition = _oldPosition;
 
-            if (ShouldDrop)
-            {
-                OnDropAccepted();
-                return;
-            }
-
             // If the raycast did not hit any element from the UI, drop the item out of the inventory.
             GameObject o = eventData.pointerCurrentRaycast.gameObject;
             if (o == null)
@@ -152,8 +146,6 @@ namespace SS3D.Systems.Inventory.UI
                 UpdateDisplay();
             }
         }
-
-        protected virtual void OnDropAccepted() { }
 
         private void UpdateDisplay()
         {
