@@ -18,42 +18,26 @@ namespace SS3D.Systems.Inventory.UI
 
         private AttachedContainer _attachedContainer;
 
-        public IInventory Inventory
+        private bool _isInit;
+
+        private IInventory Inventory
         {
             get => _grid.Inventory;
             set => _grid.Inventory = value;
         }
 
-        public AttachedContainer AttachedContainer
-        {
-            get => _attachedContainer;
+        private AttachedContainer AttachedContainer => _attachedContainer;
 
-            set
-            {
-                _attachedContainer = value;
-                UpdateContainer(value);
-            }
-        }
-
-        public void Close()
+        public void Init(AttachedContainer container, IInventory inventory)
         {
-            Inventory.ContainerViewer.CmdContainerClose(_attachedContainer);
-            gameObject.Dispose(true);
-        }
-
-        protected void OnDestroy()
-        {
-            _grid.OnPointerClickSlot -= HandleGridPointerClickSlot;
-            _grid.OnItemDrop -= HandleGridItemDrop;
-            _attachedContainer.OnContentsChanged -= ContainerOnContentsChanged;
-        }
-
-        private void UpdateContainer(AttachedContainer container)
-        {
-            if (container == null)
+            if (container is null || inventory is null || _isInit)
             {
                 return;
             }
+
+            _isInit = true;
+            Inventory = inventory;
+            _attachedContainer = container;
 
             container.ContainerUi = this;
             _grid.Init(_attachedContainer.Size, _attachedContainer.StoredItems);
@@ -75,6 +59,19 @@ namespace SS3D.Systems.Inventory.UI
             Vector3[] v = new Vector3[4];
             rect.GetLocalCorners(v);
             _containerName.transform.localPosition = v[1] + new Vector3(0.03f * width, -0.02f * height, 0);
+        }
+
+        public void Close()
+        {
+            Inventory.ContainerViewer.CmdContainerClose(_attachedContainer);
+            gameObject.Dispose(true);
+        }
+
+        protected void OnDestroy()
+        {
+            _grid.OnPointerClickSlot -= HandleGridPointerClickSlot;
+            _grid.OnItemDrop -= HandleGridItemDrop;
+            _attachedContainer.OnContentsChanged -= ContainerOnContentsChanged;
         }
 
         private void HandleGridItemDrop(Item item, Vector2Int slotPosition)
