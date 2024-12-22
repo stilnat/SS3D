@@ -116,6 +116,8 @@ namespace SS3D.Systems.Inventory.UI
 
         private object _lockObject = new object();
 
+        private Dictionary<ContainerType, GameObject> _slotPrefabForType;
+
         /// <summary>
         /// The order in which clothing slots appear in the grid by container type,
         /// from top left, to bottom right.
@@ -129,6 +131,7 @@ namespace SS3D.Systems.Inventory.UI
 
         public void Setup(HumanInventory inventory)
         {
+            FillSlotPrefabDictionnary();
             FillClothingLayoutWithDummySlots();
             _inventory = inventory;
 
@@ -207,92 +210,27 @@ namespace SS3D.Systems.Inventory.UI
                 }
 
                 case ContainerType.Pocket:
-                {
-                    slot = AddHorizontalLayoutSlot(_pocketPrefab, ContainerType.Pocket);
-                    break;
-                }
-
                 case ContainerType.Identification:
-                {
-                    slot = AddHorizontalLayoutSlot(_idSlotPrefab, ContainerType.Identification);
-                    break;
-                }
-
                 case ContainerType.Bag:
+                case ContainerType.Belt:
                 {
-                    slot = AddHorizontalLayoutSlot(_bagPrefab, ContainerType.Bag);
+                    slot = AddHorizontalLayoutSlot(_slotPrefabForType[container.Type], container.Type);
                     break;
                 }
 
                 case ContainerType.Glasses:
-                {
-                    slot = AddClothingSlot(_glassesPrefab);
-                    break;
-                }
-
                 case ContainerType.Mask:
-                {
-                    slot = AddClothingSlot(_maskPrefab);
-                    break;
-                }
-
                 case ContainerType.EarLeft:
-                {
-                    slot = AddClothingSlot(_earLeftPrefab);
-                    break;
-                }
-
                 case ContainerType.EarRight:
-                {
-                    slot = AddClothingSlot(_earRightPrefab);
-                    break;
-                }
-
                 case ContainerType.Head:
-                {
-                    slot = AddClothingSlot(_headPrefab);
-                    break;
-                }
-
                 case ContainerType.ExoSuit:
-                {
-                    slot = AddClothingSlot(_exoSuitPrefab);
-                    break;
-                }
-
                 case ContainerType.Jumpsuit:
-                {
-                    slot = AddClothingSlot(_jumpsuitPrefab);
-                    break;
-                }
-
                 case ContainerType.GloveLeft:
-                {
-                    slot = AddClothingSlot(_gloveLeftPrefab);
-                    break;
-                }
-
                 case ContainerType.GloveRight:
-                {
-                    slot = AddClothingSlot(_gloveRightPrefab);
-                    break;
-                }
-
                 case ContainerType.ShoeLeft:
-                {
-                    slot = AddClothingSlot(_shoeLeftPrefab);
-                    break;
-                }
-
                 case ContainerType.ShoeRight:
                 {
-                    slot = AddClothingSlot(_shoeRightPrefab);
-                    break;
-                }
-
-                case ContainerType.Belt:
-                {
-                    slot = AddHorizontalLayoutSlot(_beltPrefab, ContainerType.Belt);
+                    slot = AddClothingSlot(_slotPrefabForType[container.Type]);
                     break;
                 }
 
@@ -304,7 +242,7 @@ namespace SS3D.Systems.Inventory.UI
                 }
             }
 
-            if (slot == null)
+            if (!slot)
             {
                 return;
             }
@@ -485,6 +423,28 @@ namespace SS3D.Systems.Inventory.UI
 
             slot.gameObject.Dispose(true);
             _slots.RemoveAt(indexToRemove);
+        }
+
+        private void FillSlotPrefabDictionnary()
+        {
+            _slotPrefabForType = new()
+            {
+                { ContainerType.Pocket, _pocketPrefab },
+                { ContainerType.Bag, _bagPrefab },
+                { ContainerType.Identification, _idSlotPrefab },
+                { ContainerType.ShoeLeft, _shoeLeftPrefab },
+                { ContainerType.ShoeRight, _shoeRightPrefab },
+                { ContainerType.Glasses, _glassesPrefab },
+                { ContainerType.Mask, _maskPrefab },
+                { ContainerType.Head, _headPrefab },
+                { ContainerType.Jumpsuit, _jumpsuitPrefab },
+                { ContainerType.ExoSuit, _exoSuitPrefab },
+                { ContainerType.GloveLeft, _gloveLeftPrefab },
+                { ContainerType.GloveRight, _gloveRightPrefab },
+                { ContainerType.EarLeft, _earLeftPrefab },
+                { ContainerType.EarRight, _earRightPrefab },
+                { ContainerType.Belt, _beltPrefab },
+            };
         }
     }
 }
