@@ -29,7 +29,7 @@ namespace SS3D.Systems.Inventory.Containers
         private float _nextAccessCheck;
 
         // Reference to the player's inventory.
-        public IInventory Inventory { get; set; }
+        public IInventory Inventory { get; private set; }
 
         public override void OnStartClient()
         {
@@ -76,6 +76,11 @@ namespace SS3D.Systems.Inventory.Containers
         public void CmdContainerClose(AttachedContainer container)
         {
             CloseContainerUI(container);
+        }
+
+        protected override void OnAwake()
+        {
+            Inventory = GetComponent<IInventory>();
         }
 
         private void SetupView()
@@ -147,8 +152,8 @@ namespace SS3D.Systems.Inventory.Containers
                     continue;
                  }*/
 
-                CloseContainerUI(attachedContainer);
-                i--;
+                // CloseContainerUI(attachedContainer);
+                // i--;
             }
 
             _nextAccessCheck = time + 0.5f;

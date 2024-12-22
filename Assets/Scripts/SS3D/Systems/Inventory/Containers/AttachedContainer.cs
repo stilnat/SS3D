@@ -183,6 +183,8 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         public IEnumerable<Item> Items => _storedItems.Select(x => x.Item);
 
+        public List<StoredItem> StoredItems => _storedItems.ToList();
+
         public ContainerType ContainerType => _type;
 
         public ContainerUi ContainerUi { get; set; }

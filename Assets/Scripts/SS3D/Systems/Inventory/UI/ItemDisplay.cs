@@ -14,16 +14,13 @@ namespace SS3D.Systems.Inventory.UI
     /// </summary>
     public class ItemDisplay : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
     {
-        [FormerlySerializedAs("ItemImage")]
         [SerializeField]
         private Image _itemImage;
 
-        [NonSerialized]
         private Vector3 _oldPosition;
 
         private InventoryDisplayElement _inventoryDisplayElement;
 
-        [SerializeField]
         private Item _item;
 
         private Transform _oldParent;

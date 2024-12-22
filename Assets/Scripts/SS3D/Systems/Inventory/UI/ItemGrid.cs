@@ -1,4 +1,5 @@
 ﻿using Coimbra;
+using JetBrains.Annotations;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Interfaces;
 using SS3D.Systems.Inventory.Items;
@@ -15,6 +16,10 @@ namespace SS3D.Systems.Inventory.UI
 {
     public class ItemGrid : InventoryDisplayElement, IPointerClickHandler, ISlotProvider
     {
+        public event Action<Vector2Int> OnPointerClickSlot;
+
+        public event Action<Item, Vector2Int> OnItemDrop;
+
         private readonly List<ItemGridItem> _gridItems = new();
 
         /// <summary>
@@ -33,10 +38,29 @@ namespace SS3D.Systems.Inventory.UI
 
         private GridLayoutGroup _gridLayout;
 
-        /// <summary>
-        /// The container this grid displays
-        /// </summary>
-        public AttachedContainer AttachedContainer { get; set; }
+        private Vector2Int _gridSize;
+
+        private ItemDisplay _droppedDisplay;
+
+        public void Init(Vector2Int gridSize, List<StoredItem> storedItems)
+        {
+            _gridSize = gridSize;
+
+            // todo define serialized field and set in editor
+            if (_gridLayout == null)
+            {
+                _gridLayout = GetComponentInChildren<GridLayoutGroup>();
+            }
+
+            Transform parent = _gridLayout.transform;
+            int count = gridSize.x * gridSize.y;
+            for (int i = 0; i < count; i++)
+            {
+                Instantiate(_itemSlotPrefab, parent);
+            }
+
+            StartCoroutine(DisplayInitialItems(storedItems));
+        }
 
         public void RemoveGridItem(ItemGridItem item)
         {
@@ -53,11 +77,9 @@ namespace SS3D.Systems.Inventory.UI
                 _gridLayout = GetComponentInChildren<GridLayoutGroup>();
             }
 
-            Vector2Int size = AttachedContainer.Size;
-            float x = (size.x * _gridLayout.cellSize.x) + (size.x * _gridLayout.spacing.x);
-            float y = (size.y * _gridLayout.cellSize.y) + (size.y * _gridLayout.spacing.y);
-
-            return new Vector2(x, y);
+            float x = (_gridSize.x * _gridLayout.cellSize.x) + (_gridSize.x * _gridLayout.spacing.x);
+            float y = (_gridSize.y * _gridLayout.cellSize.y) + (_gridSize.y * _gridLayout.spacing.y);
+            return new(x, y);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -78,16 +100,71 @@ namespace SS3D.Systems.Inventory.UI
 
             if (parent == _gridLayout.transform || parent == transform)
             {
-                Vector2Int slotPosition = GetSlotPosition(eventData.position);
-                Inventory.ClientInteractWithContainerSlot(AttachedContainer, slotPosition);
+                OnPointerClickSlot?.Invoke(GetSlotPosition(eventData.position));
             }
         }
 
+        [CanBeNull]
         public GameObject GetCurrentGameObjectInSlot()
         {
             Vector2Int slotPosition = GetSlotPosition(Mouse.current.position.ReadValue());
+            return ItemAt(slotPosition) == null ? null : ItemAt(slotPosition).gameObject;
+        }
 
-            return AttachedContainer.ItemAt(slotPosition) == null ? null : AttachedContainer.ItemAt(slotPosition).gameObject;
+        /// <summary>
+        /// Instantiate a sprite at the right location in the grid.
+        /// </summary>
+        public void CreateItemDisplay(Item item, Vector2Int position, bool itemMovedInsideGrid = false)
+        {
+            // avoid creating the same item sprite multiple times. Except when it's moved around in the container.
+            // In this case two instances need to exist on the same frame so we allow it.
+            foreach (ItemGridItem itemSprite in _gridItems)
+            {
+                if (itemSprite.Item == item && !itemMovedInsideGrid)
+                {
+                    return;
+                }
+            }
+
+            GameObject o = Instantiate(_itemDisplayPrefab, transform);
+            ItemGridItem itemSpriteOnGrid = o.GetComponent<ItemGridItem>();
+
+            Vector2 cellSize = _gridLayout.cellSize;
+            o.GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize.x, cellSize.y);
+
+            itemSpriteOnGrid.Item = item;
+            MoveToSlot(itemSpriteOnGrid, position);
+
+            _gridItems.Add(itemSpriteOnGrid);
+        }
+
+        public void RemoveItemDisplay(Item item)
+        {
+            foreach (ItemGridItem gridItem in _gridItems)
+            {
+                if (gridItem.Item != item)
+                {
+                    continue;
+                }
+
+                _gridItems.Remove(gridItem);
+                gridItem.gameObject.Dispose(true);
+                return;
+            }
+        }
+
+        public void MoveItemDisplay(Item item, Vector2Int slotPosition)
+        {
+            foreach (ItemGridItem gridItem in _gridItems)
+            {
+                if (gridItem.Item != item)
+                {
+                    continue;
+                }
+
+                MoveToSlot(gridItem, slotPosition);
+                return;
+            }
         }
 
         /// <summary>
@@ -102,140 +179,45 @@ namespace SS3D.Systems.Inventory.UI
 
             Vector3 mousePosition = Input.mousePosition;
             Vector2 position = GetSlotPositionExact(mousePosition);
-
             Vector2Int slot = new(Mathf.RoundToInt(position.x - (1 / 2f)), Mathf.RoundToInt(position.y - (1 / 2f)));
 
-            if (!AttachedContainer.CanContainItemAtPosition(item, slot))
-            {
-                return;
-            }
-
-            if (item.Container != null && !item.Container.CanRemoveItem(item))
-            {
-                return;
-            }
+            OnItemDrop?.Invoke(item, slot);
 
             // We make it not visible the time it is transfered to another slot, to avoid seeing the sprite flickering.
             display.MakeVisible(false);
             display.ShouldDrop = true;
-            Inventory.ClientTransferItem(item, slot, AttachedContainer);
         }
 
-        protected void Start()
+        /// <summary>
+        /// Finds an item at a position
+        /// </summary>
+        /// <param name="position">The position to check</param>
+        /// <returns>The item at the position, or null if there is none</returns>
+        private Item ItemAt(Vector2Int position)
         {
-            if (_gridLayout == null)
+            foreach (ItemGridItem storedItem in _gridItems)
             {
-                _gridLayout = GetComponentInChildren<GridLayoutGroup>();
+                if (storedItem.GridPosition == position)
+                {
+                    return storedItem.Item;
+                }
             }
 
-            Transform parent = _gridLayout.transform;
-            Vector2Int containerSize = AttachedContainer.Size;
-            int count = containerSize.x * containerSize.y;
-
-            for (int i = 0; i < count; i++)
-            {
-                Instantiate(_itemSlotPrefab, parent);
-            }
-
-            if (AttachedContainer.ItemCount > 0)
-            {
-                StartCoroutine(DisplayInitialItems());
-            }
-
-            AttachedContainer.OnContentsChanged += ContainerOnContentsChanged;
-        }
-
-        protected void OnDestroy()
-        {
-            AttachedContainer.OnContentsChanged -= ContainerOnContentsChanged;
+            return null;
         }
 
         /// <summary>
         /// Create item displays for items already contained in the container when viewing it.
         /// </summary>
-        private IEnumerator DisplayInitialItems()
+        private IEnumerator DisplayInitialItems(List<StoredItem> storedItems)
         {
             // For some reason, has to be delayed to end of frame to work.
             yield return new WaitForEndOfFrame();
 
-            foreach (Item item in AttachedContainer.Items)
+            foreach (StoredItem storedItem in storedItems)
             {
-                Vector2Int position = AttachedContainer.PositionOf(item);
-                CreateItemDisplay(item, position);
-            }
-        }
-
-        /// <summary>
-        /// When the container change, change the display of items inside it.
-        /// Either add a display, remove a display or move a display to another slot.
-        /// </summary>
-        private void ContainerOnContentsChanged(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type)
-        {
-            Vector2Int position = new Vector2Int(0, 0);
-
-            switch (type)
-            {
-                case ContainerChangeType.Add:
-                {
-                    if (newItem == null)
-                    {
-                        return;
-                    }
-
-                    position = container.PositionOf(newItem);
-                    CreateItemDisplay(newItem, position);
-
-                    break;
-                }
-
-                case ContainerChangeType.Remove:
-                {
-                    if (oldItem == null)
-                    {
-                        return;
-                    }
-
-                    for (int i = 0; i < _gridItems.Count; i++)
-                    {
-                        ItemGridItem gridItem = _gridItems[i];
-
-                        if (gridItem.Item != oldItem)
-                        {
-                            continue;
-                        }
-
-                        _gridItems.RemoveAt(i);
-                        gridItem.gameObject.Dispose(true);
-
-                        break;
-                    }
-
-                    break;
-                }
-
-                case ContainerChangeType.Move:
-                {
-                    if (newItem == null)
-                    {
-                        return;
-                    }
-
-                    foreach (ItemGridItem gridItem in _gridItems)
-                    {
-                        if (gridItem.Item == newItem)
-                        {
-                            position = container.PositionOf(newItem);
-                            MoveToSlot(gridItem, position);
-
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                Vector2Int position = storedItem.Position;
+                CreateItemDisplay(storedItem.Item, position);
             }
         }
 
@@ -279,38 +261,10 @@ namespace SS3D.Systems.Inventory.UI
                 objectToMove.SetParent(transform, false);
             }
 
-            Vector2Int containerSize = AttachedContainer.Size;
-            int slotIndex = (position.y * containerSize.x) + position.x;
+            int slotIndex = (position.y * _gridSize.x) + position.x;
             Transform slot = _gridLayout.transform.GetChild(slotIndex);
             objectToMove.localPosition = slot.localPosition;
             gridItem.MakeVisible(true);
-        }
-
-        /// <summary>
-        /// Instantiate a sprite at the right location in the grid.
-        /// </summary>
-        private void CreateItemDisplay(Item item, Vector2Int position, bool itemMovedInsideGrid = false)
-        {
-            // avoid creating the same item sprite multiple times. Except when it's moved around in the container.
-            // In this case two instances need to exist on the same frame so we allow it.
-            foreach (ItemGridItem itemSprite in _gridItems)
-            {
-                if (itemSprite.Item == item && !itemMovedInsideGrid)
-                {
-                    return;
-                }
-            }
-
-            GameObject o = Instantiate(_itemDisplayPrefab, transform);
-            ItemGridItem itemSpriteOnGrid = o.GetComponent<ItemGridItem>();
-
-            Vector2 cellSize = _gridLayout.cellSize;
-            o.GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize.x, cellSize.y);
-
-            itemSpriteOnGrid.Item = item;
-            MoveToSlot(itemSpriteOnGrid, position);
-
-            _gridItems.Add(itemSpriteOnGrid);
         }
     }
 }

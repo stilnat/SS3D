@@ -351,8 +351,8 @@ namespace SS3D.Systems.Atmospherics
                 transferHeatJob.Run();
             }
 
-            Debug.Log($"Active count : {atmosJob.ActiveEnvironmentIndexes.Length}, SemiActive count : {atmosJob.SemiActiveEnvironmentIndexes.Length}, "
-                + $"Inactive count : {atmosJob.NativeAtmosTiles.Length - atmosJob.ActiveEnvironmentIndexes.Length - atmosJob.SemiActiveEnvironmentIndexes.Length}");
+            // Debug.Log($"Active count : {atmosJob.ActiveEnvironmentIndexes.Length}, SemiActive count : {atmosJob.SemiActiveEnvironmentIndexes.Length}, "
+            //    + $"Inactive count : {atmosJob.NativeAtmosTiles.Length - atmosJob.ActiveEnvironmentIndexes.Length - atmosJob.SemiActiveEnvironmentIndexes.Length}");
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace SS3D.Systems.Inventory.UI
                 return;
             }
 
-            if (drag.TryGetComponent(out ItemDisplay display))
+            if (!drag.TryGetComponent(out ItemDisplay display))
             {
                 Log.Warning(this, "dragging on null display");
                 return;
