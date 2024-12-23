@@ -4351,6 +4351,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7592695565811586019, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
+      propertyPath: _scenePathHash
+      value: 2499635508
+      objectReference: {fileID: 0}
+    - target: {fileID: 7592695565811586019, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
+      propertyPath: <SceneId>k__BackingField
+      value: 10735852761616577220
+      objectReference: {fileID: 0}
+    - target: {fileID: 7592695565811586019, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
+      propertyPath: _networkBehaviours.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7592695565811586019, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
+      propertyPath: _networkBehaviours.Array.data[0]
+      value: 
+      objectReference: {fileID: 3810371244444567010}
     - target: {fileID: 7690423678050893371, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
@@ -4567,6 +4583,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4046292524477378599, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
   m_PrefabInstance: {fileID: 3810371244444567007}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3810371244444567010 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5871072915498813916, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}
+  m_PrefabInstance: {fileID: 3810371244444567007}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3810371244444567014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8609ee7f492f8e44bb25beb1eee6697, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3810371244444567011 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2110225533454929485, guid: df2268f4f5f6669459174c6d7e2043ce, type: 3}

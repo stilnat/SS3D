@@ -1,14 +1,16 @@
-﻿using SS3D.Data.Generated;
+﻿using SS3D.Core;
+using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Interactions;
 using SS3D.Systems.Inventory.Containers;
+using SS3D.Systems.Inventory.UI;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Interactions
 {
-    public class ViewContainerInteraction : IInteraction
+    public class ViewContainerInteraction : ContinuousInteraction
     {
         private readonly AttachedContainer _attachedContainer;
 
@@ -17,51 +19,47 @@ namespace SS3D.Systems.Inventory.Interactions
             _attachedContainer = attachedContainer;
         }
 
-        public InteractionType InteractionType => InteractionType.None;
+        public override InteractionType InteractionType => InteractionType.None;
 
         public float MaxDistance { get; set; }
 
-        public string GetGenericName() => "View Container";
+        public override string GetGenericName() => "View Container";
 
-        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
+        public override IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
-        public string GetName(InteractionEvent interactionEvent) => "View " + _attachedContainer.ContainerName;
+        public override string GetName(InteractionEvent interactionEvent) => "View " + _attachedContainer.ContainerName;
 
-        public Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
+        public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
 
-        public bool CanInteract(InteractionEvent interactionEvent)
+        public override bool CanInteract(InteractionEvent interactionEvent)
         {
-            if (!InteractionExtensions.RangeCheck(interactionEvent))
+            if (!InteractionExtensions.RangeCheck(interactionEvent) || _attachedContainer == null)
             {
                 return false;
             }
 
-            if (_attachedContainer == null)
-            {
-                return false;
-            }
-
-            ContainerViewer containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
-            if (containerViewer == null)
-            {
-                return false;
-            }
-
-            return !containerViewer.HasContainer(_attachedContainer);
+            return !ViewLocator.Get<ContainerView>()[0].ContainerIsDisplayed(_attachedContainer);
         }
 
-        public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
+        public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            ContainerViewer containerViewer = interactionEvent.Source.GetComponentInParent<ContainerViewer>();
-
-            containerViewer.ShowContainerUI(_attachedContainer);
-
-            return false;
+            ContainerView containerView = ViewLocator.Get<ContainerView>()[0];
+            containerView.RpcCloseContainer(interactionEvent.Source.NetworkObject.Owner, _attachedContainer);
         }
 
-        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
+        protected override bool CanKeepInteracting(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            return InteractionExtensions.RangeCheck(interactionEvent) && _attachedContainer != null;
+        }
 
-        public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
+        protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
+        {
+            ContainerView containerView = ViewLocator.Get<ContainerView>()[0];
+            containerView.RpcOpenContainer(interactionEvent.Source.NetworkObject.Owner, _attachedContainer, interactionEvent.Source.NetworkObject);
+            return true;
+        }
+
+        protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
         {
         }
     }

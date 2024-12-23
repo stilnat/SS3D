@@ -44,11 +44,6 @@ namespace SS3D.Systems.Inventory.Containers
         [SyncObject]
         private readonly SyncList<AttachedContainer> _containersOnPlayer = new();
 
-        // reference to the component allowing to display out of inventory containers.
-        [FormerlySerializedAs("containerViewer")]
-        [SerializeField]
-        private ContainerViewer _containerViewer;
-
         /// <summary>
         /// The hands used by this inventory
         /// </summary>
@@ -62,8 +57,6 @@ namespace SS3D.Systems.Inventory.Containers
         /// Number of hands container on this inventory.
         /// </summary>
         public int CountHands => _containersOnPlayer.Count(x => x.Type == ContainerType.Hand);
-
-        public ContainerViewer ContainerViewer => _containerViewer;
 
         public Hands Hands => _hands;
 
@@ -347,11 +340,6 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            if (!_containerViewer.CanModifyContainer(attachedTo))
-            {
-                return;
-            }
-
             attachedTo.RemoveItem(item);
         }
 
@@ -382,11 +370,6 @@ namespace SS3D.Systems.Inventory.Containers
             {
                 Log.Error(this, $"Client sent invalid container reference: NetId {container.ObjectId}");
 
-                return;
-            }
-
-            if ((itemContainer && !_containerViewer.CanModifyContainer(itemContainer)) || !_containerViewer.CanModifyContainer(container))
-            {
                 return;
             }
 

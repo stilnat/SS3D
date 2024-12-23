@@ -14,8 +14,6 @@ namespace SS3D.Systems.Inventory.UI
 
         public List<AttachedContainer> Containers { get; }
 
-        public ContainerViewer ContainerViewer { get; }
-
         public void Init();
 
         public void ClientDropItem(Item item);

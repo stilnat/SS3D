@@ -63,7 +63,6 @@ namespace SS3D.Systems.Inventory.UI
 
         public void Close()
         {
-            Inventory.ContainerViewer.CmdContainerClose(_attachedContainer);
             gameObject.Dispose(true);
         }
 

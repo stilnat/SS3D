@@ -9,15 +9,6 @@ namespace SS3D.Systems.Inventory.UI
     {
         public IInventory Inventory { get; set; }
 
-        /// <summary>
-        /// Called when an item is dragged and dropped outside
-        /// </summary>
-        /// <param name="item">The dragged item</param>
-        public void DropItemOutside(Item item)
-        {
-            Inventory.ClientDropItem(item);
-        }
-
         public void OnDrop(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -38,6 +29,15 @@ namespace SS3D.Systems.Inventory.UI
             }
 
             OnItemDisplayDrop(display);
+        }
+
+        /// <summary>
+        /// Called when an item is dragged and dropped outside
+        /// </summary>
+        /// <param name="item">The dragged item</param>
+        protected void DropItemOutside(Item item)
+        {
+            Inventory.ClientDropItem(item);
         }
 
         /// <summary>

@@ -6928,7 +6928,6 @@ GameObject:
   - component: {fileID: 3222345056416986628}
   - component: {fileID: 5029722283718734781}
   - component: {fileID: 4083960901991266909}
-  - component: {fileID: 8922211754620765195}
   - component: {fileID: 3899653582605172798}
   - component: {fileID: 7568747683536695618}
   - component: {fileID: 2744598832793855224}
@@ -7045,7 +7044,7 @@ MonoBehaviour:
   - {fileID: 7878631375339778391}
   - {fileID: 3222345056416986628}
   - {fileID: 5029722283718734781}
-  - {fileID: 8922211754620765195}
+  - {fileID: 0}
   - {fileID: 3899653582605172798}
   - {fileID: 7568747683536695618}
   - {fileID: 2744598832793855224}
@@ -7348,7 +7347,7 @@ MonoBehaviour:
   _componentIndexCache: 3
   _addedNetworkObject: {fileID: 241836927429143711}
   _networkObjectCache: {fileID: 241836927429143711}
-  _containerViewer: {fileID: 8922211754620765195}
+  _containerViewer: {fileID: 0}
   _hands: {fileID: 3222345056416986628}
 --- !u!114 &3222345056416986628
 MonoBehaviour:
@@ -7420,21 +7419,6 @@ MonoBehaviour:
   _lerpMultiplier: 5
   _aimController: {fileID: 3054724180155005980}
   _positionController: {fileID: 7568747683536695618}
---- !u!114 &8922211754620765195
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4089496606853742746}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da620d1cfa3d9fd49b22c28e910884f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 6
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
 --- !u!114 &3899653582605172798
 MonoBehaviour:
   m_ObjectHideFlags: 0
