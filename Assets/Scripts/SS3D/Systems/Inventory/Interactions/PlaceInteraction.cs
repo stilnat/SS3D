@@ -101,7 +101,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return true;
             }
 
-            hand.PlaySourceAnimation(InteractionType.Place, interactionEvent.Target.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
+            hand.PlaySourceAnimation(InteractionType.Place, interactionEvent.Source.GetComponent<NetworkObject>(), interactionEvent.Point, TimeToMoveBackHand + TimeToReachDropPlace);
             return true;
         }
     }

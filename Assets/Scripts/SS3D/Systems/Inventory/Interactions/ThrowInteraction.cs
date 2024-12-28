@@ -48,12 +48,7 @@ namespace SS3D.Systems.Inventory.Interactions
         /// <returns>If the interaction can be executed</returns>
         public bool CanInteract(InteractionEvent interactionEvent)
         {
-            if (interactionEvent.Source is not IAimingTargetProvider source)
-            {
-                return false;
-            }
-
-            if (!source.IsAimingToThrow)
+            if (interactionEvent.Source.GetRootSource() is not IAimingTargetProvider source || !source.IsAimingToThrow)
             {
                 return false;
             }
