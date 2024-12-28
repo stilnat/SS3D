@@ -62,11 +62,6 @@ namespace SS3D.Systems.Inventory.UI
             StartCoroutine(DisplayInitialItems(storedItems));
         }
 
-        public void RemoveGridItem(ItemGridItem item)
-        {
-            _gridItems.Remove(item);
-        }
-
         /// <summary>
         /// Get the dimension of the grid in pixels, including cell sizes and spacing.
         /// </summary>

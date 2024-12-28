@@ -55,8 +55,9 @@ namespace SS3D.Systems.Inventory.UI
         {
             Item item = display.Item;
 
-            if (!_container.CanContainItem(display.Item))
+            if (!_container.CanContainItem(display.Item) || (item.Container != null && !item.Container.CanRemoveItem(item)))
             {
+                _itemDisplay.ResetPositionAndParent();
                 return;
             }
 
