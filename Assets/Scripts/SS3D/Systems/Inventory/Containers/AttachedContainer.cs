@@ -1,17 +1,14 @@
 ﻿using FishNet.Component.Transforming;
-using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Logging;
 using SS3D.Systems.Inventory.Items;
 using SS3D.Systems.Inventory.UI;
-using SS3D.Traits;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SS3D.Systems.Inventory.Containers
 {
@@ -24,10 +21,6 @@ namespace SS3D.Systems.Inventory.Containers
         public delegate void AttachedContainerHandler(AttachedContainer attachedContainer);
 
         public delegate void ContainerContentsHandler(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type);
-
-        public event EventHandler<Item> OnItemAttached;
-
-        public event EventHandler<Item> OnItemDetached;
 
         public event AttachedContainerHandler OnAttachedContainerDisabled;
 
@@ -44,17 +37,8 @@ namespace SS3D.Systems.Inventory.Containers
 
         private readonly object _modificationLock = new();
 
-        [Tooltip("The local position of attached items.")]
         [SerializeField]
-        private Vector3 _attachmentOffset;
-
-        [Tooltip("If items should be attached as children of the container's game object.")]
-        [SerializeField]
-        private bool _attachItems = true;
-
-        [Tooltip("Max distance at which the container is visible if not hidden.")]
-        [SerializeField]
-        private float _maxDistance = 5f;
+        private Vector3 _attachmentOffset = Vector3.zero;
 
         [Tooltip("If the container renders items in custom position on the container.")]
         [SerializeField]
@@ -72,18 +56,10 @@ namespace SS3D.Systems.Inventory.Containers
 
         public Vector2Int Size => _size;
 
-        public float MaxDistance => _maxDistance;
-
         public string ContainerName => gameObject.name;
 
-        /// <summary>
-        /// Is this container empty
-        /// </summary>
         public bool Empty => ItemCount == 0;
 
-        /// <summary>
-        /// How many items are in this container
-        /// </summary>
         public int ItemCount => Items.Count();
 
         /// <summary>
@@ -94,8 +70,6 @@ namespace SS3D.Systems.Inventory.Containers
         public List<StoredItem> StoredItems => _storedItems.ToList();
 
         public ContainerType ContainerType => _type;
-
-        public ContainerUiDisplay ContainerUiDisplay { get; set; }
 
         public override void OnStartServer()
         {
@@ -382,15 +356,8 @@ namespace SS3D.Systems.Inventory.Containers
             if (!_hasCustomDisplay)
             {
                 item.SetVisibility(true);
-            }
-
-            // Remove parent if child of this
-            if (item.transform.parent == transform)
-            {
                 item.transform.SetParent(null, true);
             }
-
-            OnItemDetached?.Invoke(this, item);
         }
 
         [ServerOrClient]
@@ -409,11 +376,6 @@ namespace SS3D.Systems.Inventory.Containers
 
             item.Freeze();
 
-            if (!_attachItems)
-            {
-                return;
-            }
-
             if (!_hasCustomDisplay)
             {
                 item.SetVisibility(false);
@@ -421,8 +383,6 @@ namespace SS3D.Systems.Inventory.Containers
                 itemTransform.SetParent(transform, false);
                 itemTransform.localPosition = _attachmentOffset;
             }
-
-            OnItemAttached?.Invoke(this, item);
         }
 
         /// <summary>

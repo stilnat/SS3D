@@ -186,8 +186,6 @@ namespace SS3D.Systems.Inventory.Containers
 
             _containersOnPlayer.Add(container);
             container.OnContentsChanged += HandleContainerContentChanged;
-            container.OnItemAttached += HandleTryAddContainerOnItemAttached;
-            container.OnItemDetached += HandleTryRemoveContainerOnItemDetached;
 
             // Be careful, destroying an inventory container will cause issue as when syncing with client, the attachedContainer will be null.
             // Before destroying a container, consider disabling the behaviour or the game object it's on first to avoid this issue.
@@ -207,8 +205,6 @@ namespace SS3D.Systems.Inventory.Containers
 
             _containersOnPlayer.Remove(container);
             container.OnContentsChanged -= HandleContainerContentChanged;
-            container.OnItemAttached -= HandleTryAddContainerOnItemAttached;
-            container.OnItemDetached -= HandleTryRemoveContainerOnItemDetached;
             container.OnAttachedContainerDisabled -= RemoveContainer;
         }
 
@@ -299,6 +295,16 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         private void HandleContainerContentChanged(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type)
         {
+            if (type == ContainerChangeType.Add)
+            {
+               HandleTryAddContainerOnItemAttached(container, newItem);
+            }
+
+            if (type == ContainerChangeType.Remove)
+            {
+                HandleTryRemoveContainerOnItemDetached(container, oldItem);
+            }
+
             OnContainerContentChanged?.Invoke(container, oldItem, newItem, type);
         }
 
@@ -387,9 +393,8 @@ namespace SS3D.Systems.Inventory.Containers
         /// When an item is added to one of the inventory containers, check if this item has some containers that should be displayed by the inventory too.
         /// Add them to it if that's the case. E.g. a jumpsuit with pockets.
         /// </summary>
-        private void HandleTryAddContainerOnItemAttached(object sender, Item item)
+        private void HandleTryAddContainerOnItemAttached(AttachedContainer parentContainer, Item item)
         {
-            AttachedContainer parentContainer = (AttachedContainer)sender;
             IEnumerable<InventorySlotContainer> itemContainers = item.GetComponentsInChildren<InventorySlotContainer>();
 
             foreach (InventorySlotContainer container in itemContainers)
@@ -416,10 +421,8 @@ namespace SS3D.Systems.Inventory.Containers
         /// When removing an item from one the inventory containers, check if that item had some containers like pockets part of the inventory,
         /// and remove them too if that's the case.
         /// </summary>
-        private void HandleTryRemoveContainerOnItemDetached(object sender, Item item)
+        private void HandleTryRemoveContainerOnItemDetached(AttachedContainer parentContainer, Item item)
         {
-            AttachedContainer parentContainer = (AttachedContainer)sender;
-
             // If the item is held in hand, ignore it, it's not worn by the player so it shouldn't remove any containers.
             if (!parentContainer || parentContainer.Type == ContainerType.Hand)
             {

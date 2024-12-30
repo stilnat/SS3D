@@ -38,8 +38,6 @@ namespace SS3D.Systems.Inventory.UI
             _isInit = true;
             Inventory = inventory;
             _attachedContainer = container;
-
-            container.ContainerUiDisplay = this;
             _grid.Init(_attachedContainer.Size, _attachedContainer.StoredItems);
             _grid.OnPointerClickSlot += HandleGridPointerClickSlot;
             _grid.OnItemDrop += HandleGridItemDrop;

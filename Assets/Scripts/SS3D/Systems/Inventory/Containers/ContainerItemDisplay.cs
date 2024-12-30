@@ -13,13 +13,13 @@ namespace SS3D.Systems.Inventory.Containers
     /// Take for example a battery compartment, battery should appear side by side when placed inside the compartment container.
     /// Without this they would pile up in the same spot.
     /// </summary>
+    [RequireComponent(typeof(AttachedContainer))]
     public class ContainerItemDisplay : MonoBehaviour
     {
         [Tooltip(" The list of transforms defining where the items are displayed.")]
         [SerializeField]
         private Transform[] _displays;
 
-        [SerializeField]
         private AttachedContainer _attachedContainer;
 
         /// <summary>
@@ -31,20 +31,30 @@ namespace SS3D.Systems.Inventory.Containers
 
         protected void Awake()
         {
-            Assert.IsNotNull(_attachedContainer);
-
+            _attachedContainer = GetComponent<AttachedContainer>();
             _displayedItems = new Item[NumberDisplay];
-            _attachedContainer.OnItemAttached += ContainerOnItemAttached;
-            _attachedContainer.OnItemDetached += ContainerOnItemDetached;
+            _attachedContainer.OnContentsChanged += HandleContainerContentChanged;
         }
 
         protected void OnDestroy()
         {
-            _attachedContainer.OnItemAttached -= ContainerOnItemAttached;
-            _attachedContainer.OnItemDetached -= ContainerOnItemDetached;
+            _attachedContainer.OnContentsChanged -= HandleContainerContentChanged;
         }
 
-        private void ContainerOnItemAttached(object sender, Item item)
+        private void HandleContainerContentChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)
+        {
+            if (type == ContainerChangeType.Add)
+            {
+                ContainerOnItemAttached(newitem);
+            }
+
+            if (type == ContainerChangeType.Remove)
+            {
+                ContainerOnItemDetached(olditem);
+            }
+        }
+
+        private void ContainerOnItemAttached(Item item)
         {
             // Defines the transform of the item to be the first available position.
             int index = -1;
@@ -68,7 +78,7 @@ namespace SS3D.Systems.Inventory.Containers
             itemTransform.localRotation = Quaternion.identity;
         }
 
-        private void ContainerOnItemDetached(object sender, Item item)
+        private void ContainerOnItemDetached(Item item)
         {
             int index = -1;
             for (int i = 0; i < NumberDisplay; i++)

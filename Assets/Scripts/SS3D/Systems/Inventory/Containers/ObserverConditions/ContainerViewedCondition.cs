@@ -27,7 +27,7 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
             AttachedContainer container = NetworkObject.GetComponent<AttachedContainer>();
             notProcessed = false;
 
-            float sqrMaximumDistance = container.MaxDistance * container.MaxDistance;
+            const float sqrMaximumDistance = 5 * 5;
 
             Vector3 thisPosition = NetworkObject.transform.position;
             foreach (NetworkObject nob in connection.Objects)
