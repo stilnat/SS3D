@@ -15,7 +15,10 @@ namespace SS3D.Systems.Inventory.Containers
     /// </summary>
     public class ContainerItemDisplay : MonoBehaviour
     {
-        [FormerlySerializedAs("attachedContainer")]
+        [Tooltip(" The list of transforms defining where the items are displayed.")]
+        [SerializeField]
+        private Transform[] _displays;
+
         [SerializeField]
         private AttachedContainer _attachedContainer;
 
@@ -24,17 +27,13 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         private Item[] _displayedItems;
 
-        public AttachedContainer AttachedContainer
-        {
-            get => _attachedContainer;
-            set => _attachedContainer = value;
-        }
+        private int NumberDisplay => _displays.Length;
 
         protected void Awake()
         {
             Assert.IsNotNull(_attachedContainer);
 
-            _displayedItems = new Item[_attachedContainer.Displays.Length];
+            _displayedItems = new Item[NumberDisplay];
             _attachedContainer.OnItemAttached += ContainerOnItemAttached;
             _attachedContainer.OnItemDetached += ContainerOnItemDetached;
         }
@@ -49,7 +48,7 @@ namespace SS3D.Systems.Inventory.Containers
         {
             // Defines the transform of the item to be the first available position.
             int index = -1;
-            for (int i = 0; i < _attachedContainer.Displays.Length; i++)
+            for (int i = 0; i < NumberDisplay; i++)
             {
                 if (_displayedItems[i] == null)
                 {
@@ -64,7 +63,7 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             Transform itemTransform = item.transform;
-            itemTransform.SetParent(_attachedContainer.Displays[index].transform, false);
+            itemTransform.SetParent(_displays[index].transform, false);
             itemTransform.localPosition = Vector3.zero;
             itemTransform.localRotation = Quaternion.identity;
         }
@@ -72,7 +71,7 @@ namespace SS3D.Systems.Inventory.Containers
         private void ContainerOnItemDetached(object sender, Item item)
         {
             int index = -1;
-            for (int i = 0; i < _attachedContainer.Displays.Length; i++)
+            for (int i = 0; i < NumberDisplay; i++)
             {
                 if (_displayedItems[i] == item)
                 {
@@ -87,7 +86,7 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             Transform itemParent = item.transform.parent;
-            if (itemParent != null && itemParent != _attachedContainer.Displays[index])
+            if (itemParent != null && itemParent != _displays[index])
             {
                 item.transform.SetParent(null, true);
 

@@ -1,6 +1,7 @@
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Observing;
+using System;
 using UnityEngine;
 
 namespace SS3D.Systems.Inventory.Containers.ObserverConditions
@@ -31,18 +32,21 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
             Vector3 thisPosition = NetworkObject.transform.position;
             foreach (NetworkObject nob in connection.Objects)
             {
-                // If within distance.
-                if (Vector3.SqrMagnitude(nob.transform.position - thisPosition) <= sqrMaximumDistance)
+                // If not within maximum distance.
+                if (Vector3.SqrMagnitude(nob.transform.position - thisPosition) > sqrMaximumDistance)
                 {
-                    // Must be opened for it's content to be visible.
-                    if (container.IsOpenable && container.ContainerInteractive.IsOpen())
-                    {
-                        return true;
-                    }
-                    else if (!container.IsOpenable)
-                    {
-                        return true;
-                    }
+                    continue;
+                }
+
+                // Must be opened for it's content to be visible.
+                if (container.TryGetComponent(out IOpenable openable) && openable.IsOpen)
+                {
+                    return true;
+                }
+
+                if (openable == null)
+                {
+                    return true;
                 }
             }
 
@@ -54,18 +58,13 @@ namespace SS3D.Systems.Inventory.Containers.ObserverConditions
         /// True if the condition requires regular updates.
         /// </summary>
         /// <returns></returns>
-        public override bool Timed()
-        {
-            return true;
-        }
+        [Obsolete("Use GetConditionType()")]
+        public override bool Timed() => true;
 
         /// <summary>
         /// Clones referenced ObserverCondition. This must be populated with your conditions settings.
         /// </summary>
         /// <returns></returns>
-        public override ObserverCondition Clone()
-        {
-            return this;
-        }
+        public override ObserverCondition Clone() => this;
     }
 }

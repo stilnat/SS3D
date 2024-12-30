@@ -27,8 +27,6 @@ namespace SS3D.Systems.Inventory.Items
         [SerializeField]
         private Transform _secondaryLeftHandHold;
 
-        public GameObject GameObject => gameObject;
-
         public abstract bool CanHoldTwoHand { get; }
 
         public abstract FingerPoseType PrimaryHandPoseType { get; }

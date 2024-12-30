@@ -99,11 +99,10 @@ namespace SS3D.Systems.Inventory.Interactions
             return false;
         }
 
-        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => throw new NotImplementedException();
+        public bool Update(InteractionEvent interactionEvent, InteractionReference reference) => false;
 
         public void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            throw new NotImplementedException();
         }
 
         private static float ComputeTimeToReach(IntentType intent, Vector3 targetPosition, Transform playerRoot)

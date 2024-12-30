@@ -309,7 +309,7 @@ namespace SS3D.Systems.Inventory.Containers
         [Server]
         private void SetUpContainers()
         {
-            IEnumerable<AttachedContainer> attachedContainers = GetComponentsInChildren<AttachedContainer>().Where(x => x.DisplayAsSlotInUI);
+            IEnumerable<AttachedContainer> attachedContainers = GetComponentsInChildren<InventorySlotContainer>();
 
             foreach (AttachedContainer container in attachedContainers)
             {
@@ -390,9 +390,9 @@ namespace SS3D.Systems.Inventory.Containers
         private void HandleTryAddContainerOnItemAttached(object sender, Item item)
         {
             AttachedContainer parentContainer = (AttachedContainer)sender;
-            IEnumerable<AttachedContainer> itemContainers = item.GetComponentsInChildren<AttachedContainer>().Where(x => x.DisplayAsSlotInUI);
+            IEnumerable<InventorySlotContainer> itemContainers = item.GetComponentsInChildren<InventorySlotContainer>();
 
-            foreach (AttachedContainer container in itemContainers)
+            foreach (InventorySlotContainer container in itemContainers)
             {
                 if (container.GetComponentInParent<Item>() != item)
                 {

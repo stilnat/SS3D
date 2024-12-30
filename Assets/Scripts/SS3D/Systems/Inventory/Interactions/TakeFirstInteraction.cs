@@ -30,7 +30,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public string GetGenericName() => "Take";
 
-        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => throw new System.NotImplementedException();
+        public IClientInteraction CreateClient(InteractionEvent interactionEvent) => null;
 
         public string GetName(InteractionEvent interactionEvent) => "Take in " + _attachedContainer.ContainerName;
 

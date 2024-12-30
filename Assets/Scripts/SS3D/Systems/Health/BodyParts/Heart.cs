@@ -100,8 +100,7 @@ namespace SS3D.Systems.Health
 
             OnPulse += HandleHeartPulse;
 
-            // TODO : temporary fix for heart when it's not attached to a health controller. Should eventually prevent working
-            // when heart is detached from head.
+            // TODO :  Should eventually prevent heart from working when heart is detached from head.
             if (HealthController != null)
             {
                 HealthController.OnBodyPartRemoved += HandleBodyPartRemoved;

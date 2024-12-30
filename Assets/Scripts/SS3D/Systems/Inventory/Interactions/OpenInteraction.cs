@@ -1,4 +1,5 @@
 ﻿using FishNet.Object;
+using JetBrains.Annotations;
 using SS3D.Data.Generated;
 using SS3D.Interactions;
 using SS3D.Interactions.Extensions;
@@ -14,37 +15,28 @@ namespace SS3D.Systems.Inventory.Interactions
     [Serializable]
     public class OpenInteraction : DelayedInteraction
     {
-        public event EventHandler<bool> OnOpenStateChanged;
+        private IOpenable _openable;
 
-        protected static readonly int OpenId = Animator.StringToHash("Open");
-
-        private AttachedContainer _attachedContainer;
-
-        public OpenInteraction() { }
-
-        public OpenInteraction(AttachedContainer attachedContainer)
+        public OpenInteraction(IOpenable openable)
         {
-            _attachedContainer = attachedContainer;
+            _openable = openable;
         }
 
         public override InteractionType InteractionType => InteractionType.Open;
 
-        public override string GetGenericName()
-        {
-            return "Open";
-        }
+        [NotNull]
+        public override string GetGenericName() => "Open";
 
+        [NotNull]
         public override string GetName(InteractionEvent interactionEvent)
         {
-            Animator animator = interactionEvent.Target.GameObject.GetComponent<Animator>();
-            if (_attachedContainer == null)
+            if (_openable == null)
             {
-                return animator.GetBool(OpenId) ? "Close" : "Open";
+                return string.Empty;
             }
 
-            string name = _attachedContainer.ContainerName;
-
-            return animator.GetBool(OpenId) ? "Close " + name : "Open " + name;
+            string name = interactionEvent.Target.GameObject.name;
+            return _openable.IsOpen ? "Close " + name : "Open " + name;
         }
 
         public override Sprite GetIcon(InteractionEvent interactionEvent) => InteractionIcons.Open;
@@ -57,7 +49,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            return interactionEvent.Target is IGameObjectProvider target && IsFirstContainerOpenable(target);
+            return interactionEvent.Target is OpenableContainer;
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
@@ -67,11 +59,7 @@ namespace SS3D.Systems.Inventory.Interactions
         protected override void StartDelayed(InteractionEvent interactionEvent, InteractionReference reference)
         {
             Debug.Log("in OpenInteraction, Start");
-            GameObject target = interactionEvent.Target.GameObject;
-            Animator animator = target.GetComponent<Animator>();
-            bool open = animator.GetBool(OpenId);
-            animator.SetBool(OpenId, !open);
-            OnOpenStateChange(!open);
+            _openable.SetOpen(!_openable.IsOpen);
         }
 
         protected override bool StartImmediately(InteractionEvent interactionEvent, InteractionReference reference)
@@ -91,36 +79,6 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             return true;
-        }
-
-        private void OnOpenStateChange(bool e)
-        {
-            Debug.Log("In OpenInteraction, OnOpenStateChange");
-            OnOpenStateChanged?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Verifies if the attachedContainer referenced by this script is the first one on the game object at the source of the interaction.
-        /// </summary>
-        private bool IsFirstContainerOpenable(IGameObjectProvider target)
-        {
-            // Only accept the first Openable container on the GameObject.
-            // Note: if you want separately functioning doors etc, they must be on different GameObjects.
-            ContainerInteractive[] attachedContainers = target.GameObject.GetComponents<ContainerInteractive>();
-            for (int i = 0; i < attachedContainers.Length; i++)
-            {
-                if (_attachedContainer != attachedContainers[i].AttachedContainer && attachedContainers[i].AttachedContainer.IsOpenable)
-                {
-                    return false;
-                }
-
-                if (_attachedContainer == attachedContainers[i].AttachedContainer)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

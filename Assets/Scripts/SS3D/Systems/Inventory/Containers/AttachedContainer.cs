@@ -1,6 +1,7 @@
 ﻿using FishNet.Component.Transforming;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using JetBrains.Annotations;
 using SS3D.Core.Behaviours;
 using SS3D.Logging;
 using SS3D.Systems.Inventory.Items;
@@ -43,128 +44,35 @@ namespace SS3D.Systems.Inventory.Containers
 
         private readonly object _modificationLock = new();
 
-        [SerializeField]
-        private bool _automaticContainerSetUp;
-
-        // References toward all container related scripts.
-        [FormerlySerializedAs("ContainerInteractive")]
-        [SerializeField]
-        private ContainerInteractive _containerInteractive;
-
-        [FormerlySerializedAs("ContainerItemDisplay")]
-        [SerializeField]
-        private ContainerItemDisplay _containerItemDisplay;
-
         [Tooltip("The local position of attached items.")]
         [SerializeField]
-        private Vector3 _attachmentOffset = Vector3.zero;
-
-        [Tooltip("If the container is openable, this defines if things can be stored in the container without opening it.")]
-        [SerializeField]
-        private bool _onlyStoreWhenOpen;
-
-        [Tooltip("When the container UI is opened, if set true, the animation on the object is triggered.")]
-        [SerializeField]
-        private bool _openWhenContainerViewed;
+        private Vector3 _attachmentOffset;
 
         [Tooltip("If items should be attached as children of the container's game object.")]
         [SerializeField]
         private bool _attachItems = true;
 
-        // Initialized should not be displayed, it's only useful for setting up the container in editor.
-        [HideInInspector]
-        [SerializeField]
-        private bool _initialized;
-
         [Tooltip("Max distance at which the container is visible if not hidden.")]
         [SerializeField]
         private float _maxDistance = 5f;
-
-        [Tooltip("If the container can be opened/closed, in the sense of having a close/open animation.")]
-        [SerializeField]
-        private bool _isOpenable;
-
-        [Tooltip("If the container should have the container's default interactions setting script.")]
-        [SerializeField]
-        private bool _isInteractive;
-
-        [Tooltip("If stuff inside the container can be seen using an UI.")]
-        [SerializeField]
-        private bool _hasUi;
-
-        [Tooltip("If true, interactions in containerInteractive are ignored, instead, a script on the container's game object should implement IInteractionTarget.")]
-        [SerializeField]
-        private bool _hasCustomInteraction;
 
         [Tooltip("If the container renders items in custom position on the container.")]
         [SerializeField]
         private bool _hasCustomDisplay;
 
-        [Tooltip(" The list of transforms defining where the items are displayed.")]
-        [SerializeField]
-        private Transform[] _displays;
-
-        [Tooltip(" The number of custom displays.")]
-        [SerializeField]
-        private int _numberDisplay;
-
-        [Tooltip(" if should display as slot in UI.")]
-        [SerializeField]
-        private bool _displayAsSlotInUI;
-
         [Tooltip("Defines the size of the container, every item takes a defined place inside a container.")]
         [SerializeField]
-        private Vector2Int _size = new(0, 0);
-
-        /// <summary>
-        /// Set visibility of objects inside the container (not in the UI, in the actual game object).
-        /// If the container is Hidden, the visibility of items is always off.
-        /// </summary>
-        [Tooltip("Set visibility of items in container.")]
-        [SerializeField]
-        private bool _hideItems = true;
+        private Vector2Int _size = Vector2Int.one;
 
         [Tooltip("Container type mostly allow to discriminate between different containers on a single prefab.")]
         [SerializeField]
         private ContainerType _type;
 
-        [Tooltip("The filter on the container.")]
-        [SerializeField]
-        private Filter _startFilter;
-
         public ContainerType Type => _type;
 
         public Vector2Int Size => _size;
 
-        public bool HideItems => _hideItems;
-
-        public Filter StartFilter => _startFilter;
-
-        public Vector3 AttachmentOffset => _attachmentOffset;
-
-        public bool OnlyStoreWhenOpen => _onlyStoreWhenOpen;
-
-        public bool OpenWhenContainerViewed => _openWhenContainerViewed;
-
-        public bool AttachItems => _attachItems;
-
         public float MaxDistance => _maxDistance;
-
-        public bool IsOpenable => _isOpenable;
-
-        public bool IsInteractive => _isInteractive;
-
-        public bool HasUi => _hasUi;
-
-        public bool HasCustomInteraction => _hasCustomInteraction;
-
-        public bool HasCustomDisplay => _hasCustomDisplay;
-
-        public Transform[] Displays => _displays;
-
-        public int NumberDisplay => _numberDisplay;
-
-        public bool DisplayAsSlotInUI => _displayAsSlotInUI;
 
         public string ContainerName => gameObject.name;
 
@@ -189,22 +97,18 @@ namespace SS3D.Systems.Inventory.Containers
 
         public ContainerUiDisplay ContainerUiDisplay { get; set; }
 
-        public ContainerInteractive ContainerInteractive => _containerInteractive;
-
-        public ContainerItemDisplay ContainerItemDisplay => _containerItemDisplay;
-
-        [Server]
-        public void InvokeContainerDisabled()
+        public override void OnStartServer()
         {
-            OnAttachedContainerDisabled?.Invoke(this);
+            base.OnStartServer();
+            _storedItems.OnChange += HandleStoredItemsChanged;
         }
 
-        public void Init(Vector2Int size, Filter filter)
+        public void Init(Vector2Int size)
         {
             _size = size;
-            _startFilter = filter;
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"{name}({nameof(AttachedContainer)})[size: {Size}, items: ]";
@@ -349,32 +253,13 @@ namespace SS3D.Systems.Inventory.Containers
         }
 
         /// <summary>
-        /// Checks if this container contains the item
-        /// </summary>
-        /// <param name="item">The item to search for</param>
-        /// <returns>If it is in this container</returns>
-        public bool ContainsItem(Item item)
-        {
-            foreach (StoredItem storedItem in _storedItems)
-            {
-                if (storedItem.Item.Equals(item))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Checks if this item can be stored and fits inside the container. It will also check for
         /// custom storage conditions if they exists, which are scripts put on the same game object as this container and
         /// implementing IStorageCondition.
         /// </summary>
         public bool CanContainItem(Item item)
         {
-            return CanStoreItem(item)
-                && CanHoldItem(item)
+            return CanHoldItemNumber(item)
                 && !item.GetComponentsInChildren<AttachedContainer>().AsEnumerable().Contains(this) // Can't put an item in its own container
                 && !(bool)GetComponents<IStorageCondition>()?.Any(x => !x.CanStore(this, item));
         }
@@ -382,12 +267,6 @@ namespace SS3D.Systems.Inventory.Containers
         public bool CanContainItemAtPosition(Item item, Vector2Int position)
         {
             return CanContainItem(item) && IsAreaFree(position) && AreSlotCoordinatesInGrid(position);
-        }
-
-        protected override void OnAwake()
-        {
-            base.OnAwake();
-            _storedItems.OnChange += HandleStoredItemsChanged;
         }
 
         protected override void OnDisabled()
@@ -433,16 +312,6 @@ namespace SS3D.Systems.Inventory.Containers
             Purge();
         }
 
-        private void ProcessItemAttached(Item e)
-        {
-            OnItemAttached?.Invoke(this, e);
-        }
-
-        private void ProcessItemDetached(Item e)
-        {
-            OnItemDetached?.Invoke(this, e);
-        }
-
         /// <summary>
         /// Runs when the container was changed, networked
         /// </summary>
@@ -463,9 +332,6 @@ namespace SS3D.Systems.Inventory.Containers
                     break;
                 }
 
-                case SyncListOperation.Insert:
-                    break;
-
                 case SyncListOperation.Set:
                 {
                     changeType = ContainerChangeType.Move;
@@ -473,12 +339,6 @@ namespace SS3D.Systems.Inventory.Containers
                 }
 
                 case SyncListOperation.RemoveAt:
-                {
-                    changeType = ContainerChangeType.Remove;
-                    HandleItemRemoved(oldItem.Item);
-                    break;
-                }
-
                 case SyncListOperation.Clear:
                 {
                     changeType = ContainerChangeType.Remove;
@@ -486,25 +346,12 @@ namespace SS3D.Systems.Inventory.Containers
                     break;
                 }
 
+                case SyncListOperation.Insert:
                 case SyncListOperation.Complete:
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(op), op, null);
-            }
-
-            if (changeType == ContainerChangeType.Add && newItem.Item && newItem.Item.TryGetComponent(out NetworkTransform networkTransform))
-            {
-                networkTransform.SetSynchronizePosition(false);
-                networkTransform.SetSynchronizeRotation(false);
-            }
-
-            if (changeType == ContainerChangeType.Remove && oldItem.Item && oldItem.Item.TryGetComponent(out NetworkTransform networkTransform2))
-            {
-                networkTransform2.SetSynchronizePosition(true);
-                networkTransform2.SetSynchronizeRotation(true);
-
-                // Punpun.Information(this, "from container " + this.gameObject + ", removing item" + oldItem.Item?.name);
             }
 
             if (changeType == ContainerChangeType.None)
@@ -523,8 +370,16 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
+            if (item.TryGetComponent(out NetworkTransform networkTransform2))
+            {
+                networkTransform2.SetSynchronizePosition(true);
+                networkTransform2.SetSynchronizeRotation(true);
+            }
+
+            item.Unfreeze();
+
             // Restore visibility
-            if (HideItems)
+            if (!_hasCustomDisplay)
             {
                 item.SetVisibility(true);
             }
@@ -535,8 +390,7 @@ namespace SS3D.Systems.Inventory.Containers
                 item.transform.SetParent(null, true);
             }
 
-            ProcessItemDetached(item);
-            item.Unfreeze();
+            OnItemDetached?.Invoke(this, item);
         }
 
         [ServerOrClient]
@@ -547,25 +401,28 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
+            if (item.TryGetComponent(out NetworkTransform networkTransform))
+            {
+                networkTransform.SetSynchronizePosition(false);
+                networkTransform.SetSynchronizeRotation(false);
+            }
+
             item.Freeze();
 
-            // Make invisible
-            if (HideItems)
+            if (!_attachItems)
+            {
+                return;
+            }
+
+            if (!_hasCustomDisplay)
             {
                 item.SetVisibility(false);
+                Transform itemTransform = item.transform;
+                itemTransform.SetParent(transform, false);
+                itemTransform.localPosition = _attachmentOffset;
             }
 
-            if (AttachItems)
-            {
-                if (!HasCustomDisplay)
-                {
-                    Transform itemTransform = item.transform;
-                    itemTransform.SetParent(transform, false);
-                    itemTransform.localPosition = AttachmentOffset;
-                }
-
-                ProcessItemAttached(item);
-            }
+            OnItemAttached?.Invoke(this, item);
         }
 
         /// <summary>
@@ -585,7 +442,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return false;
             }
 
-            // Fail if item is at this postion
+            // Fail if item is already at this position
             if (ItemAt(newItem.Position))
             {
                 return false;
@@ -657,34 +514,17 @@ namespace SS3D.Systems.Inventory.Containers
         }
 
         /// <summary>
-        /// Checks if this item could be stored (traits etc.) without considering size
+        /// Checks if this item fits inside the container in terms of size
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        private bool CanStoreItem(Item item)
-        {
-            if (_startFilter != null)
-            {
-                return _startFilter.CanStore(item);
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks if this item fits inside the container
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        private bool CanHoldItem(Item item)
-        {
-            return Items.Count() < Size.x * Size.y;
-        }
+        private bool CanHoldItemNumber(Item item) => Items.Count() < Size.x * Size.y;
 
         /// <summary>
         /// Finds the index of an item
         /// </summary>
         /// <param name="item">The item to look for</param>
+        /// <param name = "index">The index of the item in the list or -1 if not found</param>
         /// <returns>The index of the item or -1 if not found</returns>
         private bool FindItem(Item item, out int index)
         {
@@ -707,15 +547,7 @@ namespace SS3D.Systems.Inventory.Containers
 
         private bool IsAreaFree(Vector2Int slotPosition)
         {
-            foreach (StoredItem storedItem in _storedItems)
-            {
-                if (storedItem.Position == slotPosition)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return _storedItems.All(storedItem => storedItem.Position != slotPosition);
         }
 
         private void InvokeOnContentChanged(Item oldItem, Item newItem, ContainerChangeType changeType)
