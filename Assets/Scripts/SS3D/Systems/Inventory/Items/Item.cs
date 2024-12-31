@@ -50,15 +50,12 @@ namespace SS3D.Systems.Inventory.Items
         private WorldObjectAssetReference _asset;
 
         [Header("Item settings")]
-        [FormerlySerializedAs("Name")]
         [SerializeField]
         private string _name;
 
-        [FormerlySerializedAs("Weight")]
         [SerializeField]
         private float _weight;
 
-        [FormerlySerializedAs("Traits")]
         [SerializeField]
         private List<Trait> _startingTraits;
 
@@ -91,6 +88,8 @@ namespace SS3D.Systems.Inventory.Items
         /// </summary>
         public AttachedContainer Container => _container;
 
+        public bool IsInContainer => _container != null;
+
         /// <summary>
         /// All colliders, related to the item, except of colliders, related to stored items
         /// </summary>
@@ -116,8 +115,6 @@ namespace SS3D.Systems.Inventory.Items
                 _asset = value;
             }
         }
-
-        public Item Prefab => Asset.Get<Item>();
 
         /// <summary>
         /// The sprite that is shown in the container slot
@@ -161,7 +158,7 @@ namespace SS3D.Systems.Inventory.Items
         {
             Container.RemoveItem(this);
 
-            if (GameObject != null)
+            if (GameObject)
             {
                 ServerManager.Despawn(GameObject);
             }
@@ -171,28 +168,14 @@ namespace SS3D.Systems.Inventory.Items
         /// Freezes the item, making it not move or collide
         /// </summary>
         [ServerOrClient]
-        public void Freeze()
-        {
-            if (_rigidbody != null)
-            {
-                _rigidbody.isKinematic = true;
-            }
-
-            ToggleCollider(false);
-        }
-
-        /// <summary>
-        /// Unfreezes the item, restoring normal functionality
-        /// </summary>
-        [ServerOrClient]
-        public void Unfreeze()
+        public void SetFreeze(bool isFrozen)
         {
             if (_rigidbody && IsServer)
             {
-                _rigidbody.isKinematic = false;
+                _rigidbody.isKinematic = isFrozen;
             }
 
-            ToggleCollider(true);
+            ToggleCollider(!isFrozen);
         }
 
         /// <param name="visible">Should the item be visible</param>
@@ -205,13 +188,6 @@ namespace SS3D.Systems.Inventory.Items
             {
                 childRenderer.enabled = visible;
             }
-        }
-
-        public bool IsVisible()
-        {
-            // TODO: Make this handle multiple renderers
-            Renderer component = GetComponent<Renderer>();
-            return component != null && component.enabled;
         }
 
         public virtual IInteraction[] CreateTargetInteractions(InteractionEvent interactionEvent)
@@ -230,16 +206,6 @@ namespace SS3D.Systems.Inventory.Items
             entries.Add(new(null, dropInteraction));
             entries.Add(new(null, placeInteraction));
             entries.Add(new(null, throwInteraction));
-        }
-
-        /// <summary>
-        /// Checks if the item is currently stored in a container
-        /// </summary>
-        /// <returns></returns>
-        [ServerOrClient]
-        public bool IsInContainer()
-        {
-            return _container != null;
         }
 
         /// <summary>
@@ -290,15 +256,6 @@ namespace SS3D.Systems.Inventory.Items
             _traits.Add(trait);
         }
 
-        /// <summary>
-        /// Remove a trait from this item.
-        /// </summary>
-        [Server]
-        public void RemoveTraits(Trait trait)
-        {
-             _traits.Remove(trait);
-        }
-
         protected override void OnStart()
         {
             base.OnStart();
@@ -330,7 +287,7 @@ namespace SS3D.Systems.Inventory.Items
         /// TODO : might want to replace GetComponentsInChildren with a manual setup of the container list.
         /// </summary>
         [ServerOrClient]
-        protected virtual void ToggleCollider(bool isEnable)
+        private void ToggleCollider(bool isEnable)
         {
             foreach (Collider collider in NativeColliders)
             {

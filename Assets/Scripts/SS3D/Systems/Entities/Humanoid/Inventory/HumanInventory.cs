@@ -53,11 +53,6 @@ namespace SS3D.Systems.Inventory.Containers
 
         public List<AttachedContainer> Containers => _containersOnPlayer.Collection.ToList();
 
-        /// <summary>
-        /// Number of hands container on this inventory.
-        /// </summary>
-        public int CountHands => _containersOnPlayer.Count(x => x.Type == ContainerType.Hand);
-
         public Hands Hands => _hands;
 
         /// <summary>
@@ -189,7 +184,7 @@ namespace SS3D.Systems.Inventory.Containers
 
             // Be careful, destroying an inventory container will cause issue as when syncing with client, the attachedContainer will be null.
             // Before destroying a container, consider disabling the behaviour or the game object it's on first to avoid this issue.
-            container.OnAttachedContainerDisabled += RemoveContainer;
+            // container.OnAttachedContainerDisabled += RemoveContainer;
         }
 
         /// <summary>
@@ -205,7 +200,6 @@ namespace SS3D.Systems.Inventory.Containers
 
             _containersOnPlayer.Remove(container);
             container.OnContentsChanged -= HandleContainerContentChanged;
-            container.OnAttachedContainerDisabled -= RemoveContainer;
         }
 
         /// <summary>

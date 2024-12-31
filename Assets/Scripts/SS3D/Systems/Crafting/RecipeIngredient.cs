@@ -15,7 +15,7 @@ namespace SS3D.Systems.Crafting
         [Server]
         public void Consume()
         {
-            if (TryGetComponent(out Item item) && item.IsInContainer())
+            if (TryGetComponent(out Item item) && item.IsInContainer)
             {
                 item.Container.RemoveItem(item);
             }

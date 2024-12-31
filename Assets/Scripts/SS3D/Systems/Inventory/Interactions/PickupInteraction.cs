@@ -75,7 +75,7 @@ namespace SS3D.Systems.Inventory.Interactions
             }
 
             // check the item is not in a container
-            return !item.IsInContainer() || item.Container == containerProvider.Container;
+            return !item.IsInContainer || item.Container == containerProvider.Container;
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)

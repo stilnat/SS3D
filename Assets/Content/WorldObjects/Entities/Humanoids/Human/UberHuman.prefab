@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 7752324300638111557}
   - component: {fileID: 8314021876565239770}
   - component: {fileID: 3205399072759136408}
-  - component: {fileID: 5580796170658369665}
   m_Layer: 0
   m_Name: Human Foot Right
   m_TagString: Untagged
@@ -157,7 +156,7 @@ MonoBehaviour:
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _hasCustomDisplay: 0
   _size: {x: 1, y: 1}
-  _type: 0
+  _type: 32
 --- !u!114 &8314021876565239770
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,25 +196,6 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 8314021876565239770}
   _isBleeding: 0
---- !u!114 &5580796170658369665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4059505387671784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bce363fc1c098c84689ec075464a82bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 35
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _attachmentOffset: {x: 0, y: 0, z: 0}
-  _hasCustomDisplay: 0
-  _size: {x: 1, y: 1}
-  _type: 32
 --- !u!1 &63587172050830169
 GameObject:
   m_ObjectHideFlags: 0
@@ -4337,7 +4317,6 @@ GameObject:
   - component: {fileID: 8973790830556101504}
   - component: {fileID: 2234433186656605347}
   - component: {fileID: 3855479951871235432}
-  - component: {fileID: 7657450681366921638}
   m_Layer: 0
   m_Name: Human Foot Left
   m_TagString: Untagged
@@ -4481,7 +4460,7 @@ MonoBehaviour:
   _attachmentOffset: {x: 0, y: 0, z: 0}
   _hasCustomDisplay: 0
   _size: {x: 1, y: 1}
-  _type: 0
+  _type: 16
 --- !u!114 &2234433186656605347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4521,25 +4500,6 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 241836927429143711}
   _bodyPart: {fileID: 2234433186656605347}
   _isBleeding: 0
---- !u!114 &7657450681366921638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3224255963336160249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bce363fc1c098c84689ec075464a82bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 31
-  _addedNetworkObject: {fileID: 241836927429143711}
-  _networkObjectCache: {fileID: 241836927429143711}
-  _attachmentOffset: {x: 0, y: 0, z: 0}
-  _hasCustomDisplay: 0
-  _size: {x: 1, y: 1}
-  _type: 16
 --- !u!1 &3232642881017137434
 GameObject:
   m_ObjectHideFlags: 0
@@ -6831,11 +6791,11 @@ MonoBehaviour:
   - {fileID: 8973790830556101504}
   - {fileID: 2234433186656605347}
   - {fileID: 3855479951871235432}
-  - {fileID: 7657450681366921638}
+  - {fileID: 0}
   - {fileID: 7752324300638111557}
   - {fileID: 8314021876565239770}
   - {fileID: 3205399072759136408}
-  - {fileID: 5580796170658369665}
+  - {fileID: 0}
   - {fileID: 3587815548084978834}
   - {fileID: 8826138047776932930}
   - {fileID: 5678219672846588157}

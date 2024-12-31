@@ -18,20 +18,10 @@ namespace SS3D.Systems.Inventory.Containers
     /// </summary>
     public class AttachedContainer : NetworkActor
     {
-        public delegate void AttachedContainerHandler(AttachedContainer attachedContainer);
-
         public delegate void ContainerContentsHandler(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type);
 
-        public event AttachedContainerHandler OnAttachedContainerDisabled;
-
-        /// <summary>
-        /// Called when the contents of the container change
-        /// </summary>
         public event ContainerContentsHandler OnContentsChanged;
 
-        /// <summary>
-        /// The items stored in this container, including information on how they are stored
-        /// </summary>
         [SyncObject]
         private readonly SyncList<StoredItem> _storedItems = new();
 
@@ -243,37 +233,6 @@ namespace SS3D.Systems.Inventory.Containers
             return CanContainItem(item) && IsAreaFree(position) && AreSlotCoordinatesInGrid(position);
         }
 
-        protected override void OnDisabled()
-        {
-            // Mostly used to allow inventory to update accessible containers.
-            base.OnDisabled();
-
-            if (!IsServer)
-            {
-                return;
-            }
-
-            OnAttachedContainerDisabled?.Invoke(this);
-        }
-
-        protected override void OnEnabled()
-        {
-            // Mostly used to allow inventory to update accessible containers.
-            base.OnEnabled();
-
-            if (!IsServer)
-            {
-                return;
-            }
-
-            IInventory inventory = GetComponentInParent<IInventory>();
-
-            if (inventory != null)
-            {
-                inventory.AddContainer(this);
-            }
-        }
-
         protected override void OnDestroyed()
         {
             base.OnDestroyed();
@@ -339,7 +298,7 @@ namespace SS3D.Systems.Inventory.Containers
         [ServerOrClient]
         private void HandleItemRemoved(Item item)
         {
-            if (item == null)
+            if (!item)
             {
                 return;
             }
@@ -350,7 +309,7 @@ namespace SS3D.Systems.Inventory.Containers
                 networkTransform2.SetSynchronizeRotation(true);
             }
 
-            item.Unfreeze();
+            item.SetFreeze(false);
 
             // Restore visibility
             if (!_hasCustomDisplay)
@@ -374,7 +333,7 @@ namespace SS3D.Systems.Inventory.Containers
                 networkTransform.SetSynchronizeRotation(false);
             }
 
-            item.Freeze();
+            item.SetFreeze(true);
 
             if (!_hasCustomDisplay)
             {
