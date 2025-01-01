@@ -92,7 +92,7 @@ namespace SS3D.Systems.Inventory.Containers
                 {
                     Vector2Int itemPosition = new Vector2Int(x, y);
 
-                    if (AddItemPosition(item, itemPosition))
+                    if (TryAddStoredItem(new(item, itemPosition)))
                     {
                         return true;
                     }
@@ -105,6 +105,24 @@ namespace SS3D.Systems.Inventory.Containers
         /// <summary>
         /// transfer an item from this container to another container at a given position.
         /// </summary>
+        public bool TransferItemToOther(Item item, AttachedContainer other)
+        {
+            if (!FindItem(item, out int index))
+            {
+                return false;
+            }
+
+            if (!TryRemoveStoredItem(index))
+            {
+                return false;
+            }
+
+            return other.AddItem(item);
+        }
+
+        /// <summary>
+        /// transfer an item from this container to another container at a given position.
+        /// </summary>
         public bool TransferItemToOther(Item item, Vector2Int position, AttachedContainer other)
         {
             if (!FindItem(item, out int index))
@@ -112,23 +130,12 @@ namespace SS3D.Systems.Inventory.Containers
                 return false;
             }
 
-            if (!RemoveStoredItem(index))
+            if (!TryRemoveStoredItem(index))
             {
                 return false;
             }
 
-            return other.AddStoredItem(new StoredItem(item, position));
-        }
-
-        /// <summary>
-        /// Tries to add an item at the specified position
-        /// </summary>
-        /// <param name="storedItem">The item to add</param>
-        /// <param name="position">The target position in the container</param>
-        /// <returns>If the item was added</returns>
-        public bool AddItemPosition(Item item, Vector2Int position)
-        {
-            return AddStoredItem(new StoredItem(item, position));
+            return other.TryAddStoredItem(new StoredItem(item, position));
         }
 
         public bool CanRemoveItem(Item item)
@@ -144,7 +151,7 @@ namespace SS3D.Systems.Inventory.Containers
         {
             if (FindItem(item, out int index))
             {
-                RemoveStoredItem(index);
+                TryRemoveStoredItem(index);
             }
         }
 
@@ -194,7 +201,7 @@ namespace SS3D.Systems.Inventory.Containers
 
             for (int i = _storedItems.Count - 1; i >= 0; i--)
             {
-                RemoveStoredItem(i);
+                TryRemoveStoredItem(i);
             }
         }
 
@@ -272,13 +279,13 @@ namespace SS3D.Systems.Inventory.Containers
                 }
 
                 case SyncListOperation.RemoveAt:
-                case SyncListOperation.Clear:
                 {
                     changeType = ContainerChangeType.Remove;
                     HandleItemRemoved(oldItem.Item);
                     break;
                 }
 
+                case SyncListOperation.Clear:
                 case SyncListOperation.Insert:
                 case SyncListOperation.Complete:
                     break;
@@ -292,7 +299,7 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            InvokeOnContentChanged(oldItem.Item, newItem.Item, changeType);
+            OnContentsChanged?.Invoke(this, oldItem.Item, newItem.Item, changeType);
         }
 
         [ServerOrClient]
@@ -348,32 +355,9 @@ namespace SS3D.Systems.Inventory.Containers
         /// Correctly add a storeItem to the container. All adding should use this method, never do it directly.
         /// </summary>
         /// <param name="newItem"> the item to store.</param>
-        private bool AddStoredItem(StoredItem newItem)
+        private bool TryAddStoredItem(StoredItem newItem)
         {
-            // Fail if attempted storage position is out of bounds
-            if (newItem.Position.x >= Size.x || newItem.Position.y >= Size.y)
-            {
-                return false;
-            }
-
-            if (newItem.Position.x < 0 || newItem.Position.y < 0)
-            {
-                return false;
-            }
-
-            // Fail if item is already at this position
-            if (ItemAt(newItem.Position))
-            {
-                return false;
-            }
-
-            if (!CanContainItem(newItem.Item))
-            {
-                return false;
-            }
-
-            // Fail if it is the same container
-            if (ReferenceEquals(newItem.Item.Container, this))
+            if (!CanContainItemAtPosition(newItem.Item, newItem.Position))
             {
                 return false;
             }
@@ -413,7 +397,7 @@ namespace SS3D.Systems.Inventory.Containers
         /// Correctly remove a storeItem in the container at the given index. All removing should use this method, never do it directly.
         /// </summary>
         /// <param name="index">the index in the list at which the storedItem should be removed.</param>
-        private bool RemoveStoredItem(int index)
+        private bool TryRemoveStoredItem(int index)
         {
             StoredItem storedItem = _storedItems[index];
 
@@ -467,11 +451,6 @@ namespace SS3D.Systems.Inventory.Containers
         private bool IsAreaFree(Vector2Int slotPosition)
         {
             return _storedItems.All(storedItem => storedItem.Position != slotPosition);
-        }
-
-        private void InvokeOnContentChanged(Item oldItem, Item newItem, ContainerChangeType changeType)
-        {
-            OnContentsChanged?.Invoke(this, oldItem, newItem, changeType);
         }
 
         private bool AreSlotCoordinatesInGrid(Vector2Int slotCoordinates)

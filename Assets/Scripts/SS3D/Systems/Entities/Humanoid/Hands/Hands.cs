@@ -39,7 +39,6 @@ namespace SS3D.Systems.Inventory.Containers
         /// <summary>
         /// Reference to the inventory linked to Hands.
         /// </summary>
-        [NonSerialized]
         private HumanInventory _inventory;
 
         /// <summary>

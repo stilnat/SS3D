@@ -65,6 +65,11 @@ namespace SS3D.Systems.Atmospherics
         {
             foreach (Entity player in _playersEntities)
             {
+                if (!_previousValuesChunkCenteredPlayers.ContainsKey(player.Owner))
+                {
+                    return;
+                }
+
                 AtmosContainer atmosTile = _atmosEnvironmentSystem.GetAtmosContainer(player.Position);
 
                 if (atmosTile == null)

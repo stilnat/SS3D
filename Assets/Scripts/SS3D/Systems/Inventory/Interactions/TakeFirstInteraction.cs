@@ -58,7 +58,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
             if (pickupItem != null && interactionEvent.Source is IContainerProvider containerProvider)
             {
-                containerProvider.Container.AddItem(pickupItem);
+                pickupItem.Container.TransferItemToOther(pickupItem, containerProvider.Container);
             }
 
             return false;

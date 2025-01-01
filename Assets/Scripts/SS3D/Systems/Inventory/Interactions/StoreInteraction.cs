@@ -38,7 +38,7 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            IInteractionSource source = interactionEvent.Source;
+            IInteractionSource source = interactionEvent.Source.GetRootSource();
             if (source is not IContainerProvider containerProvider)
             {
                 return false;
@@ -60,7 +60,7 @@ namespace SS3D.Systems.Inventory.Interactions
 
         public bool Start(InteractionEvent interactionEvent, InteractionReference reference)
         {
-            IInteractionSource source = interactionEvent.Source;
+            IInteractionSource source = interactionEvent.Source.GetRootSource();
             if (source is IContainerProvider containerProvider)
             {
                 Item item = containerProvider.Container.Items.First();
