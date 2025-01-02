@@ -81,7 +81,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Idle
+      name: IdlePose
       takeName: Idle
       internalID: -3100369314251171874
       firstFrame: 0
@@ -110,7 +110,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rifle
+      name: RiflePose
       takeName: Rifle
       internalID: -4226087607753745546
       firstFrame: 2
@@ -139,7 +139,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 2
     - serializedVersion: 16
-      name: Melee
+      name: MeleePose
       takeName: Melee
       internalID: -2231655820661085090
       firstFrame: 4
@@ -168,7 +168,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SpineBend
+      name: SpineBendPose
       takeName: SpineBend
       internalID: -229012657187978008
       firstFrame: 6
@@ -197,7 +197,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Crouched
+      name: CrouchedPose
       takeName: Crouched
       internalID: 3926005766609260388
       firstFrame: 8
@@ -226,7 +226,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Crawl
+      name: CrawlPose
       takeName: Crawl
       internalID: -3579208771848967941
       firstFrame: 10
@@ -255,7 +255,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Prone
+      name: PronePose
       takeName: Prone
       internalID: 2037608789245569710
       firstFrame: 12
@@ -284,7 +284,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: RifleUpperBody
+      name: RifleUpperBodyPose
       takeName: RifleUpperBody
       internalID: 5496026446824629491
       firstFrame: 14

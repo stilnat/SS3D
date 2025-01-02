@@ -17,38 +17,40 @@ ModelImporter:
     removeConstantScaleCurves: 1
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: 
+    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
+      copied configuration does not match position in animation file:\n\t'thigh_l'
+      : position error = 5.879545 mm\n\t'thigh_r' : position error = 11.314147 mm\n\t'spine'
+      : position error = 13.809788 mm\n\t'chest' : position error = 9.692043 mm\n\t'c_thumb1_r'
+      : position error = 2.960807 mm\n\t'c_ring1_r' : position error = 2.960667 mm\n\t'c_middle1_r'
+      : position error = 2.960756 mm\n\t'c_index1_r' : position error = 2.960816
+      mm\n\t'upper_arm_l' : position error = 6.211906 mm\n"
     animationImportErrors: 
     animationImportWarnings: "\nClip 'ThrowItem' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'c_thumb1_r' has translation animation that
-      will be discarded.\n\t'c_ring1_r' has translation animation that will be discarded.\n\t'c_middle1_r'
-      has translation animation that will be discarded.\n\t'c_index1_r' has translation
-      animation that will be discarded.\n\nClip 'Punch' has import animation warnings
-      that might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'c_thumb1_r' has translation animation that
-      will be discarded.\n\t'c_ring1_r' has translation animation that will be discarded.\n\t'c_ring2_r'
-      has translation animation that will be discarded.\n\t'c_ring3_r' has translation
-      animation that will be discarded.\n\t'c_middle1_r' has translation animation
-      that will be discarded.\n\t'c_middle2_r' has translation animation that will
-      be discarded.\n\t'c_middle3_r' has translation animation that will be discarded.\n\t'c_index1_r'
-      has translation animation that will be discarded.\n\t'c_index2_r' has translation
-      animation that will be discarded.\n\t'c_index3_r' has translation animation
-      that will be discarded.\n\nClip 'Interact' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'c_thumb1_r' has translation animation that
-      will be discarded.\n\t'c_ring1_r' has translation animation that will be discarded.\n\t'c_middle1_r'
-      has translation animation that will be discarded.\n\t'c_index1_r' has translation
-      animation that will be discarded.\n\nClip 'DrawHandgun' has import animation
-      warnings that might lower retargeting quality:\nNote: Activate translation
-      DOF on avatar to improve retargeting quality.\n\t'c_thumb1_r' has translation
-      animation that will be discarded.\n\t'c_ring1_r' has translation animation
-      that will be discarded.\n\t'c_ring2_r' has translation animation that will
-      be discarded.\n\t'c_ring3_r' has translation animation that will be discarded.\n\t'c_middle1_r'
+      might lower retargeting quality:\n\t'c_thumb1_r' has translation animation
+      that will be discarded.\n\t'c_ring1_r' has translation animation that will
+      be discarded.\n\t'c_middle1_r' has translation animation that will be discarded.\n\t'c_index1_r'
+      has translation animation that will be discarded.\n\nClip 'Punch' has import
+      animation warnings that might lower retargeting quality:\n\t'c_thumb1_r' has
+      translation animation that will be discarded.\n\t'c_ring1_r' has translation
+      animation that will be discarded.\n\t'c_ring2_r' has translation animation
+      that will be discarded.\n\t'c_ring3_r' has translation animation that will
+      be discarded.\n\t'c_middle1_r' has translation animation that will be discarded.\n\t'c_middle2_r'
       has translation animation that will be discarded.\n\t'c_middle3_r' has translation
       animation that will be discarded.\n\t'c_index1_r' has translation animation
       that will be discarded.\n\t'c_index2_r' has translation animation that will
-      be discarded.\n"
+      be discarded.\n\t'c_index3_r' has translation animation that will be discarded.\n\nClip
+      'Interact' has import animation warnings that might lower retargeting quality:\n\t'c_thumb1_r'
+      has translation animation that will be discarded.\n\t'c_ring1_r' has translation
+      animation that will be discarded.\n\t'c_middle1_r' has translation animation
+      that will be discarded.\n\t'c_index1_r' has translation animation that will
+      be discarded.\n\nClip 'DrawHandgun' has import animation warnings that might
+      lower retargeting quality:\n\t'c_thumb1_r' has translation animation that will
+      be discarded.\n\t'c_ring1_r' has translation animation that will be discarded.\n\t'c_ring2_r'
+      has translation animation that will be discarded.\n\t'c_ring3_r' has translation
+      animation that will be discarded.\n\t'c_middle1_r' has translation animation
+      that will be discarded.\n\t'c_middle3_r' has translation animation that will
+      be discarded.\n\t'c_index1_r' has translation animation that will be discarded.\n\t'c_index2_r'
+      has translation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -60,7 +62,123 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: ThrowItem
+      takeName: ThrowItem
+      internalID: -8313846177282872050
+      firstFrame: 0
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Punch
+      takeName: Punch
+      internalID: 2353680664591731088
+      firstFrame: 40
+      lastFrame: 70
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Interact
+      takeName: Interact
+      internalID: 1701519168366769839
+      firstFrame: 80
+      lastFrame: 110
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: DrawHandgun
+      takeName: DrawHandgun
+      internalID: 6315187618311913350
+      firstFrame: 160
+      lastFrame: 185
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -96,6 +214,7 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
