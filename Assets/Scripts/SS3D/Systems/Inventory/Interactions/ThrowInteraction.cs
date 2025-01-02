@@ -89,11 +89,11 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.RootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.25f / Time.timeScale);
+            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.RootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.4f / Time.timeScale);
 
             if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
             {
-                animatedSource.PlaySourceAnimation(InteractionType.Throw, interactionEvent.Source.GetComponent<NetworkObject>(), Vector3.zero, 0.25f / Time.timeScale);
+                animatedSource.PlaySourceAnimation(InteractionType.Throw, interactionEvent.Source.GetComponent<NetworkObject>(), Vector3.zero, 0.4f / Time.timeScale);
             }
 
             return false;
