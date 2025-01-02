@@ -94,6 +94,8 @@ namespace SS3D.Systems.Inventory.UI
         private void HandleDragOutOfUI(object sender, EventArgs e)
         {
             DropItemOutside(_itemDisplay.Item);
+            _itemDisplay.MakeVisible(false);
+            _itemDisplay.ResetPositionAndParent();
         }
 
         /// <summary>
