@@ -1,10 +1,12 @@
-﻿using FishNet;
+﻿using DG.Tweening;
+using FishNet;
 using FishNet.Component.Animating;
 using SS3D.Core.Behaviours;
 using SS3D.Systems.Animations;
 using SS3D.Systems.Inventory.Containers;
 using SS3D.Systems.Inventory.Items;
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace SS3D.Systems.Entities.Humanoid
@@ -38,6 +40,13 @@ namespace SS3D.Systems.Entities.Humanoid
         public void Dance(bool dance, float transitionDuration = 0.15f)
         {
             _animator.CrossFade(dance ? "Dance" : "Move", transitionDuration);
+        }
+
+        public void Throw(bool isRight)
+        {
+            _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 1);
+            _animator.SetTrigger(isRight ? "ThrowRight" : "ThrowLeft");
+            StartCoroutine(SetLayerWeight(isRight ? "ArmRight" : "ArmLeft", 0f, 0.25f, 0.25f));
         }
 
         public void MakeFist(bool makeFist, bool isRight)
@@ -96,6 +105,17 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             base.OnDestroyed();
             UnsubscribeFromEvents();
+        }
+
+        private IEnumerator SetLayerWeight(string layerName, float weight, float delay, float time)
+        {
+            yield return new WaitForSeconds(delay);
+            DOTween.To(
+                    () => _animator.GetLayerIndex(layerName),
+                    x => _animator.SetLayerWeight(_animator.GetLayerIndex(layerName), x),
+                    weight,
+                    time)
+                .SetEase(Ease.Linear);
         }
 
         private void HandleNetworkTick()
@@ -228,7 +248,7 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.SetBool(Aim, isAiming);
             _animator.SetBool(TorsoGunAim, !toThrow);
 
-            _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
+            // _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
 
         private void UpdateSpeedParamater(float speed)

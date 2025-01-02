@@ -30,48 +30,27 @@ namespace SS3D.Systems.Animations
         {
             _mainHand.Hold.ItemPositionConstraint.weight = 0f;
 
-            /*
-            bool isRight = _mainHand.HandType == HandType.RightHand;
-            int deviationRightOrLeft = isRight ? 1 : -1;
+            Controller.AnimatorController.Throw(_mainHand.HandType == HandType.RightHand);
 
-            Vector3 initialPosition = _mainHand.Hold.ItemPositionTargetLocker.transform.position;
-            Vector3 initialPositionInRoot = _rootTransform.InverseTransformPoint(initialPosition);
-            Vector3 middle = initialPositionInRoot + 0.15f * Vector3.up - 0.15f * Vector3.forward + deviationRightOrLeft * 0.1f * Vector3.right;
-            Vector3 end = initialPositionInRoot - 0.3f * Vector3.forward;
+            _holdable.GameObject.transform.parent = _mainHand.HandBone;
 
+            _mainHand.Hold.HoldIkConstraint.weight = 0f;
+            _mainHand.Hold.PickupIkConstraint.weight = 0f;
 
-            Vector3[] path =
+            // remove all IK constraint on second hand if needed
+            if (_holdable.CanHoldTwoHand && _secondaryHand)
             {
-                initialPositionInRoot,
-                middle,
-                end
-            };
+                _secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
+                _secondaryHand.Hold.HoldIkConstraint.weight = 0f;
+                _secondaryHand.Hold.PickupIkConstraint.weight = 0f;
+            }
 
-            // do a little back and forth path
-            InteractionSequence.Join(_mainHand.Hold.ItemPositionTargetLocker.transform.DOLocalPath(path, InteractionTime/2)
-                .SetLoops(2, LoopType.Yoyo));
-            */
-
-            InteractionSequence.OnComplete(() =>
+            if (_holdable.TryGetComponent(out Collider collider))
             {
-                _mainHand.Hold.HoldIkConstraint.weight = 0f;
-                _mainHand.Hold.PickupIkConstraint.weight = 0f;
-
-                // remove all IK constraint on second hand if needed
-                if (_holdable.CanHoldTwoHand && _secondaryHand)
-                {
-                    _secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
-                    _secondaryHand.Hold.HoldIkConstraint.weight = 0f;
-                    _secondaryHand.Hold.PickupIkConstraint.weight = 0f;
-                }
-
-                _holdable.GameObject.transform.parent = null;
-            });
-
-            // Ignore collision between thrown item and player for a short while
-            Physics.IgnoreCollision(_holdable.GetComponent<Collider>(), _rootTransform.GetComponent<Collider>(), true);
-
-            WaitToRestoreCollision();
+                // Ignore collision between thrown item and player for a short while
+                Physics.IgnoreCollision(collider, _rootTransform.GetComponent<Collider>(), true);
+                WaitToRestoreCollision();
+            }
         }
 
         public override void Cancel()

@@ -89,11 +89,11 @@ namespace SS3D.Systems.Inventory.Interactions
                 return false;
             }
 
-            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.RootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.5f);
+            ServerThrow(itemHolder, itemHolder.ItemHeld, rootTransformProvider.RootTransform, aimingTargetProvider.AimTarget, intentProvider.Intent, 0.25f / Time.timeScale);
 
             if (interactionEvent.Source.GetRootSource() is IInteractionSourceAnimate animatedSource)
             {
-                animatedSource.PlaySourceAnimation(InteractionType.Throw, interactionEvent.Target.GetComponent<NetworkObject>(), Vector3.zero, 0.5f);
+                animatedSource.PlaySourceAnimation(InteractionType.Throw, interactionEvent.Source.GetComponent<NetworkObject>(), Vector3.zero, 0.25f / Time.timeScale);
             }
 
             return false;
@@ -159,22 +159,29 @@ namespace SS3D.Systems.Inventory.Interactions
             // remove client ownership so that server can take full control of item trajectory
             item.RemoveOwnership();
 
-            // ignore collisions while in hand, the time the item gets a bit out of the player collider.
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), true);
+            if (item.TryGetComponent(out Collider collider))
+            {
+                // ignore collisions while in hand, the time the item gets a bit out of the player collider.
+                Physics.IgnoreCollision(collider, playerRoot.gameObject.GetComponent<Collider>(), true);
+            }
 
             // wait roughly the time of animation on client before actually throwing
             await Task.Delay((int)(time * 1000));
 
             item.transform.parent = null;
             item.GetComponent<Rigidbody>().isKinematic = false;
-            item.GetComponent<Collider>().enabled = true;
             AddForceToItem(item.GameObject, playerRoot, aimTarget, intent);
 
             item.Container.RemoveItem(item);
 
-            // after a short amount of time, stop ignoring collisions
-            await Task.Delay(300);
-            Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), false);
+            if (collider)
+            {
+                collider.enabled = true;
+
+                // after a short amount of time, stop ignoring collisions
+                await Task.Delay(300);
+                Physics.IgnoreCollision(item.GetComponent<Collider>(), playerRoot.gameObject.GetComponent<Collider>(), false);
+            }
         }
 
         private void AddForceToItem(GameObject item, Transform playerRoot, Transform aimTarget, IntentType intent)
