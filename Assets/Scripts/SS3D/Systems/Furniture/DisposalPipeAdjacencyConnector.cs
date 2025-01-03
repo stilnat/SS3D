@@ -129,7 +129,7 @@ namespace SS3D.Systems.Tile.Connections
             // with other Disposal pipes.
             else
             {
-                isUpdated = _adjacencyMap.SetConnection(dir, new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
+                isUpdated = _adjacencyMap.SetConnection(dir, isConnected);
             }
 
             if (isUpdated)

@@ -1,4 +1,5 @@
 ﻿using SS3D.Systems.Tile.Connections.AdjacencyTypes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,21 +12,11 @@ namespace SS3D.Systems.Tile.Connections
     public class AdjacencyMap
     {
         // Stores an array of which of the 8 surrounding tiles have a connection. Order assumed to match Direction enum values.
-        private AdjacencyData[] _connections;
+        private bool[] _connections;
 
         public AdjacencyMap()
         {
-            _connections = new AdjacencyData[]
-            {
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-                new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, false),
-            };
+            _connections = new bool[8];
         }
 
         /// <summary>
@@ -43,7 +34,7 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public int ConnectionCount => GetAdjacencies(true).Count + GetAdjacencies(false).Count;
 
-        public bool HasConnection(Direction direction) => _connections[(int)direction].Exists;
+        public bool HasConnection(Direction direction) => _connections[(int)direction];
 
         /// <summary>
         /// Gets the direction of the only cardinal/diagonal connection.
@@ -93,14 +84,10 @@ namespace SS3D.Systems.Tile.Connections
         /// <param name="direction"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool SetConnection(Direction direction, AdjacencyData data)
+        public bool SetConnection(Direction direction, bool isConnected)
         {
-            bool changed = !data.Equals(_connections[(int)direction]);
-            if (changed)
-            {
-                _connections[(int)direction] = data;
-            }
-
+            bool changed = _connections[(int)direction] != isConnected;
+            _connections[(int)direction] = isConnected;
             return changed;
         }
 
@@ -112,17 +99,17 @@ namespace SS3D.Systems.Tile.Connections
                 TileHelper.DiagonalDirections().ConvertAll(direction => (int)direction);
 
             // Loop through each index in direction indexes, pick those that exist and cast them to the Direction enum.
-            return (from index in directionIndexes where _connections[index].Exists select (Direction)index).ToList();
+            return (from index in directionIndexes where _connections[index] select (Direction)index).ToList();
         }
 
         public void DeserializeFromByte(byte bytemap)
         {
             BitArray bits = new(new byte[] { bytemap });
-            AdjacencyData[] adjacencyData = new AdjacencyData[8];
+            bool[] adjacencyData = new bool[8];
 
             for (int i = 0; i < bits.Length; i++)
             {
-                adjacencyData[i] = new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, bits[i]);
+                adjacencyData[i] = bits[i];
             }
 
             _connections = adjacencyData;
@@ -133,7 +120,7 @@ namespace SS3D.Systems.Tile.Connections
             int sum = 0;
             for (int i = 1, direction = 0; i < 256; i *= 2, direction++)
             {
-                if (_connections[direction].Exists)
+                if (_connections[direction])
                 {
                     sum += i;
                 }

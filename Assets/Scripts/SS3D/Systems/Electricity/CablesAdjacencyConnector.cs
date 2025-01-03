@@ -77,7 +77,7 @@ namespace System.Electricity
 
             bool isConnected = IsConnected(neighbourObject);
 
-            bool isUpdated = _adjacencyMap.SetConnection(dir, new(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
+            bool isUpdated = _adjacencyMap.SetConnection(dir, isConnected);
 
             if (isUpdated && updateNeighbour && neighbourObject)
             {

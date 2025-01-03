@@ -119,7 +119,7 @@ namespace SS3D.Systems.Tile.Connections
 
             bool isConnected = IsConnected(neighbourObject);
 
-            bool isUpdated = _adjacencyMap.SetConnection(dir, new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, isConnected));
+            bool isUpdated = _adjacencyMap.SetConnection(dir, isConnected);
 
             if (isUpdated)
             {
@@ -141,7 +141,7 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         public void SetBlockedDirection(Direction dir, bool value)
         {
-            _adjacencyMap.SetConnection(dir, new AdjacencyData(TileObjectGenericType.None, TileObjectSpecificType.None, value));
+            _adjacencyMap.SetConnection(dir, value);
             UpdateMeshAndDirection();
         }
 
@@ -203,25 +203,27 @@ namespace SS3D.Systems.Tile.Connections
         /// </summary>
         private void Setup()
         {
-            if (!_initialized)
+            if (_initialized)
             {
-                _adjacencyMap = new AdjacencyMap();
-                _filter = GetComponent<MeshFilter>();
-
-                _placedObject = GetComponentInParent<PlacedTileObject>();
-                if (_placedObject == null)
-                {
-                    _genericType = TileObjectGenericType.None;
-                    _specificType = TileObjectSpecificType.None;
-                }
-                else
-                {
-                    _genericType = _placedObject.GenericType;
-                    _specificType = _placedObject.SpecificType;
-                }
-
-                _initialized = true;
+                return;
             }
+
+            _adjacencyMap = new AdjacencyMap();
+            _filter = GetComponent<MeshFilter>();
+
+            _placedObject = GetComponentInParent<PlacedTileObject>();
+            if (!_placedObject)
+            {
+                _genericType = TileObjectGenericType.None;
+                _specificType = TileObjectSpecificType.None;
+            }
+            else
+            {
+                _genericType = _placedObject.GenericType;
+                _specificType = _placedObject.SpecificType;
+            }
+
+            _initialized = true;
         }
 
         /// <summary>
