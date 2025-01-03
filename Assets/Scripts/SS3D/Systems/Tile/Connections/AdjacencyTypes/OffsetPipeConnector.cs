@@ -9,7 +9,7 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
     /// Used by the non-centered pipe layers.
     /// </summary>
     [Serializable]
-    public struct OffsetConnector : IMeshAndDirectionResolver
+    public struct OffsetPipeConnector : IMeshAndDirectionResolver
     {
         public enum OffsetOrientation
         {
@@ -28,55 +28,42 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
             X = 12,
         }
 
-        [FormerlySerializedAs("o")]
         [Tooltip("A mesh where no edges are connected")]
         public Mesh O;
 
-        [FormerlySerializedAs("uNorth")]
         [Tooltip("A mesh where the North edge is connected, can be rotated to the East")]
         public Mesh UNorth;
 
-        [FormerlySerializedAs("uSouth")]
         [Tooltip("A mesh where the South edge is connected, can be rotated to the West")]
         public Mesh USouth;
 
-        [FormerlySerializedAs("i")]
         [Tooltip("A mesh where North & South edges are connected")]
         public Mesh I;
 
-        [FormerlySerializedAs("lNE")]
         [Tooltip("A mesh where the North & East edges are connected")]
         public Mesh LNe;
 
-        [FormerlySerializedAs("lNW")]
         [Tooltip("A mesh where the North & West edges are connected")]
         public Mesh LNw;
 
-        [FormerlySerializedAs("lSE")]
         [Tooltip("A mesh where the South & East edges are connected")]
         public Mesh LSe;
 
-        [FormerlySerializedAs("lSW")]
         [Tooltip("A mesh where the South & West edges are connected")]
         public Mesh LSW;
 
-        [FormerlySerializedAs("tSWE")]
         [Tooltip("A mesh where the South, West, & East edges are connected")]
         public Mesh TSwe;
 
-        [FormerlySerializedAs("tNEW")]
         [Tooltip("A mesh where the North, East, & West edges are connected")]
         public Mesh TNew;
 
-        [FormerlySerializedAs("tNSW")]
         [Tooltip("A mesh where the North, South, & West edges are connected")]
         public Mesh TNsw;
 
-        [FormerlySerializedAs("tNSE")]
         [Tooltip("A mesh where the North, South, & East edges are connected")]
         public Mesh TNse;
 
-        [FormerlySerializedAs("x")]
         [Tooltip("A mesh where all edges are connected")]
         public Mesh X;
 
