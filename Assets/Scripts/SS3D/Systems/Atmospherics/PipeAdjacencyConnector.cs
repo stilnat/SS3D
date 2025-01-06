@@ -80,7 +80,7 @@ namespace SS3D.Systems.Atmospherics
 
             if (isUpdated)
             {
-                if (neighbourObject)
+                if (neighbourObject && updateNeighbour)
                 {
                     neighbourObject.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), _placedObject, false);
                 }
@@ -128,8 +128,9 @@ namespace SS3D.Systems.Atmospherics
                 isConnected &= valve.IsOpen;
             }
 
-            if (neighbourObject.TryGetComponent(out TrinaryAtmosDevice filter))
+            if (neighbourObject.TryGetComponent(out AtmosTrinaryDeviceAdjacencyConnector filter))
             {
+                // This pipe connects to TrinaryAtmosDevice only if it's placed behind, in front or on one of its side
                 isConnected &= tileObject.WorldOrigin == neighbourObject.WorldOrigin + neighbourObjectTwoDForward
                     || tileObject.WorldOrigin == neighbourObject.WorldOrigin - neighbourObjectTwoDForward
                     || tileObject.WorldOrigin == neighbourObject.WorldOrigin + neighbourObjectTwoDRight;
@@ -140,11 +141,14 @@ namespace SS3D.Systems.Atmospherics
                 // Can't connect if connected to more than one other pipe
                 isConnected &= _pipeLayerConnections.ConnectionCount <= 1;
 
-                // If connected to one pipe already, connect only if this pipe is opposite to the machinery.
+                // If connected to one pipe already, connect only if the neighbour pipe is opposite to the machinery.
                 if (_pipeLayerConnections.ConnectionCount == 1)
                 {
                     isConnected &= _pipeLayerConnections.GetSingleConnection() == TileHelper.GetOpposite(neighbourDirection);
                 }
+
+                // If the device is already connected does not connect
+                isConnected &= !filter.Connections.HasConnection(TileHelper.GetOpposite(neighbourDirection));
             }
 
             if (

@@ -29,6 +29,8 @@ namespace SS3D.Systems.Atmospherics
         /// </summary>
         private bool _initialized;
 
+        public AdjacencyMap Connections => _pipeLayerConnections;
+
         public bool UpdateSingleConnection(Direction dir, PlacedTileObject neighbourObject, bool updateNeighbour)
         {
             Setup();
@@ -36,7 +38,7 @@ namespace SS3D.Systems.Atmospherics
             bool isConnected = IsConnected(neighbourObject);
             bool isUpdated = _pipeLayerConnections.SetConnection(dir, isConnected);
 
-            if (isUpdated && neighbourObject)
+            if (isUpdated && neighbourObject && updateNeighbour)
             {
                 neighbourObject.UpdateSingleAdjacency(TileHelper.GetOpposite(dir), _placedObject, false);
             }
@@ -73,11 +75,9 @@ namespace SS3D.Systems.Atmospherics
                 || neighbourObject.WorldOrigin == GetComponent<PlacedTileObject>().WorldOrigin - twoDForward
                 || neighbourObject.WorldOrigin == GetComponent<PlacedTileObject>().WorldOrigin + twoDRight;
 
-            // Only connect to pipes of the same layer as the set up trinary device layer
-            if (neighbourObject.TryGetComponent(out PipeAdjacencyConnector neighbourConnector))
-            {
-                isConnected &= GetComponent<TrinaryAtmosDevice>().PipeLayer == neighbourObject.Layer;
-            }
+            // Only connect if not already connected to something else.
+            isConnected &= _placedObject.NeighbourAtDirectionOf(neighbourObject, out Direction neighbourDirection)
+                && !_pipeLayerConnections.HasConnection(neighbourDirection);
 
             return isConnected;
         }

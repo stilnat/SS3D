@@ -112,7 +112,7 @@ namespace SS3D.Systems.Atmospherics
             atmosPipe = null;
             SingleTileLocation tileLocation = Subsystems.Get<TileSystem>().CurrentMap.GetTileLocation(layer, worldPosition) as SingleTileLocation;
 
-            if (!tileLocation.TryGetPlacedObject(out PlacedTileObject placedTileObject))
+            if (tileLocation == null || !tileLocation.TryGetPlacedObject(out PlacedTileObject placedTileObject))
             {
                 return false;
             }
