@@ -143,8 +143,8 @@ MonoBehaviour:
     UNorth: {fileID: -4913184590784469283, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
     USouth: {fileID: -8982356636661201101, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
     I: {fileID: 6771834481066591091, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
-    INorthMachinery: {fileID: 6934015897885533510, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
-    ISouthMachinery: {fileID: 9192307229445680586, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
+    INorthMachinery: {fileID: -1620234467289525196, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
+    ISouthMachinery: {fileID: 8309825238281200940, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
     LNe: {fileID: 1452706557494696559, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
     LNw: {fileID: 2974487339661499261, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}
     LSe: {fileID: -8284340391569421606, guid: 013a2e526b13e1849b628bdc478f9c03, type: 3}

@@ -13,7 +13,7 @@ namespace SS3D.Systems.Atmospherics
         [SerializeField]
         private bool _sideOnRight;
 
-        public TileLayer PipeLayer { get; private set; } = TileLayer.PipeLeft;
+        public TileLayer PipeLayer { get; private set; } = TileLayer.PipeRight;
 
         protected Vector3 FrontPipePosition { get; private set; }
 
