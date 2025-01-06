@@ -44,7 +44,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5199170345094387172}
-  m_Mesh: {fileID: -2638617416542609423, guid: 2a30be4c78c286b4e89636ae631df4d0, type: 3}
+  m_Mesh: {fileID: -1076428387231834887, guid: 2a30be4c78c286b4e89636ae631df4d0, type: 3}
 --- !u!23 &5199170345094387171
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -102,12 +102,14 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 5199170345094387173}
   _networkObjectCache: {fileID: 5199170345094387173}
+  _sideOnRight: 0
   _litersPerSecond: 10
+  _filterActive: 0
   _filterOxygen: 0
   _filterNitrogen: 0
   _filterCarbonDioxyde: 0
   _filterPlasma: 0
-  FilterViewPrefab: {fileID: 1118764599578552362, guid: f51ad456af7bc2a45a60f8063c87f6d9, type: 3}
+  _filterViewPrefab: {fileID: 1118764599578552362, guid: f51ad456af7bc2a45a60f8063c87f6d9, type: 3}
 --- !u!114 &5199170345094387173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,6 +127,7 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   _networkBehaviours:
   - {fileID: 5199170345094387170}
+  - {fileID: 3409017397977807752}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   SerializedTransformProperties:
@@ -136,7 +139,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 109
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
@@ -167,7 +170,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c431b27f40b0019438c6ceaf9c8c54f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 5199170345094387173}
-  _networkObjectCache: {fileID: 0}
-  _syncedConnections: 0
+  _networkObjectCache: {fileID: 5199170345094387173}

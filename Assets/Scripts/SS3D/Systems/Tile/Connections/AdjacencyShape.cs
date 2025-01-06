@@ -47,5 +47,9 @@
         LOut = 30,
         ULeft = 31,
         URight = 32,
+
+        // PipeOffsetMachinery
+        INorthMachinery = 33,
+        ISouthMachinery = 34,
     }
 }

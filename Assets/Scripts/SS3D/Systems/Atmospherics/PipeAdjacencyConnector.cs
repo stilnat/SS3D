@@ -33,7 +33,9 @@ namespace SS3D.Systems.Atmospherics
         /// </summary>
         private AdjacencyMap _pipeLayerConnections;
 
-        private AdjacencyMap _machineryLayerConnections;
+        private Direction _machineryConnection;
+
+        private bool _isConnectedToMachinery;
 
         /// <summary>
         /// The specific mesh this connectable has.
@@ -53,14 +55,27 @@ namespace SS3D.Systems.Atmospherics
             bool isUpdated = false;
 
             // If neighbour is a atmos machinery and this pipe is connected to it
-            if (isConnected && neighbourObject.TryGetComponent(out FilterAtmosObject _))
+            if (isConnected && neighbourObject.TryGetComponent(out TrinaryAtmosDevice _))
             {
-                isUpdated = _machineryLayerConnections.SetConnection(dir, true);
+                isUpdated = !_isConnectedToMachinery;
+                _isConnectedToMachinery = true;
+                _placedObject.NeighbourAtDirectionOf(neighbourObject, out _machineryConnection);
             }
 
             if (isConnected && neighbourObject.TryGetComponent(out PipeAdjacencyConnector _))
             {
                 isUpdated = _pipeLayerConnections.SetConnection(dir, true);
+            }
+
+            if (!isConnected && _pipeLayerConnections.HasConnection(dir))
+            {
+                isUpdated = _pipeLayerConnections.SetConnection(dir, false);
+            }
+
+            if (!isConnected && _isConnectedToMachinery && dir == _machineryConnection)
+            {
+                _isConnectedToMachinery = false;
+                isUpdated = true;
             }
 
             if (isUpdated)
@@ -99,25 +114,45 @@ namespace SS3D.Systems.Atmospherics
                 return false;
             }
 
+            _placedObject.NeighbourAtDirectionOf(neighbourObject, out Direction neighbourDirection);
+            Vector2Int neighbourObjectTwoDForward = new((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z);
+            Vector2Int neighbourObjectTwoDRight = new((int)neighbourObject.transform.right.x, (int)neighbourObject.transform.right.z);
+
             isConnected = neighbourObject && neighbourObject.HasAdjacencyConnector;
 
             if (neighbourObject.TryGetComponent(out IAtmosValve valve))
             {
-                isConnected &= tileObject.WorldOrigin == neighbourObject.WorldOrigin + new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z) ||
-                    tileObject.WorldOrigin == neighbourObject.WorldOrigin - new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z);
+                isConnected &= tileObject.WorldOrigin == neighbourObject.WorldOrigin + neighbourObjectTwoDForward
+                    || tileObject.WorldOrigin == neighbourObject.WorldOrigin - neighbourObjectTwoDRight;
 
                 isConnected &= valve.IsOpen;
             }
 
-            if (neighbourObject.TryGetComponent(out FilterAtmosObject filter))
+            if (neighbourObject.TryGetComponent(out TrinaryAtmosDevice filter))
             {
-                isConnected &= tileObject.WorldOrigin == neighbourObject.WorldOrigin + new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z) ||
-                    tileObject.WorldOrigin == neighbourObject.WorldOrigin - new Vector2Int((int)neighbourObject.transform.forward.x, (int)neighbourObject.transform.forward.z)
-                    || tileObject.WorldOrigin == neighbourObject.WorldOrigin + new Vector2Int((int)gameObject.transform.right.x, (int)gameObject.transform.right.z);
+                isConnected &= tileObject.WorldOrigin == neighbourObject.WorldOrigin + neighbourObjectTwoDForward
+                    || tileObject.WorldOrigin == neighbourObject.WorldOrigin - neighbourObjectTwoDForward
+                    || tileObject.WorldOrigin == neighbourObject.WorldOrigin + neighbourObjectTwoDRight;
 
-                // Can't connect to machinery if already connected to a pipe
-                _placedObject.NeighbourAtDirectionOf(neighbourObject, out Direction direction);
-                isConnected &= !_pipeLayerConnections.HasConnection(direction);
+                // Can't connect to machinery if pipe already connected to other machinery except if it's the same machinery
+                isConnected &= !_isConnectedToMachinery || (_isConnectedToMachinery && neighbourDirection == _machineryConnection);
+
+                // Can't connect if connected to more than one other pipe
+                isConnected &= _pipeLayerConnections.ConnectionCount <= 1;
+
+                // If connected to one pipe already, connect only if this pipe is opposite to the machinery.
+                if (_pipeLayerConnections.ConnectionCount == 1)
+                {
+                    isConnected &= _pipeLayerConnections.GetSingleConnection() == TileHelper.GetOpposite(neighbourDirection);
+                }
+            }
+
+            if (
+                neighbourObject.TryGetComponent(out PipeAdjacencyConnector neighbourConnector)
+                && neighbourConnector._isConnectedToMachinery
+                && neighbourConnector._machineryConnection != neighbourDirection)
+            {
+                isConnected &= false;
             }
 
             // Pipes connect only between themselves on the same layer.
@@ -146,7 +181,7 @@ namespace SS3D.Systems.Atmospherics
 
         private void UpdateMeshAndDirection()
         {
-            MeshDirectionInfo info = _pipeConnector.GetMeshAndDirection(_pipeLayerConnections);
+            MeshDirectionInfo info = _pipeConnector.GetMeshAndDirection(_pipeLayerConnections, _isConnectedToMachinery, _machineryConnection);
             _filter.mesh = info.Mesh;
             Quaternion localRotation = transform.localRotation;
             Vector3 eulerRotation = localRotation.eulerAngles;
@@ -164,7 +199,6 @@ namespace SS3D.Systems.Atmospherics
             _filter = GetComponent<MeshFilter>();
             _placedObject = GetComponentInParent<PlacedTileObject>();
             _pipeLayerConnections = new AdjacencyMap();
-            _machineryLayerConnections = new AdjacencyMap();
             _initialized = true;
         }
     }

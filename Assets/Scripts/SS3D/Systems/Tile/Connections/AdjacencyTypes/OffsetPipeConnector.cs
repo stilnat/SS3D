@@ -9,25 +9,8 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
     /// Used by the non-centered pipe layers.
     /// </summary>
     [Serializable]
-    public struct OffsetPipeConnector : IMeshAndDirectionResolver
+    public struct OffsetPipeConnector
     {
-        public enum OffsetOrientation
-        {
-            O = 0,
-            UNorth = 1,
-            USouth = 2,
-            I = 3,
-            LNe = 4,
-            LNw = 5,
-            LSe = 6,
-            LSW = 7,
-            TNEW = 8,
-            TNSW = 9,
-            TNSE = 10,
-            TSWE = 11,
-            X = 12,
-        }
-
         [Tooltip("A mesh where no edges are connected")]
         public Mesh O;
 
@@ -39,6 +22,12 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
 
         [Tooltip("A mesh where North & South edges are connected")]
         public Mesh I;
+
+        [Tooltip("A mesh where North & South edges are connected")]
+        public Mesh INorthMachinery;
+
+        [Tooltip("A mesh where North & South edges are connected")]
+        public Mesh ISouthMachinery;
 
         [Tooltip("A mesh where the North & East edges are connected")]
         public Mesh LNe;
@@ -67,54 +56,59 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
         [Tooltip("A mesh where all edges are connected")]
         public Mesh X;
 
-        private OffsetOrientation _orientation;
-
-        public OffsetOrientation GetOrientation() => _orientation;
-
-        public MeshDirectionInfo GetMeshAndDirection(AdjacencyMap adjacencyMap)
+        public MeshDirectionInfo GetMeshAndDirection(AdjacencyMap pipeConnections, bool connectedToMachinery = false, Direction machineryDirection = Direction.North)
         {
             // Determine rotation and mesh specially for every single case.
             float rotation = 0.0f;
             Mesh mesh;
 
-            AdjacencyShape shape = AdjacencyShapeResolver.GetOffsetShape(adjacencyMap);
+            AdjacencyShape shape = GetPipeOffsetShape(pipeConnections, connectedToMachinery, machineryDirection);
             switch (shape)
             {
                 case AdjacencyShape.O:
                 {
                     mesh = O;
-                    _orientation = OffsetOrientation.O;
                     break;
                 }
 
                 case AdjacencyShape.UNorth:
                 {
                     mesh = UNorth;
-                    _orientation = OffsetOrientation.UNorth;
-                    rotation = TileHelper.AngleBetween(Direction.North, adjacencyMap.GetSingleConnection());
+                    rotation = TileHelper.AngleBetween(Direction.North, pipeConnections.GetSingleConnection());
                     break;
                 }
 
                 case AdjacencyShape.USouth:
                 {
                     mesh = USouth;
-                    _orientation = OffsetOrientation.USouth;
-                    rotation = TileHelper.AngleBetween(Direction.South, adjacencyMap.GetSingleConnection());
+                    rotation = TileHelper.AngleBetween(Direction.South, pipeConnections.GetSingleConnection());
                     break;
                 }
 
                 case AdjacencyShape.I:
                 {
                     mesh = I;
-                    _orientation = OffsetOrientation.I;
-                    rotation = TileHelper.AngleBetween(Direction.North, adjacencyMap.HasConnection(Direction.North) ? Direction.North : Direction.East);
+                    rotation = TileHelper.AngleBetween(Direction.North, pipeConnections.HasConnection(Direction.North) ? Direction.North : Direction.East);
+                    break;
+                }
+
+                case AdjacencyShape.INorthMachinery:
+                {
+                    mesh = INorthMachinery;
+                    rotation = machineryDirection == Direction.North ? 180 : -90;
+                    break;
+                }
+
+                case AdjacencyShape.ISouthMachinery:
+                {
+                    mesh = ISouthMachinery;
+                    rotation = machineryDirection == Direction.South ? 0 : 90;
                     break;
                 }
 
                 case AdjacencyShape.LNorthWest:
                 {
                     mesh = LNw;
-                    _orientation = OffsetOrientation.LNw;
                     rotation = 90;
                     break;
                 }
@@ -122,7 +116,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.LNorthEast:
                 {
                     mesh = LNe;
-                    _orientation = OffsetOrientation.LSe;
                     rotation = 90;
                     break;
                 }
@@ -130,7 +123,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.LSouthEast:
                 {
                     mesh = LSe;
-                    _orientation = OffsetOrientation.LSW;
                     rotation = 90;
                     break;
                 }
@@ -138,7 +130,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.LSouthWest:
                 {
                     mesh = LSW;
-                    _orientation = OffsetOrientation.LNw;
                     rotation = 90;
                     break;
                 }
@@ -146,7 +137,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.TNorthSouthEast:
                 {
                     mesh = TNse;
-                    _orientation = OffsetOrientation.TSWE;
                     rotation = 90;
                     break;
                 }
@@ -154,7 +144,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.TSouthWestEast:
                 {
                     mesh = TSwe;
-                    _orientation = OffsetOrientation.TNSW;
                     rotation = 90;
                     break;
                 }
@@ -162,7 +151,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.TNorthSouthWest:
                 {
                     mesh = TNsw;
-                    _orientation = OffsetOrientation.TNEW;
                     rotation = 90;
                     break;
                 }
@@ -170,7 +158,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.TNorthEastWest:
                 {
                     mesh = TNew;
-                    _orientation = OffsetOrientation.TNSE;
                     rotation = 90;
                     break;
                 }
@@ -178,7 +165,6 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
                 case AdjacencyShape.X:
                 {
                     mesh = X;
-                    _orientation = OffsetOrientation.X;
                     rotation = 90;
                     break;
                 }
@@ -192,6 +178,73 @@ namespace SS3D.Systems.Tile.Connections.AdjacencyTypes
             }
 
             return new MeshDirectionInfo { Mesh = mesh, Rotation = rotation };
+        }
+
+        private static AdjacencyShape GetPipeOffsetShape(AdjacencyMap pipeConnections, bool connectedToMachinery, Direction machineryDirection)
+        {
+            int pipeConnectionCount = pipeConnections.CardinalConnectionCount;
+
+            if (connectedToMachinery)
+            {
+                return machineryDirection switch
+                {
+                    Direction.North => AdjacencyShape.INorthMachinery,
+                    Direction.South => AdjacencyShape.ISouthMachinery,
+                    Direction.West => AdjacencyShape.ISouthMachinery,
+                    _ => AdjacencyShape.INorthMachinery,
+                };
+            }
+
+            if (pipeConnectionCount == 0)
+            {
+                return AdjacencyShape.O;
+            }
+
+            if (pipeConnectionCount == 1)
+            {
+                return pipeConnections.HasConnection(Direction.North) || pipeConnections.HasConnection(Direction.East) ?
+                    AdjacencyShape.UNorth : AdjacencyShape.USouth;
+            }
+
+            // When two connections to pipes and they're opposite
+            if (pipeConnectionCount == 2 && pipeConnections.HasConnection(Direction.North) == pipeConnections.HasConnection(Direction.South))
+            {
+                return AdjacencyShape.I;
+            }
+
+            // When two connections to pipes and they're adjacent
+            if (pipeConnectionCount == 2 && pipeConnections.HasConnection(Direction.North) != pipeConnections.HasConnection(Direction.South))
+            {
+                Direction diagonal = pipeConnections.GetDirectionBetweenTwoConnections();
+                return diagonal switch
+                {
+                    Direction.NorthEast => AdjacencyShape.LNorthWest,
+                    Direction.SouthEast => AdjacencyShape.LNorthEast,
+                    Direction.SouthWest => AdjacencyShape.LSouthEast,
+                    _ => AdjacencyShape.LSouthWest,
+                };
+            }
+
+            if (pipeConnectionCount == 3)
+            {
+                Direction missingConnection = pipeConnections.GetSingleNonConnection();
+                return missingConnection switch
+                {
+                    Direction.North => AdjacencyShape.TNorthSouthEast,
+                    Direction.East => AdjacencyShape.TSouthWestEast,
+                    Direction.South => AdjacencyShape.TNorthSouthWest,
+                    _ => AdjacencyShape.TNorthEastWest,
+                };
+            }
+
+            if (pipeConnectionCount == 4)
+            {
+                return AdjacencyShape.X;
+            }
+
+            Debug.LogError(
+                $"Could not resolve Offset Adjacency Shape for given Adjacency Map - {pipeConnections}");
+            return AdjacencyShape.X;
         }
     }
 }
