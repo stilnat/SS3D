@@ -16,6 +16,7 @@ namespace SS3D.Systems.Entities.Humanoid
         private static readonly int AngleAimMove = Animator.StringToHash("AngleAimMove");
         private static readonly int Aim = Animator.StringToHash("Aim");
         private static readonly int TorsoGunAim = Animator.StringToHash("TorsoGunAim");
+        private static readonly int AnglePunch = Animator.StringToHash("AnglePunch");
 
         [SerializeField]
         private HumanoidMovementController _movementController;
@@ -40,6 +41,19 @@ namespace SS3D.Systems.Entities.Humanoid
         public void Dance(bool dance, float transitionDuration = 0.15f)
         {
             _animator.CrossFade(dance ? "Dance" : "Move", transitionDuration);
+        }
+
+        public void Punch(Hand hand, Vector3 hitPosition)
+        {
+            bool isRight = hand.HandType == HandType.RightHand;
+            _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 1);
+            _animator.SetTrigger(isRight ? "PunchRight" : "PunchLeft");
+            StartCoroutine(SetLayerWeight(isRight ? "ArmRight" : "ArmLeft", 0f, 0.25f, 0.25f));
+            Vector3 hitDirection = hitPosition - hand.Hold.UpperArm.position;
+            float signedAngle = Vector3.SignedAngle(hand.Hold.UpperArm.forward, hitDirection, hand.Hold.UpperArm.up);
+            _animator.SetFloat(AnglePunch, (signedAngle + 90) / 180f);
+
+            // StartCoroutine(UpdateHitAngle(hitPosition, 0.5f, hand.Hold.UpperArm));
         }
 
         public void Throw(bool isRight)
@@ -274,6 +288,19 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _animator.enabled = animatorEnabled;
             _networkAnimator.enabled = animatorEnabled;
+        }
+
+        private IEnumerator UpdateHitAngle(Vector3 hit, float duration, Transform shoulder)
+        {
+            float startingTime = Time.time;
+
+            while (startingTime + duration >= Time.time)
+            {
+                Vector3 hitDirection = hit - shoulder.position;
+                float signedAngle = Vector3.SignedAngle(shoulder.forward, hitDirection, shoulder.up);
+                _animator.SetFloat(AnglePunch, (signedAngle + 180) / 360f);
+                yield return null;
+            }
         }
     }
 }

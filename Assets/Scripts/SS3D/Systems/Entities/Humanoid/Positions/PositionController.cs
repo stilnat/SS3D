@@ -147,8 +147,7 @@ namespace SS3D.Systems.Entities
         [Client]
         public void TryToGetToPreviousPosition()
         {
-            // todo make checks for change
-            RpcChangePosition(_previousPosition);
+            RpcRestorePreviousPosition();
         }
 
         [Client]
@@ -222,6 +221,12 @@ namespace SS3D.Systems.Entities
         {
             _previousMovement = _movement;
             _movement = movement;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RpcRestorePreviousPosition()
+        {
+            ChangePosition(_previousPosition);
         }
 
         [ServerRpc(RequireOwnership = false)]
