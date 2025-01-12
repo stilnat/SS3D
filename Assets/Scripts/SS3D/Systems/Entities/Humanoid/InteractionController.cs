@@ -332,7 +332,7 @@ namespace SS3D.Systems.Interactions
             List<IInteractionTarget> targets = new();
 
             // Get all target components which are not disabled and the source can interact with
-            targets.AddRange(targetGameObject.GetComponents<IInteractionTarget>().Where(x => x is MonoBehaviour behaviour && behaviour.enabled && source.CanInteractWithTarget(x)));
+            targets.AddRange(targetGameObject.GetComponents<IInteractionTarget>().Where(x => x is MonoBehaviour behaviour && behaviour.enabled));
             if (targets.Count < 1)
             {
                 targets.Add(new InteractionTargetGameObject(targetGameObject));

@@ -16,18 +16,6 @@ namespace SS3D.Interactions.Interfaces
         /// <param name="targets">The interaction targets of this interaction</param>
         /// <param name="entries">The already present interactions</param>
         void CreateSourceInteractions(IInteractionTarget[] targets, List<InteractionEntry> entries);
-        /// <summary>
-        /// Checks if this source can interact with a certain target
-        /// </summary>
-        /// <param name="target">The interaction target to check against</param>
-        /// <returns>If the interaction target is supported</returns>
-        bool CanInteractWithTarget(IInteractionTarget target);
-        /// <summary>
-        /// Checks if this source can execute a given interaction
-        /// </summary>
-        /// <param name="interaction">The interaction to check</param>
-        /// <returns>If this interaction source can execute the interaction</returns>
-        bool CanExecuteInteraction(IInteraction interaction);
 
         /// <summary>
         /// Executes the interaction (server-side)
