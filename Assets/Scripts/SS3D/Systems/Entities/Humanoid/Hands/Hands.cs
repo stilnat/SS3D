@@ -69,11 +69,6 @@ namespace SS3D.Systems.Inventory.Containers
         /// </summary>
         public List<AttachedContainer> HandContainers => PlayerHands.Select(x => x.Container).ToList();
 
-        public Hand HandFromContainer(AttachedContainer container)
-        {
-            return PlayerHands.FirstOrDefault(x => x.Container == container);
-        }
-
         public override void OnStartServer()
         {
             base.OnStartServer();

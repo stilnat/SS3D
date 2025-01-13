@@ -106,8 +106,7 @@ namespace SS3D.Systems.Animations
 
                 case InteractionType.Hit:
                 {
-                    proceduralAnimation = mainHand.Full ?
-                        new HitWithItemAnimation(this, time, targetPosition, mainHand, target) : new HitAnimation(this, time, targetPosition, mainHand);
+                    proceduralAnimation = new HitAnimation(this, time, targetPosition, mainHand);
                     break;
                 }
 

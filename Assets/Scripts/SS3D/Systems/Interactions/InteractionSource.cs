@@ -22,8 +22,6 @@ namespace SS3D.Interactions
         // Client only
         private readonly List<ClientInteractionInstance> _clientInteractions = new();
 
-        public new GameObject GameObject => base.GameObject;
-
         public virtual void Update()
         {
             if (IsClient)

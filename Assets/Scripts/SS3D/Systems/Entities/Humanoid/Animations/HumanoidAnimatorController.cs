@@ -47,13 +47,20 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             bool isRight = hand.HandType == HandType.RightHand;
             _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 1);
-            _animator.SetTrigger(isRight ? "PunchRight" : "PunchLeft");
-            StartCoroutine(SetLayerWeight(isRight ? "ArmRight" : "ArmLeft", 0f, 0.25f, 0.25f));
+
+            if (hand.Full)
+            {
+                _animator.SetTrigger(isRight ? "HitWithItemRight" : "HitWithItemLeft");
+            }
+            else
+            {
+                _animator.SetTrigger(isRight ? "PunchRight" : "PunchLeft");
+            }
+
+            StartCoroutine(SetLayerWeight(isRight ? "ArmRight" : "ArmLeft", 0f, 0.5f, 0.25f));
             Vector3 hitDirection = hitPosition - hand.Hold.UpperArm.position;
             float signedAngle = Vector3.SignedAngle(hand.Hold.UpperArm.forward, hitDirection, hand.Hold.UpperArm.up);
             _animator.SetFloat(AnglePunch, (signedAngle + 90) / 180f);
-
-            // StartCoroutine(UpdateHitAngle(hitPosition, 0.5f, hand.Hold.UpperArm));
         }
 
         public void Throw(bool isRight)
