@@ -22,7 +22,7 @@ public class TargetFollow : MonoBehaviour
         _timing = 0;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (Followed is null)
         {

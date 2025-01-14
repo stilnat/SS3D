@@ -148,7 +148,7 @@ namespace SS3D.Systems.Entities.Humanoid
         {
             _movementController.OnSpeedChangeEvent += UpdateSpeedParamater;
             InstanceFinder.TimeManager.OnTick += HandleNetworkTick;
-            _aimController.OnAim += HandleAimInAnimatorControler;
+            _aimController.OnAim += HandleAimChanged;
             _positionController.OnChangedPosition += HandlePositionChanged;
             _positionController.OnChangedMovement += HandleMovementChanged;
             _positionController.OnDance += HandleDance;
@@ -184,43 +184,29 @@ namespace SS3D.Systems.Entities.Humanoid
                 ToggleAnimator(true);
             }
 
-            switch (position)
+            if (position == PositionType.Proning)
             {
-                case PositionType.Proning:
-                {
-                    Prone();
-                    break;
-                }
-
-                case PositionType.Crouching:
-                {
-                    Crouch();
-                    break;
-                }
-
-                case PositionType.Standing:
-                {
-                    StandUp();
-                    break;
-                }
-
-                case PositionType.Sitting:
-                {
-                    Sit();
-                    break;
-                }
-
-                case PositionType.RagdollRecover:
-                {
-                    RagdollRecover(transitionDuration);
-                    break;
-                }
-
-                case PositionType.Ragdoll:
-                {
-                    ToggleAnimator(false);
-                    break;
-                }
+                Prone();
+            }
+            else if (position == PositionType.Crouching)
+            {
+                Crouch();
+            }
+            else if (position == PositionType.Standing)
+            {
+                StandUp();
+            }
+            else if (position == PositionType.Sitting)
+            {
+                Sit();
+            }
+            else if (position == PositionType.RagdollRecover)
+            {
+                RagdollRecover(transitionDuration);
+            }
+            else if (position == PositionType.Ragdoll)
+            {
+                ToggleAnimator(false);
             }
         }
 
@@ -263,13 +249,11 @@ namespace SS3D.Systems.Entities.Humanoid
             _animator.CrossFade("Drag", transitionDuration);
         }
 
-        private void HandleAimInAnimatorControler(bool isAiming, bool toThrow)
+        private void HandleAimChanged(bool isAiming, bool toThrow)
         {
             UnityEngine.Debug.Log("animator change aim");
             _animator.SetBool(Aim, isAiming);
             _animator.SetBool(TorsoGunAim, !toThrow);
-
-            // _animator.SetLayerWeight(_animator.GetLayerIndex("UpperBodyLayer"), isAiming ? 1 : 0);
         }
 
         private void UpdateSpeedParamater(float speed)
