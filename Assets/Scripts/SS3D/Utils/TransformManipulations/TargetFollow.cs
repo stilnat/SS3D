@@ -14,21 +14,30 @@ public class TargetFollow : MonoBehaviour
 
     private float _timing;
 
-    public void Follow(Transform followed, bool reproduceRotation, float timeToReachRotation = 0)
+    private bool _update;
+
+    public void Follow(Transform followed, bool reproduceRotation, float timeToReachRotation = 0, bool update = true)
     {
         Followed = followed;
         _reproduceRotation = reproduceRotation;
         _timeToReachRotation = timeToReachRotation;
         _timing = 0;
+        _update = update;
+        UpdateFollow();
     }
 
     private void LateUpdate()
     {
-        if (Followed is null)
+        if (Followed is null || !_update) 
         {
             return;
         }
 
+        UpdateFollow();
+    }
+
+    private void UpdateFollow()
+    {
         transform.position = Followed.position;
 
         if (!_reproduceRotation) { return; }

@@ -91,7 +91,7 @@ namespace SS3D.Systems.Animations
         [field: SerializeField]
         public TargetFollow HandTargetFollow { get; private set; }
 
-        public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider, bool simulateRotation = true, float timeToReachRotation = 0f)
+        public void HandTargetFollowHold(bool secondary, AbstractHoldable holdProvider, bool simulateRotation = true, float timeToReachRotation = 0f, bool update = true)
         {
             Transform parent = holdProvider.GetHold(!secondary, Hand.HandType);
             HandTargetFollowTransform(parent, simulateRotation, timeToReachRotation);
@@ -100,7 +100,7 @@ namespace SS3D.Systems.Animations
         /// <summary>
         /// Put the right IK target as a child of another transform, setting its position to zero and its rotation to be the same as the parent one (or optionnally not doing it).
         /// </summary>
-        public void HandTargetFollowTransform(Transform parent, bool simulateRotation = true, float timeToReachRotation = 0f)
+        public void HandTargetFollowTransform(Transform parent, bool simulateRotation = true, float timeToReachRotation = 0f, bool update = true)
         {
             HandTargetFollow.Follow(parent, simulateRotation, timeToReachRotation);
         }

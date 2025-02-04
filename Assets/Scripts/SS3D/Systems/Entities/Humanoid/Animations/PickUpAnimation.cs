@@ -63,7 +63,7 @@ namespace SS3D.Systems.Animations
             OrientTargetForHandRotation(_mainHand, _holdable.transform.position);
 
             // Place hand ik target on the item, at their respective position and rotation.
-            _mainHand.Hold.HandTargetFollowHold(false, _holdable, false);
+            _mainHand.Hold.HandTargetFollowHold(false, _holdable, false, 0f, false);
 
             // Needed if this has been changed elsewhere
             _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;

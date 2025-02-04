@@ -187,6 +187,7 @@ namespace SS3D.Systems.Animations
         {
             UpdatePoseWithoutItem(hand, 0.2f);
 
+            // if the other hand hold an item that can be held with two hands, do so.
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemHeld.Holdable.CanHoldTwoHand)
             {
                 UpdatePoseWithItem(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
