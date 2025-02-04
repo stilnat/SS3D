@@ -180,7 +180,7 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             _containersOnPlayer.Add(container);
-            container.OnContentsChanged += HandleContainerContentChanged;
+            container.OnServerContentsChanged += HandleContainerContentChanged;
 
             // Be careful, destroying an inventory container will cause issue as when syncing with client, the attachedContainer will be null.
             // Before destroying a container, consider disabling the behaviour or the game object it's on first to avoid this issue.
@@ -199,7 +199,7 @@ namespace SS3D.Systems.Inventory.Containers
             }
 
             _containersOnPlayer.Remove(container);
-            container.OnContentsChanged -= HandleContainerContentChanged;
+            container.OnServerContentsChanged -= HandleContainerContentChanged;
         }
 
         /// <summary>

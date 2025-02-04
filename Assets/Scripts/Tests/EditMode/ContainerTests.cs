@@ -153,7 +153,7 @@ namespace EditorTests
         {
             GameObject go = new();
             Item item = go.AddComponent<Item>();
-            item.Init(trait.Name, 1f, new List<Trait>() { trait });
+            item.Init(trait.Name, new List<Trait>() { trait });
             return item;
         }
 
@@ -166,7 +166,7 @@ namespace EditorTests
         {
             GameObject go = new();
             Item item = go.AddComponent<Item>();
-            item.Init(name, weight, new List<Trait>());
+            item.Init(name, new List<Trait>());
             return item;
         }
 

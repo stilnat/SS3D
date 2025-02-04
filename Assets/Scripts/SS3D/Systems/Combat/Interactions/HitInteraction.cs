@@ -6,6 +6,7 @@ using SS3D.Interactions.Extensions;
 using SS3D.Interactions.Interfaces;
 using SS3D.Systems.Entities;
 using SS3D.Systems.Interactions;
+using SS3D.Systems.Inventory.Items;
 using UnityEngine;
 
 namespace SS3D.Systems.Combat.Interactions
@@ -33,7 +34,17 @@ namespace SS3D.Systems.Combat.Interactions
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
 
-            return source.GetRootSource() is IIntentProvider hand && hand.Intent == IntentType.Harm;
+            if (source.GetRootSource() is not IIntentProvider hand || hand.Intent != IntentType.Harm)
+            {
+                return false;
+            }
+
+            if (source.GetRootSource() is IItemHolder itemHolder)
+            {
+                return (itemHolder.ItemHeld != null && itemHolder.ItemHeld.TryGetComponent(out IHittingItem _)) || itemHolder.ItemHeld == null;
+            }
+
+            return true;
         }
 
         public override void Cancel(InteractionEvent interactionEvent, InteractionReference reference)
@@ -45,15 +56,17 @@ namespace SS3D.Systems.Combat.Interactions
             IInteractionTarget target = interactionEvent.Target;
             IInteractionSource source = interactionEvent.Source;
 
-            if (target is IGameObjectProvider targetBehaviour && targetBehaviour.GameObject.GetComponentInParent<Entity>() != null)
+            if (target is not IGameObjectProvider targetBehaviour || targetBehaviour.GameObject.GetComponentInParent<Entity>() == null)
             {
-                Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
+                return;
+            }
 
-                if (entity is IRagdollable ragdoll)
-                {
-                    ragdoll.Knockdown(1f);
-                    ragdoll.AddForceToAllRagdollParts(-interactionEvent.Source.GameObject.transform.up);
-                }
+            Entity entity = targetBehaviour.GameObject.GetComponentInParent<Entity>();
+
+            if (entity is IRagdollable ragdoll)
+            {
+                ragdoll.Knockdown(1f);
+                ragdoll.AddForceToAllRagdollParts(-interactionEvent.Source.GameObject.transform.up);
             }
         }
 

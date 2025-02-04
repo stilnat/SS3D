@@ -167,7 +167,7 @@ namespace SS3D.Systems.Inventory.Containers
         protected void Awake()
         {
             // should only be called on server, however it's too late if listening in OnStartServer (again, issue with initialization timing of our systems...)
-            _container.OnContentsChanged += ContainerOnOnContentsChanged;
+            _container.OnServerContentsChanged += ContainerOnOnContentsChanged;
         }
 
         protected override void OnDisabled()

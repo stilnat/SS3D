@@ -205,12 +205,12 @@ namespace SS3D.Systems.Health
             return BodyLayers.First(x => x.LayerType == layerType);
         }
 
-        public virtual void Init(BodyPart parent)
+        public void Init(BodyPart parent)
         {
             ParentBodyPart = parent;
         }
 
-        public virtual void Init(BodyPart parentBodyPart, List<BodyPart> childBodyParts, List<BodyLayer> bodyLayers)
+        public void Init(BodyPart parentBodyPart, List<BodyPart> childBodyParts, List<BodyLayer> bodyLayers)
         {
             ParentBodyPart = parentBodyPart;
             _childBodyParts.AddRange(childBodyParts);
@@ -252,7 +252,7 @@ namespace SS3D.Systems.Health
         /// </summary>
         /// <returns> The body layer was added.</returns>
         [Server]
-        public virtual bool TryAddBodyLayer(BodyLayer layer)
+        public bool TryAddBodyLayer(BodyLayer layer)
         {
             layer.BodyPart = this;
             _bodyLayers.Add(layer);
@@ -266,7 +266,7 @@ namespace SS3D.Systems.Health
         /// </summary>
         /// <param name="layer"></param>
         [Server]
-        public virtual void RemoveBodyLayer(BodyLayer layer)
+        public void RemoveBodyLayer(BodyLayer layer)
         {
             _bodyLayers.Remove(layer);
         }
@@ -276,7 +276,7 @@ namespace SS3D.Systems.Health
         /// </summary>
         /// <param name="bodyPart"></param>
         [Server]
-        public virtual void AddChildBodyPart(BodyPart bodyPart)
+        public void AddChildBodyPart(BodyPart bodyPart)
         {
             _childBodyParts.Add(bodyPart);
         }

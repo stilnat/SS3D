@@ -9,11 +9,10 @@ namespace SS3D.Systems.Inventory.Containers
         None = 0,
         Toolbox = 1,
         Shoulder = 2,
-        DoubleHandGun = 3,
-        DoubleHandGunHarm = 4,
+        DoubleHandRifle = 3,
+        DoubleHandRifleHarm = 4,
         SmallItem = 5,
-        ThrowToolBox = 6,
         UnderArm = 7,
-        ThrowSmallItem = 8,
+        SingleHandRifle = 8,
     }
 }

@@ -28,21 +28,14 @@ namespace SS3D.Systems.Animations
 
         public override void ClientPlay()
         {
-            _mainHand.Hold.ItemPositionConstraint.weight = 0f;
-
             Controller.AnimatorController.Throw(_mainHand.HandType == HandType.RightHand);
 
             _holdable.GameObject.transform.parent = _mainHand.HandBone;
 
-            _mainHand.Hold.HoldIkConstraint.weight = 0f;
-            _mainHand.Hold.PickupIkConstraint.weight = 0f;
-
             // remove all IK constraint on second hand if needed
             if (_holdable.CanHoldTwoHand && _secondaryHand)
             {
-                _secondaryHand.Hold.ItemPositionConstraint.weight = 0f;
                 _secondaryHand.Hold.HoldIkConstraint.weight = 0f;
-                _secondaryHand.Hold.PickupIkConstraint.weight = 0f;
             }
 
             if (_holdable.TryGetComponent(out Collider collider))

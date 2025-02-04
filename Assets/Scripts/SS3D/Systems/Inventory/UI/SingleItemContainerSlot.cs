@@ -125,10 +125,10 @@ namespace SS3D.Systems.Inventory.UI
 
             if (_container != null)
             {
-                _container.OnContentsChanged -= ContainerContentsChanged;
+                _container.OnClientContentsChanged -= ContainerContentsChanged;
             }
 
-            newContainer.OnContentsChanged += ContainerContentsChanged;
+            newContainer.OnClientContentsChanged += ContainerContentsChanged;
             _container = newContainer;
         }
 

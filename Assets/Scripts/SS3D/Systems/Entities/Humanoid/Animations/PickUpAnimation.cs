@@ -88,8 +88,6 @@ namespace SS3D.Systems.Animations
         [Client]
         private void PickupReach(bool withTwoHands)
         {
-            Controller.HoldController.UpdatePose(_mainHand, _holdable, 0.1f);
-
             // Rotate player toward item
             TryRotateTowardTargetPosition(Controller.transform, _itemReachDuration, _holdable.transform.position);
 
@@ -118,7 +116,8 @@ namespace SS3D.Systems.Animations
             InteractionSequence.Join(DOTween.To(() => _mainHand.Hold.HoldIkConstraint.data.targetRotationWeight, x => _mainHand.Hold.HoldIkConstraint.data.targetRotationWeight = x, 1f, _itemReachDuration).OnStart(() =>
             {
                 _mainHand.Hold.HandTargetFollowHold(false, _holdable, true, _itemReachDuration);
-                Controller.HoldController.BringToHand(_mainHand, _holdable, _itemReachDuration);
+
+                // Controller.HoldController.BringToHand(_mainHand, _holdable, _itemReachDuration);
             }));
 
             // At the same time, remove the pickup constraint

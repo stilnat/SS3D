@@ -21,9 +21,5 @@ namespace SS3D.Systems.Inventory.Items
         public override HandHoldType SingleHandHoldHarm => _holdableScriptableObject.SingleHandHoldHarm;
 
         public override HandHoldType TwoHandHoldHarm => _holdableScriptableObject.TwoHandHoldHarm;
-
-        public override HandHoldType SingleHandHoldThrow => _holdableScriptableObject.SingleHandHoldThrow;
-
-        public override HandHoldType TwoHandHoldThrow => _holdableScriptableObject.TwoHandHoldThrow;
     }
 }

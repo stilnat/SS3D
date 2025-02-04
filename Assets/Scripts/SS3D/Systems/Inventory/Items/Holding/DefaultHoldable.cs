@@ -24,9 +24,5 @@ namespace SS3D.Systems.Inventory.Containers
         public override HandHoldType SingleHandHoldHarm => HandHoldType.SmallItem;
 
         public override HandHoldType TwoHandHoldHarm => HandHoldType.SmallItem;
-
-        public override HandHoldType SingleHandHoldThrow => HandHoldType.ThrowSmallItem;
-
-        public override HandHoldType TwoHandHoldThrow => HandHoldType.ThrowSmallItem;
     }
 }

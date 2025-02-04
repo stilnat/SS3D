@@ -41,7 +41,7 @@ namespace SS3D.Systems.Inventory.UI
             _grid.Init(_attachedContainer.Size, _attachedContainer.StoredItems);
             _grid.OnPointerClickSlot += HandleGridPointerClickSlot;
             _grid.OnItemDrop += HandleGridItemDrop;
-            _attachedContainer.OnContentsChanged += ContainerOnContentsChanged;
+            _attachedContainer.OnClientContentsChanged += ContainerOnContentsChanged;
 
             RectTransform rectTransform = _grid.GetComponent<RectTransform>();
             Vector2 gridDimensions = _grid.GetGridDimensions();
@@ -68,7 +68,7 @@ namespace SS3D.Systems.Inventory.UI
         {
             _grid.OnPointerClickSlot -= HandleGridPointerClickSlot;
             _grid.OnItemDrop -= HandleGridItemDrop;
-            _attachedContainer.OnContentsChanged -= ContainerOnContentsChanged;
+            _attachedContainer.OnClientContentsChanged -= ContainerOnContentsChanged;
         }
 
         private void HandleGridItemDrop(Item item, Vector2Int slotPosition)

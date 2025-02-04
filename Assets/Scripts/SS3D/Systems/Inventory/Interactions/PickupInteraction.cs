@@ -24,7 +24,7 @@ namespace SS3D.Systems.Inventory.Interactions
         {
             TimeToMoveBackItem = timeToMoveBackItem;
             TimeToReachItem = timeToReachItem;
-            Delay = TimeToMoveBackItem + TimeToReachItem;
+            Delay = TimeToReachItem;
         }
 
         public override InteractionType InteractionType => InteractionType.Pickup;

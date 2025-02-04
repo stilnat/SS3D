@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: RifleHoldable
   m_EditorClassIdentifier: 
   _canHoldTwoHand: 1
-  _singleHandHold: 2
+  _singleHandHold: 8
   _twoHandHold: 3
-  _singleHandHoldHarm: 2
+  _singleHandHoldHarm: 4
   _twoHandHoldHarm: 4
-  _singleHandHoldThrow: 6
-  _twoHandHoldThrow: 6
   _primaryHandPoseType: 1
   _secondaryHandPoseType: 0

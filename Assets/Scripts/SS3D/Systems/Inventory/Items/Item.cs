@@ -54,9 +54,6 @@ namespace SS3D.Systems.Inventory.Items
         private string _name;
 
         [SerializeField]
-        private float _weight;
-
-        [SerializeField]
         private List<Trait> _startingTraits;
 
         [SerializeField]
@@ -130,7 +127,7 @@ namespace SS3D.Systems.Inventory.Items
         /// <summary>
         /// Initialise this item fields. Can only be called once.
         /// </summary>
-        public void Init(string itemName, float weight,  List<Trait> traits)
+        public void Init(string itemName,  List<Trait> traits)
         {
             if (_initialised)
             {
@@ -139,7 +136,6 @@ namespace SS3D.Systems.Inventory.Items
             }
 
             _name = itemName ?? string.Empty;
-            _weight = weight;
             _traits.AddRange(traits);
             _initialised = true;
         }
@@ -220,7 +216,7 @@ namespace SS3D.Systems.Inventory.Items
                 traits += trait.Name + " ";
             }
 
-            return $"{Name}, weight = {_weight}, traits = {traits}, container is {_container.ContainerName}";
+            return $"{Name}, traits = {traits}, container is {_container.ContainerName}";
         }
 
         /// <summary>

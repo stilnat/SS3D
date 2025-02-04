@@ -26,13 +26,6 @@ namespace SS3D.Systems.Inventory.Items
         private HandHoldType _twoHandHoldHarm;
 
         [SerializeField]
-        private HandHoldType _singleHandHoldThrow;
-
-        [ShowIf(nameof(_canHoldTwoHand))]
-        [SerializeField]
-        private HandHoldType _twoHandHoldThrow;
-
-        [SerializeField]
         private FingerPoseType _primaryHandPoseType;
 
         [ShowIf(nameof(_canHoldTwoHand))]
@@ -52,9 +45,5 @@ namespace SS3D.Systems.Inventory.Items
         public HandHoldType SingleHandHoldHarm => _singleHandHoldHarm;
 
         public HandHoldType TwoHandHoldHarm => _twoHandHoldHarm;
-
-        public HandHoldType SingleHandHoldThrow => _singleHandHoldThrow;
-
-        public HandHoldType TwoHandHoldThrow => _twoHandHoldThrow;
     }
 }

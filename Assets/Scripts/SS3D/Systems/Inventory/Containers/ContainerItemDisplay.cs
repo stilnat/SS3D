@@ -33,12 +33,12 @@ namespace SS3D.Systems.Inventory.Containers
         {
             _attachedContainer = GetComponent<AttachedContainer>();
             _displayedItems = new Item[NumberDisplay];
-            _attachedContainer.OnContentsChanged += HandleContainerContentChanged;
+            _attachedContainer.OnClientContentsChanged += HandleContainerContentChanged;
         }
 
         protected void OnDestroy()
         {
-            _attachedContainer.OnContentsChanged -= HandleContainerContentChanged;
+            _attachedContainer.OnClientContentsChanged -= HandleContainerContentChanged;
         }
 
         private void HandleContainerContentChanged(AttachedContainer container, Item olditem, Item newitem, ContainerChangeType type)

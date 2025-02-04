@@ -96,7 +96,7 @@ namespace SS3D.Systems.Animations
         private void SyncAimingToShoot(bool wasAiming, bool isAiming, bool asServer)
         {
             _bodyAimRig.weight = isAiming ? 0.3f : 0f;
-            OnAim?.Invoke(this, isAiming);
+            OnAim?.Invoke(isAiming, false);
         }
 
         [Client]

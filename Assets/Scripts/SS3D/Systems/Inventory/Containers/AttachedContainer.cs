@@ -20,7 +20,9 @@ namespace SS3D.Systems.Inventory.Containers
     {
         public delegate void ContainerContentsHandler(AttachedContainer container, Item oldItem, Item newItem, ContainerChangeType type);
 
-        public event ContainerContentsHandler OnContentsChanged;
+        public event ContainerContentsHandler OnClientContentsChanged;
+
+        public event ContainerContentsHandler OnServerContentsChanged;
 
         [SyncObject]
         private readonly SyncList<StoredItem> _storedItems = new();
@@ -299,7 +301,14 @@ namespace SS3D.Systems.Inventory.Containers
                 return;
             }
 
-            OnContentsChanged?.Invoke(this, oldItem.Item, newItem.Item, changeType);
+            if (asServer)
+            {
+                OnServerContentsChanged?.Invoke(this, oldItem.Item, newItem.Item, changeType);
+            }
+            else
+            {
+                OnClientContentsChanged?.Invoke(this, oldItem.Item, newItem.Item, changeType);
+            }
         }
 
         [ServerOrClient]

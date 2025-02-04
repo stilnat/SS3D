@@ -41,11 +41,7 @@ namespace SS3D.Systems.Inventory.Items
 
         public abstract HandHoldType TwoHandHoldHarm { get; }
 
-        public abstract HandHoldType SingleHandHoldThrow { get; }
-
-        public abstract HandHoldType TwoHandHoldThrow { get; }
-
-        public HandHoldType GetHoldType(bool withTwoHands, IntentType intent, bool toThrow)
+        public HandHoldType GetHoldType(bool withTwoHands, IntentType intent)
         {
             switch (intent, withTwoHands)
             {
@@ -54,9 +50,9 @@ namespace SS3D.Systems.Inventory.Items
                 case (IntentType.Help, false):
                     return SingleHandHold;
                 case (IntentType.Harm, true):
-                    return toThrow ? TwoHandHoldThrow : TwoHandHoldHarm;
+                    return TwoHandHoldHarm;
                 case (IntentType.Harm, false):
-                    return toThrow ? SingleHandHoldThrow : SingleHandHoldHarm;
+                    return SingleHandHoldHarm;
             }
 
             return SingleHandHold;

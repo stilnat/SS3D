@@ -54,9 +54,5 @@ namespace SS3D.Systems.Inventory.Items
         public override HandHoldType SingleHandHoldHarm => _singleHandHoldHarm;
 
         public override HandHoldType TwoHandHoldHarm => _twoHandHoldHarm;
-
-        public override HandHoldType SingleHandHoldThrow => _singleHandHoldThrow;
-
-        public override HandHoldType TwoHandHoldThrow => _twoHandHoldThrow;
     }
 }

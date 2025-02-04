@@ -37,12 +37,6 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        /// <summary>
-        /// Keeps track of items held in each hand
-        /// </summary>
-        [SyncObject]
-        private readonly SyncList<HandItem> _itemsInHands = new();
-
         private readonly Dictionary<HandHoldType, string> _rightHandHoldTypeToAnimatorPoseParameter = new();
 
         private readonly Dictionary<HandHoldType, string> _leftHandHoldTypeToAnimatorPoseParameter = new();
@@ -80,26 +74,22 @@ namespace SS3D.Systems.Animations
             StartCoroutine(CoroutineBringToHand(hand, holdable, duration));
         }
 
-        public void UpdatePose([NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
-        {
-            StartCoroutine(UpdatePoseCoroutine(hand, item, duration));
-        }
-
         protected override void OnAwake()
         {
-            _itemsInHands.OnChange += SyncItemsInHandsChanged;
             _intents.OnIntentChange += HandleIntentChange;
             _aimController.OnAim += HandleAimChange;
 
             _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem] = "ArmIdlePoseRight";
-            _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandGun] = "RifleRestPoseRight";
+            _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandRifle] = "RifleRestPoseRight";
             _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.UnderArm] = "UnderArmPoseRight";
-            _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandGunHarm] = "RifleHarmPoseRight";
+            _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandRifleHarm] = "RifleHarmPoseRight";
+            _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.SingleHandRifle] = "SingleHandRiflePoseRight";
 
             _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem] = "ArmIdlePoseLeft";
-            _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandGun] = "RifleRestPoseLeft";
+            _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandRifle] = "RifleRestPoseLeft";
             _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.UnderArm] = "UnderArmPoseLeft";
-            _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandGunHarm] = "RifleHarmPoseLeft";
+            _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.DoubleHandRifleHarm] = "RifleHarmPoseLeft";
+            _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.SingleHandRifle] = "SingleHandRiflePoseLeft";
         }
 
         private IEnumerator CoroutineBringToHand([NotNull] Hand hand, [NotNull] AbstractHoldable holdable, float duration)
@@ -130,37 +120,48 @@ namespace SS3D.Systems.Animations
             holdable.transform.localRotation = Quaternion.identity;
         }
 
-        private IEnumerator UpdatePoseCoroutine([NotNull] Hand hand, AbstractHoldable item, float duration)
+        private void UpdatePoseWithItem([NotNull] Hand hand, [NotNull] AbstractHoldable item, float duration)
         {
-            string currentPose;
-            string targetPose;
+            hand.Hold.HoldIkConstraint.weight = 0f;
             bool isRight = hand.HandType == HandType.RightHand;
 
-            if (item)
-            {
-                _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 1);
-                bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
-                bool toThrow = _aimController.IsAimingToThrow;
+            bool withTwoHands = _hands.TryGetOppositeHand(hand, out Hand oppositeHand) && item.CanHoldTwoHand && oppositeHand.Empty;
 
-                // Fetch how the item should be held
-                HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent, toThrow);
+            // Fetch how the item should be held
+            HandHoldType itemHoldType = item.GetHoldType(withTwoHands, _intents.Intent);
 
-                currentPose = isRight ? _rightHandCurrentPose : _leftHandCurrentPose;
-                targetPose = isRight ? _rightHandHoldTypeToAnimatorPoseParameter[itemHoldType] : _leftHandHoldTypeToAnimatorPoseParameter[itemHoldType];
-            }
-            else
+            float layerWeight = 1f;
+
+            // If small item, depending on the item mass, set the arm layer weight, to allow for more or less arm movement.
+            if (item.TryGetComponent(out Rigidbody itemRigidBody) && itemHoldType == HandHoldType.SmallItem)
             {
-                _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 0);
-                currentPose = isRight ? _rightHandCurrentPose : _leftHandCurrentPose;
-                targetPose = isRight ? _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem] : _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem];
+                layerWeight = Mathf.Min(0.3f + (itemRigidBody.mass / 10), 1f);
             }
 
+            _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), layerWeight);
+
+            string currentPose = isRight ? _rightHandCurrentPose : _leftHandCurrentPose;
+            string targetPose = isRight ? _rightHandHoldTypeToAnimatorPoseParameter[itemHoldType] : _leftHandHoldTypeToAnimatorPoseParameter[itemHoldType];
+
+            StartCoroutine(SetPoseAnimation(currentPose, targetPose, isRight, duration));
+        }
+
+        private void UpdatePoseWithoutItem([NotNull] Hand hand, float duration)
+        {
+            bool isRight = hand.HandType == HandType.RightHand;
+            _animator.SetLayerWeight(_animator.GetLayerIndex(isRight ? "ArmRight" : "ArmLeft"), 0);
+            string currentPose = isRight ? _rightHandCurrentPose : _leftHandCurrentPose;
+            string targetPose = isRight ? _rightHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem] : _leftHandHoldTypeToAnimatorPoseParameter[HandHoldType.SmallItem];
+            StartCoroutine(SetPoseAnimation(currentPose, targetPose, isRight, duration));
+        }
+
+        private IEnumerator SetPoseAnimation(string currentPose, string targetPose, bool isRight, float duration)
+        {
             if (currentPose == targetPose)
             {
                 yield break;
             }
 
-            // Smoothly move item toward the target position
             for (float timePassed = 0f; timePassed < duration; timePassed += Time.deltaTime)
             {
                 _animator.SetFloat(currentPose, 1 - (timePassed / duration));
@@ -181,88 +182,50 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        /// <summary>
-        /// This method is necessary to sync between clients items held in hand, for instance for late joining client, or simply client far away on the map.
-        /// </summary>
-        private void SyncItemsInHandsChanged(SyncListOperation op, int index, HandItem oldItem, HandItem newItem, bool asServer)
-        {
-            if (asServer)
-            {
-                return;
-            }
-
-            switch (op)
-            {
-                case SyncListOperation.Add or SyncListOperation.Insert or SyncListOperation.Set:
-                {
-                    AddItem(newItem.Hand, newItem.Holdable);
-                    break;
-                }
-
-                case SyncListOperation.RemoveAt:
-                {
-                    RemoveItem(oldItem.Hand);
-                    break;
-                }
-            }
-        }
-
-        [Client]
+        [ObserversRpc(BufferLast = true)]
         private void RemoveItem(Hand hand)
         {
-            StartCoroutine(UpdatePoseCoroutine(hand, null, 0.2f));
+            UpdatePoseWithoutItem(hand, 0.2f);
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full && oppositeHand.ItemHeld.Holdable.CanHoldTwoHand)
             {
-                StartCoroutine(UpdatePoseCoroutine(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f));
+                UpdatePoseWithItem(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
                 hand.Hold.HoldIkConstraint.weight = 1f;
                 hand.Hold.HandTargetFollowHold(true, oppositeHand.ItemHeld.Holdable);
             }
         }
 
-        [Client]
+        [ObserversRpc(BufferLast = true)]
         private void AddItem([NotNull] Hand hand, [NotNull] AbstractHoldable holdable)
         {
-            BringToHand(hand, holdable, 0f);
-            StartCoroutine(UpdatePoseCoroutine(hand, holdable, 0f));
+            BringToHand(hand, holdable, 0.2f);
+            UpdatePoseWithItem(hand, holdable, 0.2f);
 
             if (_hands.TryGetOppositeHand(hand, out Hand oppositeHand) && oppositeHand.Full)
             {
-                StartCoroutine(UpdatePoseCoroutine(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f));
+                UpdatePoseWithItem(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
             }
         }
 
         [Server]
         private void HandleHandContentChanged(Hand hand, Item oldItem, Item newItem, ContainerChangeType type)
         {
-            int handIndex = _itemsInHands.FindIndex(x => x.Hand = hand);
-
             if (type == ContainerChangeType.Add)
             {
-                if (handIndex == -1)
-                {
-                    _itemsInHands.Add(new(hand, newItem.Holdable));
-                }
-                else
-                {
-                    _itemsInHands[handIndex] = new(hand, newItem.Holdable);
-                }
+                AddItem(hand, newItem.Holdable);
             }
-
-            if (type == ContainerChangeType.Remove && handIndex != -1)
+            else if (type == ContainerChangeType.Remove)
             {
-                _itemsInHands.RemoveAt(handIndex);
+                RemoveItem(hand);
             }
         }
 
         // TODO : add a handle for selected hand change, and update only visually the intent for selected hand
         private void HandleIntentChange(object sender, IntentType e)
         {
-            Hand mainHand = _hands.SelectedHand;
-
-            if (mainHand.Full)
+            foreach (Hand hand in _hands.PlayerHands.Where(x => x.Full))
             {
-                StartCoroutine(UpdatePoseCoroutine(mainHand, mainHand.ItemHeld.Holdable, 0.25f));
+                UpdatePoseWithItem(hand, hand.ItemHeld.Holdable, 0.25f);
             }
         }
 
@@ -279,6 +242,8 @@ namespace SS3D.Systems.Animations
             // handle aiming with shoulder aim
             if (holdable && holdable.TryGetComponent(out gun) && !toThrow && isAiming)
             {
+                // when aiming, the main hand holding the gun should use IK, as the gun moves independently from the character armature.
+                _hands.SelectedHand.Hold.HoldIkConstraint.weight = 1f;
                 gun.transform.parent = _hands.SelectedHand.Hold.ShoulderWeaponPivot;
 
                 // position correctly the gun on the shoulder, assuming the rifle butt transform is defined correctly
@@ -289,16 +254,14 @@ namespace SS3D.Systems.Animations
             // Stop aiming with shoulder aim
             else if (gun && !isAiming)
             {
-                _hands.SelectedHand.ItemHeld.GameObject.transform.parent = _hands.SelectedHand.Hold.ItemPositionTargetLocker;
-                _hands.SelectedHand.ItemHeld.GameObject.transform.localPosition = Vector3.zero;
-                _hands.SelectedHand.ItemHeld.GameObject.transform.localRotation = Quaternion.identity;
-                StartCoroutine(UpdatePoseCoroutine(_hands.SelectedHand, _hands.SelectedHand.ItemHeld.Holdable, 0.2f));
+                BringToHand(_hands.SelectedHand, holdable, 0.2f);
+                UpdatePoseWithItem(_hands.SelectedHand, holdable, 0.2f);
             }
 
             // if it's not a gun, or if its to throw it
             else
             {
-                StartCoroutine(UpdatePoseCoroutine(_hands.SelectedHand, _hands.SelectedHand.ItemHeld.Holdable, 0.2f));
+                UpdatePoseWithItem(_hands.SelectedHand, holdable, 0.2f);
             }
         }
 
