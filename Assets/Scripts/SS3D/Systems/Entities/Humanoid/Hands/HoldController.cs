@@ -191,7 +191,7 @@ namespace SS3D.Systems.Animations
             {
                 UpdatePoseWithItem(oppositeHand, oppositeHand.ItemHeld.Holdable, 0.2f);
                 hand.Hold.HoldIkConstraint.weight = 1f;
-                hand.Hold.HandTargetFollow.Follow(oppositeHand.ItemHeld.Holdable.Position);
+                hand.Hold.HandTargetFollowHold(true, oppositeHand.ItemHeld.Holdable);
             }
         }
 

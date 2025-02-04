@@ -73,7 +73,7 @@ namespace SS3D.Systems.Animations
 
         private void SetUpGrab(bool withTwoHands)
         {
-            _mainHand.Hold.HandTargetFollow.Follow(_grabbedObject.transform.position);
+            _mainHand.Hold.HandTargetFollowTransform(_grabbedObject.transform);
 
             // Needed if this has been changed elsewhere
             _mainHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
@@ -81,12 +81,12 @@ namespace SS3D.Systems.Animations
             // Reproduce changes on secondary hand if necessary.
             if (withTwoHands)
             {
-                _secondaryHand.Hold.HandTargetFollow.Follow(_grabbedObject.transform.position);
+                _secondaryHand.Hold.HandTargetFollowTransform(_grabbedObject.transform);
                 _secondaryHand.Hold.PickupIkConstraint.data.tipRotationWeight = 1f;
             }
 
             // Set up the look at target locker on the item to pick up.
-            Controller.LookAtTargetLocker.Follow(_grabbedObject.transform.position);
+            Controller.LookAtTargetLocker.Follow(_grabbedObject.transform, true);
             OrientTargetForHandRotation(_mainHand, _grabbedObject.transform.position);
         }
 
