@@ -14,10 +14,13 @@ public class TargetFollow : MonoBehaviour
 
     private float _timing;
 
+    private Vector3 _initialPosition;
+
     private bool _update;
 
     public void Follow(Transform followed, bool reproduceRotation, float timeToReachRotation = 0, bool update = true)
     {
+        _initialPosition = followed.position;
         Followed = followed;
         _reproduceRotation = reproduceRotation;
         _timeToReachRotation = timeToReachRotation;
@@ -28,7 +31,7 @@ public class TargetFollow : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (Followed is null || !_update) 
+        if (Followed is null) 
         {
             return;
         }
@@ -38,7 +41,15 @@ public class TargetFollow : MonoBehaviour
 
     private void UpdateFollow()
     {
-        transform.position = Followed.position;
+        if (_update)
+        {
+            transform.position = Followed.position;
+        }
+        else
+        {
+            transform.position = _initialPosition;
+        }
+        
 
         if (!_reproduceRotation) { return; }
 

@@ -22,21 +22,6 @@ namespace SS3D.Systems.Animations
     /// </summary>
     public class HoldController : NetworkActor
     {
-        /// <summary>
-        /// Simple struct for syncing purpose
-        /// </summary>
-        private struct HandItem
-        {
-            public readonly AbstractHoldable Holdable;
-            public Hand Hand;
-
-            public HandItem(Hand hand, AbstractHoldable holdable)
-            {
-                Holdable = holdable;
-                Hand = hand;
-            }
-        }
-
         private readonly Dictionary<HandHoldType, string> _rightHandHoldTypeToAnimatorPoseParameter = new();
 
         private readonly Dictionary<HandHoldType, string> _leftHandHoldTypeToAnimatorPoseParameter = new();
@@ -221,7 +206,6 @@ namespace SS3D.Systems.Animations
             }
         }
 
-        // TODO : add a handle for selected hand change, and update only visually the intent for selected hand
         private void HandleIntentChange(object sender, IntentType e)
         {
             foreach (Hand hand in _hands.PlayerHands.Where(x => x.Full))
