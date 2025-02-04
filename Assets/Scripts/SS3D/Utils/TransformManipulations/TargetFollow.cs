@@ -5,35 +5,17 @@ using UnityEngine;
 /// </summary>
 public class TargetFollow : MonoBehaviour
 {
-
-    public Transform Followed { get; private set; }
-
-    private bool _reproduceRotation;
-
-    private float _timeToReachRotation;
+    public Vector3 Followed { get; private set; }
 
     private float _timing;
 
-    public void Follow(Transform followed, bool reproduceRotation, float timeToReachRotation = 0)
+    public void Follow(Vector3 position)
     {
-        Followed = followed;
-        _reproduceRotation = reproduceRotation;
-        _timeToReachRotation = timeToReachRotation;
-        _timing = 0;
+        Followed = position;
     }
 
     private void LateUpdate()
     {
-        if (Followed is null)
-        {
-            return;
-        }
-
-        transform.position = Followed.position;
-
-        if (!_reproduceRotation) { return; }
-
-        transform.rotation = _timing >= _timeToReachRotation ? Followed.rotation : Quaternion.Slerp(transform.rotation, Followed.rotation, _timing/_timeToReachRotation);
-        _timing += Time.deltaTime;
+        transform.position = Followed;
     }
 }
